@@ -1,0 +1,36 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ItemChecker.MVVM.Model
+{
+    public class ParserData
+    {
+        public string ItemType { get; set; }
+        public string ItemName { get; set; }
+        public decimal Price1 { get; set; }
+        public decimal Price2 { get; set; }
+        public decimal Price3 { get; set; }
+        public decimal Price4 { get; set; }
+        public decimal Precent { get; set; }
+        public decimal Difference { get; set; }
+        public string Status { get; set; }
+
+        public static List<ParserData> ParserItems = new();
+
+        public ParserData(string ItemType, string ItemName, decimal Price1, decimal Price2, decimal Price3, decimal Price4, decimal Precent, decimal Difference, string Status)
+        {
+            this.ItemType = ItemType;
+            this.ItemName = ItemName;
+            this.Price1 = Price1;
+            this.Price2 = Price2;
+            this.Price3 = Price3;
+            this.Price4 = Price4;
+            this.Precent = Precent;
+            this.Difference = Difference;
+            this.Status = Status;
+        }
+    }
+}
