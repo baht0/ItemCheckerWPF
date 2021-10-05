@@ -25,6 +25,42 @@ namespace ItemChecker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool tryskins {
+            get {
+                return ((bool)(this["tryskins"]));
+            }
+            set {
+                this["tryskins"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool manual {
+            get {
+                return ((bool)(this["manual"]));
+            }
+            set {
+                this["manual"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool queue {
+            get {
+                return ((bool)(this["queue"]));
+            }
+            set {
+                this["queue"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
         public int serviceOne {
             get {
@@ -50,9 +86,9 @@ namespace ItemChecker.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("60")]
-        public int maxPrecent {
+        public decimal maxPrecent {
             get {
-                return ((int)(this["maxPrecent"]));
+                return ((decimal)(this["maxPrecent"]));
             }
             set {
                 this["maxPrecent"] = value;
@@ -62,9 +98,9 @@ namespace ItemChecker.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("35")]
-        public int minPrecent {
+        public decimal minPrecent {
             get {
-                return ((int)(this["minPrecent"]));
+                return ((decimal)(this["minPrecent"]));
             }
             set {
                 this["minPrecent"] = value;
@@ -74,9 +110,9 @@ namespace ItemChecker.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int maxPrice {
+        public decimal maxPrice {
             get {
-                return ((int)(this["maxPrice"]));
+                return ((decimal)(this["maxPrice"]));
             }
             set {
                 this["maxPrice"] = value;
@@ -86,9 +122,9 @@ namespace ItemChecker.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int minPrice {
+        public decimal minPrice {
             get {
-                return ((int)(this["minPrice"]));
+                return ((decimal)(this["minPrice"]));
             }
             set {
                 this["minPrice"] = value;
@@ -164,6 +200,17 @@ namespace ItemChecker.Properties {
             }
             set {
                 this["sticker"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.ObjectModel.ObservableCollection<System.String> checkList {
+            get {
+                return ((global::System.Collections.ObjectModel.ObservableCollection<System.String>)(this["checkList"]));
+            }
+            set {
+                this["checkList"] = value;
             }
         }
     }

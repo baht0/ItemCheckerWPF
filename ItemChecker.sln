@@ -5,9 +5,11 @@ VisualStudioVersion = 16.0.31624.102
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ItemChecker", "ItemChecker\ItemChecker.csproj", "{41A2DCCE-3882-42ED-8D90-1D77EF40B3C9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ItemChecker.Net", "ItemChecker.Net\ItemChecker.Net.csproj", "{DAC0E208-88E3-442E-AE02-A4BD5E6B47E6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ItemChecker.Net", "ItemChecker.Net\ItemChecker.Net.csproj", "{DAC0E208-88E3-442E-AE02-A4BD5E6B47E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ItemChecker.Support", "ItemChecker.Support\ItemChecker.Support.csproj", "{6D126737-0EA3-430F-98D8-10F57575E9A7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ItemChecker.Support", "ItemChecker.Support\ItemChecker.Support.csproj", "{6D126737-0EA3-430F-98D8-10F57575E9A7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ItemChecker.Updater", "ItemChecker.Updater\ItemChecker.Updater.csproj", "{E307A14A-FE58-4A19-9795-3FAA70E7489B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{6D126737-0EA3-430F-98D8-10F57575E9A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D126737-0EA3-430F-98D8-10F57575E9A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D126737-0EA3-430F-98D8-10F57575E9A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E307A14A-FE58-4A19-9795-3FAA70E7489B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E307A14A-FE58-4A19-9795-3FAA70E7489B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E307A14A-FE58-4A19-9795-3FAA70E7489B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E307A14A-FE58-4A19-9795-3FAA70E7489B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

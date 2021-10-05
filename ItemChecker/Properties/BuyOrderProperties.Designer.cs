@@ -13,11 +13,11 @@ namespace ItemChecker.Properties {
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.10.0.0")]
-    internal sealed partial class SteamProperties : global::System.Configuration.ApplicationSettingsBase {
+    internal sealed partial class BuyOrderProperties : global::System.Configuration.ApplicationSettingsBase {
         
-        private static SteamProperties defaultInstance = ((SteamProperties)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new SteamProperties())));
+        private static BuyOrderProperties defaultInstance = ((BuyOrderProperties)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new BuyOrderProperties())));
         
-        public static SteamProperties Default {
+        public static BuyOrderProperties Default {
             get {
                 return defaultInstance;
             }
@@ -25,133 +25,107 @@ namespace ItemChecker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string login {
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public int TimerPush {
             get {
-                return ((string)(this["login"]));
+                return ((int)(this["TimerPush"]));
             }
             set {
-                this["login"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string password {
-            get {
-                return ((string)(this["password"]));
-            }
-            set {
-                this["password"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool remember {
-            get {
-                return ((bool)(this["remember"]));
-            }
-            set {
-                this["remember"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string steamApiKey {
-            get {
-                return ((string)(this["steamApiKey"]));
-            }
-            set {
-                this["steamApiKey"] = value;
+                this["TimerPush"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("10")]
-        public int timer {
+        public int TimerFavorite {
             get {
-                return ((int)(this["timer"]));
+                return ((int)(this["TimerFavorite"]));
             }
             set {
-                this["timer"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool startupPush {
-            get {
-                return ((bool)(this["startupPush"]));
-            }
-            set {
-                this["startupPush"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool updateST {
-            get {
-                return ((bool)(this["updateST"]));
-            }
-            set {
-                this["updateST"] = value;
+                this["TimerFavorite"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("10")]
-        public int cancelPrecent {
+        public int TimerFloat {
             get {
-                return ((int)(this["cancelPrecent"]));
+                return ((int)(this["TimerFloat"]));
             }
             set {
-                this["cancelPrecent"] = value;
+                this["TimerFloat"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool cancelBalance {
+        [global::System.Configuration.DefaultSettingValueAttribute("0.01")]
+        public decimal MaxDeviation {
             get {
-                return ((bool)(this["cancelBalance"]));
+                return ((decimal)(this["MaxDeviation"]));
             }
             set {
-                this["cancelBalance"] = value;
+                this["MaxDeviation"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool cancelOverstock {
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int Compare {
             get {
-                return ((bool)(this["cancelOverstock"]));
+                return ((int)(this["Compare"]));
             }
             set {
-                this["cancelOverstock"] = value;
+                this["Compare"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("7")]
+        public decimal MaxPrecent {
+            get {
+                return ((decimal)(this["MaxPrecent"]));
+            }
+            set {
+                this["MaxPrecent"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Generic.List<System.String> FavoriteList {
+            get {
+                return ((global::System.Collections.Generic.List<System.String>)(this["FavoriteList"]));
+            }
+            set {
+                this["FavoriteList"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Generic.List<System.String> FloatList {
+            get {
+                return ((global::System.Collections.Generic.List<System.String>)(this["FloatList"]));
+            }
+            set {
+                this["FloatList"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("100")]
-        public decimal priceSell {
+        public int MaxPrice {
             get {
-                return ((decimal)(this["priceSell"]));
+                return ((int)(this["MaxPrice"]));
             }
             set {
-                this["priceSell"] = value;
+                this["MaxPrice"] = value;
             }
         }
     }

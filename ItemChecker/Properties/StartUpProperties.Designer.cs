@@ -13,11 +13,11 @@ namespace ItemChecker.Properties {
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.10.0.0")]
-    internal sealed partial class StartProperties : global::System.Configuration.ApplicationSettingsBase {
+    internal sealed partial class StartUpProperties : global::System.Configuration.ApplicationSettingsBase {
         
-        private static StartProperties defaultInstance = ((StartProperties)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new StartProperties())));
+        private static StartUpProperties defaultInstance = ((StartUpProperties)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new StartUpProperties())));
         
-        public static StartProperties Default {
+        public static StartUpProperties Default {
             get {
                 return defaultInstance;
             }

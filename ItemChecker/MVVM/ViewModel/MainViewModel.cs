@@ -1,12 +1,15 @@
 ﻿using ItemChecker.Core;
 using ItemChecker.MVVM.Model;
-using System;
+using ItemChecker.Support;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace ItemChecker.MVVM.ViewModel
-{    
+{
     public class MainViewModel : ObservableObject
     {
+        string _accountName;
         decimal _course;
         decimal _balance;
         decimal _balanceCsm;
@@ -14,6 +17,17 @@ namespace ItemChecker.MVVM.ViewModel
         decimal _balanceCsmUsd;
         int _overstock;
         int _unavailable;
+        string _statusCommunity;
+        string _statusSessions;
+        public string AccountName
+        {
+            get { return _accountName; }
+            set
+            {
+                _accountName = value;
+                OnPropertyChanged();
+            }
+        }
         public decimal Course
         {
             get { return _course; }
@@ -77,10 +91,32 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-
+        public string StatusCommunity
+        {
+            get { return _statusCommunity; }
+            set
+            {
+                _statusCommunity = value;
+                OnPropertyChanged();
+            }
+        }
+        public string StatusSessions
+        {
+            get { return _statusSessions; }
+            set
+            {
+                _statusSessions = value;
+                OnPropertyChanged();
+            }
+        }
 
         public MainViewModel()
         {
+            UpdateInformation();
+        }
+        protected void UpdateInformation()
+        {
+            AccountName = Account.AccountName;
             Course = Account.OrderSum;
             Balance = Account.Balance;
             BalanceCsm = Account.BalanceCsm;
@@ -88,16 +124,27 @@ namespace ItemChecker.MVVM.ViewModel
             BalanceCsmUsd = Account.BalanceCsmUsd;
             Overstock = Main.Overstock.Count;
             Unavailable = Main.Unavailable.Count;
+            StatusCommunity = "CheckCircle";
+            if (Main.StatusCommunity != "normal")
+                StatusCommunity = "CloseCircle";
         }
-        public ICommand Converting
-        {
-            get
+        public ICommand OpenFolderCommand =>
+            new RelayCommand((obj) =>
             {
-                return new RelayCommand((obj) =>
+                Edit.openUrl(BaseModel.AppPath);
+            });
+        public ICommand ExitCommand =>
+            new RelayCommand((obj) =>
+            {
+                MessageBoxResult result = MessageBox.Show("Are you sure you want to close?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
                 {
-                    //
-                });
-            }
-        }
+                    Task.Run(() =>
+                    {
+                        BaseModel.BrowserExit();
+                    }).Wait(5000);
+                    Application.Current.Shutdown();
+                }
+            });
     }
 }

@@ -1,16 +1,7 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ItemChecker.Settings" GeneratedClassName="FloatConfig">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ItemChecker.Properties" GeneratedClassName="FloatProperties">
   <Profiles />
   <Settings>
-    <Setting Name="maxFloatPrecent" Type="System.Decimal" Scope="User">
-      <Value Profile="(Default)">7</Value>
-    </Setting>
-    <Setting Name="countGetItems" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">40</Value>
-    </Setting>
-    <Setting Name="priceCompare" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">0</Value>
-    </Setting>
     <Setting Name="maxFloatValue_FN" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)">0.001</Value>
     </Setting>
@@ -25,12 +16,6 @@
     </Setting>
     <Setting Name="maxFloatValue_BS" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)">0.500</Value>
-    </Setting>
-    <Setting Name="floatList" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="timer" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">10</Value>
     </Setting>
   </Settings>
 </SettingsFile>

@@ -1,17 +1,7 @@
-﻿using ItemChecker.MVVM.ViewModel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ItemChecker.MVVM.Model;
+using ItemChecker.MVVM.ViewModel;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace ItemChecker.MVVM.View
 {
@@ -22,7 +12,7 @@ namespace ItemChecker.MVVM.View
     {
         public MainWindow()
         {
-            InitializeComponent(); 
+            InitializeComponent();
             DataContext = new BuyOrderViewModel();
         }
         private void DragMove_MouseDown(object sender, MouseButtonEventArgs e)
@@ -31,33 +21,24 @@ namespace ItemChecker.MVVM.View
         }
         private void Home_Click(object sender, RoutedEventArgs e)
         {
-            DataContext = new BuyOrderViewModel();
+            if (!Main.IsLoading)
+                DataContext = new BuyOrderViewModel();
         }
         private void Parser_Click(object sender, RoutedEventArgs e)
         {
-            DataContext = new ParserViewModel();
+            if(!Main.IsLoading)
+                DataContext = new ParserViewModel();
         }
 
         private void MinWin_Click(object sender, RoutedEventArgs e)
         {
             this.WindowState = WindowState.Minimized;
         }
-        private void MaxWin_Click(object sender, RoutedEventArgs e)
-        {
-            if (this.WindowState == WindowState.Maximized)
-                this.WindowState = WindowState.Normal;
-            else
-                this.WindowState = WindowState.Maximized;
 
-        }
-        private void CloseWin_Click(object sender, RoutedEventArgs e)
+        private void Setting_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-
+            SettingWindow settingWindow = new();
+            settingWindow.ShowDialog();
         }
     }
 }

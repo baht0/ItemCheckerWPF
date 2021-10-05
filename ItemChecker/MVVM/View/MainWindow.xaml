@@ -4,130 +4,118 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:view="clr-namespace:ItemChecker.MVVM.View"
-        xmlns:vm="clr-namespace:ItemChecker.MVVM.ViewModel"
+        xmlns:viewModel="clr-namespace:ItemChecker.MVVM.ViewModel"
         mc:Ignorable="d"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        d:DataContext="{d:DesignInstance Type=viewModel:BuyOrderViewModel}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignLightBackground}"
         TextElement.FontWeight="Normal"
         TextElement.FontSize="12"
         FontFamily="{materialDesign:MaterialDesignFont}"
         Title="ItemChecker" 
-        Height="710" Width="1296"
-        MinHeight="540" MinWidth="955" 
+        Height="710" Width="1300"
+        MinHeight="540" MinWidth="955"
         WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="NoResize">
-    <Window.DataContext>
-        <vm:MainViewModel/>
-    </Window.DataContext>
     <Window.Resources>
-        <DataTemplate x:Name="steamViewTemplate" DataType="{x:Type vm:BuyOrderViewModel}">
+        <DataTemplate DataType="{x:Type viewModel:BuyOrderViewModel}">
             <view:BuyOrderView DataContext="{Binding}"/>
         </DataTemplate>
-        <DataTemplate x:Name="parserViewTemplate" DataType="{x:Type vm:ParserViewModel}">
+        <DataTemplate DataType="{x:Type viewModel:ParserViewModel}">
             <view:ParserView DataContext="{Binding}"/>
         </DataTemplate>
     </Window.Resources>
-    <Grid Margin="10 0 10 0">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="25"/>
-            <RowDefinition/>
-            <RowDefinition Height="37"/>
-            <RowDefinition Height="25"/>
-        </Grid.RowDefinitions>
-        <Grid Grid.Row="0" x:Name="TitleBar">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition></ColumnDefinition>
-                <ColumnDefinition></ColumnDefinition>
-            </Grid.ColumnDefinitions>
-            <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Grid.Column="0">
-                <Button Height="25" Style="{DynamicResource MaterialDesignToolButton}" Click="Home_Click">
-                    <!--<Image Source="../../Resources/icon.png"/>-->
-                    <materialDesign:PackIcon Kind="Home"/>
-                </Button>
-                <Button Height="25" Style="{DynamicResource MaterialDesignFlatButton}" Click="Parser_Click">
-                    <TextBlock Text="Parser"/>
-                </Button>
-                <Button Height="25" Style="{DynamicResource MaterialDesignFlatButton}">
-                    <TextBlock Text="Tools"/>
-                </Button>
-                <Button Height="25" Style="{DynamicResource MaterialDesignFlatButton}">
-                    <TextBlock Text="About"/>
-                </Button>
-            </StackPanel>
-            <StackPanel Margin="0 0 -10 0" HorizontalAlignment="Right" Orientation="Horizontal" Grid.Column="1">
-                <Button Height="25" Style="{DynamicResource MaterialDesignToolButton}">
-                    <materialDesign:PackIcon Kind="Settings"/>
-                </Button>
-                <Button Height="25" Style="{DynamicResource MaterialDesignFlatButton}" Click="MinWin_Click">
-                    <materialDesign:PackIcon Kind="Minus"/>
-                </Button>
-                <Button Height="25" Style="{DynamicResource MaterialDesignFlatButton}" Click="CloseWin_Click">
-                    <materialDesign:PackIcon Kind="Close"/>
-                </Button>
-            </StackPanel>
+    <Border BorderBrush="DimGray" BorderThickness="0.5">
+        <Grid Margin="10 0 10 0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="25"/>
+                <RowDefinition/>
+                <RowDefinition Height="25"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0" x:Name="TitleBar" Background="WhiteSmoke">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Grid.Column="0">
+                    <Image Source="../../Resources/icon.png" Height="18" Margin="2">
+                        <Image.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="OpenFolder" Command="{Binding OpenFolderCommand}"></MenuItem>
+                                <MenuItem Header="Restart"></MenuItem>
+                                <MenuItem Header="Exit" Command="{Binding ExitCommand}"></MenuItem>
+                            </ContextMenu>
+                        </Image.ContextMenu>
+                    </Image>
+                    <Button Height="25" Style="{DynamicResource MaterialDesignFlatButton}" 
+                        Click="Home_Click">
+                        <TextBlock Text="MyOrders"/>
+                    </Button>
+                    <Button Height="25" Style="{DynamicResource MaterialDesignFlatButton}" 
+                        Click="Parser_Click">
+                        <TextBlock Text="Parser"/>
+                    </Button>
+                </StackPanel>
+                <StackPanel Margin="0 0 -10 0" HorizontalAlignment="Right" Orientation="Horizontal" Grid.Column="1">
+                    <Button Height="25" Style="{DynamicResource MaterialDesignToolButton}">
+                        <materialDesign:PackIcon Kind="BellNotification"/>
+                    </Button>
+                    <Button Height="25" Style="{DynamicResource MaterialDesignToolButton}" Click="Setting_Click">
+                        <materialDesign:PackIcon Kind="Settings"/>
+                    </Button>
+                    <Button Height="25" Style="{DynamicResource MaterialDesignFlatButton}" Click="MinWin_Click">
+                        <materialDesign:PackIcon Kind="Minus"/>
+                    </Button>
+                    <Button Height="25" Style="{DynamicResource MaterialDesignFlatButton}" Command="{Binding ExitCommand}">
+                        <materialDesign:PackIcon Kind="Close"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+            <!--body-->
+            <ContentControl Grid.Row="1" Content="{Binding}" Margin="10" />
+            <!--/body-->
+            <Grid Grid.Row="2" x:Name="StatusBar" VerticalAlignment="Center" Background="WhiteSmoke">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0">
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="Account: {2} | Balance: {0}₽ / {1}₽">
+                            <Binding Path="Balance" />
+                            <Binding Path="BalanceCsm" />
+                            <Binding Path="AccountName"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                    <TextBlock.ToolTip>
+                        <ToolTip>
+                            <ToolTip.Content>
+                                <MultiBinding StringFormat="Course: {0}₽ Balance: {1}$ / {2}$">
+                                    <Binding Path="Course" />
+                                    <Binding Path="BalanceUsd" />
+                                    <Binding Path="BalanceCsmUsd" />
+                                </MultiBinding>
+                            </ToolTip.Content>
+                        </ToolTip>
+                    </TextBlock.ToolTip>
+                </TextBlock>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock Margin="0 0 5 0">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="Availability: {0}/{1}">
+                                <Binding Path="Overstock" />
+                                <Binding Path="Unavailable" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                    <TextBlock x:Name="steamStatusOk">                    
+                    <materialDesign:PackIcon Kind="{Binding StatusCommunity}"/>
+                        <TextBlock.ToolTip>
+                            <ToolTip Content="Steam Status"/>
+                        </TextBlock.ToolTip>
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
         </Grid>
-        <!--body-->
-        <ContentControl Grid.Row="1" 
-                        Content="{Binding}" 
-                        Margin="10" />
-        <!--/body-->
-        <Grid Grid.Row="2" x:Name="StatusGroupBoxes">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <GroupBox
-                Grid.Column="0"
-                Header="Availability:" 
-                Margin="0 0 5 0"
-                Style="{DynamicResource None}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="{Binding Path=Overstock, StringFormat='Overstock: {0}'}" />
-                    <TextBlock Grid.Column="1" Text="{Binding Path=Unavailable, StringFormat='Unavailable: {0}'}" />
-                    <TextBlock Grid.Column="3" Text="{Binding Path=Course, StringFormat='SteamMarket: {0}'}" />
-                </Grid>
-            </GroupBox>
-            <GroupBox
-                Grid.Column="1"
-                Header="Status Steam:" 
-                Margin="5 0 0 0"
-                Style="{DynamicResource None}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="{Binding Path=Course, StringFormat='Community: {0}'}" />
-                    <TextBlock Grid.Column="1" Text="{Binding Path=Course, StringFormat='SessionsLogon: {0}'}" />
-                </Grid>
-            </GroupBox>
-        </Grid>
-        <Grid Grid.Row="3" x:Name="StatusBar" VerticalAlignment="Center">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0">
-                <TextBlock.Text>
-                    <MultiBinding StringFormat="Balance: {0}₽ / {1}₽">
-                        <Binding Path="Balance" />
-                        <Binding Path="BalanceCsm" />
-                    </MultiBinding>
-                </TextBlock.Text>
-                <TextBlock.ToolTip>
-                    <MultiBinding StringFormat="Course: {0}₽ Balance: {1}$ / {2}$">
-                        <Binding Path="Course" />
-                        <Binding Path="BalanceUsd" />
-                        <Binding Path="BalanceCsmUsd" />
-                    </MultiBinding>
-                </TextBlock.ToolTip>
-            </TextBlock>
-            <TextBlock Grid.Column="1" Text="{Binding Path=Course}" HorizontalAlignment="Right"/>
-        </Grid>
-    </Grid>
+    </Border>
 </Window>

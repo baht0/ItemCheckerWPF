@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace ItemChecker.MVVM.Model
 {
@@ -18,7 +15,7 @@ namespace ItemChecker.MVVM.Model
         public decimal Difference { get; set; }
         public string Status { get; set; }
 
-        public static List<ParserData> ParserItems = new();
+        public static ObservableCollection<ParserData> ParserItems = new();
 
         public ParserData(string ItemType, string ItemName, decimal Price1, decimal Price2, decimal Price3, decimal Price4, decimal Precent, decimal Difference, string Status)
         {

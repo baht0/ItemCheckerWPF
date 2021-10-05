@@ -47,15 +47,15 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>ParserProperties.settings</DependentUpon>
     </Compile>
-    <Compile Update="Properties\StartProperties.Designer.cs">
+    <Compile Update="Properties\StartUpProperties.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
-      <DependentUpon>StartProperties.settings</DependentUpon>
+      <DependentUpon>StartUpProperties.settings</DependentUpon>
     </Compile>
-    <Compile Update="Properties\SteamProperties.Designer.cs">
+    <Compile Update="Properties\BuyOrderProperties.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
-      <DependentUpon>SteamProperties.settings</DependentUpon>
+      <DependentUpon>BuyOrderProperties.settings</DependentUpon>
     </Compile>
   </ItemGroup>
 
@@ -72,13 +72,13 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>ParserProperties.Designer.cs</LastGenOutput>
     </None>
-    <None Update="Properties\StartProperties.settings">
+    <None Update="Properties\StartUpProperties.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>StartProperties.Designer.cs</LastGenOutput>
+      <LastGenOutput>StartUpProperties.Designer.cs</LastGenOutput>
     </None>
-    <None Update="Properties\SteamProperties.settings">
+    <None Update="Properties\BuyOrderProperties.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>SteamProperties.Designer.cs</LastGenOutput>
+      <LastGenOutput>BuyOrderProperties.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
 

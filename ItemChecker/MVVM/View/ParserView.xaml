@@ -5,11 +5,39 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ItemChecker.MVVM.View"
              mc:Ignorable="d"
-             xmlns:viewmodel="clr-namespace:ItemChecker.MVVM.ViewModel" 
+             xmlns:viewmodel="clr-namespace:ItemChecker.MVVM.ViewModel"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              d:DataContext="{d:DesignInstance Type=viewmodel:ParserViewModel}"
              FontFamily="{materialDesign:MaterialDesignFont}"
-             d:DesignHeight="450" d:DesignWidth="1024">
+             d:DesignHeight="660" d:DesignWidth="1280">
+    <UserControl.Resources>
+        <Storyboard x:Key="MenuOpen">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(FrameworkElement.Width)" Storyboard.TargetName="FilterGrid">
+                <EasingDoubleKeyFrame KeyTime="0" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.1" Value="300"/>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+        <Storyboard x:Key="MenuClose">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(FrameworkElement.Width)" Storyboard.TargetName="FilterGrid">
+                <EasingDoubleKeyFrame KeyTime="0" Value="300"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.1" Value="0"/>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+    </UserControl.Resources>
+    <UserControl.Triggers>
+        <EventTrigger RoutedEvent="ButtonBase.Click" SourceName="OpenFilter">
+            <BeginStoryboard Storyboard="{StaticResource MenuOpen}"/>
+        </EventTrigger>
+        <EventTrigger RoutedEvent="ButtonBase.Click" SourceName="ApplyFilter">
+            <BeginStoryboard Storyboard="{StaticResource MenuClose}"/>
+        </EventTrigger>
+        <EventTrigger RoutedEvent="ButtonBase.Click" SourceName="ResetFilter">
+            <BeginStoryboard Storyboard="{StaticResource MenuClose}"/>
+        </EventTrigger>
+        <EventTrigger RoutedEvent="ButtonBase.Click" SourceName="CloseFilter">
+            <BeginStoryboard Storyboard="{StaticResource MenuClose}"/>
+        </EventTrigger>
+    </UserControl.Triggers>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
@@ -22,36 +50,65 @@
                 <RowDefinition/>
                 <RowDefinition Height="40"/>
             </Grid.RowDefinitions>
-            <Border Grid.Row="0" Background="Transparent">
-                <TextBlock Text="{Binding Path=ItemCount, StringFormat='Parser ({0})'}"
-                       VerticalAlignment="Center" 
+            <StackPanel Grid.Row="0" Background="Transparent"
+                        Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="Parser" FontWeight="Normal"
+                           FontStyle="Normal"
+                           FontSize="18" TextDecorations="{x:Null}"/>
+                <TextBlock Text="{Binding ParserGrid.Count, StringFormat=' ({0})'}"
                        FontWeight="Normal" 
                        FontStyle="Normal" 
                        FontSize="18" TextDecorations="{x:Null}"/>
-            </Border>
+                <TextBlock Text="{Binding Timer}" Visibility="{Binding TimerOn}" Margin="10 0 0 0" VerticalAlignment="Bottom" FontSize="14"/>
+            </StackPanel>
             <Border Grid.Row="1" Background="Transparent">
-                <TextBlock Text="Mode"
-                       VerticalAlignment="Center" 
-                       FontWeight="Normal" 
-                       FontStyle="Normal"
-                       FontSize="12" TextDecorations="{x:Null}"/>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Mode, StringFormat='Mode: {0},'}"/>
+                    <TextBlock x:Name="Service1" Text="{Binding Service1, StringFormat=' {0} To'}"/>
+                    <TextBlock x:Name="Service2" Text="{Binding Service2, StringFormat=' {0}.'}"/>
+                    <TextBlock x:Name="Currency" Text="{Binding Currency, StringFormat=' ({0})'}"/>
+                </StackPanel>
             </Border>
-            <DataGrid x:Name="ordersGrid"
-                  Grid.Row="2"
-                  AutoGenerateColumns="False" 
-                  ItemsSource="{Binding ParserGrid}" Grid.ColumnSpan="2">
+            <!--table-->
+            <DataGrid Grid.Row="2" x:Name="parserGrid"
+                      AutoGenerateColumns="False" IsReadOnly="True"
+                      ItemsSource="{Binding ParserGridView, UpdateSourceTrigger=PropertyChanged}"
+                      SelectedItem="{Binding SelectedParserItem}"
+                      KeyDown="DataGrid_KeyDown"
+                      MouseDoubleClick="DataGrid_MouseDoubleClick">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="" Binding="{Binding Type}" CanUserResize="False" Width="3"/>
-                    <DataGridTextColumn Header="Item" Binding="{Binding ItemName}" CanUserResize="False" Width="auto"/>
-                    <DataGridTextColumn Header="Price1" Binding="{Binding Price1}" CanUserResize="False" Width="auto"/>
-                    <DataGridTextColumn Header="Price2" Binding="{Binding Price2}" CanUserResize="False" Width="auto"/>
-                    <DataGridTextColumn Header="Price3" Binding="{Binding Price3}" CanUserResize="False" Width="auto"/>
-                    <DataGridTextColumn Header="Price4" Binding="{Binding Price4}" CanUserResize="False" Width="auto"/>
+                    <DataGridTextColumn Header="" Binding="{Binding Type}" CanUserResize="False" Width="1" Visibility="Hidden"/>
+                    <DataGridTextColumn Binding="{Binding ItemName}" CanUserResize="False" Width="auto" MaxWidth="380" MinWidth="250">
+                        <DataGridTextColumn.Header>
+                            <TextBlock Text="{Binding DataContext.ParserGridView.Count, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat='Item: {0}'}"/>
+                        </DataGridTextColumn.Header>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding Price1}" CanUserResize="False" Width="auto">
+                        <DataGridTextColumn.Header>
+                            <TextBlock Text="{Binding DataContext.Price1, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                        </DataGridTextColumn.Header>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding Price2}" CanUserResize="False" Width="auto">
+                        <DataGridTextColumn.Header>
+                            <TextBlock Text="{Binding DataContext.Price2, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                        </DataGridTextColumn.Header>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding Price3}" CanUserResize="False" Width="auto">
+                        <DataGridTextColumn.Header>
+                            <TextBlock Text="{Binding DataContext.Price3, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                        </DataGridTextColumn.Header>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding Price4}" CanUserResize="False" Width="auto">
+                        <DataGridTextColumn.Header>
+                            <TextBlock Text="{Binding DataContext.Price4, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                        </DataGridTextColumn.Header>
+                    </DataGridTextColumn>
                     <DataGridTextColumn Header="Precent" Binding="{Binding Precent}" CanUserResize="False" Width="auto"/>
-                    <DataGridTextColumn Header="Differece" Binding="{Binding Difference}" CanUserResize="False" Width="auto"/>
+                    <DataGridTextColumn Header="Differece" Binding="{Binding Difference}" CanUserResize="False" Width="auto" MaxWidth="110"/>
                     <DataGridTextColumn Header="Status" Binding="{Binding Status}" CanUserResize="False" Width="auto"/>
                 </DataGrid.Columns>
             </DataGrid>
+            <!--search-->
             <Grid Grid.Row="3" VerticalAlignment="Center">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="30"/>
@@ -59,161 +116,494 @@
                     <ColumnDefinition/>
                     <ColumnDefinition Width="30"/>
                 </Grid.ColumnDefinitions>
-                <Button Grid.Column="0" Style="{DynamicResource MaterialDesignToolButton}">
+                <Button Grid.Column="0" x:Name="OpenFilter"
+                        Style="{DynamicResource MaterialDesignToolButton}">
                     <materialDesign:PackIcon Kind="FormatListBulleted"/>
                 </Button>
                 <TextBlock Grid.Column="1" Text="Search Item:" VerticalAlignment="Center"/>
-                <TextBox Grid.Column="2" VerticalAlignment="Center"/>
+                <TextBox Grid.Column="2" VerticalAlignment="Center"
+                         Text="{Binding SearchString}"/>
                 <Button Grid.Column="3" Style="{DynamicResource MaterialDesignToolButton}">
                     <materialDesign:PackIcon Kind="Close"/>
                 </Button>
             </Grid>
-        </Grid>
-        <Grid Grid.Column="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="50"/>
-                <RowDefinition/>
-                <RowDefinition Height="35"/>
-            </Grid.RowDefinitions>
-            <materialDesign:ColorZone Background="Transparent" Grid.Row="0">
-                <StackPanel Orientation="Horizontal" Margin="2" HorizontalAlignment="Center">
-                    <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="rbTab1" Margin="4" Content="TrySkins" IsChecked="True"/>
-                    <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="rbTab2" Margin="4" Content="Manual"/>
-                </StackPanel>
-            </materialDesign:ColorZone>
-            <Border Grid.Row="1"   
-                    DataContext="{Binding ParserConfig}"
-                    BorderBrush="{DynamicResource PrimaryHueMidBrush}">
-                <Grid>
+            <!--filter-->
+            <Border x:Name="FilterGrid" HorizontalAlignment="Left" Grid.RowSpan="4" Margin="-20 0 0 0"
+                    Width="0" Background="WhiteSmoke"
+                    BorderBrush="LightSlateGray" BorderThickness="0.5">
+                <Grid Margin="5">
                     <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition Height="35"/>
+                        <RowDefinition Height="600"/>
+                        <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <Grid Visibility="{Binding IsChecked, ElementName=rbTab1, Converter={StaticResource BooleanToVisibilityConverter}}"
-                          Margin="10">
+                    <Grid DataContext="{Binding FilterConfig, UpdateSourceTrigger=PropertyChanged}">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="30"/>
-                            <RowDefinition Height="60"/>
+                            <RowDefinition Height="117"/>
+                            <RowDefinition Height="132"/>
+                            <RowDefinition Height="132"/>
+                            <RowDefinition Height="112"/>
+                            <RowDefinition Height="97"/>
                         </Grid.RowDefinitions>
-                        <TextBlock Text="Price:" Height="15"/>
-                        <StackPanel Grid.Row="0" 
-                                    Margin="0 0 10 0"
-                                    VerticalAlignment="Center"
-                                    HorizontalAlignment="Right"
-                                    Orientation="Horizontal">
-                            <TextBox Width="70" Text="{Binding MinPrice}" PreviewTextInput="PricePreviewTextInput"/>
-                            <TextBlock Text="-"  Margin="5"/>
-                            <TextBox Width="70" Text="{Binding MaxPrice}" PreviewTextInput="PricePreviewTextInput"/>
-                            <TextBlock Text="$" VerticalAlignment="Bottom"/>
-                        </StackPanel>
-                        <TextBlock Grid.Row="1" Text="Precent:" Height="15"/>
-                        <StackPanel Grid.Row="1" 
-                                    Margin="0 0 10 0"
-                                    VerticalAlignment="Center"
-                                    HorizontalAlignment="Right"
-                                    Orientation="Horizontal">
-                            <TextBox Width="70" Text="{Binding MinPrecent}" PreviewTextInput="PrecentPreviewTextInput"/>
-                            <TextBlock Text="-" Margin="5"/>
-                            <TextBox Width="70" Text="{Binding MaxPrecent}" PreviewTextInput="PrecentPreviewTextInput"/>
-                            <TextBlock Text="%" VerticalAlignment="Bottom"/>
-                        </StackPanel>
-                        <TextBlock Grid.Row="2" Text="Steam Sales:" Height="15"/>
-                        <StackPanel Grid.Row="2" 
-                                    Margin="0 0 10 0"
-                                    VerticalAlignment="Center"
-                                    HorizontalAlignment="Right"
-                                    Orientation="Horizontal">
-                            <TextBox Width="70" Text="{Binding SteamSales}" PreviewTextInput="PricePreviewTextInput"/>
-                        </StackPanel>
-                        <TextBlock Grid.Row="3" Text="Name Contains:" Height="15"/>
-                        <StackPanel Grid.Row="3" 
-                                    Margin="0 0 10 0"
-                                    VerticalAlignment="Center"
-                                    HorizontalAlignment="Right"
-                                    Orientation="Horizontal">
-                            <TextBox Width="130" Text="{Binding NameContains}"/>
-                        </StackPanel>
-                        <Grid Grid.Row="4" >
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                            </Grid.RowDefinitions>
-                            <CheckBox Grid.Row="0" Grid.Column="0" IsChecked="{Binding Knife}" HorizontalAlignment="Left">
-                                <TextBlock Text="Knife"/>
-                            </CheckBox>
-                            <CheckBox Grid.Row="0" Grid.Column="1" IsChecked="{Binding Stattrak}" HorizontalAlignment="Left">
-                                <TextBlock Text="StatTrak"/>
-                            </CheckBox>
-                            <CheckBox Grid.Row="1"  Grid.Column="0" IsChecked="{Binding Souvenir}" HorizontalAlignment="Left">
-                                <TextBlock Text="Souvenir"/>
-                            </CheckBox>
-                            <CheckBox Grid.Row="1" Grid.Column="1" IsChecked="{Binding Sticker}" HorizontalAlignment="Left">
-                                <TextBlock Text="Sticker"/>
-                            </CheckBox>
-                        </Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <GroupBox Header="Category:" Grid.Row="0" Grid.Column="0"
+                              Style="{DynamicResource None}">
+                            <Grid Margin="2">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <CheckBox Grid.Row="0" Content="Normal" IsChecked="{Binding Normal}"/>
+                                <CheckBox Grid.Row="1" Content="StatTrak™" IsChecked="{Binding Stattrak}"/>
+                                <CheckBox Grid.Row="2" Content="Souvenir" IsChecked="{Binding Souvenir}"/>
+                                <CheckBox Grid.Row="3" Content="★" IsChecked="{Binding KnifeGlove}"/>
+                                <CheckBox Grid.Row="4" Content="★ StatTrak™" IsChecked="{Binding KnifeGloveStattrak}"/>
+                            </Grid>
+                        </GroupBox>
+                        <GroupBox Header="Status:" Grid.Row="0" Grid.Column="1"
+                              Style="{DynamicResource None}">
+                            <Grid Margin="2">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <CheckBox Grid.Row="0" Content="Tradable" IsChecked="{Binding Tradable}"/>
+                                <CheckBox Grid.Row="1" Content="Ordered" IsChecked="{Binding Ordered}"/>
+                                <CheckBox Grid.Row="2" Content="Overstock" IsChecked="{Binding Overstock}"/>
+                                <CheckBox Grid.Row="3" Content="Unavailable" IsChecked="{Binding Unavailable}"/>
+                                <CheckBox Grid.Row="4" Content="Unknown" IsChecked="{Binding Unknown}"/>
+                            </Grid>
+                        </GroupBox>
+                        <GroupBox Header="Exterior:" Grid.Row="1" Grid.Column="0"
+                              Style="{DynamicResource None}">
+                            <Grid Margin="2">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <CheckBox Grid.Row="0" Content="Not Painted" IsChecked="{Binding NotPainted}"/>
+                                <CheckBox Grid.Row="1" Content="Battle-Scarred" IsChecked="{Binding BattleScarred}"/>
+                                <CheckBox Grid.Row="2" Content="Well-Worn" IsChecked="{Binding WellWorn}"/>
+                                <CheckBox Grid.Row="3" Content="Field-Tested" IsChecked="{Binding FieldTested}"/>
+                                <CheckBox Grid.Row="4" Content="Minimal Wear" IsChecked="{Binding MinimalWear}"/>
+                                <CheckBox Grid.Row="5" Content="Factory New" IsChecked="{Binding FactoryNew}"/>
+                            </Grid>
+                        </GroupBox>
+                        <GroupBox Header="Reversion:" Grid.Row="1" Grid.Column="1"
+                              Style="{DynamicResource None}">
+                            <Grid Margin="2">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <CheckBox Grid.Row="1" Content="Category" IsChecked="{Binding Category}"/>
+                                <CheckBox Grid.Row="2" Content="Status"  IsChecked="{Binding Status}"/>
+                                <CheckBox Grid.Row="3" Content="Exterior" IsChecked="{Binding Exterior}"/>
+                                <CheckBox Grid.Row="4" Content="Types" IsChecked="{Binding Types}"/>
+                                <TextBlock Grid.Row="0" Text="Hides the selected." VerticalAlignment="Center" HorizontalAlignment="Center" FontStyle="Italic"/>
+                            </Grid>
+                        </GroupBox>
+                        <GroupBox Header="Types:" Grid.Row="2" Grid.ColumnSpan="2"
+                              Style="{DynamicResource None}">
+                            <Grid Margin="2">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <CheckBox Grid.Row="0" Grid.Column="0" Content="Weapon" IsChecked="{Binding Weapon}"/>
+                                <CheckBox Grid.Row="1" Grid.Column="0" Content="Knife" IsChecked="{Binding Knife}"/>
+                                <CheckBox Grid.Row="2" Grid.Column="0" Content="Gloves" IsChecked="{Binding Gloves}"/>
+                                <CheckBox Grid.Row="3" Grid.Column="0" Content="Sticker" IsChecked="{Binding Sticker}"/>
+                                <CheckBox Grid.Row="4" Grid.Column="0" Content="Patch" IsChecked="{Binding Patch}"/>
+                                <CheckBox Grid.Row="5" Grid.Column="0" Content="Pin" IsChecked="{Binding Pin}"/>
+
+                                <CheckBox Grid.Row="0" Grid.Column="1" Content="Key" IsChecked="{Binding Key}"/>
+                                <CheckBox Grid.Row="1" Grid.Column="1" Content="Pass" IsChecked="{Binding Pass}"/>
+                                <CheckBox Grid.Row="2" Grid.Column="1" Content="Music Kit" IsChecked="{Binding MusicKit}"/>
+                                <CheckBox Grid.Row="3" Grid.Column="1" Content="Graffiti" IsChecked="{Binding Graffiti}"/>
+                                <CheckBox Grid.Row="4" Grid.Column="1" Content="Case" IsChecked="{Binding Case}"/>
+                                <CheckBox Grid.Row="5" Grid.Column="1" Content="Package" IsChecked="{Binding Package}"/>
+                            </Grid>
+                        </GroupBox>
+                        <GroupBox Header="Prices:" Grid.Row="3" Grid.ColumnSpan="2"
+                              Style="{DynamicResource None}">
+                            <Grid Margin="2">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="65"/>
+                                    <ColumnDefinition Width="15"/>
+                                    <ColumnDefinition Width="65"/>
+                                </Grid.ColumnDefinitions>
+                                <CheckBox Grid.Row="0" Grid.Column="0"
+                                          Content="{Binding DataContext.Price1, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                          IsChecked="{Binding Price1}"/>
+                                <CheckBox Grid.Row="1" Grid.Column="0" 
+                                          Content="{Binding DataContext.Price2, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                          IsChecked="{Binding Price2}"/>
+                                <CheckBox Grid.Row="2" Grid.Column="0" 
+                                          Content="{Binding DataContext.Price3, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                          IsChecked="{Binding Price3}"/>
+                                <CheckBox Grid.Row="3" Grid.Column="0" 
+                                          Content="{Binding DataContext.Price4, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                          IsChecked="{Binding Price4}"/>
+
+                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Price1From}" PreviewTextInput="Decimal_PreviewTextInput"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Price2From}" PreviewTextInput="Decimal_PreviewTextInput"/>
+                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Price3From}" PreviewTextInput="Decimal_PreviewTextInput"/>
+                                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Price4From}" PreviewTextInput="Decimal_PreviewTextInput"/>
+
+                                <TextBlock Grid.Row="0" Grid.Column="2" Text="-" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                <TextBlock Grid.Row="1" Grid.Column="2" Text="-" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                <TextBlock Grid.Row="2" Grid.Column="2" Text="-" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                <TextBlock Grid.Row="3" Grid.Column="2" Text="-" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+
+                                <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding Price1To}" PreviewTextInput="Decimal_PreviewTextInput"/>
+                                <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding Price2To}" PreviewTextInput="Decimal_PreviewTextInput"/>
+                                <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding Price3To}" PreviewTextInput="Decimal_PreviewTextInput"/>
+                                <TextBox Grid.Row="3" Grid.Column="3" Text="{Binding Price4To}" PreviewTextInput="Decimal_PreviewTextInput"/>
+                            </Grid>
+                        </GroupBox>
+                        <GroupBox Header="Other:" Grid.Row="4" Grid.ColumnSpan="2"
+                              Style="{DynamicResource None}">
+                            <Grid Margin="2">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="65"/>
+                                    <ColumnDefinition Width="15"/>
+                                    <ColumnDefinition Width="65"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Precent" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Difference" VerticalAlignment="Center"/>
+
+                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding PrecentFrom}" PreviewTextInput="Decimal_PreviewTextInput"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding DifferenceFrom}" PreviewTextInput="Decimal_PreviewTextInput"/>
+
+                                <TextBlock Grid.Row="0" Grid.Column="2" Text="-" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                <TextBlock Grid.Row="1" Grid.Column="2" Text="-" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+
+                                <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding PrecentTo}" PreviewTextInput="Decimal_PreviewTextInput"/>
+                                <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding DifferenceTo}" PreviewTextInput="Decimal_PreviewTextInput"/>
+
+                                <StackPanel Grid.Row="2" Grid.ColumnSpan="4" Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <CheckBox Content="Hide (-100%)" IsChecked="{Binding Hide100}"/>
+                                    <CheckBox Content="Hide (0%)" IsChecked="{Binding Hide0}"/>
+                                </StackPanel>
+                            </Grid>
+                        </GroupBox>
                     </Grid>
-                    <Grid Visibility="{Binding IsChecked, ElementName=rbTab2, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="25"/>
-                            <RowDefinition Height="25"/>
-                            <RowDefinition/>
-                        </Grid.RowDefinitions>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Button Height="20" FontSize="12" Style="{StaticResource MaterialDesignFlatButton}" Content="Select File" />
-                        </StackPanel>
-                        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Button Height="20" FontSize="11" Style="{StaticResource MaterialDesignFlatButton}" Content="Get Cs.Money" />
-                            <Rectangle VerticalAlignment="Stretch" Width="0.5" Height="15" Margin="2" Stroke="Gray" />
-                            <Button Height="20" FontSize="11" Style="{StaticResource MaterialDesignFlatButton}" Content="Get Loot.Farm" />
-                        </StackPanel>
-                        <RichTextBox Background="WhiteSmoke" Margin="5" Grid.Row="2" x:Name="checkList"/>
-                    </Grid>
-                    <!--services-->
-                    <StackPanel Grid.Row="1"
-                            Orientation="Horizontal"
-                            HorizontalAlignment="Center">
-                        <ComboBox Width="105" Height="25"
-                              ItemsSource="{Binding Services}" 
-                                  SelectedIndex="{Binding ServiceOne}"/>
-                        <TextBlock Text="To" VerticalAlignment="Bottom"  Margin="5"/>
-                        <ComboBox Width="105" Height="25" 
-                              ItemsSource="{Binding Services}" 
-                                  SelectedIndex="{Binding ServiceTwo}"/>
+
+                    <Button Grid.Row="1" Style="{DynamicResource MaterialDesignToolButton}"
+                            HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                            Margin="20 0 0 0" x:Name="CloseFilter">
+                        <materialDesign:PackIcon Kind="ArrowLeft"/>
+                    </Button>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal"
+                                VerticalAlignment="Bottom" HorizontalAlignment="Right">
+                        <Button Style="{DynamicResource MaterialDesignFlatButton}"
+                                HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                Command="{Binding ResetCommand}"
+                                x:Name="ResetFilter">
+                            <TextBlock Text="Reset"/>
+                        </Button>
+                        <Button Style="{DynamicResource MaterialDesignFlatButton}"
+                                HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                Command="{Binding ApplyCommand}"
+                                CommandParameter="{Binding FilterConfig}"
+                                x:Name="ApplyFilter">
+                            <TextBlock Text="Apply"/>
+                        </Button>
                     </StackPanel>
                 </Grid>
             </Border>
-            <Grid Grid.Row="2">
-                <!--check-->
-                <Grid Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Row="1"
+        </Grid>
+        <!--panel-->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="35"/>
+            </Grid.RowDefinitions>
+            <!--ParserConfig-->
+            <Grid Grid.Row="0" DataContext="{Binding ParserConfig}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <materialDesign:ColorZone Background="Transparent" Grid.Row="0">
+                    <StackPanel Orientation="Horizontal" Margin="2" HorizontalAlignment="Center">
+                        <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="tryskinsTab" Margin="2" Content="TrySkins" IsChecked="{Binding Tryskins}"/>
+                        <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="manualTab" Margin="2" Content="Manual" IsChecked="{Binding Manual}"/>
+                        <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="queueTab" Margin="2" Content="Queue" IsChecked="{Binding Queue}"/>
+                    </StackPanel>
+                </materialDesign:ColorZone>
+                <Border Grid.Row="1"
+                        BorderBrush="{DynamicResource PrimaryHueMidBrush}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition Height="35"/>
+                        </Grid.RowDefinitions>
+                        <!--tryskins-->
+                        <Grid Visibility="{Binding IsChecked, ElementName=tryskinsTab, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="10">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="60"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="Price:" Height="15"/>
+                            <StackPanel Grid.Row="0" 
+                                    Margin="0 0 10 0"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Right"
+                                    Orientation="Horizontal">
+                                <TextBox Width="70" Text="{Binding MinPrice}" PreviewTextInput="Decimal_PreviewTextInput"/>
+                                <TextBlock Text="-"  Margin="5"/>
+                                <TextBox Width="70" Text="{Binding MaxPrice}" PreviewTextInput="Decimal_PreviewTextInput"/>
+                                <TextBlock Text="$" VerticalAlignment="Bottom"/>
+                            </StackPanel>
+                            <TextBlock Grid.Row="1" Text="Precent:" Height="15"/>
+                            <StackPanel Grid.Row="1" 
+                                    Margin="0 0 10 0"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Right"
+                                    Orientation="Horizontal">
+                                <TextBox Width="70" Text="{Binding MinPrecent}" PreviewTextInput="Decimal_PreviewTextInput"/>
+                                <TextBlock Text="-" Margin="5"/>
+                                <TextBox Width="70" Text="{Binding MaxPrecent}" PreviewTextInput="Decimal_PreviewTextInput"/>
+                                <TextBlock Text="%" VerticalAlignment="Bottom"/>
+                            </StackPanel>
+                            <TextBlock Grid.Row="2" Text="Steam Sales:" Height="15"/>
+                            <StackPanel Grid.Row="2" 
+                                    Margin="0 0 10 0"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Right"
+                                    Orientation="Horizontal">
+                                <TextBox Width="70" Text="{Binding SteamSales}" PreviewTextInput="Number_PreviewTextInput"/>
+                            </StackPanel>
+                            <TextBlock Grid.Row="3" Text="Name Contains:" Height="15"/>
+                            <StackPanel Grid.Row="3" 
+                                    Margin="0 0 10 0"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Right"
+                                    Orientation="Horizontal">
+                                <TextBox Width="130" Text="{Binding NameContains}"/>
+                            </StackPanel>
+                            <Grid Grid.Row="4" >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <CheckBox Grid.Row="0" Grid.Column="0" IsChecked="{Binding Knife}" HorizontalAlignment="Left">
+                                    <TextBlock Text="Knife"/>
+                                </CheckBox>
+                                <CheckBox Grid.Row="0" Grid.Column="1" IsChecked="{Binding Stattrak}" HorizontalAlignment="Left">
+                                    <TextBlock Text="StatTrak"/>
+                                </CheckBox>
+                                <CheckBox Grid.Row="1"  Grid.Column="0" IsChecked="{Binding Souvenir}" HorizontalAlignment="Left">
+                                    <TextBlock Text="Souvenir"/>
+                                </CheckBox>
+                                <CheckBox Grid.Row="1" Grid.Column="1" IsChecked="{Binding Sticker}" HorizontalAlignment="Left">
+                                    <TextBlock Text="Sticker"/>
+                                </CheckBox>
+                            </Grid>
+                        </Grid>
+                        <!--manual-->
+                        <Grid Visibility="{Binding IsChecked, ElementName=manualTab, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="6">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="25"/>
+                                <RowDefinition Height="25"/>
+                                <RowDefinition Height="25"/>
+                                <RowDefinition/>
+                                <RowDefinition Height="30"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button Height="20" FontSize="12" Style="{StaticResource MaterialDesignFlatButton}" Content="Select File"
+                                        Command="{Binding DataContext.SelectFileCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" 
+                                        Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button Height="20" FontSize="11" Style="{StaticResource MaterialDesignFlatButton}" 
+                                        Content="Get Cs.Money" Command="{Binding DataContext.GetCsmCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                <Rectangle VerticalAlignment="Stretch" Width="0.5" Height="15" Margin="2" Stroke="Gray" />
+                                <Button Height="20" FontSize="11" Style="{StaticResource MaterialDesignFlatButton}" 
+                                        Content="Get Loot.Farm" Command="{Binding DataContext.GetLFCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="2" VerticalAlignment="Center" Orientation="Horizontal">
+                                <TextBlock Text="Count: "/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center"
+                                    Text="{Binding DataContext.CheckList.Count, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                            </StackPanel>
+                            <Button Grid.Row="2" Grid.Column="3" Height="25" HorizontalAlignment="Right" Style="{DynamicResource MaterialDesignToolForegroundButton}"
+                                        Command="{Binding DataContext.ClearListCommand, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}">
+                                <materialDesign:PackIcon Kind="Remove"/>
+                            </Button>
+                            <ListBox Background="WhiteSmoke" Grid.Row="3" x:Name="checkList"
+                                     ItemsSource="{Binding DataContext.CheckList, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}"
+                                     SelectedItem="{Binding DataContext.SelectedItem, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                            <Grid Grid.Row="4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="31"/>
+                                    <ColumnDefinition Width="31"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0" VerticalAlignment="Center"
+                                         Text="{Binding DataContext.SelectedItem, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                <Button Grid.Column="1" Height="25" Style="{DynamicResource MaterialDesignToolForegroundButton}"
+                                        Command="{Binding DataContext.AddItemCommand, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}"
+                                        CommandParameter="{Binding DataContext.SelectedItem, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                    <materialDesign:PackIcon Kind="Add"/>
+                                </Button>
+                                <Button Grid.Column="2" Height="25" Style="{DynamicResource MaterialDesignToolForegroundButton}"
+                                        Command="{Binding DataContext.RemoveItemCommand, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}"
+                                        CommandParameter="{Binding DataContext.SelectedItem, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                    <materialDesign:PackIcon Kind="Minus"/>
+                                </Button>
+                            </Grid>
+                        </Grid>
+                        <!--queue-->
+                        <Grid Visibility="{Binding IsChecked, ElementName=queueTab, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="6">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="80"/>
+                                <RowDefinition Height="25"/>
+                                <RowDefinition/>
+                                <RowDefinition Height="30"/>
+                            </Grid.RowDefinitions>
+                            <GroupBox Grid.Row="0" Style="{DynamicResource None}" Header="Place Order">
+                                <Grid Margin="5">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="1" Text="{Binding DataContext.OrderAmout, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat='Amount: {0}₽'}"  VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="0" Text="{Binding DataContext.OrderAvailable, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat='Available: {0}₽'}"  VerticalAlignment="Center"/>
+                                    <Button Grid.RowSpan="2" Margin="0 0 10 0" HorizontalAlignment="Right" Style="{DynamicResource MaterialDesignFlatButton}" VerticalAlignment="Bottom"
+                                            Command="{Binding DataContext.PlaceOrderCommand, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                        <materialDesign:PackIcon Kind="Play"/>
+                                    </Button>
+                                </Grid>
+                            </GroupBox>
+                            <Grid Grid.Row="1" VerticalAlignment="Center">
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center"
+                                    Text="{Binding DataContext.PlaceOrder.Count, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat='Items: {0}'}"/>
+                                <Button Grid.Column="3" Height="25" HorizontalAlignment="Right" Style="{DynamicResource MaterialDesignToolForegroundButton}"
+                                        Command="{Binding DataContext.ClearQueueCommand, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}">
+                                    <materialDesign:PackIcon Kind="Remove"/>
+                                </Button>
+                            </Grid>
+                            <ListBox Background="WhiteSmoke" Grid.Row="2"
+                                     ItemsSource="{Binding DataContext.PlaceOrder, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}"
+                                     SelectedItem="{Binding DataContext.SelectedQueue, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                            <Grid Grid.Row="4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="31"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0" VerticalAlignment="Center"
+                                         Text="{Binding DataContext.SelectedQueue, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                <Button Grid.Column="2" Height="25" Style="{DynamicResource MaterialDesignToolForegroundButton}"
+                                        Command="{Binding DataContext.RemoveQueueCommand, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}"
+                                        CommandParameter="{Binding DataContext.SelectedQueue, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                    <materialDesign:PackIcon Kind="Minus"/>
+                                </Button>
+                            </Grid>
+                        </Grid>
+                        <!--services-->
+                        <StackPanel Grid.Row="1"
                             Orientation="Horizontal"
+                            HorizontalAlignment="Center">
+                            <ComboBox Width="105" Height="25"
+                                      ItemsSource="{Binding Services}"
+                                      SelectedIndex="{Binding ServiceOne}"/>
+                            <TextBlock Text="-" VerticalAlignment="Center" Margin="5"/>
+                            <ComboBox Width="105" Height="25"
+                                      ItemsSource="{Binding Services}"
+                                      SelectedIndex="{Binding ServiceTwo}"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+            <!--check-->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="70"/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center" Margin="5 0 0 0">
-                        <Button Height="25" Style="{DynamicResource MaterialDesignToolForegroundButton}">
-                            <materialDesign:PackIcon Kind="Upload"/>
-                        </Button>
-                        <Button Style="{DynamicResource MaterialDesignToolForegroundButton}">
-                            <materialDesign:PackIcon Kind="Download"/>
-                        </Button>
-                    </StackPanel>
-                    <Button Grid.Column="1" Margin="0 0 10 0" HorizontalAlignment="Right"
+                    <Button Height="25" Style="{DynamicResource MaterialDesignToolForegroundButton}"
+                            Command="{Binding ExportCsvCommand}">
+                        <Button.ToolTip>
+                            <ToolTip Content="Export Table to *.csv"/>
+                        </Button.ToolTip>
+                        <materialDesign:PackIcon Kind="Download"/>
+                    </Button>
+                    <Button Style="{DynamicResource MaterialDesignToolForegroundButton}"
+                            Command="{Binding ImportCsvCommand}">
+                        <Button.ToolTip>
+                            <ToolTip Content="Import Table from *.csv"/>
+                        </Button.ToolTip>
+                        <materialDesign:PackIcon Kind="Upload"/>
+                    </Button>
+                </StackPanel>
+                <Button Grid.Column="1" Style="{DynamicResource MaterialDesignToolForegroundButton}" HorizontalAlignment="Left"
+                        Command="{Binding ExportTxtCommand}">
+                    <Button.ToolTip>
+                        <ToolTip Content="Export Items to *.txt"/>
+                    </Button.ToolTip>
+                    <materialDesign:PackIcon Kind="FileDocument"/>
+                </Button>                
+                <Button Grid.Column="2" Margin="0 0 10 0" HorizontalAlignment="Right"
                             Style="{DynamicResource MaterialDesignFlatButton}"
                             Command="{Binding CheckCommand}"
                             CommandParameter="{Binding ParserConfig}">
-                        <materialDesign:PackIcon Kind="Play"/>
-                    </Button>
-                </Grid>
+                    <materialDesign:PackIcon Kind="Play"/>
+                </Button>
+                <ProgressBar Grid.ColumnSpan="3"
+                             VerticalAlignment="Bottom"
+                             Height="3"
+                             Value="{Binding CurrentProgress}"
+                             Maximum="{Binding MaxProgress}"/>
             </Grid>
         </Grid>
     </Grid>

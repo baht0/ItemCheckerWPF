@@ -5,43 +5,336 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ItemChecker.MVVM.View"
              xmlns:viewmodel="clr-namespace:ItemChecker.MVVM.ViewModel" 
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"             
              d:DataContext="{d:DesignInstance Type=viewmodel:BuyOrderViewModel}"
              FontFamily="{materialDesign:MaterialDesignFont}"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="660" d:DesignWidth="1280" x:Name="userControl">
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="25"/>
-            <RowDefinition/>
-        </Grid.RowDefinitions>
-        <Border Grid.Row="0" Background="Transparent">
-            <TextBlock Text="{Binding Path=ItemCount, StringFormat='My Buy Orders ({0})'}" 
-                       VerticalAlignment="Center" 
-                       FontWeight="Normal" 
-                       FontStyle="Normal"
-                       FontSize="18" TextDecorations="{x:Null}"/>
-        </Border>        
-        <DataGrid x:Name="ordersGrid"
-                  Grid.Row="1"
-                  AutoGenerateColumns="False" 
-                  ItemsSource="{Binding OrderedGrid}">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="" Binding="{Binding Type}" CanUserResize="False" Width="10"/>
-                <DataGridTextColumn Header="Item" Binding="{Binding ItemName}" CanUserResize="False" Width="300"/>
-                <DataGridTextColumn Header="ST" Binding="{Binding StmPrice}" CanUserResize="False"/>
-                <DataGridTextColumn Header="STA" Binding="{Binding OrderPrice}" CanUserResize="False"/>
-                <DataGridTextColumn Header="CSM" Binding="{Binding CsmPrice}" CanUserResize="False"/>
-                <DataGridTextColumn Header="CSM" Binding="{Binding CsmBuy}" CanUserResize="False"/>
-                <DataGridTextColumn Header="Precent" Binding="{Binding Precent}" CanUserResize="False"/>
-                <DataGridTextColumn Header="Differece" Binding="{Binding Difference}" CanUserResize="False"/>
-            </DataGrid.Columns>
-        </DataGrid>
-        <Grid Grid.Column="1" Margin="0 0 10 0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="950"/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="250"/>
+        </Grid.ColumnDefinitions> 
+        <!--body-->
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="25"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0" Background="Transparent"
+                        Orientation="Horizontal" VerticalAlignment="Center">
+                <Button HorizontalAlignment="Right" VerticalAlignment="Center"
+                        Style="{DynamicResource MaterialDesignToolButton}"
+                        Command="{Binding ReloadCommand}">
+                    <materialDesign:PackIcon Kind="Reload"/>
+                </Button>
+                <TextBlock Text="My Buy Orders" 
+                       VerticalAlignment="Center"
+                       FontSize="18"/>
+                <TextBlock Text="{Binding OrderedGrid.Count, StringFormat=' ({0})'}" 
+                       VerticalAlignment="Center"
+                       FontSize="18"/>
+            </StackPanel>
+            <DataGrid x:Name="ordersGrid" Grid.Row="1"
+                      AutoGenerateColumns="False" IsReadOnly="True"
+                      ItemsSource="{Binding OrderedGrid, UpdateSourceTrigger=PropertyChanged}"
+                      SelectedItem="{Binding SelectedOrderItem}"
+                      KeyDown="DataGrid_KeyDown"
+                      MouseDoubleClick="DataGrid_MouseDoubleClick">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="" Binding="{Binding Type}" CanUserResize="False" Width="1" Visibility="Hidden"/>
+                    <DataGridTextColumn Header="Item" Binding="{Binding ItemName}" CanUserResize="False" Width="auto" MaxWidth="380" MinWidth="250"/>
+                    <DataGridTextColumn Header="Sale(ST)" Binding="{Binding StmPrice}" CanUserResize="False" Width="auto"/>
+                    <DataGridTextColumn Header="BuyOrder(₽)" Binding="{Binding OrderPrice}" CanUserResize="False" Width="auto"/>
+                    <DataGridTextColumn Header="Sale(CSM)" Binding="{Binding CsmPrice}" CanUserResize="False" Width="auto"/>
+                    <DataGridTextColumn Header="Buy(CSM)" Binding="{Binding CsmBuy}" CanUserResize="False" Width="auto"/>
+                    <DataGridTextColumn Header="Precent" Binding="{Binding Precent}" CanUserResize="False" Width="auto"/>
+                    <DataGridTextColumn Header="Differece" Binding="{Binding Difference}" CanUserResize="False" Width="auto"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+        <!--panel-->
+        <Grid Grid.Column="1" Margin="10 0 10 0"
+              Background="Transparent">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="35"/>
+            </Grid.RowDefinitions>
+            <!--tools-->
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <materialDesign:ColorZone Background="Transparent" Grid.Row="0">
+                    <StackPanel Orientation="Horizontal" Margin="2" HorizontalAlignment="Center">
+                        <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="serviceTab" Margin="4" Content="Services" IsChecked="True"/>
+                        <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="toolsTab" Margin="4" Content="Tools"/>
+                    </StackPanel>
+                </materialDesign:ColorZone>
+                <Border Grid.Row="1" BorderBrush="{DynamicResource PrimaryHueMidBrush}">
+                    <Grid>
+                        <!--Services-->
+                        <Grid Visibility="{Binding IsChecked, ElementName=serviceTab, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Grid DataContext="{Binding OrderConfig, UpdateSourceTrigger=PropertyChanged}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="100"/>
+                                    <RowDefinition Height="130"/>
+                                    <RowDefinition Height="160"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <GroupBox Grid.Row="0" Style="{DynamicResource None}" Header="BuyOrder Pusher">
+                                    <Grid Margin="5">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Row="0" Text="Timer:" Height="15"/>
+                                        <StackPanel Grid.Row="0" Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Left"
+                                    Orientation="Horizontal">
+                                            <TextBox Width="70" Text="{Binding PushTimer}" PreviewTextInput="Number_PreviewTextInput"/>
+                                            <TextBlock Text="Min." Margin="2 0 0 0" VerticalAlignment="Bottom"/>
+                                        </StackPanel>
+                                        <Button Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right"
+                                            Style="{DynamicResource MaterialDesignFlatButton}"
+                                            Command="{Binding DataContext.PushCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding DataContext.OrderConfig, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                            <materialDesign:PackIcon Kind="Play"/>
+                                        </Button>
+                                    </Grid>
+                                </GroupBox>
+                                <GroupBox Grid.Row="1" Style="{DynamicResource None}" Header="Favorite Check">
+                                    <Grid Margin="5">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Row="0" Text="Max. Deviation:" Height="15"/>
+                                        <StackPanel Grid.Row="0" Grid.Column="1"
+                                                    VerticalAlignment="Center"
+                                                    HorizontalAlignment="Left"
+                                                    Orientation="Horizontal">
+                                            <TextBox Width="70" Text="{Binding MaxDeviation}" PreviewTextInput="Decimal_PreviewTextInput"/>
+                                            <TextBlock Text="$" Margin="2 0 0 0" VerticalAlignment="Bottom"/>
+                                        </StackPanel>
+                                        <TextBlock Grid.Row="1" Text="Timer:" Height="15"/>
+                                        <StackPanel Grid.Row="1" Grid.Column="1"
+                                                    VerticalAlignment="Center"
+                                                    HorizontalAlignment="Left"
+                                                    Orientation="Horizontal">
+                                            <TextBox Width="70" Text="{Binding FavoriteTimer}" PreviewTextInput="Number_PreviewTextInput"/>
+                                            <TextBlock Text="Sec." Margin="2 0 0 0" VerticalAlignment="Bottom"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="2" Orientation="Horizontal"
+                                                VerticalAlignment="Center">
+                                            <Button HorizontalAlignment="Left"
+                                            Style="{DynamicResource MaterialDesignToolButton}"
+                                            Command="{Binding DataContext.AddFavoriteListCommand, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                                <materialDesign:PackIcon Kind="ViewList"/>
+                                            </Button>
+                                            <TextBlock Text="{Binding DataContext.FavoriteListCount, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat='({0})'}" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                        <Button Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right"
+                                            Style="{DynamicResource MaterialDesignFlatButton}"
+                                            Command="{Binding DataContext.FavoriteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding DataContext.OrderConfig, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                            <materialDesign:PackIcon Kind="Play"/>
+                                        </Button>
+                                    </Grid>
+                                </GroupBox>
+                                <GroupBox Grid.Row="2" Style="{DynamicResource None}" Header="Float Check">
+                                    <Grid Margin="5">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Row="0" Text="Compare Price:" Height="15"/>
+                                        <StackPanel Grid.Row="0" Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Left"
+                                    Orientation="Horizontal">
+                                            <ComboBox Width="85" 
+                                                  ItemsSource="{Binding ComparePrices}"
+                                                  SelectedIndex="{Binding Compare}"/>
+                                        </StackPanel>
+                                        <TextBlock Grid.Row="1" Text="Max. Precent:" Height="15"/>
+                                        <StackPanel Grid.Row="1" Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Left"
+                                    Orientation="Horizontal">
+                                            <TextBox Width="70" Text="{Binding MaxPrecent}" PreviewTextInput="Number_PreviewTextInput"/>
+                                            <TextBlock Text="%" Margin="2 0 0 0" VerticalAlignment="Bottom"/>
+                                        </StackPanel>
+                                        <TextBlock Grid.Row="2" Text="Timer:" Height="15"/>
+                                        <StackPanel Grid.Row="2" Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Left"
+                                    Orientation="Horizontal">
+                                            <TextBox Width="70" Text="{Binding FloatTimer}" PreviewTextInput="Number_PreviewTextInput"/>
+                                            <TextBlock Text="Min." Margin="2 0 0 0" VerticalAlignment="Bottom"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="3" Orientation="Horizontal"
+                                                VerticalAlignment="Center">
+                                            <Button HorizontalAlignment="Left"
+                                            Style="{DynamicResource MaterialDesignToolButton}"
+                                            Command="{Binding DataContext.AddFloatListCommand, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                                <materialDesign:PackIcon Kind="ViewList"/>
+                                            </Button>
+                                            <TextBlock Text="{Binding DataContext.FloatListCount, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat='({0})'}" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                        <Button Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right"
+                                            Style="{DynamicResource MaterialDesignFlatButton}"
+                                            Command="{Binding DataContext.FloatCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding DataContext.OrderConfig, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                            <materialDesign:PackIcon Kind="Play"/>
+                                        </Button>
+                                    </Grid>
+                                </GroupBox>
+                            </Grid>                            
+                            <!--statistic-->
+                            <GroupBox Grid.Row="3" Style="{DynamicResource None}" VerticalAlignment="Bottom" Height="75">
+                                <GroupBox.Header>
+                                    <TextBlock Text="{Binding CurrentService, StringFormat='Statistic ({0})', UpdateSourceTrigger=PropertyChanged}"/>
+                                </GroupBox.Header>
+                                <Grid Margin="5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Check, StringFormat='Check: {0}'}" VerticalAlignment="Center"/>
+                                    <Grid Grid.Row="1" Grid.ColumnSpan="2" 
+                                          Visibility="{Binding PushService, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <!--pusher-->
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="{Binding Push, StringFormat='Push: {0}'}" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Cancel, StringFormat='Cancel: {0}'}" VerticalAlignment="Center"/>
+                                    </Grid>
+                                    <Grid Grid.Row="1" Grid.ColumnSpan="2" 
+                                          Visibility="{Binding FavoriteService, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Grid.Column="0" Text="{Binding SuccessfulTrades, StringFormat='Successful Trades: {0}'}" VerticalAlignment="Center"/>
+                                    </Grid>
+                                    <Grid Grid.Row="1" Grid.ColumnSpan="2" 
+                                          Visibility="{Binding FloatService, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Grid.Column="0" Text="{Binding PurchasesMade, StringFormat='Purchases made: {0}'}" VerticalAlignment="Center"/>
+                                    </Grid>
+                                </Grid>
+                            </GroupBox>
+                        </Grid>
+                        <!--Tools-->
+                        <Grid Visibility="{Binding IsChecked, ElementName=toolsTab, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="65"/>
+                                <RowDefinition Height="130"/>
+                                <RowDefinition Height="65"/>
+                            </Grid.RowDefinitions>
+                            <GroupBox Grid.Row="0" Style="{DynamicResource None}" Header="Trade Offers">
+                                <Grid Margin="5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Trades, StringFormat='Trades: {0}'}" VerticalAlignment="Center"/>
+                                    <Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right"
+                                            Style="{DynamicResource MaterialDesignFlatButton}"
+                                            Command="{Binding TradeOfferCommand}">
+                                        <materialDesign:PackIcon Kind="Play"/>
+                                    </Button>
+                                </Grid>
+                            </GroupBox>
+                            <GroupBox Grid.Row="1" Style="{DynamicResource None}" Header="Quick Sale">
+                                <Grid Margin="5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding SellItems, StringFormat='Items: {0}'}"  VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Sum, StringFormat='Sum: {0}₽'}"  VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="1" Text="Max. Price:" Height="15"/>
+                                    <StackPanel Grid.Row="1" Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Left"
+                                    Orientation="Horizontal">
+                                        <TextBox Width="70" Text="{Binding OrderConfig.MaxPrice}" PreviewTextInput="Number_PreviewTextInput"/>
+                                        <TextBlock Text="₽" Margin="2 0 0 0" VerticalAlignment="Bottom"/>
+                                    </StackPanel>
+                                    <Button Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right"
+                                            Style="{DynamicResource MaterialDesignFlatButton}"
+                                            Command="{Binding QuickSellCommand}"
+                                            CommandParameter="{Binding OrderConfig.MaxPrice}">
+                                        <materialDesign:PackIcon Kind="Play"/>
+                                    </Button>
+                                </Grid>
+                            </GroupBox>
+                            <GroupBox Grid.Row="2" Style="{DynamicResource None}" Header="Withdraw">
+                                <Grid Margin="5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding WithdrawItems, StringFormat='Items: {0}'}" VerticalAlignment="Center"/>
+                                    <Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right"
+                                            Style="{DynamicResource MaterialDesignFlatButton}"
+                                            Command="{Binding WithdrawCommand}">
+                                        <materialDesign:PackIcon Kind="Play"/>
+                                    </Button>
+                                </Grid>
+                            </GroupBox>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+            <!--statusBar-->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <ProgressBar Grid.ColumnSpan="2"
+                             VerticalAlignment="Bottom"
+                             Height="3"
+                             Maximum="{Binding MaxProgress}"
+                             Value="{Binding CurrentProgress}"/>
+                <TextBlock Grid.Column="0" Text="{Binding TimerText}" 
+                           Visibility="{Binding TimerVisible, Converter={StaticResource BooleanToVisibilityConverter}, UpdateSourceTrigger=PropertyChanged}"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Left"/>
+                <Button Grid.Column="1"
+                        Style="{DynamicResource MaterialDesignFlatButton}"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Right"
+                        Command="{Binding StopCommand}">
+                    <materialDesign:PackIcon Kind="Stop"/>
+                </Button>
+            </Grid>
         </Grid>
     </Grid>
 </UserControl>

@@ -1,6 +1,6 @@
 ﻿namespace ItemChecker.MVVM.Model
 {
-    public class MyOrder
+    public class OrderData
     {
         public string Type { get; set; }
         public string ItemName { get; set; }
@@ -12,7 +12,7 @@
         public decimal Precent { get; set; }
         public decimal Difference { get; set; }
 
-        public MyOrder(string Type, string ItemName, string OrderId, decimal StmPrice, decimal OrderPrice, decimal CsmPrice, decimal CsmBuy, decimal Precent, decimal Difference)
+        public OrderData(string Type, string ItemName, string OrderId, decimal StmPrice, decimal OrderPrice, decimal CsmPrice, decimal CsmBuy, decimal Precent, decimal Difference)
         {
             this.Type = Type;
             this.ItemName = ItemName;

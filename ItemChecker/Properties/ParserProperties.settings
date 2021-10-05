@@ -2,22 +2,31 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ItemChecker.Properties" GeneratedClassName="ParserProperties">
   <Profiles />
   <Settings>
+    <Setting Name="tryskins" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="manual" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="queue" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
     <Setting Name="serviceOne" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="serviceTwo" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">1</Value>
     </Setting>
-    <Setting Name="maxPrecent" Type="System.Int32" Scope="User">
+    <Setting Name="maxPrecent" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)">60</Value>
     </Setting>
-    <Setting Name="minPrecent" Type="System.Int32" Scope="User">
+    <Setting Name="minPrecent" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)">35</Value>
     </Setting>
-    <Setting Name="maxPrice" Type="System.Int32" Scope="User">
+    <Setting Name="maxPrice" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="minPrice" Type="System.Int32" Scope="User">
+    <Setting Name="minPrice" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="steamSales" Type="System.Int32" Scope="User">
@@ -37,6 +46,9 @@
     </Setting>
     <Setting Name="sticker" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="checkList" Type="System.Collections.ObjectModel.ObservableCollection&lt;System.String&gt;" Scope="User">
+      <Value Profile="(Default)" />
     </Setting>
   </Settings>
 </SettingsFile>

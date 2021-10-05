@@ -1,18 +1,29 @@
-﻿using ItemChecker.Net;
-using ItemChecker.Support;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Threading;
+﻿using System.Collections.Generic;
 
 namespace ItemChecker.MVVM.Model
 {
     public class Parser
     {
-        public List<string> Services = new();
+        public static string Price1 { get; set; } = "Price1";
+        public static string Price2 { get; set; } = "Price2";
+        public static string Price3 { get; set; } = "Price3";
+        public static string Price4 { get; set; } = "Price4";
+
+        public static string Mode { get; set; } = "Unknown";
+        public static string Service1 { get; set; } = "Service1";
+        public static string Service2 { get; set; } = "Service2";
+        public static string DataCurrency { get; set; } = "Unknown";
+
+        //mode
+        public bool Tryskins { get; set; }
+        public bool Manual { get; set; }
+        public bool Queue { get; set; }
+
+        public List<string> Services { get; set; }
         public int ServiceOne { get; set; }
         public int ServiceTwo { get; set; }
 
+        //Tryskins
         public decimal MinPrice { get; set; }
         public decimal MaxPrice { get; set; }
         public decimal MinPrecent { get; set; }
@@ -23,49 +34,5 @@ namespace ItemChecker.MVVM.Model
         public bool Stattrak { get; set; }
         public bool Souvenir { get; set; }
         public bool Sticker { get; set; }
-
-        public static void getList()
-        {
-            ParserData.ParserItems.Clear();
-            ParserData.ParserItems.Add(new ParserData("White", "★ StatTrak™ Paracord Knife | Night Stripe (Battle-Scarred)", 10000, 20000, 30000, 40000, 45.67m, 7890.67m, "Unavailable"));
-            ParserData.ParserItems.Add(new ParserData("White", "★ StatTrak™ Paracord Knife | Night Stripe (Battle-Scarred)", 10000, 20000, 30000.32m, 40000, 45.67m, 7890.67m, "Unavailable"));
-            ParserData.ParserItems.Add(new ParserData("White", "★ StatTrak™ Paracord Knife | Night Stripe (Battle-Scarred)", 10000, 20000, 30000, 40000, 45.67m, 7890.67m, "Unavailable"));
-            ParserData.ParserItems.Add(new ParserData("White", "★ StatTrak™ Paracord Knife | Night Stripe (Battle-Scarred)", 10000, 20000, 30000, 40000.76m, 45.67m, 7890.67m, "Unavailable"));
-            ParserData.ParserItems.Add(new ParserData("White", "★ StatTrak™ Paracord Knife | Night Stripe (Battle-Scarred)", 10000, 20000, 30000, 40000, 45.67m, 7890.67m, "Unavailable"));
-            ParserData.ParserItems.Add(new ParserData("White", "★ StatTrak™ Paracord Knife | Night Stripe (Battle-Scarred)", 10000, 20000, 30000, 40000, 45.67m, 7890.67m, "Unavailable"));
-            ParserData.ParserItems.Add(new ParserData("White", "★ StatTrak™ Paracord Knife | Night Stripe (Battle-Scarred)", 10000, 20000, 30000, 40000, 45.67m, 7890.67m, "Unavailable"));
-            ParserData.ParserItems.Add(new ParserData("White", "★ StatTrak™ Paracord Knife | Night Stripe (Battle-Scarred)", 10000, 20000, 30000, 40000, 45.67m, 7890.67m, "Unavailable"));
-        }
-        protected void checkItems(string itemName)
-        {
-            Tuple<String, Boolean> response = Tuple.Create("", false);
-            do
-            {
-                response = Get.MrinkaRequest(Edit.MarketHashName(itemName));
-                if (!response.Item2)
-                {
-                    Thread.Sleep(30000);
-                }
-            }
-            while (!response.Item2);
-
-            parseJson(response.Item1, itemName);
-        }
-        private void parseJson(string response, string itemName)
-        {
-            decimal steam_price = Convert.ToDecimal(JObject.Parse(response)["steam"]["buyOrder"].ToString());
-            steam_price = Convert.ToDecimal(JObject.Parse(response)["steam"]["sellOrder"].ToString());
-            decimal csm_sell = Convert.ToDecimal(JObject.Parse(response)["csm"]["sell"].ToString());
-            decimal precent = Edit.Precent(steam_price, csm_sell);
-
-            if (precent > 0)
-            {
-                //ItemName.Add(item_name);
-                //sta.Add(steam_price);
-                //csm.Add(csm_sell);
-                //Precent.Add(precent);
-                //Difference.Add(Edit.Difference(csm_sell, steam_price, GeneralProperties.Default.currency));
-            }
-        }
     }
 }        

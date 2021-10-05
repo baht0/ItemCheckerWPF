@@ -25,42 +25,6 @@ namespace ItemChecker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("7")]
-        public decimal maxFloatPrecent {
-            get {
-                return ((decimal)(this["maxFloatPrecent"]));
-            }
-            set {
-                this["maxFloatPrecent"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("40")]
-        public int countGetItems {
-            get {
-                return ((int)(this["countGetItems"]));
-            }
-            set {
-                this["countGetItems"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int priceCompare {
-            get {
-                return ((int)(this["priceCompare"]));
-            }
-            set {
-                this["priceCompare"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0.001")]
         public decimal maxFloatValue_FN {
             get {
@@ -116,30 +80,6 @@ namespace ItemChecker.Properties {
             }
             set {
                 this["maxFloatValue_BS"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string floatList {
-            get {
-                return ((string)(this["floatList"]));
-            }
-            set {
-                this["floatList"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("10")]
-        public int timer {
-            get {
-                return ((int)(this["timer"]));
-            }
-            set {
-                this["timer"] = value;
             }
         }
     }

@@ -1,0 +1,193 @@
+﻿using ItemChecker.MVVM.Model;
+using ItemChecker.Net;
+using ItemChecker.Properties;
+using ItemChecker.Support;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Support.Extensions;
+using OpenQA.Selenium.Support.UI;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+
+namespace ItemChecker.Services
+{
+    public class FavoriteCheckService : BaseService
+    {
+        private static List<string> old_id = new();
+
+        public void checkFavorite(string favoriteItem)
+        {
+            string[] item_line = favoriteItem.Split(';');
+
+            var json = Get.InventoriesCsMoney(Edit.MarketHashName(item_line[0]));
+            if (!json.Contains("error"))
+            {
+                JArray items = new();
+                JArray inventory = JArray.Parse(JObject.Parse(json)["items"].ToString());
+                foreach (JObject item in inventory)
+                {
+                    if ((string)item["fullName"] != item_line[0])
+                        continue;
+                    if (favoriteItem.Contains(";"))
+                    {
+                        decimal maxPrice = decimal.Parse(item_line[1]) + BuyOrderProperties.Default.MaxDeviation;
+                        decimal price = Convert.ToDecimal(item["price"]);
+                        if (price > maxPrice)
+                            continue;
+                    }
+                    if (item.ContainsKey("stackSize"))
+                    {
+                        var response = Get.Request("https://inventories.cs.money/4.0/get_bot_stack/730/" + item["stackId"].ToString());
+                        JArray stack = JArray.Parse(response);
+                        foreach (JObject stack_item in stack)
+                            items.Add(getStackItems(item, stack_item));
+                    }
+                    else
+                        items.Add(item);
+                }
+                if (items.Any())
+                    addCart(items);
+            }
+        }
+        Boolean addCart(JArray items)
+        {
+            clearCart();
+            decimal sum = 0;
+            foreach (JObject item in items)
+            {
+                JObject json = new(
+                           new JProperty("type", 2),
+                           new JProperty("item", new JObject(item)));
+                string body = json.ToString(Formatting.None);
+                Browser.ExecuteJavaScript(Post.FetchRequest("application/json", body, "https://cs.money/add_cart"));
+                sum += Convert.ToDecimal(item["price"].ToString());
+                Thread.Sleep(300);
+            }
+            sum *= -1;
+            return sendOffer(items, sum);
+        }
+        Boolean sendOffer(JArray items, decimal sum)
+        {
+            JObject json = new(
+                        new JProperty("skins",
+                            new JObject(
+                                new JProperty("user", new JArray()),
+                                new JProperty("bot", new JArray(items)))),
+                        new JProperty("balance", sum),
+                            new JProperty("games", new JObject()),
+                            new JProperty("isVirtual", false));
+            string body = json.ToString(Formatting.None);
+
+            JObject response = sendRespons(body);
+            if (response.ContainsKey("error"))
+            {
+                if (response["error"].ToString() == "11")
+                {
+                    JArray skins = JArray.Parse(response["details"]["skins"].ToString());
+                    if (items.Count > skins.Count)
+                    {
+                        JArray itemsCopy = items;
+                        foreach (JObject skinId in skins)
+                        {
+                            string id = skinId["skinId"].ToString();
+                            foreach (JObject item in items)
+                                if (item["id"].ToString() == id)
+                                {
+                                    Browser.ExecuteJavaScript(Delete.FetchRequest("https://cs.money/remove_cart_item?type=2&id=" + id));
+                                    sum -= Convert.ToDecimal(item["price"].ToString());
+                                    itemsCopy.Remove(item);
+                                    Thread.Sleep(150);
+                                }
+                        }
+                        sendOffer(itemsCopy, sum);
+                        return true;
+                    }
+                    else return false;
+                }
+                else return false;
+            }
+            else return true;
+        }
+
+        public void getTransactions()
+        {
+            Thread.Sleep(500);
+
+            Browser.Navigate().GoToUrl("https://cs.money/2.0/get_transactions?type=0&status=0&appId=730&limit=20");
+            IWebElement html = WebDriverWait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//pre")));
+
+            string json = html.Text;
+            JArray trades = JArray.Parse(json);
+            if (trades.Any())
+                foreach (JObject trade in trades)
+                {
+                    string id = (string)trade["offers"][0]["id"];
+                    if (!old_id.Contains(id))
+                        confirmVirtualOffer(id);
+                }
+        }
+        void confirmVirtualOffer(string id)
+        {
+            JObject json = new(
+                        new JProperty("offer_id", id),
+                        new JProperty("action", "confirm"));
+            string body = json.ToString(Formatting.None);
+            Browser.ExecuteJavaScript(Post.FetchRequest("application/json", body, "https://cs.money/confirm_virtual_offer"));
+            OrderStatistic.SuccessfulTrades++;
+
+            old_id.Add(id);
+        }
+
+        protected JObject getStackItems(JObject item, JObject stack_item)
+        {
+            if (stack_item.ContainsKey("3d"))
+                item["3d"] = stack_item["3d"].ToString();
+            if (stack_item.ContainsKey("float"))
+                item["float"] = stack_item["float"].ToString();
+            if (stack_item.ContainsKey("id"))
+                item["id"] = Convert.ToInt64(stack_item["id"].ToString());
+            if (stack_item.ContainsKey("img"))
+                item["img"] = stack_item["img"].ToString();
+            if (stack_item.ContainsKey("pattern"))
+                if (stack_item["pattern"].ToString() != "null")
+                    item["pattern"] = Convert.ToInt32(stack_item["pattern"].ToString());
+            if (stack_item.ContainsKey("preview"))
+                item["preview"] = stack_item["preview"].ToString();
+            if (stack_item.ContainsKey("screenshot"))
+                item["screenshot"] = stack_item["screenshot"].ToString();
+            if (stack_item.ContainsKey("steamId"))
+                item["steamId"] = stack_item["steamId"].ToString();
+
+            return item;
+        }
+        JObject sendRespons(string body)
+        {
+            Browser.ExecuteJavaScript("window.open();");
+            Browser.SwitchTo().Window(Browser.WindowHandles.Last());
+            Browser.ExecuteJavaScript(Post.FetchRequestWithResponse("application/json", body, "https://cs.money/2.0/send_offer"));
+            IWebElement html = WebDriverWait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//pre")));
+            string json = html.Text;
+            Thread.Sleep(100);
+            Browser.ExecuteJavaScript("window.close();");
+            Browser.SwitchTo().Window(Browser.WindowHandles.First());
+
+            return JObject.Parse(json);
+        }
+        public void clearCart()
+        {
+            Browser.ExecuteJavaScript(Post.FetchRequest("application/json", "{\"type\":1}", "https://cs.money/clear_cart"));
+            Thread.Sleep(300);
+            Browser.ExecuteJavaScript(Post.FetchRequest("application/json", "{\"type\":2}", "https://cs.money/clear_cart"));
+        }
+
+        public List<string> SelectFile()
+        {
+            List<string> list = OpenFileDialog("txt");
+
+            return list;
+        }
+    }
+}

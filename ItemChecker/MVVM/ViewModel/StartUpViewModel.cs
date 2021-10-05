@@ -14,17 +14,18 @@ using ItemChecker.MVVM.View;
 using System.Diagnostics;
 using System.Linq;
 using ItemChecker.Properties;
+using System.Globalization;
 
 namespace ItemChecker.MVVM.ViewModel
 {
-    public class StartViewModel : ObservableObject
+    public class StartUpViewModel : ObservableObject
     {
         IView _view;
         Task startTask;
         string _version;
         string _status;
         bool _isLogin;
-        private Account _account;
+        private Account _login;
 
         public string Version
         {
@@ -53,44 +54,46 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        public Account Account
+        public Account Login
         {
-            get { return _account; }
+            get { return _login; }
             set
             {
-                _account = value;
+                _login = value;
                 OnPropertyChanged();
             }
         }
 
-        public StartViewModel(IView view)
+        public StartUpViewModel(IView view)
         {
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.CreateSpecificCulture("en-Us");
+            CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.CreateSpecificCulture("en-Us");
+            Login = new Account()
+            {
+                Login = string.Empty,
+                Code2AF = string.Empty,
+            };
             _view = view;
-            Version = Start.Version;
-            Account = Account.GetUser();
+            Version = BaseModel.Version;
             startTask = Task.Run(() => { Starting(); });
         }
-        public ICommand CloseCommand
-        {
-            get
+        public ICommand CloseCommand => 
+            new RelayCommand((obj) => 
             {
-                return new RelayCommand((obj) =>
+                MessageBoxResult result = MessageBox.Show("Are you sure you want to close?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
                 {
-                    MessageBoxResult result = MessageBox.Show("Are you sure you want to close?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                    if (result == MessageBoxResult.Yes)
+                    Task.Run(() =>
                     {
-                        Task.Run(() => {
-                            Start.cts.Cancel();
-                            Status = "Exit...";
-                            startTask.Wait();
-                            Start.BrowserExit();
-                        }).Wait();
-                        Application.Current.Shutdown();
-                    }
-                });
-            }
-        }
-        private void Hide()
+                        BaseModel.cts.Cancel();
+                        Status = "Exit...";
+                        startTask.Wait(5000);
+                        BaseModel.BrowserExit();
+                    }).Wait();
+                    Application.Current.Shutdown();
+                }
+            });
+        void Hide()
         {
             _view.Hide();
         }
@@ -102,6 +105,8 @@ namespace ItemChecker.MVVM.ViewModel
                 CompletionUpdate();
                 LaunchBrowser();
                 CheckUpdate();
+                Status = "Status Steam...";
+                Main.StatusSteam();
 
                 LoginSteam();
                 LoginTryskins();
@@ -109,7 +114,7 @@ namespace ItemChecker.MVVM.ViewModel
                 Status = "Get Informations...";
                 Account.GetInformations();
                 Status = "Check Steam Orders...";
-                BuyOrder order = new();
+                OrderCheckService order = new();
                 order.SteamOrders();
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -120,8 +125,8 @@ namespace ItemChecker.MVVM.ViewModel
             }
             catch (Exception exp)
             {
-                Start.errorLog(exp, Start.Version);
-                Start.errorMessage(exp);
+                BaseModel.errorLog(exp);
+                BaseModel.errorMessage(exp);
             }
         }
         void KillProccess()
@@ -135,7 +140,7 @@ namespace ItemChecker.MVVM.ViewModel
                     MessageBoxImage.Error);
                 Process.GetCurrentProcess().Kill();
             }
-            //if (GeneralProperties.Default.exitChrome)
+            if (GeneralProperties.Default.ExitChrome)
                 foreach (Process proc in Process.GetProcessesByName("chrome")) proc.Kill();
             foreach (Process proc in Process.GetProcessesByName("chromedriver")) proc.Kill();
             foreach (Process proc in Process.GetProcessesByName("conhost"))
@@ -152,15 +157,15 @@ namespace ItemChecker.MVVM.ViewModel
         }
         void CompletionUpdate()
         {
-            if (Start.token.IsCancellationRequested)
+            if (BaseModel.token.IsCancellationRequested)
                 return;
-            if (StartProperties.Default.completionUpdate)
+            if (StartUpProperties.Default.completionUpdate)
             {
                 Status = "Completion Update...";
-                string update = Start.AppPath + @"\update";
+                string update = BaseModel.AppPath + @"\update";
                 if (Directory.Exists(update))
                 {
-                    string path = Start.AppPath;
+                    string path = BaseModel.AppPath;
                     string updaterExe = "ItemChecker.Updater.exe";
                     string updaterDll = "ItemChecker.Updater.dll";
                     File.Move($"{update}\\{updaterExe}", path + updaterExe, true);
@@ -168,18 +173,27 @@ namespace ItemChecker.MVVM.ViewModel
                     Directory.Delete(update, true);
                 }
                 GeneralProperties.Default.Upgrade();
-                SteamProperties.Default.Upgrade();
+                BuyOrderProperties.Default.Upgrade();
                 ParserProperties.Default.Upgrade();
                 FloatProperties.Default.Upgrade();
 
-                StartProperties.Default.completionUpdate = false;
-                StartProperties.Default.Save();
+                StartUpProperties.Default.completionUpdate = false;
+                StartUpProperties.Default.Save();
             }
         }
         void LaunchBrowser()
         {
-            if (Start.token.IsCancellationRequested)
+            if (BaseModel.token.IsCancellationRequested)
                 return;
+
+            string profilesDir = BaseModel.AppPath + "\\Profiles";
+
+            if (!Directory.Exists(profilesDir))
+                Directory.CreateDirectory(profilesDir);
+
+            DirectoryInfo dirInfo = new(profilesDir);
+            dirInfo.Attributes = FileAttributes.Hidden;
+
             Status = "Launch Browser...";
             ChromeDriverService chromeDriverService = ChromeDriverService.CreateDefaultService();
             chromeDriverService.HideCommandPromptWindow = true;
@@ -192,87 +206,80 @@ namespace ItemChecker.MVVM.ViewModel
                 "--disable-extensions",
                 "--disable-blink-features=AutomationControlled",
                 "ignore-certificate-errors");
-            if (GeneralProperties.Default.profileUse)
-                option.AddArguments($"--user-data-dir={Start.AppPath}\\profiles\\{GeneralProperties.Default.profile}", "profile-directory=Default");
-            else
-                Directory.Delete($"{Start.AppPath}\\profile", true);
+
+            option.AddArguments($"--user-data-dir={profilesDir}\\{GeneralProperties.Default.Profile}", "profile-directory=Default");
             option.Proxy = null;
 
-            Start.Browser = new ChromeDriver(chromeDriverService, option, TimeSpan.FromSeconds(30));
-            Start.Browser.Manage().Window.Maximize();
-            Start.webDriverWait = new WebDriverWait(Start.Browser, TimeSpan.FromSeconds(GeneralProperties.Default.wait));
+
+            BaseModel.Browser = new ChromeDriver(chromeDriverService, option, TimeSpan.FromSeconds(30));
+            BaseModel.Browser.Manage().Window.Maximize();
+            BaseModel.WebDriverWait = new WebDriverWait(BaseModel.Browser, TimeSpan.FromSeconds(15));
         }
         void CheckUpdate()
         {
-            if (Start.token.IsCancellationRequested)
+            if (BaseModel.token.IsCancellationRequested)
                 return;
             Status = "Check Update...";
-            ProjectInfo project = new();
-            project.CheckUpdate();
+            ProjectInfoService.CheckUpdate();
         }
 
         void LoginSteam()
         {
-            if (Start.token.IsCancellationRequested)
+            if (BaseModel.token.IsCancellationRequested)
                 return;
             Status = "Login Steam...";
-            Start.Browser.Navigate().GoToUrl("https://steamcommunity.com/login/home/?goto=");
-            string cookie = Start.Browser.Manage().Cookies.GetCookieNamed("sessionid").ToString();
-            Start.SessionId = cookie.Substring(10, 24);
+            BaseModel.Browser.Navigate().GoToUrl("https://steamcommunity.com/login/home/?goto=");
+            string cookie = BaseModel.Browser.Manage().Cookies.GetCookieNamed("sessionid").ToString();
+            BaseModel.SessionId = cookie.Substring(10, 24);
 
-            if (Start.Browser.Url.Contains("id") | Start.Browser.Url.Contains("profiles"))
+            if (BaseModel.Browser.Url.Contains("id") | BaseModel.Browser.Url.Contains("profiles"))
             {
-                IWebElement account = Start.webDriverWait.Until(ExpectedConditions.ElementExists(By.XPath("//span[@class='persona online']")));
+                IWebElement account = BaseModel.WebDriverWait.Until(ExpectedConditions.ElementExists(By.XPath("//span[@class='persona online']")));
                 Account.AccountName = account.GetAttribute("textContent");
                 return;
             }
 
-            IWebElement username = Start.Browser.FindElement(By.XPath("//input[@name='username']"));
-            IWebElement password = Start.Browser.FindElement(By.XPath("//input[@name='password']"));
-            IWebElement signin = Start.webDriverWait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//button[@class='btn_blue_steamui btn_medium login_btn']")));
+            IWebElement username = BaseModel.Browser.FindElement(By.XPath("//input[@name='username']"));
+            IWebElement password = BaseModel.Browser.FindElement(By.XPath("//input[@name='password']"));
+            IWebElement signin = BaseModel.WebDriverWait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//button[@class='btn_blue_steamui btn_medium login_btn']")));
 
             IsLogin = true;
 
             while (IsLogin)
-                Task.Delay(500);
-            username.SendKeys(Account.Login);
-            password.SendKeys(Account.Password);
+                Thread.Sleep(500);
+            username.SendKeys(Login.Login);
+            password.SendKeys(Login.Password);
             signin.Click();
 
-            IWebElement code = Start.webDriverWait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//input[@id='twofactorcode_entry']")));
-            code.SendKeys(Account.Code2AF);
+            IWebElement code = BaseModel.WebDriverWait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//input[@id='twofactorcode_entry']")));
+            code.SendKeys(Login.Code2AF);
             code.SendKeys(OpenQA.Selenium.Keys.Enter);
 
             Thread.Sleep(4000);
             LoginSteam();
         }
-        public ICommand LoginCommand
-        {
-            get
+        public ICommand LoginCommand =>
+            new RelayCommand((obj) =>
             {
-                return new RelayCommand((obj) =>
-                {
-                    var propertyInfo = obj.GetType().GetProperty("Password");
-                    Account.Password = (string)propertyInfo.GetValue(obj, null);
-                    if (Account.Password != "")
-                        IsLogin = false;
-                }, (obj) => IsLogin & !String.IsNullOrEmpty(Account.Login) & Account.Code2AF.Length == 5);
-            }
-        }
+                var propertyInfo = obj.GetType().GetProperty("Password");
+                Login.Password = (string)propertyInfo.GetValue(obj, null);
+                if (Login.Password != "")
+                    IsLogin = false;
+            }, (obj) => IsLogin & !String.IsNullOrEmpty(Login.Login) & Login.Code2AF.Length == 5);
         void LoginTryskins()
         {
-            if (Start.token.IsCancellationRequested)
+            if (BaseModel.token.IsCancellationRequested)
                 return;
             Status = "Login TrySkins...";
 
-            Start.Browser.Navigate().GoToUrl("https://table.altskins.com/site/items");
-            if (Start.Browser.Url.Contains("items"))
+            BaseModel.Browser.Navigate().GoToUrl("https://table.altskins.com/site/items");
+            if (BaseModel.Browser.Url.Contains("items"))
                 return;
 
-            Start.Browser.Navigate().GoToUrl("https://table.altskins.com/login/steam");
+            BaseModel.Browser.Navigate().GoToUrl("https://table.altskins.com/login/steam");
 
-            IWebElement account = Start.webDriverWait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//div[@class='OpenID_loggedInAccount']")));
-            IWebElement signins = Start.webDriverWait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//input[@class='btn_green_white_innerfade']")));
+            IWebElement account = BaseModel.WebDriverWait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//div[@class='OpenID_loggedInAccount']")));
+            IWebElement signins = BaseModel.WebDriverWait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//input[@class='btn_green_white_innerfade']")));
             signins.Click();
             Thread.Sleep(300);
 
@@ -280,15 +287,14 @@ namespace ItemChecker.MVVM.ViewModel
         }
         void LoginCsm()
         {
-            if (Start.token.IsCancellationRequested)
+            if (BaseModel.token.IsCancellationRequested)
                 return;
             Status = "Login Cs.Money...";
 
-            Start.Browser.Navigate().GoToUrl("https://cs.money/pending-trades");
-            IWebElement html = Start.webDriverWait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//pre")));
+            BaseModel.Browser.Navigate().GoToUrl("https://cs.money/pending-trades");
+            IWebElement html = BaseModel.WebDriverWait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//pre")));
             string json = html.Text;
 
-            //string json = MainPresenter.JsonSelenium("https://cs.money/pending-trades");
             if (json.Contains("error"))
             {
                 var code_error = JObject.Parse(json)["error"].ToString();
@@ -296,7 +302,7 @@ namespace ItemChecker.MVVM.ViewModel
                 {
                     Main.Browser.Navigate().GoToUrl("https://auth.dota.trade/login?redirectUrl=https://cs.money/&callbackUrl=https://cs.money/login");
 
-                    IWebElement signins = Start.webDriverWait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//input[@class='btn_green_white_innerfade']")));
+                    IWebElement signins = BaseModel.WebDriverWait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//input[@class='btn_green_white_innerfade']")));
                     signins.Click();
                     Thread.Sleep(500);
                 }

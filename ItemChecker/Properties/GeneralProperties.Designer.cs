@@ -26,122 +26,96 @@ namespace ItemChecker.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string checkList {
+        public string CurrencyApiKey {
             get {
-                return ((string)(this["checkList"]));
+                return ((string)(this["CurrencyApiKey"]));
             }
             set {
-                this["checkList"] = value;
+                this["CurrencyApiKey"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string currencyApiKey {
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int Currency {
             get {
-                return ((string)(this["currencyApiKey"]));
+                return ((int)(this["Currency"]));
             }
             set {
-                this["currencyApiKey"] = value;
+                this["Currency"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("74")]
-        public decimal currency {
+        public decimal CurrencyValue {
             get {
-                return ((decimal)(this["currency"]));
+                return ((decimal)(this["CurrencyValue"]));
             }
             set {
-                this["currency"] = value;
+                this["CurrencyValue"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool proxy {
+        public bool ExitChrome {
             get {
-                return ((bool)(this["proxy"]));
+                return ((bool)(this["ExitChrome"]));
             }
             set {
-                this["proxy"] = value;
+                this["ExitChrome"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string proxyList {
+        public string SteamApiKey {
             get {
-                return ((string)(this["proxyList"]));
+                return ((string)(this["SteamApiKey"]));
             }
             set {
-                this["proxyList"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("15")]
-        public int wait {
-            get {
-                return ((int)(this["wait"]));
-            }
-            set {
-                this["wait"] = value;
+                this["SteamApiKey"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool exitChrome {
+        public bool NotEnoughBalance {
             get {
-                return ((bool)(this["exitChrome"]));
+                return ((bool)(this["NotEnoughBalance"]));
             }
             set {
-                this["exitChrome"] = value;
+                this["NotEnoughBalance"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool profileUse {
+        [global::System.Configuration.DefaultSettingValueAttribute("20")]
+        public int CancelOrder {
             get {
-                return ((bool)(this["profileUse"]));
+                return ((int)(this["CancelOrder"]));
             }
             set {
-                this["profileUse"] = value;
+                this["CancelOrder"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("Default")]
-        public string profile {
+        public string Profile {
             get {
-                return ((string)(this["profile"]));
+                return ((string)(this["Profile"]));
             }
             set {
-                this["profile"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("\r\n        <?xml version=\"1.0\" encoding=\"utf-16\"?>\r\n        <ArrayOfString xmlns:x" +
-            "si=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001" +
-            "/XMLSchema\" />\r\n      ")]
-        public global::System.Collections.Specialized.StringCollection profilesList {
-            get {
-                return ((global::System.Collections.Specialized.StringCollection)(this["profilesList"]));
-            }
-            set {
-                this["profilesList"] = value;
+                this["Profile"] = value;
             }
         }
     }

@@ -1,0 +1,39 @@
+﻿using ItemChecker.MVVM.Model;
+using ItemChecker.Net;
+using ItemChecker.Properties;
+using OpenQA.Selenium.Support.Extensions;
+
+namespace ItemChecker.Services
+{
+    public class OrderService : BaseService
+    {
+
+        //delete order
+        public void CancelOrder(OrderData order)
+        {
+            Browser.ExecuteJavaScript(Post.CancelBuyOrder(order.OrderId, Main.SessionId));
+            Account.MyOrders.Remove(order);
+
+            OrderCheckService myOrder = new();
+            myOrder.availableAmount();
+        }
+        protected void CheckConditions(OrderData order, decimal orderPrice)
+        {
+            if (GeneralProperties.Default.NotEnoughBalance & Account.Balance < orderPrice)
+            {
+                CancelOrder(order);
+                OrderStatistic.Cancel++;
+            }
+            if (GeneralProperties.Default.CancelOrder > order.Precent)
+            {
+                CancelOrder(order);
+                OrderStatistic.Cancel++;
+            }
+            if (Main.Overstock.Contains(order.ItemName) | Main.Unavailable.Contains(order.ItemName))
+            {
+                CancelOrder(order);
+                OrderStatistic.Cancel++;
+            }
+        }
+    }
+}

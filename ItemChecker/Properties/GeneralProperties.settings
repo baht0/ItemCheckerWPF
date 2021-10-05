@@ -1,39 +1,30 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ItemChecker.Settings" GeneratedClassName="GeneralConfig">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ItemChecker.Properties" GeneratedClassName="GeneralProperties">
   <Profiles />
   <Settings>
-    <Setting Name="checkList" Type="System.String" Scope="User">
+    <Setting Name="CurrencyApiKey" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="currencyApiKey" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+    <Setting Name="Currency" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="currency" Type="System.Decimal" Scope="User">
+    <Setting Name="CurrencyValue" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)">74</Value>
     </Setting>
-    <Setting Name="proxy" Type="System.Boolean" Scope="User">
+    <Setting Name="ExitChrome" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="proxyList" Type="System.String" Scope="User">
+    <Setting Name="SteamApiKey" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="wait" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">15</Value>
-    </Setting>
-    <Setting Name="exitChrome" Type="System.Boolean" Scope="User">
+    <Setting Name="NotEnoughBalance" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="profileUse" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
+    <Setting Name="CancelOrder" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">20</Value>
     </Setting>
-    <Setting Name="profile" Type="System.String" Scope="User">
+    <Setting Name="Profile" Type="System.String" Scope="User">
       <Value Profile="(Default)">Default</Value>
-    </Setting>
-    <Setting Name="profilesList" Type="System.Collections.Specialized.StringCollection" Scope="User">
-      <Value Profile="(Default)">
-        &lt;?xml version="1.0" encoding="utf-16"?&gt;
-        &lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" /&gt;
-      </Value>
     </Setting>
   </Settings>
 </SettingsFile>
