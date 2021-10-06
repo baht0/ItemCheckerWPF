@@ -8,15 +8,16 @@
         mc:Ignorable="d"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         d:DataContext="{d:DesignInstance Type=viewModel:BuyOrderViewModel}"
-        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-        Background="{DynamicResource MaterialDesignLightBackground}"
+        TextElement.Foreground="{StaticResource MaterialDesignBody}"
+        Background="{StaticResource MaterialDesignLightBackground}"
         TextElement.FontWeight="Normal"
         TextElement.FontSize="12"
         FontFamily="{materialDesign:MaterialDesignFont}"
         Title="ItemChecker" 
         Height="710" Width="1300"
         MinHeight="540" MinWidth="955"
-        WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="NoResize">
+        WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="NoResize"
+        Closing="Window_Closing">
     <Window.Resources>
         <DataTemplate DataType="{x:Type viewModel:BuyOrderViewModel}">
             <view:BuyOrderView DataContext="{Binding}"/>
@@ -47,26 +48,26 @@
                             </ContextMenu>
                         </Image.ContextMenu>
                     </Image>
-                    <Button Height="25" Style="{DynamicResource MaterialDesignFlatButton}" 
+                    <Button Height="25" Style="{StaticResource MaterialDesignFlatButton}" 
                         Click="Home_Click">
                         <TextBlock Text="MyOrders"/>
                     </Button>
-                    <Button Height="25" Style="{DynamicResource MaterialDesignFlatButton}" 
+                    <Button Height="25" Style="{StaticResource MaterialDesignFlatButton}" 
                         Click="Parser_Click">
                         <TextBlock Text="Parser"/>
                     </Button>
                 </StackPanel>
                 <StackPanel Margin="0 0 -10 0" HorizontalAlignment="Right" Orientation="Horizontal" Grid.Column="1">
-                    <Button Height="25" Style="{DynamicResource MaterialDesignToolButton}">
+                    <Button Height="25" Style="{StaticResource MaterialDesignToolButton}">
                         <materialDesign:PackIcon Kind="BellNotification"/>
                     </Button>
-                    <Button Height="25" Style="{DynamicResource MaterialDesignToolButton}" Click="Setting_Click">
+                    <Button Height="25" Style="{StaticResource MaterialDesignToolButton}" Click="Setting_Click">
                         <materialDesign:PackIcon Kind="Settings"/>
                     </Button>
-                    <Button Height="25" Style="{DynamicResource MaterialDesignFlatButton}" Click="MinWin_Click">
+                    <Button Height="25" Style="{StaticResource MaterialDesignFlatButton}" Click="MinWin_Click">
                         <materialDesign:PackIcon Kind="Minus"/>
                     </Button>
-                    <Button Height="25" Style="{DynamicResource MaterialDesignFlatButton}" Command="{Binding ExitCommand}">
+                    <Button Height="25" Style="{StaticResource MaterialDesignFlatButton}" Click="Close_Click">
                         <materialDesign:PackIcon Kind="Close"/>
                     </Button>
                 </StackPanel>
@@ -87,17 +88,6 @@
                             <Binding Path="AccountName"/>
                         </MultiBinding>
                     </TextBlock.Text>
-                    <TextBlock.ToolTip>
-                        <ToolTip>
-                            <ToolTip.Content>
-                                <MultiBinding StringFormat="Course: {0}₽ Balance: {1}$ / {2}$">
-                                    <Binding Path="Course" />
-                                    <Binding Path="BalanceUsd" />
-                                    <Binding Path="BalanceCsmUsd" />
-                                </MultiBinding>
-                            </ToolTip.Content>
-                        </ToolTip>
-                    </TextBlock.ToolTip>
                 </TextBlock>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                     <TextBlock Margin="0 0 5 0">

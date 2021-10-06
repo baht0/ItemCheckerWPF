@@ -120,12 +120,12 @@ namespace ItemChecker.MVVM.Model
         void parseOrder(string response, int i)
         {
             decimal my_order = Convert.ToDecimal(this.OrderPrice[i]);
-            decimal buy_order = Math.Round(my_order / GeneralProperties.Default.CurrencyValue, 2);
+            decimal my_order_usd = Math.Round(my_order / GeneralProperties.Default.CurrencyValue, 2);
             decimal stm_sell = Convert.ToDecimal(JObject.Parse(response)["steam"]["sellOrder"].ToString());
             decimal csm_sell = Convert.ToDecimal(JObject.Parse(response)["csm"]["sell"].ToString());
             decimal csm_buy = Convert.ToDecimal(JObject.Parse(response)["csm"]["buy"]["0"].ToString());
-            decimal precent = Edit.Precent(buy_order, csm_sell);
-            decimal different = Edit.Difference(csm_sell, my_order);
+            decimal precent = Edit.Precent(my_order_usd, csm_sell);
+            decimal different = Edit.Difference(csm_sell, my_order_usd);
 
             this.StmPrice.Add(stm_sell);
             this.CsmPrice.Add(csm_buy);

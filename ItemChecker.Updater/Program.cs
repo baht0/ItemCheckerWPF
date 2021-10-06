@@ -33,21 +33,21 @@ namespace ItemChecker.Updater
                 List<string> files = new();
                 files.Add("ItemChecker.exe");
                 files.Add("ItemChecker.dll");
-                if (args[1] == "True")
+                if (args[0] == "True")
                     files.Add("ItemChecker.Net.dll");
-                if (args[2] == "True")
+                if (args[1] == "True")
                     files.Add("ItemChecker.Support.dll");
-                if (args[3] == "True")
+                if (args[2] == "True")
                     files.Add("Newtonsoft.Json.dll");
-                if (args[4] == "True")
+                if (args[3] == "True")
                     files.Add("WebDriver.dll");
-                if (args[5] == "True")
+                if (args[4] == "True")
                     files.Add("WebDriver.Support.dll");
-                if (args[6] == "True")
+                if (args[5] == "True")
                     files.Add("MaterialDesignColors.dll");
-                if (args[7] == "True")
+                if (args[6] == "True")
                     files.Add("MaterialDesignThemes.Wpf.dll");
-                if (args[8] == "True")
+                if (args[7] == "True")
                     files.Add("chromedriver.exe");
                 files.Add("ItemChecker.Updater.exe");
                 files.Add("ItemChecker.Updater.dll");

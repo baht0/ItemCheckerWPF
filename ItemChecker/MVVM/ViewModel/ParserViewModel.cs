@@ -46,7 +46,7 @@ namespace ItemChecker.MVVM.ViewModel
         private int _currentProgress;
         private int _maxProgress;
         private string _timer;
-        private string _timerOn;
+        private bool _timerOn;
         //GridData
         public string Mode
         {
@@ -330,7 +330,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        public string TimerOn
+        public bool TimerOn
         {
             get { return _timerOn; }
             set
@@ -355,6 +355,7 @@ namespace ItemChecker.MVVM.ViewModel
             Price2 = Parser.Price2;
             Price3 = Parser.Price3;
             Price4 = Parser.Price4;
+
             ParserConfig = new Parser()
             {
                 Tryskins = ParserProperties.Default.tryskins,
@@ -599,11 +600,14 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 Task.Run(() =>
                 {
-                    Parser parserConfig = (Parser)obj;
-                    Main.IsLoading = true;
-                    Check(parserConfig);
+                    if (CheckList.Any())
+                    {
+                        Parser parserConfig = (Parser)obj;
+                        Main.IsLoading = true;
+                        Check(parserConfig);
+                    }
                 });
-            }, (obj) => !Main.IsLoading & !Main.Timer.Enabled & ParserConfig.ServiceOne != ParserConfig.ServiceTwo & ((ParserConfig.Manual & ParserProperties.Default.checkList != null) | ParserConfig.Tryskins));
+            }, (obj) => !Main.IsLoading & !Main.Timer.Enabled & ParserConfig.ServiceOne != ParserConfig.ServiceTwo & ((ParserConfig.Manual & CheckList != null) | ParserConfig.Tryskins));
         void Check(Parser parserConfig)
         {
             try
@@ -612,7 +616,7 @@ namespace ItemChecker.MVVM.ViewModel
                 CleanDataGrid();
                 DataGrid(parserConfig.ServiceOne, parserConfig.ServiceTwo);
                 SaveConfig(parserConfig);
-                TimerOn = "Visible";
+                TimerOn = true;
                 if (parserConfig.Tryskins)
                     CheckTryskins();
                 else if (parserConfig.Manual)
@@ -621,7 +625,7 @@ namespace ItemChecker.MVVM.ViewModel
                     ParserGrid = ParserData.ParserItems;
                 ParserGridView = CollectionViewSource.GetDefaultView(ParserGrid);
                 Currency = Parser.DataCurrency;
-                TimerOn = "Hidden";
+                TimerOn = false;
             }
             catch (Exception exp)
             {

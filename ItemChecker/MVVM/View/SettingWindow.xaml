@@ -92,8 +92,7 @@
                                     <TextBlock Text="Steam API Key:" Height="15"/>
                                     <TextBox Grid.Column="1" VerticalAlignment="Center" Text="{Binding DataContext.SteamApiKey, RelativeSource={RelativeSource AncestorType=Window}, UpdateSourceTrigger=PropertyChanged}"/>
                                     <Button Grid.Column="2" Height="25" Style="{DynamicResource MaterialDesignToolButton}"
-                                        Command="{Binding DataContext.GetSteamApiCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                        CommandParameter="{Binding SteamApi}">
+                                        Command="{Binding DataContext.GetSteamApiCommand, RelativeSource={RelativeSource AncestorType=Window}}">
                                         <materialDesign:PackIcon Kind="GetApp"/>
                                     </Button>
                                 </Grid>

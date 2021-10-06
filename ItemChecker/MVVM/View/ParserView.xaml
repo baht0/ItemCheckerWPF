@@ -59,7 +59,7 @@
                        FontWeight="Normal" 
                        FontStyle="Normal" 
                        FontSize="18" TextDecorations="{x:Null}"/>
-                <TextBlock Text="{Binding Timer}" Visibility="{Binding TimerOn}" Margin="10 0 0 0" VerticalAlignment="Bottom" FontSize="14"/>
+                <TextBlock Text="{Binding Timer}" Visibility="{Binding TimerOn, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="10 0 0 0" VerticalAlignment="Bottom" FontSize="14"/>
             </StackPanel>
             <Border Grid.Row="1" Background="Transparent">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">

@@ -40,5 +40,18 @@ namespace ItemChecker.MVVM.View
             SettingWindow settingWindow = new();
             settingWindow.ShowDialog();
         }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            var viewModel = (MainViewModel)DataContext;
+            if (viewModel.ExitCommand.CanExecute(null))
+                viewModel.ExitCommand.Execute(null);
+            e.Cancel = true;
+        }
+
+        private void Close_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
     }
 }
