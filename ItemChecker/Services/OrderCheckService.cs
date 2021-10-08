@@ -29,7 +29,6 @@ namespace ItemChecker.MVVM.Model
             if (Account.OrdersCount != 0)
             {
                 getSteamlist();
-                availableAmount();
                 checkOrders();
 
                 Account.MyOrders.Clear();
@@ -51,6 +50,7 @@ namespace ItemChecker.MVVM.Model
                     CheckConditions(Account.MyOrders.Last(), OrderPrice[i]);
                 }
             }
+            Account.GetAvailableAmount();
         }
         void getSteamlist()
         {
@@ -84,18 +84,6 @@ namespace ItemChecker.MVVM.Model
                 this.OrderPrice.Add(Edit.removeRub(str[0].Trim()));
                 this.OrderId.Add(Edit.buyOrderId(id.GetAttribute("id"))); 
                 i++;
-            }
-        }
-        public void availableAmount()
-        {
-            if (this.ItemName.Any())
-            {
-                Account.OrderSum = 0;
-                Account.AvailableAmount = 0;
-
-                foreach (decimal item_price in this.StmPrice)
-                    Account.OrderSum += item_price;
-                Account.AvailableAmount = Math.Round(Account.Balance * 10 - Account.OrderSum, 2);
             }
         }
         void checkOrders()

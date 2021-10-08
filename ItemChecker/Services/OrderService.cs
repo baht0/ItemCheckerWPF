@@ -14,8 +14,7 @@ namespace ItemChecker.Services
             Browser.ExecuteJavaScript(Post.CancelBuyOrder(order.OrderId, Main.SessionId));
             Account.MyOrders.Remove(order);
 
-            OrderCheckService myOrder = new();
-            myOrder.availableAmount();
+            Account.GetAvailableAmount();
         }
         protected void CheckConditions(OrderData order, decimal orderPrice)
         {

@@ -1,5 +1,6 @@
 ﻿using ItemChecker.Core;
 using ItemChecker.MVVM.Model;
+using ItemChecker.Properties;
 using ItemChecker.Support;
 using System.Threading.Tasks;
 using System.Windows;
@@ -117,7 +118,7 @@ namespace ItemChecker.MVVM.ViewModel
         protected void UpdateInformation()
         {
             AccountName = Account.AccountName;
-            Course = Account.OrderSum;
+            Course = GeneralProperties.Default.CurrencyValue;
             Balance = Account.Balance;
             BalanceCsm = Account.BalanceCsm;
             BalanceUsd = Account.BalanceUsd;

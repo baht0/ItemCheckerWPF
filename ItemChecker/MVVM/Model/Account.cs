@@ -5,6 +5,7 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
 namespace ItemChecker.MVVM.Model
@@ -28,7 +29,6 @@ namespace ItemChecker.MVVM.Model
         public static List<OrderData> MyOrders = new();
         public static int OrdersCount { get; set; } = 0;
         public static decimal AvailableAmount { get; set; } = 0.00m;
-        public static decimal OrderSum { get; set; } = 0.00m;
 
         public static void GetInformations()
         {
@@ -57,7 +57,6 @@ namespace ItemChecker.MVVM.Model
                 Balance = Edit.removeRub(balance.Text);
                 OrdersCount = int.Parse(count.Text);
                 BalanceUsd = Math.Round(Balance / GeneralProperties.Default.CurrencyValue, 2);
-                AvailableAmount = Balance * 10;
             }
             catch (Exception exp)
             {
@@ -96,6 +95,16 @@ namespace ItemChecker.MVVM.Model
 
             IWebElement steam_api = WebDriverWait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//div[@id='bodyContents_ex']/p")));
             return steam_api.Text.Replace("Key: ", null);
+        }
+        public static void GetAvailableAmount()
+        {
+            AvailableAmount = Balance * 10;
+            if (MyOrders.Any())
+            {
+                decimal sum = MyOrders.Sum(s => s.OrderPrice);
+
+                AvailableAmount = Math.Round(AvailableAmount - sum, 2);
+            }
         }
     }
 }
