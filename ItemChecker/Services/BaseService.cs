@@ -1,15 +1,9 @@
 ﻿using ItemChecker.MVVM.Model;
-using ItemChecker.Net;
-using ItemChecker.Properties;
-using ItemChecker.Support;
 using Microsoft.Win32;
-using OpenQA.Selenium.Support.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ItemChecker.Services
 {

@@ -50,7 +50,7 @@
                     </Image>
                     <Button Height="25" Style="{StaticResource MaterialDesignFlatButton}" 
                         Click="Home_Click">
-                        <TextBlock Text="MyOrders"/>
+                        <TextBlock Text="Home"/>
                     </Button>
                     <Button Height="25" Style="{StaticResource MaterialDesignFlatButton}" 
                         Click="Parser_Click">
@@ -58,6 +58,7 @@
                     </Button>
                 </StackPanel>
                 <StackPanel Margin="0 0 -10 0" HorizontalAlignment="Right" Orientation="Horizontal" Grid.Column="1">
+                    <TextBlock Text="BETA" VerticalAlignment="Center"/>
                     <Button Height="25" Style="{StaticResource MaterialDesignToolButton}">
                         <materialDesign:PackIcon Kind="BellNotification"/>
                     </Button>

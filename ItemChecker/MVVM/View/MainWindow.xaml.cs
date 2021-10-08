@@ -30,28 +30,24 @@ namespace ItemChecker.MVVM.View
                 DataContext = new ParserViewModel();
         }
 
-        private void MinWin_Click(object sender, RoutedEventArgs e)
-        {
-            this.WindowState = WindowState.Minimized;
-        }
-
         private void Setting_Click(object sender, RoutedEventArgs e)
         {
             SettingWindow settingWindow = new();
             settingWindow.ShowDialog();
         }
-
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void MinWin_Click(object sender, RoutedEventArgs e)
         {
-            var viewModel = (MainViewModel)DataContext;
-            if (viewModel.ExitCommand.CanExecute(null))
-                viewModel.ExitCommand.Execute(null);
-            e.Cancel = true;
+            this.WindowState = WindowState.Minimized;
         }
-
         private void Close_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            e.Cancel = true;
+            this.Visibility = Visibility.Hidden;
         }
     }
 }

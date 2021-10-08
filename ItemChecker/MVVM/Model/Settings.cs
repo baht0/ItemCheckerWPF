@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace ItemChecker.MVVM.Model
 {
@@ -6,9 +7,10 @@ namespace ItemChecker.MVVM.Model
     {
         //general
         public string CurrencyApi { get; set; }
-        public List<string> CurrencyList { get; set; }
+        public ObservableCollection<string> CurrencyList { get; set; }
         public int Currency { get; set; }
         public bool ExitChrome { get; set; }
+        public bool Guard { get; set; }
         public bool NotEnoughBalance { get; set; }
         public int CancelOrder { get; set; }
         //float

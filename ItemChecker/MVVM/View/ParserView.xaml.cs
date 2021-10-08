@@ -14,12 +14,12 @@ namespace ItemChecker.MVVM.View
             InitializeComponent();
             this.DataContext = new ParserViewModel();
         }
-        private void Decimal_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        private void InputDecimal(object sender, TextCompositionEventArgs e)
         {
             decimal result;
             e.Handled = !decimal.TryParse(e.Text, out result);
         }
-        private void Number_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        private void NumberPlus_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             int result;
             e.Handled = !int.TryParse(e.Text, out result);
@@ -29,7 +29,7 @@ namespace ItemChecker.MVVM.View
         {
             if (!parserGrid.Items.IsEmpty & e.Key == Key.Insert)
             {
-                var viewModel = (ParserViewModel)DataContext;
+                ParserViewModel viewModel = (ParserViewModel)DataContext;
                 if (viewModel.AddQueueCommand.CanExecute(null))
                     viewModel.AddQueueCommand.Execute(viewModel.SelectedParserItem);
             }

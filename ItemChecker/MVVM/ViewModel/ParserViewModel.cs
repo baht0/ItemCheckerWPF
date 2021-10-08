@@ -362,7 +362,7 @@ namespace ItemChecker.MVVM.ViewModel
                 Manual = ParserProperties.Default.manual,
                 Queue = ParserProperties.Default.queue,
 
-                Services = new List<string>()
+                Services = new ObservableCollection<string>()
                 {
                     "SteamMarket",
                     "Cs.Money",
@@ -504,7 +504,6 @@ namespace ItemChecker.MVVM.ViewModel
             bool prices = true;
             if (filterConfig.Price1 | filterConfig.Price2 | filterConfig.Price3 | filterConfig.Price4)
             {
-                prices = false;
                 if (filterConfig.Price1)
                     prices = filterConfig.Price1From < item.Price1 & filterConfig.Price1To > item.Price1;
                 if (filterConfig.Price2 & prices)
@@ -600,12 +599,12 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 Task.Run(() =>
                 {
-                    if (CheckList.Any())
-                    {
-                        Parser parserConfig = (Parser)obj;
-                        Main.IsLoading = true;
-                        Check(parserConfig);
-                    }
+                    if (!CheckList.Any() & ParserConfig.Manual)
+                        return;
+
+                    Parser parserConfig = (Parser)obj;
+                    Main.IsLoading = true;
+                    Check(parserConfig);
                 });
             }, (obj) => !Main.IsLoading & !Main.Timer.Enabled & ParserConfig.ServiceOne != ParserConfig.ServiceTwo & ((ParserConfig.Manual & CheckList != null) | ParserConfig.Tryskins));
         void Check(Parser parserConfig)
@@ -617,6 +616,7 @@ namespace ItemChecker.MVVM.ViewModel
                 DataGrid(parserConfig.ServiceOne, parserConfig.ServiceTwo);
                 SaveConfig(parserConfig);
                 TimerOn = true;
+                CurrentProgress = 0;
                 if (parserConfig.Tryskins)
                     CheckTryskins();
                 else if (parserConfig.Manual)
@@ -759,9 +759,9 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 ParserData item = obj as ParserData;
                 PlaceOrderService.AddQueue(item.ItemName, item.Price2);
-
                 OrderAmout = OrderPlace.AmountRub;
-            }, (obj) => !Main.IsLoading & ParserData.ParserItems.Any() & OrderPlace.AmountRub < Account.AvailableAmount);
+
+            }, (obj) => OrderPlace.AmountRub < Account.AvailableAmount);
         public ICommand RemoveQueueCommand =>
             new RelayCommand((obj) =>
             {
@@ -818,10 +818,10 @@ namespace ItemChecker.MVVM.ViewModel
                 {
                     Main.IsLoading = true;
                     ParserService list = new();
-                    list.ExportCsv(ParserGridView);
+                    list.ExportCsv(ParserGridView, Mode);
                     Main.IsLoading = false;
                 });
-            }, (obj) => ParserData.ParserItems.Any() & !Main.IsLoading);
+            }, (obj) => (ParserGrid != null | ParserGridView != null) & !Main.IsLoading);
         public ICommand ImportCsvCommand =>
             new RelayCommand((obj) =>
             {
@@ -832,7 +832,7 @@ namespace ItemChecker.MVVM.ViewModel
                     ObservableCollection<ParserData> response = list.ImportCsv();
                     if (response.Any())
                     {
-                        Mode = "Import CSV";
+                        Mode = "Import";
                         CleanDataGrid();
                         DataGrid(ParserProperties.Default.serviceOne, ParserProperties.Default.serviceTwo);
 
@@ -851,7 +851,7 @@ namespace ItemChecker.MVVM.ViewModel
                 {
                     Main.IsLoading = true;
                     ParserService list = new();
-                    list.ExportTxt(ParserGridView, Price1);
+                    list.ExportTxt(ParserGridView, Price1, Mode);
                     Main.IsLoading = false;
                 });
             }, (obj) => ParserData.ParserItems.Any() & !Main.IsLoading);

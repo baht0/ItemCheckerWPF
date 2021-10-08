@@ -64,7 +64,7 @@ namespace ItemChecker.Services
                 string body = json.ToString(Formatting.None);
                 Browser.ExecuteJavaScript(Post.FetchRequest("application/json", body, "https://cs.money/add_cart"));
                 sum += Convert.ToDecimal(item["price"].ToString());
-                Thread.Sleep(300);
+                Thread.Sleep(1500);
             }
             sum *= -1;
             return sendOffer(items, sum);
@@ -99,7 +99,7 @@ namespace ItemChecker.Services
                                     Browser.ExecuteJavaScript(Delete.FetchRequest("https://cs.money/remove_cart_item?type=2&id=" + id));
                                     sum -= Convert.ToDecimal(item["price"].ToString());
                                     itemsCopy.Remove(item);
-                                    Thread.Sleep(150);
+                                    Thread.Sleep(1500);
                                 }
                         }
                         sendOffer(itemsCopy, sum);
@@ -114,7 +114,7 @@ namespace ItemChecker.Services
 
         public void getTransactions()
         {
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
 
             Browser.Navigate().GoToUrl("https://cs.money/2.0/get_transactions?type=0&status=0&appId=730&limit=20");
             IWebElement html = WebDriverWait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//pre")));
@@ -137,7 +137,7 @@ namespace ItemChecker.Services
             string body = json.ToString(Formatting.None);
             Browser.ExecuteJavaScript(Post.FetchRequest("application/json", body, "https://cs.money/confirm_virtual_offer"));
             OrderStatistic.SuccessfulTrades++;
-
+            Thread.Sleep(1500);
             old_id.Add(id);
         }
 
@@ -170,7 +170,7 @@ namespace ItemChecker.Services
             Browser.ExecuteJavaScript(Post.FetchRequestWithResponse("application/json", body, "https://cs.money/2.0/send_offer"));
             IWebElement html = WebDriverWait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//pre")));
             string json = html.Text;
-            Thread.Sleep(100);
+            Thread.Sleep(300);
             Browser.ExecuteJavaScript("window.close();");
             Browser.SwitchTo().Window(Browser.WindowHandles.First());
 
@@ -179,7 +179,7 @@ namespace ItemChecker.Services
         public void clearCart()
         {
             Browser.ExecuteJavaScript(Post.FetchRequest("application/json", "{\"type\":1}", "https://cs.money/clear_cart"));
-            Thread.Sleep(300);
+            Thread.Sleep(1000);
             Browser.ExecuteJavaScript(Post.FetchRequest("application/json", "{\"type\":2}", "https://cs.money/clear_cart"));
         }
 

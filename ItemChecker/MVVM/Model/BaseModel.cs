@@ -26,7 +26,8 @@ namespace ItemChecker.MVVM.Model
         {
             try
             {
-                Browser.Quit();
+                if (Browser != null)
+                    Browser.Quit();
             }
             catch
             {

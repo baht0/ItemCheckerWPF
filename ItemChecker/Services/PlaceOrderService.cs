@@ -13,19 +13,16 @@ namespace ItemChecker.Services
 
         public static void AddQueue(string itemName, decimal price)
         {
-            try
-            {
-                if (!Account.MyOrders.Any(n => n.ItemName == itemName) & price <= Account.BalanceUsd & !OrderPlace.Queue.Contains(itemName))
-                {
-                    OrderPlace.AmountRub += Math.Round(price * GeneralProperties.Default.CurrencyValue, 2);
-                    OrderPlace.Queue.Add(itemName);
-                }
-            }
-            catch (Exception exp)
-            {
-                errorMessage(exp);
-                errorLog(exp);
-            }
+            if (Account.MyOrders.Any(n => n.ItemName == itemName) & OrderPlace.Queue.Contains(itemName))
+                return;
+            if ((Parser.DataCurrency == "USD" & price > Account.BalanceUsd) | (Parser.DataCurrency == "RUB" & price > Account.Balance))
+                return;
+
+            decimal AmountRub = price;
+            if (Parser.DataCurrency == "USD")
+                AmountRub = Math.Round(price * GeneralProperties.Default.CurrencyValue, 2);
+            OrderPlace.AmountRub += AmountRub;
+            OrderPlace.Queue.Add(itemName);
         }
         public static void RemoveQueue(string itemName)
         {

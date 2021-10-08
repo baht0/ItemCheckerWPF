@@ -130,13 +130,14 @@ namespace ItemChecker.MVVM.ViewModel
             Settings = new Settings()
             {
                 CurrencyApi = GeneralProperties.Default.CurrencyApiKey,
-                CurrencyList = new List<string>()
+                CurrencyList = new ObservableCollection<string>()
                 {
                     "USD ($)",
                     "RUB (₽)"
                 },
                 Currency = GeneralProperties.Default.Currency,
                 ExitChrome = GeneralProperties.Default.ExitChrome,
+                Guard = GeneralProperties.Default.Guard,
                 NotEnoughBalance = GeneralProperties.Default.NotEnoughBalance,
                 CancelOrder = GeneralProperties.Default.CancelOrder,
 
@@ -245,6 +246,7 @@ namespace ItemChecker.MVVM.ViewModel
             GeneralProperties.Default.CurrencyApiKey = settings.CurrencyApi;
             GeneralProperties.Default.Currency = settings.Currency;
             GeneralProperties.Default.ExitChrome = settings.ExitChrome;
+            GeneralProperties.Default.Guard = settings.Guard;
             GeneralProperties.Default.NotEnoughBalance = settings.NotEnoughBalance;
             GeneralProperties.Default.CancelOrder = settings.CancelOrder;
 

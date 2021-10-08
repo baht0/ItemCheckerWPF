@@ -8,6 +8,6 @@ namespace ItemChecker.Core
 {
     public interface IView
     {
-        void Hide();
+        void Close();
     }
 }

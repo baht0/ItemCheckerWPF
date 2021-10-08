@@ -5,8 +5,8 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:view="clr-namespace:ItemChecker.MVVM.View"
              xmlns:viewModel="clr-namespace:ItemChecker.MVVM.ViewModel"
-             StartupUri="MVVM/View/StartWindow.xaml">
-    <Application.Resources>        
+             Startup="ApplicationStart">
+    <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <materialDesign:BundledTheme BaseTheme="Light" PrimaryColor="BlueGrey" SecondaryColor="LightBlue" />

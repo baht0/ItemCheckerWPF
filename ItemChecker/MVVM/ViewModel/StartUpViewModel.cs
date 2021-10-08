@@ -10,7 +10,6 @@ using System.Windows.Input;
 using Newtonsoft.Json.Linq;
 using ItemChecker.MVVM.Model;
 using System.Windows;
-using ItemChecker.MVVM.View;
 using System.Diagnostics;
 using System.Linq;
 using ItemChecker.Properties;
@@ -27,6 +26,7 @@ namespace ItemChecker.MVVM.ViewModel
         bool _isLogin;
         private Account _login;
 
+        public bool LoginSuccessful { get; set; }
         public string Version
         {
             get { return _version; }
@@ -75,27 +75,24 @@ namespace ItemChecker.MVVM.ViewModel
             };
             _view = view;
             Version = BaseModel.Version;
+            Main.IsLoading = true;
             startTask = Task.Run(() => { Starting(); });
         }
-        public ICommand CloseCommand => 
-            new RelayCommand((obj) => 
+        public ICommand ExitCommand =>
+            new RelayCommand((obj) =>
             {
-                MessageBoxResult result = MessageBox.Show("Are you sure you want to close?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if (result == MessageBoxResult.Yes)
+                Task.Run(() =>
                 {
-                    Task.Run(() =>
-                    {
-                        BaseModel.cts.Cancel();
-                        Status = "Exit...";
-                        startTask.Wait(5000);
-                        BaseModel.BrowserExit();
-                    }).Wait();
-                    Application.Current.Shutdown();
-                }
+                    BaseModel.cts.Cancel();
+                    Status = "Exit...";
+                    startTask.Wait(5000);
+                    BaseModel.BrowserExit();
+                }).Wait();
+                Application.Current.Shutdown();
             });
         void Hide()
         {
-            _view.Hide();
+            _view.Close();
         }
         void Starting()
         {
@@ -116,12 +113,12 @@ namespace ItemChecker.MVVM.ViewModel
                 Status = "Check Steam Orders...";
                 OrderCheckService order = new();
                 order.SteamOrders();
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    Hide();
-                    MainWindow mainWindow = new();
-                    mainWindow.Show();
-                });
+
+                if (BaseModel.token.IsCancellationRequested)
+                    return;
+                Main.IsLoading = false;
+                LoginSuccessful = true;
+                Application.Current.Dispatcher.Invoke(() => { Hide(); });
             }
             catch (Exception exp)
             {
@@ -287,7 +284,7 @@ namespace ItemChecker.MVVM.ViewModel
         }
         void LoginCsm()
         {
-            if (BaseModel.token.IsCancellationRequested)
+            if (BaseModel.token.IsCancellationRequested | GeneralProperties.Default.Guard)
                 return;
             Status = "Login Cs.Money...";
 

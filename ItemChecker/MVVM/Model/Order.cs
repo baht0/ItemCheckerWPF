@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace ItemChecker.MVVM.Model
 {
@@ -16,7 +17,7 @@ namespace ItemChecker.MVVM.Model
         public int FloatTimer { get; set; }
         public int Compare { get; set; }
 
-        public List<string> ComparePrices { get; set; }
+        public ObservableCollection<string> ComparePrices { get; set; }
         public decimal MaxPrecent { get; set; }
 
         public int MaxPrice { get; set; }

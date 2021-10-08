@@ -1,10 +1,7 @@
 ﻿using ItemChecker.Net;
 using ItemChecker.Properties;
 using ItemChecker.Support;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Support.Extensions;
 using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
@@ -22,16 +19,16 @@ namespace ItemChecker.MVVM.Model
 
         //informations
         public static string AccountName { get; set; }
-        public static decimal Balance { get; set; }
-        public static decimal BalanceUsd { get; set; }
-        public static decimal BalanceCsm { get; set; }
-        public static decimal BalanceCsmUsd { get; set; }
+        public static decimal Balance { get; set; } = 0.00m;
+        public static decimal BalanceUsd { get; set; } = 0.00m;
+        public static decimal BalanceCsm { get; set; } = 0.00m;
+        public static decimal BalanceCsmUsd { get; set; } = 0.00m;
 
         //orders
         public static List<OrderData> MyOrders = new();
-        public static int OrdersCount { get; set; }
-        public static decimal AvailableAmount { get; set; }
-        public static decimal OrderSum { get; set; }
+        public static int OrdersCount { get; set; } = 0;
+        public static decimal AvailableAmount { get; set; } = 0.00m;
+        public static decimal OrderSum { get; set; } = 0.00m;
 
         public static void GetInformations()
         {
@@ -42,7 +39,8 @@ namespace ItemChecker.MVVM.Model
                 GeneralProperties.Default.Save();
             }
             GetSteamBalance();
-            GetCsmBalance();
+            if (!GeneralProperties.Default.Guard)
+                GetCsmBalance();
 
             Get get = new();
             Overstock = get.Overstock();
@@ -57,8 +55,9 @@ namespace ItemChecker.MVVM.Model
                 IWebElement balance = WebDriverWait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//a[@id='header_wallet_balance']")));
 
                 Balance = Edit.removeRub(balance.Text);
-                OrdersCount = Convert.ToInt32(count.Text);
+                OrdersCount = int.Parse(count.Text);
                 BalanceUsd = Math.Round(Balance / GeneralProperties.Default.CurrencyValue, 2);
+                AvailableAmount = Balance * 10;
             }
             catch (Exception exp)
             {

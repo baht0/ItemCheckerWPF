@@ -319,7 +319,7 @@ namespace ItemChecker.MVVM.ViewModel
                 FloatTimer = BuyOrderProperties.Default.TimerFloat,
                 MaxPrecent = BuyOrderProperties.Default.MaxPrecent,
                 Compare = BuyOrderProperties.Default.Compare,
-                ComparePrices = new List<string>()
+                ComparePrices = new ObservableCollection<string>()
                 {
                     "Lowest ST",
                     "Median ST",
@@ -347,11 +347,13 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand ReloadCommand =>
             new RelayCommand((obj) =>
             {
-                Main.IsLoading = true;
-                OrderCheckService orderCheck = new();
-                orderCheck.SteamOrders();
-                OrderedGrid = new ObservableCollection<OrderData>(Account.MyOrders);
-                Main.IsLoading = false;
+                Task.Run(() => {
+                    Main.IsLoading = true;
+                    OrderCheckService orderCheck = new();
+                    orderCheck.SteamOrders();
+                    OrderedGrid = new ObservableCollection<OrderData>(Account.MyOrders);
+                    Main.IsLoading = false;
+                });
             }, (obj) => !Main.IsLoading);
         public ICommand AddFavoriteListCommand =>
             new RelayCommand((obj) =>
@@ -406,7 +408,7 @@ namespace ItemChecker.MVVM.ViewModel
                 Main.Timer.Elapsed += timerTick;
                 Main.TimerTick = config.FavoriteTimer;
                 Main.Timer.Enabled = true;
-            }, (obj) => BuyOrderProperties.Default.FavoriteList != null & !Main.IsLoading & !Main.Timer.Enabled);
+            }, (obj) => BuyOrderProperties.Default.FavoriteList != null & !Main.IsLoading & !Main.Timer.Enabled & !GeneralProperties.Default.Guard);
         public ICommand FloatCommand => 
             new RelayCommand((obj) =>
             {
@@ -464,6 +466,7 @@ namespace ItemChecker.MVVM.ViewModel
 
                 int TimeTick = 0;
                 TimerText = "Preparation...";
+                CurrentProgress = 0;
                 switch (OrderStatistic.CurrentService)
                 {
                     case "BuyOrder Pusher":
@@ -706,7 +709,7 @@ namespace ItemChecker.MVVM.ViewModel
                     }
                     Main.IsLoading = false;
                 });
-            }, (obj) => !Main.IsLoading & !Main.Timer.Enabled & (!PushService & !FavoriteService & !FloatService));
+            }, (obj) => !Main.IsLoading & !Main.Timer.Enabled & (!PushService & !FavoriteService & !FloatService) & !GeneralProperties.Default.Guard);
 
         public ICommand CancelOrderCommand =>
             new RelayCommand((obj) =>

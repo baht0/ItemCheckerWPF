@@ -171,16 +171,17 @@ namespace ItemChecker.MVVM.Model
         }
 
         //CSV
-        public void ExportCsv(ICollectionView collectionView)
+        public void ExportCsv(ICollectionView collectionView, string mode)
         {
-            MessageBoxResult result = MessageBox.Show($"Export with filter applied?\n\nClick \"No\" to export the entire list.", "Question", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
-            dynamic source = null;
-            if (result == MessageBoxResult.Cancel)
-                return;
-            else if (result == MessageBoxResult.Yes)
-                source = collectionView;
-            else if (result == MessageBoxResult.No)
-                source = ParserData.ParserItems;
+            dynamic source = ParserData.ParserItems;
+            if (collectionView.Cast<ParserData>().Count() != ParserData.ParserItems.Count)
+            {
+                MessageBoxResult result = MessageBox.Show($"Export with filter applied?\n\nClick \"No\" to export the entire list.", "Question", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Cancel)
+                    return;
+                else if (result == MessageBoxResult.Yes)
+                    source = collectionView;
+            }
 
             string csv = $"{Parser.DataCurrency},{ParserProperties.Default.serviceOne},{ParserProperties.Default.serviceTwo}\r\n";
             foreach (var item in source)
@@ -195,18 +196,15 @@ namespace ItemChecker.MVVM.Model
             string path = $"{BaseModel.AppPath}\\extract";
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
-            File.WriteAllText(path + $"\\serviceParser_{DateTime.Now:dd.MM.yyyy_hh.mm}.csv", Edit.replaceSymbols(csv));
+            File.WriteAllText(path + $"\\Parser_{mode}_{Parser.DataCurrency}_{DateTime.Now:dd.MM.yyyy_hh.mm}.csv", Edit.replaceSymbols(csv));
         }
         public ObservableCollection<ParserData> ImportCsv()
         {
             List<string> list = OpenFileDialog("csv");
             ObservableCollection<ParserData> datas = new();
             if (!list.Any())
-            {
-                MessageBox.Show("File is empty.", "Stop", MessageBoxButton.OK, MessageBoxImage.Stop);
                 return datas;
-            }
-            
+
             foreach (string info in list)
             {
                 string[] line = info.Split(',');
@@ -236,14 +234,13 @@ namespace ItemChecker.MVVM.Model
 
             return datas;
         }
-        public void ExportTxt(ICollectionView collectionView, string HeaderText)
+        public void ExportTxt(ICollectionView collectionView, string HeaderText, string mode)
         {
             MessageBoxResult result = MessageBox.Show($"Do need to add \"{HeaderText}\" to the list?", "Question", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
             if (result == MessageBoxResult.Cancel)
                 return;
 
             string txt = null;
-
             if (result == MessageBoxResult.Yes)
             {
                 if (Parser.DataCurrency == "RUB")
@@ -252,7 +249,7 @@ namespace ItemChecker.MVVM.Model
                 {
                     decimal price = item.Price1;
                     if (Parser.DataCurrency == "RUB")
-                        price = item.Price1 / GeneralProperties.Default.CurrencyValue;
+                        price = Math.Round(item.Price1 / GeneralProperties.Default.CurrencyValue, 2);
 
                     txt += $"{item.ItemName};{price}\r\n";
                 }
@@ -267,7 +264,7 @@ namespace ItemChecker.MVVM.Model
             string path = $"{BaseModel.AppPath}\\extract";
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
-            File.WriteAllText(path + $"\\serviceParser_{DateTime.Now:dd.MM.yyyy_hh.mm}.txt", Edit.replaceSymbols(txt));
+            File.WriteAllText(path + $"\\Parser_{mode}_{Parser.DataCurrency}_{result}_{DateTime.Now:dd.MM.yyyy_hh.mm}.txt", Edit.replaceSymbols(txt));
         }
     }
 }

@@ -1,10 +1,8 @@
-﻿using System.Collections.Generic;
-
-namespace ItemChecker.MVVM.Model
+﻿namespace ItemChecker.MVVM.Model
 {
     public class OrderStatistic
     {
-        public static string CurrentService { get; set; }
+        public static string CurrentService { get; set; } = "Unknown";
         public static bool PushService { get; set; }
         public static bool FavoriteService { get; set; }
         public static bool FloatService { get; set; }

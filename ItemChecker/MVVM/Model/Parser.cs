@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace ItemChecker.MVVM.Model
 {
@@ -19,7 +20,7 @@ namespace ItemChecker.MVVM.Model
         public bool Manual { get; set; }
         public bool Queue { get; set; }
 
-        public List<string> Services { get; set; }
+        public ObservableCollection<string> Services { get; set; }
         public int ServiceOne { get; set; }
         public int ServiceTwo { get; set; }
 

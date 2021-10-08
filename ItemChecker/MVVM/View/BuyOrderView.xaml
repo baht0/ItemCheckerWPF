@@ -10,11 +10,14 @@
              FontFamily="{materialDesign:MaterialDesignFont}"
              mc:Ignorable="d" 
              d:DesignHeight="660" d:DesignWidth="1280" x:Name="userControl">
+    <UserControl.Resources>
+        <ControlTemplate x:Key="ValidError"/>
+    </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition Width="250"/>
-        </Grid.ColumnDefinitions> 
+        </Grid.ColumnDefinitions>
         <!--body-->
         <Grid Grid.Column="0">
             <Grid.RowDefinitions>
@@ -124,7 +127,7 @@
                                                     VerticalAlignment="Center"
                                                     HorizontalAlignment="Left"
                                                     Orientation="Horizontal">
-                                            <TextBox Width="70" Text="{Binding MaxDeviation}" PreviewTextInput="Decimal_PreviewTextInput"/>
+                                            <TextBox Width="70" Text="{Binding MaxDeviation}" TextInput="Decimal_PreviewTextInput" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                                             <TextBlock Text="$" Margin="2 0 0 0" VerticalAlignment="Bottom"/>
                                         </StackPanel>
                                         <TextBlock Grid.Row="1" Text="Timer:" Height="15"/>
@@ -205,7 +208,7 @@
                                         </Button>
                                     </Grid>
                                 </GroupBox>
-                            </Grid>                            
+                            </Grid>
                             <!--statistic-->
                             <GroupBox Grid.Row="3" Style="{DynamicResource None}" VerticalAlignment="Bottom" Height="75">
                                 <GroupBox.Header>

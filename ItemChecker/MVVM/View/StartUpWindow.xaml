@@ -16,7 +16,7 @@
         TextElement.FontWeight="Normal"
         FontFamily="{materialDesign:MaterialDesignFont}"
         WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="NoResize"
-        MouseLeftButtonDown="Window_MouseDown">
+        MouseLeftButtonDown="Window_MouseDown" Closing="Window_Closing">
     <Border BorderBrush="DimGray" BorderThickness="0.5">
         <Grid>
             <Grid.RowDefinitions>
@@ -35,9 +35,9 @@
                 Height="220" Width="360">
                 <Rectangle.Fill>
                     <LinearGradientBrush>
-                        <GradientStop Color="#FFEE721D"/>
-                        <GradientStop Color="#FFFFC65F" Offset="1"/>
-                        <GradientStop Color="Black" Offset="05"/>
+                        <GradientStop Color="#FFB9E2FF"/>
+                        <GradientStop Color="#FF108CD3" Offset="1"/>
+                        <GradientStop Color="Black" Offset="3"/>
                     </LinearGradientBrush>
                 </Rectangle.Fill>
             </Rectangle>
@@ -50,7 +50,7 @@
                 <TextBlock Text="ItemChecker" VerticalAlignment="Center"  Margin="10 0 0 0"/>
                 <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Grid.Column="1">
                     <Button Height="25" Style="{DynamicResource MaterialDesignFlatButton}"
-                        Command="{Binding CloseCommand}">
+                        Click="Close_Click">
                         <materialDesign:PackIcon Kind="Close"/>
                     </Button>
                 </StackPanel>
@@ -58,7 +58,7 @@
             <!--Body-->
             <Grid Grid.Row="1">
                 <Image Grid.Row="1"
-                   Source="../../Resources/icon.ico"
+                   Source="../../Resources/icon.png"
                    Width="80"
                    Margin="0 10 0 0"
                    VerticalAlignment="Top"/>
@@ -103,23 +103,19 @@
                         </GroupBox>
                         <GroupBox Grid.Row="1" Header="2AF Code:" Style="{DynamicResource None}">
                             <TextBox x:Name="codeTextbox"
-                                 MaxLength="5"
-                                 FontSize="20"
-                                 Margin="5"
-                                 TextAlignment="Center"
-                                 Typography.Capitals="AllSmallCaps"
-                                 FontWeight="Bold"
-                                 Text="{Binding Code2AF, UpdateSourceTrigger=PropertyChanged}"/>
+                                     MaxLength="5" FontSize="20"
+                                     Margin="5" TextAlignment="Center"
+                                     Typography.Capitals="AllSmallCaps"
+                                     FontWeight="Bold" KeyDown="codeTextbox_KeyDown"
+                                     FontFamily="Consolas"
+                                     Text="{Binding Code2AF, UpdateSourceTrigger=PropertyChanged}"/>
                         </GroupBox>
                     </Grid>
                 </Grid>
-                <Button 
-                VerticalAlignment="Bottom" 
-                Margin="120 0 120 45"
-                Command="{Binding LoginCommand}"
-                CommandParameter="{Binding ElementName=passTextbox}">
-                    Log In
-                </Button>
+                <Button Content="Log In"
+                        VerticalAlignment="Bottom" Margin="120 0 120 45"
+                        Command="{Binding LoginCommand}"
+                        CommandParameter="{Binding ElementName=passTextbox}"/>
             </Grid>
             <!--Footer-->
             <Grid Grid.Row="3" Margin="10 0 10 0">

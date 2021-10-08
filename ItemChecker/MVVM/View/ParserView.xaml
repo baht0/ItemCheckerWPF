@@ -23,6 +23,7 @@
                 <EasingDoubleKeyFrame KeyTime="0:0:0.1" Value="0"/>
             </DoubleAnimationUsingKeyFrames>
         </Storyboard>
+        <ControlTemplate x:Key="ValidError"/>
     </UserControl.Resources>
     <UserControl.Triggers>
         <EventTrigger RoutedEvent="ButtonBase.Click" SourceName="OpenFilter">
@@ -50,6 +51,7 @@
                 <RowDefinition/>
                 <RowDefinition Height="40"/>
             </Grid.RowDefinitions>
+            <!--top-->
             <StackPanel Grid.Row="0" Background="Transparent"
                         Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock Text="Parser" FontWeight="Normal"
@@ -117,13 +119,13 @@
                     <ColumnDefinition Width="30"/>
                 </Grid.ColumnDefinitions>
                 <Button Grid.Column="0" x:Name="OpenFilter"
-                        Style="{DynamicResource MaterialDesignToolButton}">
+                        Style="{StaticResource MaterialDesignToolButton}">
                     <materialDesign:PackIcon Kind="FormatListBulleted"/>
                 </Button>
                 <TextBlock Grid.Column="1" Text="Search Item:" VerticalAlignment="Center"/>
                 <TextBox Grid.Column="2" VerticalAlignment="Center"
                          Text="{Binding SearchString}"/>
-                <Button Grid.Column="3" Style="{DynamicResource MaterialDesignToolButton}">
+                <Button Grid.Column="3" Style="{StaticResource MaterialDesignToolButton}">
                     <materialDesign:PackIcon Kind="Close"/>
                 </Button>
             </Grid>
@@ -202,7 +204,7 @@
                             </Grid>
                         </GroupBox>
                         <GroupBox Header="Reversion:" Grid.Row="1" Grid.Column="1"
-                              Style="{DynamicResource None}">
+                              Style="{DynamicResource None}" IsEnabled="False">
                             <Grid Margin="2">
                                 <Grid.RowDefinitions>
                                     <RowDefinition/>
@@ -276,20 +278,20 @@
                                           Content="{Binding DataContext.Price4, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                           IsChecked="{Binding Price4}"/>
 
-                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Price1From}" PreviewTextInput="Decimal_PreviewTextInput"/>
-                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Price2From}" PreviewTextInput="Decimal_PreviewTextInput"/>
-                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Price3From}" PreviewTextInput="Decimal_PreviewTextInput"/>
-                                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Price4From}" PreviewTextInput="Decimal_PreviewTextInput"/>
+                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Price1From}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Price2From}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
+                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Price3From}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
+                                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Price4From}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
 
                                 <TextBlock Grid.Row="0" Grid.Column="2" Text="-" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                 <TextBlock Grid.Row="1" Grid.Column="2" Text="-" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                 <TextBlock Grid.Row="2" Grid.Column="2" Text="-" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                 <TextBlock Grid.Row="3" Grid.Column="2" Text="-" VerticalAlignment="Center" HorizontalAlignment="Center"/>
 
-                                <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding Price1To}" PreviewTextInput="Decimal_PreviewTextInput"/>
-                                <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding Price2To}" PreviewTextInput="Decimal_PreviewTextInput"/>
-                                <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding Price3To}" PreviewTextInput="Decimal_PreviewTextInput"/>
-                                <TextBox Grid.Row="3" Grid.Column="3" Text="{Binding Price4To}" PreviewTextInput="Decimal_PreviewTextInput"/>
+                                <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding Price1To}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
+                                <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding Price2To}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
+                                <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding Price3To}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
+                                <TextBox Grid.Row="3" Grid.Column="3" Text="{Binding Price4To}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                             </Grid>
                         </GroupBox>
                         <GroupBox Header="Other:" Grid.Row="4" Grid.ColumnSpan="2"
@@ -309,14 +311,13 @@
                                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Precent" VerticalAlignment="Center"/>
                                 <TextBlock Grid.Row="1" Grid.Column="0" Text="Difference" VerticalAlignment="Center"/>
 
-                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding PrecentFrom}" PreviewTextInput="Decimal_PreviewTextInput"/>
-                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding DifferenceFrom}" PreviewTextInput="Decimal_PreviewTextInput"/>
-
+                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding PrecentFrom}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding DifferenceFrom}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                                 <TextBlock Grid.Row="0" Grid.Column="2" Text="-" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                 <TextBlock Grid.Row="1" Grid.Column="2" Text="-" VerticalAlignment="Center" HorizontalAlignment="Center"/>
 
-                                <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding PrecentTo}" PreviewTextInput="Decimal_PreviewTextInput"/>
-                                <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding DifferenceTo}" PreviewTextInput="Decimal_PreviewTextInput"/>
+                                <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding PrecentTo}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
+                                <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding DifferenceTo}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
 
                                 <StackPanel Grid.Row="2" Grid.ColumnSpan="4" Orientation="Horizontal" HorizontalAlignment="Right">
                                     <CheckBox Content="Hide (-100%)" IsChecked="{Binding Hide100}"/>
@@ -325,21 +326,20 @@
                             </Grid>
                         </GroupBox>
                     </Grid>
-
-                    <Button Grid.Row="1" Style="{DynamicResource MaterialDesignToolButton}"
+                    <Button Grid.Row="1" Style="{StaticResource MaterialDesignToolButton}"
                             HorizontalAlignment="Left" VerticalAlignment="Bottom"
                             Margin="20 0 0 0" x:Name="CloseFilter">
                         <materialDesign:PackIcon Kind="ArrowLeft"/>
                     </Button>
                     <StackPanel Grid.Row="1" Orientation="Horizontal"
                                 VerticalAlignment="Bottom" HorizontalAlignment="Right">
-                        <Button Style="{DynamicResource MaterialDesignFlatButton}"
+                        <Button Style="{StaticResource MaterialDesignFlatButton}"
                                 HorizontalAlignment="Right" VerticalAlignment="Bottom"
                                 Command="{Binding ResetCommand}"
                                 x:Name="ResetFilter">
                             <TextBlock Text="Reset"/>
                         </Button>
-                        <Button Style="{DynamicResource MaterialDesignFlatButton}"
+                        <Button Style="{StaticResource MaterialDesignFlatButton}"
                                 HorizontalAlignment="Right" VerticalAlignment="Bottom"
                                 Command="{Binding ApplyCommand}"
                                 CommandParameter="{Binding FilterConfig}"
@@ -370,7 +370,7 @@
                     </StackPanel>
                 </materialDesign:ColorZone>
                 <Border Grid.Row="1"
-                        BorderBrush="{DynamicResource PrimaryHueMidBrush}">
+                        BorderBrush="{StaticResource PrimaryHueMidBrush}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition/>
@@ -391,9 +391,9 @@
                                     VerticalAlignment="Center"
                                     HorizontalAlignment="Right"
                                     Orientation="Horizontal">
-                                <TextBox Width="70" Text="{Binding MinPrice}" PreviewTextInput="Decimal_PreviewTextInput"/>
+                                <TextBox Width="70" Text="{Binding MinPrice}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                                 <TextBlock Text="-"  Margin="5"/>
-                                <TextBox Width="70" Text="{Binding MaxPrice}" PreviewTextInput="Decimal_PreviewTextInput"/>
+                                <TextBox Width="70" Text="{Binding MaxPrice}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                                 <TextBlock Text="$" VerticalAlignment="Bottom"/>
                             </StackPanel>
                             <TextBlock Grid.Row="1" Text="Precent:" Height="15"/>
@@ -402,9 +402,9 @@
                                     VerticalAlignment="Center"
                                     HorizontalAlignment="Right"
                                     Orientation="Horizontal">
-                                <TextBox Width="70" Text="{Binding MinPrecent}" PreviewTextInput="Decimal_PreviewTextInput"/>
+                                <TextBox Width="70" Text="{Binding MinPrecent}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                                 <TextBlock Text="-" Margin="5"/>
-                                <TextBox Width="70" Text="{Binding MaxPrecent}" PreviewTextInput="Decimal_PreviewTextInput"/>
+                                <TextBox Width="70" Text="{Binding MaxPrecent}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                                 <TextBlock Text="%" VerticalAlignment="Bottom"/>
                             </StackPanel>
                             <TextBlock Grid.Row="2" Text="Steam Sales:" Height="15"/>
@@ -413,7 +413,7 @@
                                     VerticalAlignment="Center"
                                     HorizontalAlignment="Right"
                                     Orientation="Horizontal">
-                                <TextBox Width="70" Text="{Binding SteamSales}" PreviewTextInput="Number_PreviewTextInput"/>
+                                <TextBox Width="70" Text="{Binding SteamSales}" PreviewTextInput="NumberPlus_PreviewTextInput"/>
                             </StackPanel>
                             <TextBlock Grid.Row="3" Text="Name Contains:" Height="15"/>
                             <StackPanel Grid.Row="3" 
@@ -472,7 +472,7 @@
                                 <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center"
                                     Text="{Binding DataContext.CheckList.Count, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
                             </StackPanel>
-                            <Button Grid.Row="2" Grid.Column="3" Height="25" HorizontalAlignment="Right" Style="{DynamicResource MaterialDesignToolForegroundButton}"
+                            <Button Grid.Row="2" Grid.Column="3" Height="25" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignToolForegroundButton}"
                                         Command="{Binding DataContext.ClearListCommand, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}">
                                 <materialDesign:PackIcon Kind="Remove"/>
                             </Button>
@@ -487,12 +487,12 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBox Grid.Column="0" VerticalAlignment="Center"
                                          Text="{Binding DataContext.SelectedItem, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
-                                <Button Grid.Column="1" Height="25" Style="{DynamicResource MaterialDesignToolForegroundButton}"
+                                <Button Grid.Column="1" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
                                         Command="{Binding DataContext.AddItemCommand, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}"
                                         CommandParameter="{Binding DataContext.SelectedItem, RelativeSource={RelativeSource AncestorType=UserControl}}">
                                     <materialDesign:PackIcon Kind="Add"/>
                                 </Button>
-                                <Button Grid.Column="2" Height="25" Style="{DynamicResource MaterialDesignToolForegroundButton}"
+                                <Button Grid.Column="2" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
                                         Command="{Binding DataContext.RemoveItemCommand, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}"
                                         CommandParameter="{Binding DataContext.SelectedItem, RelativeSource={RelativeSource AncestorType=UserControl}}">
                                     <materialDesign:PackIcon Kind="Minus"/>
@@ -515,7 +515,7 @@
                                     </Grid.RowDefinitions>
                                     <TextBlock Grid.Row="1" Text="{Binding DataContext.OrderAmout, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat='Amount: {0}₽'}"  VerticalAlignment="Center"/>
                                     <TextBlock Grid.Row="0" Text="{Binding DataContext.OrderAvailable, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat='Available: {0}₽'}"  VerticalAlignment="Center"/>
-                                    <Button Grid.RowSpan="2" Margin="0 0 10 0" HorizontalAlignment="Right" Style="{DynamicResource MaterialDesignFlatButton}" VerticalAlignment="Bottom"
+                                    <Button Grid.RowSpan="2" Margin="0 0 10 0" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignFlatButton}" VerticalAlignment="Bottom"
                                             Command="{Binding DataContext.PlaceOrderCommand, RelativeSource={RelativeSource AncestorType=UserControl}}">
                                         <materialDesign:PackIcon Kind="Play"/>
                                     </Button>
@@ -524,7 +524,7 @@
                             <Grid Grid.Row="1" VerticalAlignment="Center">
                                 <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center"
                                     Text="{Binding DataContext.PlaceOrder.Count, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat='Items: {0}'}"/>
-                                <Button Grid.Column="3" Height="25" HorizontalAlignment="Right" Style="{DynamicResource MaterialDesignToolForegroundButton}"
+                                <Button Grid.Column="3" Height="25" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignToolForegroundButton}"
                                         Command="{Binding DataContext.ClearQueueCommand, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}">
                                     <materialDesign:PackIcon Kind="Remove"/>
                                 </Button>
@@ -539,7 +539,7 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBox Grid.Column="0" VerticalAlignment="Center"
                                          Text="{Binding DataContext.SelectedQueue, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
-                                <Button Grid.Column="2" Height="25" Style="{DynamicResource MaterialDesignToolForegroundButton}"
+                                <Button Grid.Column="2" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
                                         Command="{Binding DataContext.RemoveQueueCommand, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}"
                                         CommandParameter="{Binding DataContext.SelectedQueue, RelativeSource={RelativeSource AncestorType=UserControl}}">
                                     <materialDesign:PackIcon Kind="Minus"/>
@@ -571,14 +571,14 @@
                 <StackPanel Orientation="Horizontal"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center" Margin="5 0 0 0">
-                    <Button Height="25" Style="{DynamicResource MaterialDesignToolForegroundButton}"
+                    <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
                             Command="{Binding ExportCsvCommand}">
                         <Button.ToolTip>
                             <ToolTip Content="Export Table to *.csv"/>
                         </Button.ToolTip>
                         <materialDesign:PackIcon Kind="Download"/>
                     </Button>
-                    <Button Style="{DynamicResource MaterialDesignToolForegroundButton}"
+                    <Button Style="{StaticResource MaterialDesignToolForegroundButton}"
                             Command="{Binding ImportCsvCommand}">
                         <Button.ToolTip>
                             <ToolTip Content="Import Table from *.csv"/>
@@ -586,7 +586,7 @@
                         <materialDesign:PackIcon Kind="Upload"/>
                     </Button>
                 </StackPanel>
-                <Button Grid.Column="1" Style="{DynamicResource MaterialDesignToolForegroundButton}" HorizontalAlignment="Left"
+                <Button Grid.Column="1" Style="{StaticResource MaterialDesignToolForegroundButton}" HorizontalAlignment="Left"
                         Command="{Binding ExportTxtCommand}">
                     <Button.ToolTip>
                         <ToolTip Content="Export Items to *.txt"/>
@@ -594,7 +594,7 @@
                     <materialDesign:PackIcon Kind="FileDocument"/>
                 </Button>                
                 <Button Grid.Column="2" Margin="0 0 10 0" HorizontalAlignment="Right"
-                            Style="{DynamicResource MaterialDesignFlatButton}"
+                            Style="{StaticResource MaterialDesignFlatButton}"
                             Command="{Binding CheckCommand}"
                             CommandParameter="{Binding ParserConfig}">
                     <materialDesign:PackIcon Kind="Play"/>

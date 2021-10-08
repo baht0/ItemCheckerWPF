@@ -136,15 +136,11 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand ExitCommand =>
             new RelayCommand((obj) =>
             {
-                MessageBoxResult result = MessageBox.Show("Are you sure you want to close?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if (result == MessageBoxResult.Yes)
-                {
-                    Task.Run(() =>
-                    {
-                        BaseModel.BrowserExit();
-                    }).Wait(5000);
-                    Application.Current.Shutdown();
-                }
+                Task.Run(() => {
+                    BaseModel.cts.Cancel();
+                    BaseModel.BrowserExit();
+                }).Wait(5000);
+                Application.Current.Shutdown();
             });
     }
 }
