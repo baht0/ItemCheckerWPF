@@ -505,7 +505,6 @@
                                 <RowDefinition Height="80"/>
                                 <RowDefinition Height="25"/>
                                 <RowDefinition/>
-                                <RowDefinition Height="30"/>
                             </Grid.RowDefinitions>
                             <GroupBox Grid.Row="0" Style="{DynamicResource None}" Header="Place Order">
                                 <Grid Margin="5">
@@ -522,29 +521,23 @@
                                 </Grid>
                             </GroupBox>
                             <Grid Grid.Row="1" VerticalAlignment="Center">
-                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center"
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center"
                                     Text="{Binding DataContext.PlaceOrder.Count, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat='Items: {0}'}"/>
-                                <Button Grid.Column="3" Height="25" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignToolForegroundButton}"
+                                    <Button Grid.Column="3" Height="25" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignToolForegroundButton}"
                                         Command="{Binding DataContext.ClearQueueCommand, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}">
-                                    <materialDesign:PackIcon Kind="Remove"/>
-                                </Button>
-                            </Grid>
-                            <ListBox Background="WhiteSmoke" Grid.Row="2"
-                                     ItemsSource="{Binding DataContext.PlaceOrder, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}"
-                                     SelectedItem="{Binding DataContext.SelectedQueue, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
-                            <Grid Grid.Row="4">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition Width="31"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" VerticalAlignment="Center"
-                                         Text="{Binding DataContext.SelectedQueue, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
-                                <Button Grid.Column="2" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
+                                        <materialDesign:PackIcon Kind="Remove"/>
+                                    </Button>
+                                </StackPanel>
+                                <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}" HorizontalAlignment="Right"
                                         Command="{Binding DataContext.RemoveQueueCommand, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}"
                                         CommandParameter="{Binding DataContext.SelectedQueue, RelativeSource={RelativeSource AncestorType=UserControl}}">
                                     <materialDesign:PackIcon Kind="Minus"/>
                                 </Button>
                             </Grid>
+                            <ListBox Background="WhiteSmoke" Grid.Row="2"
+                                     ItemsSource="{Binding DataContext.PlaceOrder, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}"
+                                     SelectedItem="{Binding DataContext.SelectedQueue, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
                         </Grid>
                         <!--services-->
                         <StackPanel Grid.Row="1"

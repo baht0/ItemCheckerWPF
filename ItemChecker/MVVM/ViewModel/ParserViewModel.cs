@@ -760,14 +760,12 @@ namespace ItemChecker.MVVM.ViewModel
                 ParserData item = obj as ParserData;
                 PlaceOrderService.AddQueue(item.ItemName, item.Price2);
                 OrderAmout = OrderPlace.AmountRub;
-
             }, (obj) => OrderPlace.AmountRub < Account.AvailableAmount);
         public ICommand RemoveQueueCommand =>
             new RelayCommand((obj) =>
             {
                 string item = obj as string;
                 PlaceOrderService.RemoveQueue(item);
-
                 OrderAmout = OrderPlace.AmountRub;
             }, (obj) => OrderPlace.Queue.Any());
         public ICommand ClearQueueCommand =>
@@ -783,6 +781,7 @@ namespace ItemChecker.MVVM.ViewModel
                     Main.IsLoading = true;
                     PlaceOrderService placeOrder = new();
                     MaxProgress = OrderPlace.Queue.Count;
+                    CurrentProgress = 0;
                     foreach (string itemName in OrderPlace.Queue)
                     {
                         try

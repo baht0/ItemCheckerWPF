@@ -18,28 +18,22 @@ namespace ItemChecker.Services
             if ((Parser.DataCurrency == "USD" & price > Account.BalanceUsd) | (Parser.DataCurrency == "RUB" & price > Account.Balance))
                 return;
 
-            decimal AmountRub = price;
             if (Parser.DataCurrency == "USD")
-                AmountRub = Math.Round(price * GeneralProperties.Default.CurrencyValue, 2);
-            OrderPlace.AmountRub += AmountRub;
+                OrderPlace.AmountRub = Math.Round(price * GeneralProperties.Default.CurrencyValue, 2);
+            OrderPlace.AmountRub += price;
             OrderPlace.Queue.Add(itemName);
         }
         public static void RemoveQueue(string itemName)
         {
-            try
-            {
-                decimal price = ParserData.ParserItems.First(p => p.ItemName == itemName).Price2;
-                if (!Account.MyOrders.Any(n => n.ItemName == itemName) & price <= Account.BalanceUsd & OrderPlace.Queue.Contains(itemName))
-                {
-                    OrderPlace.AmountRub -= Math.Round(price * GeneralProperties.Default.CurrencyValue, 2);
-                    OrderPlace.Queue.Remove(itemName);
-                }
-            }
-            catch (Exception exp)
-            {
-                errorMessage(exp);
-                errorLog(exp);
-            }
+            if (!OrderPlace.Queue.Contains(itemName))
+                return;
+
+            decimal price = ParserData.ParserItems.First(p => p.ItemName == itemName).Price2;
+
+            if (Parser.DataCurrency == "USD")
+                OrderPlace.AmountRub -= Math.Round(price * GeneralProperties.Default.CurrencyValue, 2);
+            OrderPlace.AmountRub -= price;
+            OrderPlace.Queue.Remove(itemName);
         }
         public void PlaceOrder(string itemName)
         {
