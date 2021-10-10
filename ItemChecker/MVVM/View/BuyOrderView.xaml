@@ -19,7 +19,7 @@
             <ColumnDefinition Width="250"/>
         </Grid.ColumnDefinitions>
         <!--body-->
-        <Grid Grid.Column="0">
+        <Grid Grid.Column="0" Margin="0 0 10 0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="25"/>
                 <RowDefinition/>
@@ -39,7 +39,7 @@
                        VerticalAlignment="Center"
                        FontSize="18"/>
             </VirtualizingStackPanel>
-            <DataGrid x:Name="ordersGrid" Grid.Row="1"
+            <DataGrid x:Name="ordersGrid" Grid.Row="1" AlternationCount="2"
                       AutoGenerateColumns="False" IsReadOnly="True"
                       ItemsSource="{Binding OrderedGrid, UpdateSourceTrigger=PropertyChanged}"
                       SelectedItem="{Binding SelectedOrderItem}"
@@ -58,7 +58,7 @@
             </DataGrid>
         </Grid>
         <!--panel-->
-        <Grid Grid.Column="1" Margin="10 0 10 0"
+        <Grid Grid.Column="1"
               Background="Transparent">
             <Grid.RowDefinitions>
                 <RowDefinition/>
@@ -72,15 +72,16 @@
                 </Grid.RowDefinitions>
                 <materialDesign:ColorZone Background="Transparent" Grid.Row="0">
                     <StackPanel Orientation="Horizontal" Margin="2" HorizontalAlignment="Center">
-                        <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="serviceTab" Margin="4" Content="Services" IsChecked="True"/>
-                        <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="toolsTab" Margin="4" Content="Tools"/>
+                        <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="serviceTab" Margin="1" Content="Services" IsChecked="True"/>
+                        <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="toolsTab" Margin="1" Content="Tools"/>
+                        <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="favoriteTab" Margin="1" Content="Favorite"/>
                     </StackPanel>
                 </materialDesign:ColorZone>
                 <Border Grid.Row="1" BorderBrush="{StaticResource PrimaryHueMidBrush}">
                     <Grid>
                         <!--Services-->
                         <Grid Visibility="{Binding IsChecked, ElementName=serviceTab, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <Grid DataContext="{Binding OrderConfig, UpdateSourceTrigger=PropertyChanged}">
+                            <Grid DataContext="{Binding ServicesConfig, UpdateSourceTrigger=PropertyChanged}">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="100"/>
                                     <RowDefinition Height="130"/>
@@ -106,12 +107,12 @@
                                         <Button Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right"
                                             Style="{StaticResource MaterialDesignFlatButton}"
                                             Command="{Binding DataContext.PushCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                            CommandParameter="{Binding DataContext.OrderConfig, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                            CommandParameter="{Binding DataContext.ServicesConfig, RelativeSource={RelativeSource AncestorType=UserControl}}">
                                             <materialDesign:PackIcon Kind="Play"/>
                                         </Button>
                                     </Grid>
                                 </GroupBox>
-                                <GroupBox Grid.Row="1" Style="{DynamicResource None}" Header="Favorite Check">
+                                <GroupBox Grid.Row="1" Style="{DynamicResource None}" Header="Cs.Money Check">
                                     <Grid Margin="5">
                                         <Grid.RowDefinitions>
                                             <RowDefinition/>
@@ -135,21 +136,21 @@
                                                     VerticalAlignment="Center"
                                                     HorizontalAlignment="Left"
                                                     Orientation="Horizontal">
-                                            <TextBox Width="70" Text="{Binding FavoriteTimer}" PreviewTextInput="Number_PreviewTextInput"/>
+                                            <TextBox Width="70" Text="{Binding CsmTimer}" PreviewTextInput="Number_PreviewTextInput"/>
                                             <TextBlock Text="Sec." Margin="2 0 0 0" VerticalAlignment="Bottom"/>
                                         </StackPanel>
                                         <StackPanel Grid.Row="2" Orientation="Horizontal"
                                                 VerticalAlignment="Center">
-                                            <Button HorizontalAlignment="Left" Style="{StaticResource MaterialDesignToolButton}"
-                                                    Command="{Binding DataContext.AddFavoriteListCommand, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                            <Button HorizontalAlignment="Left" Style="{StaticResource MaterialDesignToolButton}" ToolTip="Add item list"
+                                                    Command="{Binding DataContext.AddCsmListCommand, RelativeSource={RelativeSource AncestorType=UserControl}}">
                                                 <materialDesign:PackIcon Kind="ViewList"/>
                                             </Button>
-                                            <TextBlock Text="{Binding DataContext.FavoriteListCount, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat='({0})'}" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding DataContext.CsmListCount, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat='({0})'}" VerticalAlignment="Center"/>
                                         </StackPanel>
                                         <Button Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right"
                                             Style="{StaticResource MaterialDesignFlatButton}"
-                                            Command="{Binding DataContext.FavoriteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                            CommandParameter="{Binding DataContext.OrderConfig, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                            Command="{Binding DataContext.CsmCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding DataContext.ServicesConfig, RelativeSource={RelativeSource AncestorType=UserControl}}">
                                             <materialDesign:PackIcon Kind="Play"/>
                                         </Button>
                                     </Grid>
@@ -193,7 +194,7 @@
                                         </StackPanel>
                                         <StackPanel Grid.Row="3" Orientation="Horizontal"
                                                 VerticalAlignment="Center">
-                                            <Button HorizontalAlignment="Left"
+                                            <Button HorizontalAlignment="Left" ToolTip="Add item list"
                                             Style="{StaticResource MaterialDesignToolButton}"
                                             Command="{Binding DataContext.AddFloatListCommand, RelativeSource={RelativeSource AncestorType=UserControl}}">
                                                 <materialDesign:PackIcon Kind="ViewList"/>
@@ -203,14 +204,14 @@
                                         <Button Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right"
                                             Style="{StaticResource MaterialDesignFlatButton}"
                                             Command="{Binding DataContext.FloatCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                            CommandParameter="{Binding DataContext.OrderConfig, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                            CommandParameter="{Binding DataContext.ServicesConfig, RelativeSource={RelativeSource AncestorType=UserControl}}">
                                             <materialDesign:PackIcon Kind="Play"/>
                                         </Button>
                                     </Grid>
                                 </GroupBox>
                             </Grid>
                             <!--statistic-->
-                            <GroupBox Grid.Row="3" Style="{DynamicResource None}" VerticalAlignment="Bottom" Height="75">
+                            <GroupBox Style="{DynamicResource None}" VerticalAlignment="Bottom" Height="75">
                                 <GroupBox.Header>
                                     <TextBlock Text="{Binding CurrentService, StringFormat='Statistic ({0})', UpdateSourceTrigger=PropertyChanged}"/>
                                 </GroupBox.Header>
@@ -235,7 +236,7 @@
                                         <TextBlock Grid.Column="1" Text="{Binding Cancel, StringFormat='Cancel: {0}'}" VerticalAlignment="Center"/>
                                     </Grid>
                                     <Grid Grid.Row="1" Grid.ColumnSpan="2" 
-                                          Visibility="{Binding FavoriteService, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                          Visibility="{Binding CsmService, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <TextBlock Grid.Column="0" Text="{Binding SuccessfulTrades, StringFormat='Successful Trades: {0}'}" VerticalAlignment="Center"/>
                                     </Grid>
                                     <Grid Grid.Row="1" Grid.ColumnSpan="2" 
@@ -284,13 +285,13 @@
                                     VerticalAlignment="Center"
                                     HorizontalAlignment="Left"
                                     Orientation="Horizontal">
-                                        <TextBox Width="70" Text="{Binding OrderConfig.MaxPrice}" PreviewTextInput="Number_PreviewTextInput"/>
+                                        <TextBox Width="70" Text="{Binding ServicesConfig.MaxPrice}" PreviewTextInput="Number_PreviewTextInput"/>
                                         <TextBlock Text="₽" Margin="2 0 0 0" VerticalAlignment="Bottom"/>
                                     </StackPanel>
                                     <Button Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right"
                                             Style="{StaticResource MaterialDesignFlatButton}"
                                             Command="{Binding QuickSellCommand}"
-                                            CommandParameter="{Binding OrderConfig.MaxPrice}">
+                                            CommandParameter="{Binding ServicesConfig.MaxPrice}">
                                         <materialDesign:PackIcon Kind="Play"/>
                                     </Button>
                                 </Grid>
@@ -310,6 +311,66 @@
                                 </Grid>
                             </GroupBox>
                         </Grid>
+                        <!--Favorite-->
+                        <Grid Visibility="{Binding IsChecked, ElementName=favoriteTab, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="25"/>
+                                <RowDefinition Height="25"/>
+                                <RowDefinition/>
+                                <RowDefinition Height="35"/>
+                            </Grid.RowDefinitions>
+                            <VirtualizingStackPanel Orientation="Horizontal">
+                                <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}" ToolTip="Add BuyOrders in favorite list"
+                                        Command="{Binding AddOrdersFavCommand}"
+                                        CommandParameter="{Binding OrderedGrid}">
+                                    <materialDesign:PackIcon Kind="FileDocument"/>
+                                </Button>
+                                <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}" ToolTip="Extract favorite list"
+                                        Command="{Binding ExportFavCommand}">
+                                    <materialDesign:PackIcon Kind="FileDownload"/>
+                                </Button>
+                                <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}" ToolTip="Import favorite list"
+                                        Command="{Binding ImportFavCommand}">
+                                    <materialDesign:PackIcon Kind="FileUpload"/>
+                                </Button>
+                            </VirtualizingStackPanel>
+                            <Button Height="25" Style="{StaticResource MaterialDesignFlatButton}" HorizontalAlignment="Right" ToolTip="PlaceOrder favorite list"
+                                    Command="{Binding PlaceOrderFavCommand}">
+                                <materialDesign:PackIcon Kind="Play"/>
+                            </Button>
+                            <Grid Grid.Row="1" VerticalAlignment="Center">
+                                <VirtualizingStackPanel Orientation="Horizontal">
+                                    <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center"
+                                    Text="{Binding FavoriteList.Count, StringFormat='Count: {0}'}"/>
+                                </VirtualizingStackPanel>                                
+                                <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}" HorizontalAlignment="Right"
+                                        Command="{Binding ClearFavListCommand}">
+                                    <materialDesign:PackIcon Kind="Remove"/>
+                                </Button>
+                            </Grid>
+                            <ListBox Grid.Row="2" Background="WhiteSmoke"
+                                     ItemsSource="{Binding FavoriteList, UpdateSourceTrigger=PropertyChanged}"
+                                     SelectedItem="{Binding SelectedFavItem}"/>
+                            <Grid Grid.Row="3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="31"/>
+                                    <ColumnDefinition Width="31"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0" VerticalAlignment="Center"
+                                         Text="{Binding SelectedFavItem}"/>
+                                <Button Grid.Column="1" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
+                                        Command="{Binding AddFavoriteCommand}"
+                                        CommandParameter="{Binding SelectedFavItem}">
+                                    <materialDesign:PackIcon Kind="Add"/>
+                                </Button>
+                                <Button Grid.Column="2" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
+                                        Command="{Binding RemoveFavoriteCommand}"
+                                        CommandParameter="{Binding SelectedFavItem}">
+                                    <materialDesign:PackIcon Kind="Minus"/>
+                                </Button>
+                            </Grid>
+                        </Grid>
                     </Grid>
                 </Border>
             </Grid>
@@ -326,8 +387,8 @@
                              Value="{Binding CurrentProgress}"/>
                 <TextBlock Grid.Column="0" Text="{Binding TimerText}" 
                            Visibility="{Binding TimerVisible, Converter={StaticResource BooleanToVisibilityConverter}, UpdateSourceTrigger=PropertyChanged}"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Left"/>
+                           VerticalAlignment="Center" HorizontalAlignment="Left"
+                           PreviewMouseDown="TimerTextBlock_PreviewMouseDown"/>
                 <Button Grid.Column="1"
                         Style="{StaticResource MaterialDesignFlatButton}"
                         VerticalAlignment="Center"

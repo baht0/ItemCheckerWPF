@@ -26,11 +26,20 @@ namespace ItemChecker.MVVM.View
         }
         private void DataGrid_KeyDown(object sender, KeyEventArgs e)
         {
-            if (!ordersGrid.Items.IsEmpty & e.Key == Key.Back)
+            if (!ordersGrid.Items.IsEmpty)
             {
-                BuyOrderViewModel viewModel = (BuyOrderViewModel)DataContext;
-                if (viewModel.CancelOrderCommand.CanExecute(null))
-                    viewModel.CancelOrderCommand.Execute(viewModel.SelectedOrderItem);
+                if (e.Key == Key.Back)
+                {
+                    BuyOrderViewModel viewModel = (BuyOrderViewModel)DataContext;
+                    if (viewModel.CancelOrderCommand.CanExecute(null))
+                        viewModel.CancelOrderCommand.Execute(viewModel.SelectedOrderItem);
+                }
+                if (e.Key == Key.F)
+                {
+                    MainViewModel viewModel = (MainViewModel)DataContext;
+                    if (viewModel.AddFavoriteCommand.CanExecute(null))
+                        viewModel.AddFavoriteCommand.Execute(((BuyOrderViewModel)DataContext).SelectedOrderItem);
+                }
             }
         }
         private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -63,6 +72,13 @@ namespace ItemChecker.MVVM.View
                         break;
                 }
             }
+        }
+
+        private void TimerTextBlock_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            BuyOrderViewModel viewModel = (BuyOrderViewModel)DataContext;
+            if (viewModel.TimerCommand.CanExecute(null))
+                viewModel.TimerCommand.Execute(null);
         }
     }
 }

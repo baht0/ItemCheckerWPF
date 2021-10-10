@@ -64,6 +64,9 @@
                                         Height="25" Style="{DynamicResource MaterialDesignToolButton}"
                                         Command="{Binding DataContext.GetCurrencyApiCommand, RelativeSource={RelativeSource AncestorType=Window}}">
                                     <materialDesign:PackIcon Kind="OpenInBrowser"/>
+                                    <Button.ToolTip>
+                                        <TextBlock Text="Get API Key"/>
+                                    </Button.ToolTip>
                                 </Button>
                                 <TextBlock Grid.Row="1" Grid.Column="0"
                                            Text="Currency:" VerticalAlignment="Center"/>
@@ -72,10 +75,18 @@
                                           SelectedIndex="{Binding Currency}"/>
                                 <CheckBox Grid.Row="2" Grid.Column="0" 
                                           Content="Exit Chrome" HorizontalAlignment="Left" 
-                                          IsChecked="{Binding ExitChrome}"/>
+                                          IsChecked="{Binding ExitChrome}">
+                                    <CheckBox.ToolTip>
+                                        <TextBlock Text="Close all Google Chrome proccess"/>
+                                    </CheckBox.ToolTip>
+                                </CheckBox>
                                 <CheckBox Grid.Row="2" Grid.Column="1" IsEnabled="False"
                                           Content="Guard" HorizontalAlignment="Left" 
-                                          IsChecked="{Binding Guard}"/>
+                                          IsChecked="{Binding Guard}">
+                                    <CheckBox.ToolTip>
+                                        <TextBlock Text="Disable Cs.Money"/>
+                                    </CheckBox.ToolTip>
+                                </CheckBox>
                             </Grid>
                         </GroupBox>
                         <GroupBox Grid.Row="1" Style="{DynamicResource None}" Header="Steam">
@@ -98,7 +109,11 @@
                                         <materialDesign:PackIcon Kind="GetApp"/>
                                     </Button>
                                 </Grid>
-                                <CheckBox Grid.Row="1" Content="Not enough balance" HorizontalAlignment="Left" IsChecked="{Binding NotEnoughBalance}"/>
+                                <CheckBox Grid.Row="1" Content="Not enough balance" HorizontalAlignment="Left" IsChecked="{Binding NotEnoughBalance}">
+                                    <CheckBox.ToolTip>
+                                        <TextBlock Text="Cancel order if balance isn't enough"/>
+                                    </CheckBox.ToolTip>
+                                </CheckBox>
                                 <Grid Grid.Row="2">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="130"/>

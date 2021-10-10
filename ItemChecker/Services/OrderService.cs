@@ -23,7 +23,7 @@ namespace ItemChecker.Services
                 CancelOrder(order);
                 OrderStatistic.Cancel++;
             }
-            if (GeneralProperties.Default.CancelOrder > order.Precent)
+            if (GeneralProperties.Default.CancelOrder > order.Precent & order.Precent != -100)
             {
                 CancelOrder(order);
                 OrderStatistic.Cancel++;

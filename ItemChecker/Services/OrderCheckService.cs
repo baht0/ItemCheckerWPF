@@ -26,29 +26,26 @@ namespace ItemChecker.MVVM.Model
 
         public void SteamOrders()
         {
-            if (Account.OrdersCount != 0)
+            getSteamlist();
+            checkOrders();
+
+            Account.MyOrders.Clear();
+            for (int i = 0; i < ItemName.Count; i++)
             {
-                getSteamlist();
-                checkOrders();
-
-                Account.MyOrders.Clear();
-                for (int i = 0; i < ItemName.Count; i++)
+                decimal _stmPrice = StmPrice[i];
+                decimal _csmPrice = CsmPrice[i];
+                decimal _stmBuy = CsmBuy[i];
+                decimal _difference = Difference[i];
+                if (GeneralProperties.Default.Currency == 1)
                 {
-                    decimal _stmPrice = StmPrice[i];
-                    decimal _csmPrice = CsmPrice[i];
-                    decimal _stmBuy = CsmBuy[i];
-                    decimal _difference = Difference[i];
-                    if (GeneralProperties.Default.Currency == 1)
-                    {
-                        _stmPrice = Edit.Converter(_stmPrice, GeneralProperties.Default.CurrencyValue);
-                        _csmPrice = Edit.Converter(_csmPrice, GeneralProperties.Default.CurrencyValue);
-                        _stmBuy = Edit.Converter(_stmBuy, GeneralProperties.Default.CurrencyValue);
-                        _difference = Edit.Converter(_difference, GeneralProperties.Default.CurrencyValue);
-                    }
-
-                    Account.MyOrders.Add(new OrderData(ItemType[i], ItemName[i], OrderId[i], _stmPrice, OrderPrice[i], _csmPrice, _stmBuy, Precent[i], _difference));
-                    CheckConditions(Account.MyOrders.Last(), OrderPrice[i]);
+                    _stmPrice = Edit.Converter(_stmPrice, GeneralProperties.Default.CurrencyValue);
+                    _csmPrice = Edit.Converter(_csmPrice, GeneralProperties.Default.CurrencyValue);
+                    _stmBuy = Edit.Converter(_stmBuy, GeneralProperties.Default.CurrencyValue);
+                    _difference = Edit.Converter(_difference, GeneralProperties.Default.CurrencyValue);
                 }
+
+                Account.MyOrders.Add(new OrderData(ItemType[i], ItemName[i], OrderId[i], _stmPrice, OrderPrice[i], _csmPrice, _stmBuy, Precent[i], _difference));
+                CheckConditions(Account.MyOrders.Last(), OrderPrice[i]);
             }
             Account.GetAvailableAmount();
         }

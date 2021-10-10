@@ -14,13 +14,13 @@ using System.Threading;
 
 namespace ItemChecker.Services
 {
-    public class FavoriteCheckService : BaseService
+    public class CsmCheckService : BaseService
     {
         private static List<string> old_id = new();
 
-        public void checkFavorite(string favoriteItem)
+        public void checkCsm(string checkItem)
         {
-            string[] item_line = favoriteItem.Split(';');
+            string[] item_line = checkItem.Split(';');
 
             var json = Get.InventoriesCsMoney(Edit.MarketHashName(item_line[0]));
             if (!json.Contains("error"))
@@ -31,7 +31,7 @@ namespace ItemChecker.Services
                 {
                     if ((string)item["fullName"] != item_line[0])
                         continue;
-                    if (favoriteItem.Contains(";"))
+                    if (checkItem.Contains(";"))
                     {
                         decimal maxPrice = decimal.Parse(item_line[1]) + BuyOrderProperties.Default.MaxDeviation;
                         decimal price = Convert.ToDecimal(item["price"]);

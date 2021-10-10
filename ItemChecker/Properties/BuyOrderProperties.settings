@@ -5,7 +5,7 @@
     <Setting Name="TimerPush" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">10</Value>
     </Setting>
-    <Setting Name="TimerFavorite" Type="System.Int32" Scope="User">
+    <Setting Name="TimerCsm" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">10</Value>
     </Setting>
     <Setting Name="TimerFloat" Type="System.Int32" Scope="User">
@@ -20,7 +20,7 @@
     <Setting Name="MaxPrecent" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)">7</Value>
     </Setting>
-    <Setting Name="FavoriteList" Type="System.Collections.Generic.List&lt;System.String&gt;" Scope="User">
+    <Setting Name="CsmList" Type="System.Collections.Generic.List&lt;System.String&gt;" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="FloatList" Type="System.Collections.Generic.List&lt;System.String&gt;" Scope="User">
@@ -28,6 +28,9 @@
     </Setting>
     <Setting Name="MaxPrice" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">100</Value>
+    </Setting>
+    <Setting Name="FavoriteList" Type="System.Collections.ObjectModel.ObservableCollection&lt;System.String&gt;" Scope="User">
+      <Value Profile="(Default)" />
     </Setting>
   </Settings>
 </SettingsFile>

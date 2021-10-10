@@ -1,16 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 
 namespace ItemChecker.MVVM.Model
 {
-    public class Order : Main
+    public class OrderSevices : Main
     {
         public OrderStatistic Statistic { get; set; }
         //push
         public int PushTimer { get; set; }
 
         //Favorite
-        public int FavoriteTimer { get; set; }
+        public int CsmTimer { get; set; }
         public decimal MaxDeviation { get; set; }
 
         //float

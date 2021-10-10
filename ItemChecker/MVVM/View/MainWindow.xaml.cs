@@ -21,12 +21,12 @@ namespace ItemChecker.MVVM.View
         }
         private void Home_Click(object sender, RoutedEventArgs e)
         {
-            if (!Main.IsLoading)
+            if (!Main.IsLoading & !Main.Timer.Enabled)
                 DataContext = new BuyOrderViewModel();
         }
         private void Parser_Click(object sender, RoutedEventArgs e)
         {
-            if(!Main.IsLoading)
+            if (!Main.IsLoading & !Main.Timer.Enabled)
                 DataContext = new ParserViewModel();
         }
 

@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace ItemChecker.Services
 {
-    public class WithdrawService : FavoriteCheckService
+    public class WithdrawService : CsmCheckService
     {
         public JArray checkInventory()
         {

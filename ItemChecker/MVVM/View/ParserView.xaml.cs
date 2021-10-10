@@ -27,11 +27,20 @@ namespace ItemChecker.MVVM.View
 
         private void DataGrid_KeyDown(object sender, KeyEventArgs e)
         {
-            if (!parserGrid.Items.IsEmpty & e.Key == Key.Insert)
+            if (!parserGrid.Items.IsEmpty)
             {
-                ParserViewModel viewModel = (ParserViewModel)DataContext;
-                if (viewModel.AddQueueCommand.CanExecute(null))
-                    viewModel.AddQueueCommand.Execute(viewModel.SelectedParserItem);
+                if (e.Key == Key.Insert)
+                {
+                    ParserViewModel viewModel = (ParserViewModel)DataContext;
+                    if (viewModel.AddQueueCommand.CanExecute(null))
+                        viewModel.AddQueueCommand.Execute(viewModel.SelectedParserItem);
+                }
+                if (e.Key == Key.F)
+                {
+                    MainViewModel viewModel = (MainViewModel)DataContext;
+                    if (viewModel.AddFavoriteCommand.CanExecute(null))
+                        viewModel.AddFavoriteCommand.Execute(((ParserViewModel)DataContext).SelectedParserItem);
+                }
             }
         }
         private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)

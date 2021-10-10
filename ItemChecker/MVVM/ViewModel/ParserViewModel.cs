@@ -11,6 +11,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 
@@ -38,7 +39,7 @@ namespace ItemChecker.MVVM.ViewModel
         private ObservableCollection<string> _checkList;
         private string _selectedItem;
         private string _selectedFile;
-        private ObservableCollection<string> _placeOrder;
+        private ObservableCollection<string> _placeOrderItems;
         private string _selectedQueue;
         private decimal _orderAmout;
         private decimal _orderAvailable;
@@ -203,6 +204,11 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 _searchString = value;
                 OnPropertyChanged();
+                FilterConfig = new Filter();
+                ParserGridView.Filter = item =>
+                {
+                    return ((ParserData)item).ItemName.Contains(value);
+                };
             }
         }
         //config
@@ -254,15 +260,15 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        public ObservableCollection<string> PlaceOrder
+        public ObservableCollection<string> PlaceOrderItems
         {
             get
             {
-                return _placeOrder;
+                return _placeOrderItems;
             }
             set
             {
-                _placeOrder = value;
+                _placeOrderItems = value;
                 OnPropertyChanged();
             }
         }
@@ -390,7 +396,7 @@ namespace ItemChecker.MVVM.ViewModel
             ParserGridView = CollectionViewSource.GetDefaultView(ParserGrid);
             FilterConfig = new Filter();
 
-            PlaceOrder = OrderPlace.Queue;
+            PlaceOrderItems = OrderPlace.Queue;
             OrderAmout = OrderPlace.AmountRub;
             OrderAvailable = Account.AvailableAmount;
         }
@@ -774,37 +780,41 @@ namespace ItemChecker.MVVM.ViewModel
                 ClearQueue();
             }, (obj) => OrderPlace.Queue.Any());
         public ICommand PlaceOrderCommand =>
-            new RelayCommand((obj) => 
+            new RelayCommand((obj) =>
             {
-                Task.Run(() =>
-                {
-                    Main.IsLoading = true;
-                    PlaceOrderService placeOrder = new();
-                    MaxProgress = OrderPlace.Queue.Count;
-                    CurrentProgress = 0;
-                    foreach (string itemName in OrderPlace.Queue)
-                    {
-                        try
-                        {
-                            placeOrder.PlaceOrder(itemName);
-                        }
-                        catch (Exception exp)
-                        {
-                            BaseModel.errorLog(exp);
-                            continue;
-                        }
-                        finally
-                        {
-                            CurrentProgress++;
-                        }
-                    }
-                    ClearQueue();
-                    Main.IsLoading = false;
+                Main.IsLoading = true;
+                Task.Run(() => {
+                    PlaceOrder();
                 });
             }, (obj) => !Main.IsLoading & OrderPlace.Queue.Any());
+        void PlaceOrder()
+        {
+            PlaceOrderService placeOrder = new();
+            MaxProgress = OrderPlace.Queue.Count;
+            CurrentProgress = 0;
+            foreach (string itemName in OrderPlace.Queue)
+            {
+                try
+                {
+                    placeOrder.PlaceOrder(itemName);
+                }
+                catch (Exception exp)
+                {
+                    BaseModel.errorLog(exp);
+                    continue;
+                }
+                finally
+                {
+                    CurrentProgress++;
+                }
+            }
+            ClearQueue();
+            Main.IsLoading = false;
+        }
         void ClearQueue()
         {
-            OrderPlace.Queue.Clear();
+            Application.Current.Dispatcher.Invoke(() => {
+                OrderPlace.Queue.Clear(); });
             OrderPlace.AmountRub = 0;
 
             OrderAmout = OrderPlace.AmountRub;

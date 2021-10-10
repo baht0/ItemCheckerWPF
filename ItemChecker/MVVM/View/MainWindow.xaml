@@ -83,12 +83,23 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0">
                     <TextBlock.Text>
-                        <MultiBinding StringFormat="Account: {2} | Balance: {0}₽ / {1}₽">
+                        <MultiBinding StringFormat="Account: {0} | Balance: {1}₽ / {2}₽">
+                            <Binding Path="AccountName"/>
                             <Binding Path="Balance" />
                             <Binding Path="BalanceCsm" />
-                            <Binding Path="AccountName"/>
                         </MultiBinding>
                     </TextBlock.Text>
+                    <TextBlock.ToolTip>
+                        <TextBlock>
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="Course: {0}₽ | Balance: {1}$ / {2}$">
+                                    <Binding Path="Course" />
+                                    <Binding Path="BalanceUsd" />
+                                    <Binding Path="BalanceCsmUsd" />
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </TextBlock.ToolTip>
                 </TextBlock>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                     <TextBlock Margin="0 0 5 0">
@@ -98,6 +109,9 @@
                                 <Binding Path="Unavailable" />
                             </MultiBinding>
                         </TextBlock.Text>
+                        <TextBlock.ToolTip>
+                            <ToolTip Content="Overstock/Unavailable"/>
+                        </TextBlock.ToolTip>
                     </TextBlock>
                     <TextBlock x:Name="steamStatusOk">                    
                     <materialDesign:PackIcon Kind="{Binding StatusCommunity}"/>

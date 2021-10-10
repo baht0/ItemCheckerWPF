@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -11,6 +6,7 @@ using Forms = System.Windows.Forms;
 using ItemChecker.MVVM.ViewModel;
 using ItemChecker.MVVM.View;
 using ItemChecker.Support;
+using System.Drawing;
 
 namespace ItemChecker
 {
@@ -29,7 +25,7 @@ namespace ItemChecker
         {
             RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
 
-            notifyIcon.Icon = new System.Drawing.Icon(@"../../../icon.ico");
+            notifyIcon.Icon = new Icon(@"icon.ico");
             notifyIcon.MouseDoubleClick += notifyIconMouseDoubleClick;
 
             notifyIcon.ContextMenuStrip = new();
@@ -68,6 +64,7 @@ namespace ItemChecker
             notifyIcon.Dispose();
             base.OnExit(e);
         }
+
         void notifyIconMouseDoubleClick(object sender, EventArgs e)
         {
             MainWindow.Visibility = Visibility.Visible;

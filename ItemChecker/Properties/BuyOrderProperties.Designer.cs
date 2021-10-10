@@ -38,12 +38,12 @@ namespace ItemChecker.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("10")]
-        public int TimerFavorite {
+        public int TimerCsm {
             get {
-                return ((int)(this["TimerFavorite"]));
+                return ((int)(this["TimerCsm"]));
             }
             set {
-                this["TimerFavorite"] = value;
+                this["TimerCsm"] = value;
             }
         }
         
@@ -97,12 +97,12 @@ namespace ItemChecker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Generic.List<System.String> FavoriteList {
+        public global::System.Collections.Generic.List<System.String> CsmList {
             get {
-                return ((global::System.Collections.Generic.List<System.String>)(this["FavoriteList"]));
+                return ((global::System.Collections.Generic.List<System.String>)(this["CsmList"]));
             }
             set {
-                this["FavoriteList"] = value;
+                this["CsmList"] = value;
             }
         }
         
@@ -126,6 +126,17 @@ namespace ItemChecker.Properties {
             }
             set {
                 this["MaxPrice"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.ObjectModel.ObservableCollection<System.String> FavoriteList {
+            get {
+                return ((global::System.Collections.ObjectModel.ObservableCollection<System.String>)(this["FavoriteList"]));
+            }
+            set {
+                this["FavoriteList"] = value;
             }
         }
     }

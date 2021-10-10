@@ -11,8 +11,8 @@ namespace ItemChecker.Updater
 {
     class Program
     {
-        static string path = AppDomain.CurrentDomain.BaseDirectory + @"\update";
-        static DirectoryInfo dirInfo = new(path);
+        protected static string path = AppDomain.CurrentDomain.BaseDirectory + @"\update";
+        protected static DirectoryInfo dirInfo = new(path);
         static void Main(string[] args)
         {
             try

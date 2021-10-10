@@ -2,6 +2,7 @@
 using ItemChecker.MVVM.Model;
 using ItemChecker.Properties;
 using ItemChecker.Support;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -20,6 +21,8 @@ namespace ItemChecker.MVVM.ViewModel
         int _unavailable;
         string _statusCommunity;
         string _statusSessions;
+        //favorite
+        private ObservableCollection<string> _favoriteList = new();
         public string AccountName
         {
             get { return _accountName; }
@@ -110,10 +113,25 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+        //favorite
+        public ObservableCollection<string> FavoriteList
+        {
+            get
+            {
+                return _favoriteList;
+            }
+            set
+            {
+                _favoriteList = value;
+                OnPropertyChanged();
+            }
+        }
 
         public MainViewModel()
         {
             UpdateInformation();
+
+            FavoriteList = BuyOrderProperties.Default.FavoriteList;
         }
         protected void UpdateInformation()
         {
@@ -142,6 +160,31 @@ namespace ItemChecker.MVVM.ViewModel
                     BaseModel.BrowserExit();
                 }).Wait(5000);
                 Application.Current.Shutdown();
+            });
+        //favorite
+        public ICommand AddFavoriteCommand =>
+            new RelayCommand((obj) =>
+            {
+                string itemName = string.Empty;
+                if (obj is OrderData)
+                {
+                    var item = obj as OrderData;
+                    itemName = item.ItemName;
+                }
+                else if (obj is ParserData)
+                {
+                    var item = obj as ParserData;
+                    itemName = item.ItemName;
+                }
+                else if (obj is string)
+                {
+                    itemName = (string)obj;
+                }
+                if (!BuyOrderProperties.Default.FavoriteList.Contains(itemName))
+                {
+                    BuyOrderProperties.Default.FavoriteList.Add(itemName);
+                    BuyOrderProperties.Default.Save();
+                }
             });
     }
 }
