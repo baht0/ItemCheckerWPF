@@ -385,7 +385,7 @@
                              Height="3"
                              Maximum="{Binding MaxProgress}"
                              Value="{Binding CurrentProgress}"/>
-                <TextBlock Grid.Column="0" Text="{Binding TimerText}" 
+                <TextBlock Grid.Column="0" Text="{Binding TimerStatus}" 
                            Visibility="{Binding TimerVisible, Converter={StaticResource BooleanToVisibilityConverter}, UpdateSourceTrigger=PropertyChanged}"
                            VerticalAlignment="Center" HorizontalAlignment="Left"
                            PreviewMouseDown="TimerTextBlock_PreviewMouseDown"/>

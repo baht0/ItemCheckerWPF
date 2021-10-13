@@ -131,7 +131,8 @@ namespace ItemChecker.MVVM.ViewModel
         {
             UpdateInformation();
 
-            FavoriteList = BuyOrderProperties.Default.FavoriteList;
+            if (BuyOrderProperties.Default.FavoriteList != null)
+                FavoriteList = BuyOrderProperties.Default.FavoriteList;
         }
         protected void UpdateInformation()
         {

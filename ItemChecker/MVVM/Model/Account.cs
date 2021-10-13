@@ -68,7 +68,7 @@ namespace ItemChecker.MVVM.Model
             try
             {
                 Browser.Navigate().GoToUrl("https://cs.money/personal-info/");
-                IWebElement balance = WebDriverWait.Until(ExpectedConditions.ElementExists(By.XPath("//span[@class='styles_price__1m7op styles_balance__1OBZG']/span")));
+                IWebElement balance = WebDriverWait.Until(ExpectedConditions.ElementExists(By.XPath("//span[@class='styles_price__1m7op TradeBalance_balance__2Hxq3']/span")));
                 BalanceCsmUsd = Edit.removeDol(balance.GetAttribute("textContent"));
                 BalanceCsm = Math.Round(BalanceCsmUsd * GeneralProperties.Default.CurrencyValue, 2);
             }

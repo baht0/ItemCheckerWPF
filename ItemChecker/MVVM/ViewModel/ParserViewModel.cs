@@ -722,8 +722,18 @@ namespace ItemChecker.MVVM.ViewModel
                 TimeLeftAsync(items.Count, DateTime.Now);
                 foreach (IWebElement item in items)
                 {
-                    tryskins.Tryskins(item);
-                    CurrentProgress++;
+                    try
+                    {
+                        tryskins.Tryskins(item);
+                    }
+                    catch (Exception exp)
+                    {
+                        BaseModel.errorLog(exp);
+                    }
+                    finally
+                    {
+                        CurrentProgress++;
+                    }
                 }
             }
         }
@@ -735,8 +745,18 @@ namespace ItemChecker.MVVM.ViewModel
             TimeLeftAsync(ParserProperties.Default.checkList.Count, DateTime.Now);
             foreach (string itemName in ParserProperties.Default.checkList)
             {
-                manual.Manual(itemName);
-                CurrentProgress++;
+                try
+                {
+                    manual.Manual(itemName);
+                }
+                catch (Exception exp)
+                {
+                    BaseModel.errorLog(exp);
+                }
+                finally
+                {
+                    CurrentProgress++;
+                }
             }
         }
         void TimeLeftAsync(int itemCount, DateTime timeStart)

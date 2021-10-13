@@ -80,7 +80,7 @@
                                         <TextBlock Text="Close all Google Chrome proccess"/>
                                     </CheckBox.ToolTip>
                                 </CheckBox>
-                                <CheckBox Grid.Row="2" Grid.Column="1" IsEnabled="False"
+                                <CheckBox Grid.Row="2" Grid.Column="1"
                                           Content="Guard" HorizontalAlignment="Left" 
                                           IsChecked="{Binding Guard}">
                                     <CheckBox.ToolTip>

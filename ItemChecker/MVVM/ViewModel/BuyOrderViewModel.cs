@@ -58,7 +58,7 @@ namespace ItemChecker.MVVM.ViewModel
         //progress
         private int _currentProgress;
         private int _maxProgress;
-        private string _timerText;
+        private string _timerStatus;
         private bool _timerVisible;
 
         //DataGrid
@@ -311,12 +311,12 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        public string TimerText
+        public string TimerStatus
         {
-            get { return _timerText; }
+            get { return _timerStatus; }
             set
             {
-                _timerText = value;
+                _timerStatus = value;
                 OnPropertyChanged();
             }
         }
@@ -491,7 +491,7 @@ namespace ItemChecker.MVVM.ViewModel
             TimerVisible = true;
             Main.TimerTick--;
             TimeSpan timeSpan = TimeSpan.FromSeconds(Main.TimerTick);
-            TimerText = "Next check: " + timeSpan.ToString("mm':'ss");
+            TimerStatus = "Next check: " + timeSpan.ToString("mm':'ss");
             if (Main.TimerTick <= 0)
                 TimerFineshed();
         }
@@ -505,7 +505,7 @@ namespace ItemChecker.MVVM.ViewModel
                 Main.token = Main.cts.Token;
 
                 int TimeTick = 0;
-                TimerText = "Preparation...";
+                TimerStatus = "Preparation...";
                 CurrentProgress = 0;
                 switch (OrderStatistic.CurrentService)
                 {
@@ -542,7 +542,7 @@ namespace ItemChecker.MVVM.ViewModel
                 UpdateInformation();
 
                 MaxProgress = Account.MyOrders.Count;
-                TimerText = "Pushing...";
+                TimerStatus = "Pushing...";
                 foreach (OrderData order in Account.MyOrders)
                 {
                     try
@@ -554,7 +554,6 @@ namespace ItemChecker.MVVM.ViewModel
                     catch (Exception exp)
                     {
                         BaseModel.errorLog(exp);
-                        continue;
                     }
                     finally
                     {
@@ -585,7 +584,7 @@ namespace ItemChecker.MVVM.ViewModel
                 UpdateInformation();
 
                 MaxProgress = BuyOrderProperties.Default.CsmList.Count;
-                TimerText = "Checking...";
+                TimerStatus = "Checking...";
                 foreach (string item in BuyOrderProperties.Default.CsmList)
                 {
                     try
@@ -596,7 +595,6 @@ namespace ItemChecker.MVVM.ViewModel
                     catch (Exception exp)
                     {
                         BaseModel.errorLog(exp);
-                        continue;
                     }
                     finally
                     {
@@ -625,7 +623,7 @@ namespace ItemChecker.MVVM.ViewModel
                 UpdateInformation();
 
                 MaxProgress = BuyOrderProperties.Default.FloatList.Count;
-                TimerText = "Checking...";
+                TimerStatus = "Checking...";
                 foreach (string item in BuyOrderProperties.Default.FloatList)
                 {
                     try
@@ -636,7 +634,6 @@ namespace ItemChecker.MVVM.ViewModel
                     catch (Exception exp)
                     {
                         BaseModel.errorLog(exp);
-                        continue;
                     }
                     finally
                     {
@@ -672,25 +669,42 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 TimerStop();
                 Main.cts.Cancel();
-            }, (obj) => PushService | CsmService | FloatService);
+            }, (obj) => PushService | CsmService | FloatService | TimerVisible);
         //tools
         public ICommand TradeOfferCommand =>
             new RelayCommand((obj) =>
             {
                 Task.Run(() => {
                     Main.IsLoading = true;
+                    TimerVisible = true;
+                    TimerStatus = "Accept Trades...";
+
                     TradeOfferService tradeOffer = new();
                     do
                     {
+                        CurrentProgress = 0;
                         MaxProgress = TradeOffer.TradeOffers.Count;
                         Trades += TradeOffer.TradeOffers.Count;
                         foreach (TradeOffer offer in TradeOffer.TradeOffers)
                         {
-                            tradeOffer.acceptTrade(offer.TradeOfferId, offer.PartnerId);
-                            CurrentProgress++;
+                            try
+                            {
+                                tradeOffer.acceptTrade(offer.TradeOfferId, offer.PartnerId);
+                            }
+                            catch (Exception exp)
+                            {
+                                BaseModel.errorLog(exp);
+                            }
+                            finally
+                            {
+                                CurrentProgress++;
+                            }
+                            if (Main.token.IsCancellationRequested)
+                                break;
                         }
                     }
                     while (tradeOffer.checkOffer());
+                    TimerVisible = false;
                     Main.IsLoading = false;
                 });
             }, (obj) => !Main.IsLoading & !Main.Timer.Enabled & (!PushService & !CsmService & !FloatService));
@@ -702,8 +716,13 @@ namespace ItemChecker.MVVM.ViewModel
                     BuyOrderProperties.Default.MaxPrice = (int)obj;
                     BuyOrderProperties.Default.Save();
 
+                    TimerVisible = true;
+                    TimerStatus = "Quick Sell...";
+                    CurrentProgress = 0;
+
                     QuickSellService quickSell = new();
                     quickSell.checkInventory();
+
                     MaxProgress = QuickSell.SellItems.Count;
                     SellItems = QuickSell.SellItems.Count;
                     Sum = QuickSell.SellItems.Sum(s => s.Price);
@@ -713,12 +732,19 @@ namespace ItemChecker.MVVM.ViewModel
                         {
                             quickSell.sellItems(item);
                         }
+                        catch (Exception exp)
+                        {
+                            BaseModel.errorLog(exp);
+                        }
                         finally
                         {
                             CurrentProgress++;
                             Thread.Sleep(1500);
                         }
+                        if (Main.token.IsCancellationRequested)
+                            break;
                     }
+                    TimerVisible = false;
                     Main.IsLoading = false;
                 });
             }, (obj) => !Main.IsLoading & !Main.Timer.Enabled & (!PushService & !CsmService & !FloatService));
@@ -728,6 +754,8 @@ namespace ItemChecker.MVVM.ViewModel
                 Task.Run(() => {
                     Main.IsLoading = true;
 
+                    TimerVisible = true;
+                    TimerStatus = "Withdrawing...";
                     WithdrawService withdraw = new();
                     JArray inventory = withdraw.checkInventory();
                     JArray items = new();
@@ -737,6 +765,7 @@ namespace ItemChecker.MVVM.ViewModel
                     if (!items.Any())
                         return;
 
+                    CurrentProgress = 0;
                     MaxProgress = items.Count;
                     WithdrawItems = items.Count;
                     foreach (JObject item in items)
@@ -745,12 +774,19 @@ namespace ItemChecker.MVVM.ViewModel
                         {
                             withdraw.withdrawItems(item);
                         }
+                        catch (Exception exp)
+                        {
+                            BaseModel.errorLog(exp);
+                        }
                         finally
                         {
                             Thread.Sleep(1500);
                             CurrentProgress++;
                         }
+                        if (Main.token.IsCancellationRequested)
+                            break;
                     }
+                    TimerVisible = false;
                     Main.IsLoading = false;
                 });
             }, (obj) => !Main.IsLoading & !Main.Timer.Enabled & (!PushService & !CsmService & !FloatService) & !GeneralProperties.Default.Guard);

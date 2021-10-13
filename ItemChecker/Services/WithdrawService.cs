@@ -53,7 +53,7 @@ namespace ItemChecker.Services
             JArray items = new();
             foreach (JObject item in inventory)
             {
-                Thread.Sleep(15000);
+                Thread.Sleep(1500);
                 if (item.ContainsKey("stackSize"))
                 {
                     Thread.Sleep(1500);
