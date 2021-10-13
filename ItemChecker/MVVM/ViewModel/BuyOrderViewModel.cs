@@ -676,6 +676,8 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 Task.Run(() => {
                     Main.IsLoading = true;
+                    Main.cts = new();
+                    Main.token = Main.cts.Token;
                     TimerVisible = true;
                     TimerStatus = "Accept Trades...";
 
@@ -713,6 +715,8 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 Task.Run(() => {
                     Main.IsLoading = true;
+                    Main.cts = new();
+                    Main.token = Main.cts.Token;
                     BuyOrderProperties.Default.MaxPrice = (int)obj;
                     BuyOrderProperties.Default.Save();
 
@@ -753,6 +757,8 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 Task.Run(() => {
                     Main.IsLoading = true;
+                    Main.cts = new();
+                    Main.token = Main.cts.Token;
 
                     TimerVisible = true;
                     TimerStatus = "Withdrawing...";

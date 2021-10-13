@@ -734,6 +734,8 @@ namespace ItemChecker.MVVM.ViewModel
                     {
                         CurrentProgress++;
                     }
+                    if (Main.token.IsCancellationRequested)
+                        break;
                 }
             }
         }
@@ -757,6 +759,8 @@ namespace ItemChecker.MVVM.ViewModel
                 {
                     CurrentProgress++;
                 }
+                if (Main.token.IsCancellationRequested)
+                    break;
             }
         }
         void TimeLeftAsync(int itemCount, DateTime timeStart)
@@ -778,6 +782,11 @@ namespace ItemChecker.MVVM.ViewModel
                 ParserGridView = CollectionViewSource.GetDefaultView(ParserGrid);
             }
         }
+        public ICommand StopCommand =>
+            new RelayCommand((obj) =>
+            {
+                Main.cts.Cancel();
+            }, (obj) => Main.IsLoading);
 
         //order
         public ICommand AddQueueCommand =>
