@@ -16,6 +16,8 @@ namespace ItemChecker.MVVM.Model
 {
     public class ParserService : BaseService
     {
+        public static JArray jArrayLF;
+        public static List<string> ItemsLF = new();
         //CHECk
         protected ParserData CheckItems(string itemName)
         {
@@ -39,6 +41,7 @@ namespace ItemChecker.MVVM.Model
             decimal _price3 = 0;
             decimal _price4 = 0;
             string _status = "Tradable";
+            bool _have = false;
 
             if (ParserProperties.Default.serviceOne == 0)
             {
@@ -69,31 +72,24 @@ namespace ItemChecker.MVVM.Model
             //loot.farm
             if (ParserProperties.Default.serviceOne == 2 | ParserProperties.Default.serviceTwo == 2)
             {
-                string json = Get.Request("https://loot.farm/fullprice.json");
-                JArray jArray = JArray.Parse(json);
-                List<string> listLF = new();
-
-                for (int i = 0; i < jArray.Count; i++)
-                    listLF.Add(jArray[i]["name"].ToString());
-
-                if (listLF.Contains(itemName))
+                if (ItemsLF.Contains(itemName))
                 {
-                    int id = listLF.IndexOf(itemName);
+                    int id = ItemsLF.IndexOf(itemName);
                     if (ParserProperties.Default.serviceOne == 2)
                     {
-                        decimal price = Convert.ToDecimal(jArray[id]["price"]) / 100;
+                        decimal price = Convert.ToDecimal(jArrayLF[id]["price"]) / 100;
                         _price1 = price;
                         _price2 = Math.Round(price * 0.95m, 2);
-                        int have = Convert.ToInt32(jArray[id]["have"]);
+                        _have = Convert.ToInt32(jArrayLF[id]["have"]) > 0;
                     }
                     else if (ParserProperties.Default.serviceTwo == 2)
                     {
-                        decimal price = Convert.ToDecimal(jArray[id]["price"]) / 100;
+                        decimal price = Convert.ToDecimal(jArrayLF[id]["price"]) / 100;
                         _price3 = price;
                         _price4 = Math.Round(price * 0.95m, 2);
 
-                        int have = Convert.ToInt32(jArray[id]["have"]);
-                        int max = Convert.ToInt32(jArray[id]["max"]);
+                        int have = Convert.ToInt32(jArrayLF[id]["have"]);
+                        int max = Convert.ToInt32(jArrayLF[id]["max"]);
                         int count = max - have;
                         if (count > 0)
                             _status = "Tradable";
@@ -105,8 +101,8 @@ namespace ItemChecker.MVVM.Model
                     _status = "Unknown";
             }
             //precent & diff
-            decimal _precent;
-            decimal _difference;
+            decimal _precent = 0;
+            decimal _difference = 0;
             if (ParserProperties.Default.serviceOne == 0) //steam -> (any)
             {
                 _precent = Edit.Precent(_price2, _price4);
@@ -123,7 +119,7 @@ namespace ItemChecker.MVVM.Model
                 _itemType = "Souvenir";
             if (itemName.Contains("StatTrak"))
                 _itemType = "Stattrak";
-            if (itemName.Contains("★"))
+            if (itemName.Contains("★ "))
                 _itemType = "KnifeGlove";
             if (itemName.Contains("★ StatTrak"))
                 _itemType = "KnifeGloveStattrak";
@@ -138,7 +134,7 @@ namespace ItemChecker.MVVM.Model
                 _difference = Edit.Converter(_difference, GeneralProperties.Default.CurrencyValue);
                 Parser.DataCurrency = "RUB";
             }
-            return new ParserData(_itemType, itemName, _price1, _price2, _price3, _price4, _precent, _difference, _status);
+            return new ParserData(_itemType, itemName, _price1, _price2, _price3, _price4, _precent, _difference, _status, _have);
         }
 
         public ObservableCollection<string> GetCheckList(string url)
@@ -189,7 +185,7 @@ namespace ItemChecker.MVVM.Model
                 string itemName = item.ItemName;
                 if (itemName.Contains(","))
                     itemName = itemName.Replace(",", ";");
-                csv += $"{item.ItemType},{itemName},{item.Price1},{item.Price2},{item.Price3},{item.Price4},{item.Precent},{item.Difference},{item.Status}\r\n";
+                csv += $"{item.ItemType},{itemName},{item.Price1},{item.Price2},{item.Price3},{item.Price4},{item.Precent},{item.Difference},{item.Status},{item.Have}\r\n";
             }
 
             //write
@@ -229,7 +225,8 @@ namespace ItemChecker.MVVM.Model
                     decimal.Parse(line[5]),
                     decimal.Parse(line[6]),
                     decimal.Parse(line[7]),
-                    line[8]));
+                    line[8],
+                    Convert.ToBoolean(line[9])));
             }
 
             return datas;

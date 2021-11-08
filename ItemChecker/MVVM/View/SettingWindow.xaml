@@ -58,34 +58,25 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Row="0" Grid.Column="0"
                                            Text="Currency API Key:" Height="15"/>
-                                <TextBox Grid.Row="0" Grid.Column="1"
+                                <TextBox Grid.Row="0" Grid.Column="1" ToolTip="API key of the currency server"
                                          VerticalAlignment="Center" Text="{Binding CurrencyApi}"/>
-                                <Button Grid.Row="0" Grid.Column="2"
+                                <Button Grid.Row="0" Grid.Column="2" ToolTip="Open services in browser"
                                         Height="25" Style="{DynamicResource MaterialDesignToolButton}"
                                         Command="{Binding DataContext.GetCurrencyApiCommand, RelativeSource={RelativeSource AncestorType=Window}}">
                                     <materialDesign:PackIcon Kind="OpenInBrowser"/>
-                                    <Button.ToolTip>
-                                        <TextBlock Text="Get API Key"/>
-                                    </Button.ToolTip>
                                 </Button>
                                 <TextBlock Grid.Row="1" Grid.Column="0"
                                            Text="Currency:" VerticalAlignment="Center"/>
                                 <ComboBox Grid.Row="1" Grid.Column="1" VerticalAlignment="Center"
-                                          ItemsSource="{Binding CurrencyList}"
+                                          ItemsSource="{Binding CurrencyList}" ToolTip="Displaying prices in tables"
                                           SelectedIndex="{Binding Currency}"/>
-                                <CheckBox Grid.Row="2" Grid.Column="0" 
+                                <CheckBox Grid.Row="2" Grid.Column="0" ToolTip="Close all Google Chrome proccess"
                                           Content="Exit Chrome" HorizontalAlignment="Left" 
                                           IsChecked="{Binding ExitChrome}">
-                                    <CheckBox.ToolTip>
-                                        <TextBlock Text="Close all Google Chrome proccess"/>
-                                    </CheckBox.ToolTip>
                                 </CheckBox>
-                                <CheckBox Grid.Row="2" Grid.Column="1"
+                                <CheckBox Grid.Row="2" Grid.Column="1" ToolTip="Disable Cs.Money"
                                           Content="Guard" HorizontalAlignment="Left" 
                                           IsChecked="{Binding Guard}">
-                                    <CheckBox.ToolTip>
-                                        <TextBlock Text="Disable Cs.Money"/>
-                                    </CheckBox.ToolTip>
                                 </CheckBox>
                             </Grid>
                         </GroupBox>
@@ -104,15 +95,13 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="Steam API Key:" Height="15"/>
                                     <TextBox Grid.Column="1" VerticalAlignment="Center" Text="{Binding DataContext.SteamApiKey, RelativeSource={RelativeSource AncestorType=Window}, UpdateSourceTrigger=PropertyChanged}"/>
-                                    <Button Grid.Column="2" Height="25" Style="{DynamicResource MaterialDesignToolButton}"
+                                    <Button Grid.Column="2" Height="25" Style="{DynamicResource MaterialDesignToolButton}" ToolTip="Get API Key"
                                         Command="{Binding DataContext.GetSteamApiCommand, RelativeSource={RelativeSource AncestorType=Window}}">
                                         <materialDesign:PackIcon Kind="GetApp"/>
                                     </Button>
                                 </Grid>
-                                <CheckBox Grid.Row="1" Content="Not enough balance" HorizontalAlignment="Left" IsChecked="{Binding NotEnoughBalance}">
-                                    <CheckBox.ToolTip>
-                                        <TextBlock Text="Cancel order if balance isn't enough"/>
-                                    </CheckBox.ToolTip>
+                                <CheckBox Grid.Row="1" Content="Not enough balance" ToolTip="Cancel order if balance isn't enough"
+                                          HorizontalAlignment="Left" IsChecked="{Binding NotEnoughBalance}">
                                 </CheckBox>
                                 <Grid Grid.Row="2">
                                     <Grid.ColumnDefinitions>

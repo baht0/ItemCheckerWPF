@@ -53,7 +53,7 @@ namespace ItemChecker.MVVM.Model
                 do
                 {
                     last = items.Count();
-                    IWebElement element = BaseModel.WebDriverWait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//table[@class='table table-bordered']/tbody/tr[last()]")));
+                    IWebElement element = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//table[@class='table table-bordered']/tbody/tr[last()]")));
                     Thread.Sleep(1000);
                     IJavaScriptExecutor jse = (IJavaScriptExecutor)BaseModel.Browser;
                     jse.ExecuteScript("arguments[0].scrollIntoView(true); window.scrollBy(0, -window.innerHeight / 4);", element);

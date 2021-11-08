@@ -456,7 +456,8 @@ namespace ItemChecker.MVVM.ViewModel
                         !item.ItemName.Contains("Well-Worn") &
                         !item.ItemName.Contains("Field-Tested") &
                         !item.ItemName.Contains("Minimal Wear") &
-                        !item.ItemName.Contains("Factory New");
+                        !item.ItemName.Contains("Factory New") &
+                        item.ItemType.Contains("KnifeGlove");
                 if (filterConfig.BattleScarred & !exterior)
                     exterior = item.ItemName.Contains("Battle-Scarred");
                 if (filterConfig.WellWorn & !exterior)
@@ -474,37 +475,37 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 types = false;
                 if (filterConfig.Weapon)
-                    types = !item.ItemName.Contains("Sticker") &
-                        !item.ItemName.Contains("Patch") &
-                        !item.ItemName.Contains("Pin") &
-                        !item.ItemName.Contains("Key") &
-                        !item.ItemName.Contains("Pass") &
+                    types = !item.ItemName.Contains("Sticker ") &
+                        !item.ItemName.Contains("Patch ") &
+                        !item.ItemName.Contains(" Pin") &
+                        !item.ItemName.Contains(" Key") &
+                        !item.ItemName.Contains(" Pass") &
                         !item.ItemName.Contains("Music Kit") &
-                        !item.ItemName.Contains("Graffiti") &
+                        !item.ItemName.Contains("Sealed Graffiti") &
                         !item.ItemName.Contains("Case") &
-                        !item.ItemName.Contains("Package");
+                        !item.ItemName.Contains(" Package");
                 if (filterConfig.Knife & !types)
                     types = item.ItemName.Contains("Knife");
                 if (filterConfig.Gloves & !types)
-                    types = item.ItemName.Contains("Glove");
+                    types = item.ItemName.Contains("Gloves |") | item.ItemName.Contains("★ Hand");
                 if (filterConfig.Sticker & !types)
-                    types = item.ItemName.Contains("Sticker");
+                    types = item.ItemName.Contains("Sticker ");
                 if (filterConfig.Patch & !types)
-                    types = item.ItemName.Contains("Patch");
+                    types = item.ItemName.Contains("Patch ");
                 if (filterConfig.Pin & !types)
-                    types = item.ItemName.Contains("Pin");
+                    types = item.ItemName.Contains(" Pin");
                 if (filterConfig.Key & !types)
-                    types = item.ItemName.Contains("Key");
+                    types = item.ItemName.Contains(" Key");
                 if (filterConfig.Pass & !types)
-                    types = item.ItemName.Contains("Pass");
+                    types = item.ItemName.Contains(" Pass");
                 if (filterConfig.MusicKit & !types)
                     types = item.ItemName.Contains("Music Kit");
                 if (filterConfig.Graffiti & !types)
-                    types = item.ItemName.Contains("Graffiti");
+                    types = item.ItemName.Contains("Sealed Graffiti");
                 if (filterConfig.Case & !types)
                     types = item.ItemName.Contains("Case");
                 if (filterConfig.Package & !types)
-                    types = item.ItemName.Contains("Package");
+                    types = item.ItemName.Contains(" Package");
             }
             //Prices
             bool prices = true;
@@ -536,6 +537,8 @@ namespace ItemChecker.MVVM.ViewModel
                     other = item.Precent != -100;
                 if (filterConfig.Hide0 & other)
                     other = item.Precent != 0;
+                if (filterConfig.Have & other)
+                    other = item.Have;
             }
 
             bool isShow = category & status & exterior & types & prices & other;
@@ -618,6 +621,8 @@ namespace ItemChecker.MVVM.ViewModel
             try
             {
                 Main.IsLoading = true;
+                Main.cts = new();
+                Main.token = Main.cts.Token;
                 CleanDataGrid();
                 DataGrid(parserConfig.ServiceOne, parserConfig.ServiceTwo);
                 SaveConfig(parserConfig);
@@ -743,6 +748,7 @@ namespace ItemChecker.MVVM.ViewModel
         {
             Mode = "Manual";
             ParserManualService manual = new();
+            manual.GetLF();
             MaxProgress = ParserProperties.Default.checkList.Count;
             TimeLeftAsync(ParserProperties.Default.checkList.Count, DateTime.Now);
             foreach (string itemName in ParserProperties.Default.checkList)

@@ -22,7 +22,7 @@ namespace ItemChecker.Services
         {
             string[] item_line = checkItem.Split(';');
 
-            var json = Get.InventoriesCsMoney(Edit.MarketHashName(item_line[0]));
+            string json = Get.InventoriesCsMoney(Edit.MarketHashName(item_line[0]), BuyOrderProperties.Default.UserItems);
             if (!json.Contains("error"))
             {
                 JArray items = new();
@@ -36,7 +36,7 @@ namespace ItemChecker.Services
                         decimal maxPrice = decimal.Parse(item_line[1]) + BuyOrderProperties.Default.MaxDeviation;
                         decimal price = Convert.ToDecimal(item["price"]);
                         if (price > maxPrice)
-                            continue;
+                            break;
                     }
                     if (item.ContainsKey("stackSize"))
                     {
@@ -117,7 +117,7 @@ namespace ItemChecker.Services
             Thread.Sleep(1000);
 
             Browser.Navigate().GoToUrl("https://cs.money/2.0/get_transactions?type=0&status=0&appId=730&limit=20");
-            IWebElement html = WebDriverWait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//pre")));
+            IWebElement html = WebDriverWait.Until(e => e.FindElement(By.XPath("//pre")));
 
             string json = html.Text;
             JArray trades = JArray.Parse(json);
@@ -165,13 +165,16 @@ namespace ItemChecker.Services
         }
         JObject sendRespons(string body)
         {
-            Browser.ExecuteJavaScript("window.open();");
-            Browser.SwitchTo().Window(Browser.WindowHandles.Last());
+            //Browser.ExecuteJavaScript("window.open();");
+            //Browser.SwitchTo().Window(Browser.WindowHandles.Last());
+            Browser.SwitchTo().NewWindow(WindowType.Tab);
             Browser.ExecuteJavaScript(Post.FetchRequestWithResponse("application/json", body, "https://cs.money/2.0/send_offer"));
-            IWebElement html = WebDriverWait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//pre")));
+            IWebElement html = WebDriverWait.Until(e => e.FindElement(By.XPath("//pre")));
             string json = html.Text;
             Thread.Sleep(300);
-            Browser.ExecuteJavaScript("window.close();");
+            //Close the tab or window
+            Browser.Close();
+            //Browser.ExecuteJavaScript("window.close();");
             Browser.SwitchTo().Window(Browser.WindowHandles.First());
 
             return JObject.Parse(json);

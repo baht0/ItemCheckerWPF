@@ -80,5 +80,10 @@ namespace ItemChecker.MVVM.View
             if (viewModel.TimerCommand.CanExecute(null))
                 viewModel.TimerCommand.Execute(null);
         }
+
+        private void FavItemTextBoxClear_Click(object sender, RoutedEventArgs e)
+        {
+            FavItemTextBox.Text = string.Empty;
+        }
     }
 }

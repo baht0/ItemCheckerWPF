@@ -71,6 +71,7 @@ namespace ItemChecker.MVVM.ViewModel
             Login = new Account()
             {
                 Login = string.Empty,
+                Remember = false,
                 Code2AF = string.Empty,
             };
             _view = view;
@@ -183,7 +184,7 @@ namespace ItemChecker.MVVM.ViewModel
             if (BaseModel.token.IsCancellationRequested)
                 return;
 
-            string profilesDir = BaseModel.AppPath + "\\Profiles";
+            string profilesDir = BaseModel.AppPath + "Profiles";
 
             if (!Directory.Exists(profilesDir))
                 Directory.CreateDirectory(profilesDir);
@@ -210,7 +211,7 @@ namespace ItemChecker.MVVM.ViewModel
 
             BaseModel.Browser = new ChromeDriver(chromeDriverService, option, TimeSpan.FromSeconds(30));
             BaseModel.Browser.Manage().Window.Maximize();
-            BaseModel.WebDriverWait = new WebDriverWait(BaseModel.Browser, TimeSpan.FromSeconds(15));
+            BaseModel.WebDriverWait = new WebDriverWait(BaseModel.Browser, TimeSpan.FromSeconds(10));
         }
         void CheckUpdate()
         {
@@ -231,24 +232,29 @@ namespace ItemChecker.MVVM.ViewModel
 
             if (BaseModel.Browser.Url.Contains("id") | BaseModel.Browser.Url.Contains("profiles"))
             {
-                IWebElement account = BaseModel.WebDriverWait.Until(ExpectedConditions.ElementExists(By.XPath("//span[@class='persona online']")));
+                IWebElement account = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//span[@class='persona online']")));
                 Account.AccountName = account.GetAttribute("textContent");
                 return;
             }
 
             IWebElement username = BaseModel.Browser.FindElement(By.XPath("//input[@name='username']"));
             IWebElement password = BaseModel.Browser.FindElement(By.XPath("//input[@name='password']"));
-            IWebElement signin = BaseModel.WebDriverWait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//button[@class='btn_blue_steamui btn_medium login_btn']")));
+            try
+            {
+                IWebElement remember = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@name='remember_login']")));
+                remember.Click();
+            } catch { }
+            IWebElement signin = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//button[@class='btn_blue_steamui btn_medium login_btn']")));
 
             IsLogin = true;
-
             while (IsLogin)
                 Thread.Sleep(500);
             username.SendKeys(Login.Login);
             password.SendKeys(Login.Password);
             signin.Click();
 
-            IWebElement code = BaseModel.WebDriverWait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//input[@id='twofactorcode_entry']")));
+            Thread.Sleep(2000);
+            IWebElement code = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@id='twofactorcode_entry']")));
             code.SendKeys(Login.Code2AF);
             code.SendKeys(OpenQA.Selenium.Keys.Enter);
 
@@ -262,6 +268,9 @@ namespace ItemChecker.MVVM.ViewModel
                 Login.Password = (string)propertyInfo.GetValue(obj, null);
                 if (Login.Password != "")
                     IsLogin = false;
+                //if (!Login.Remember)
+                //    Directory.Delete($"{BaseModel.AppPath}\\Profiles\\{GeneralProperties.Default.Profile}", true);
+
             }, (obj) => IsLogin & !String.IsNullOrEmpty(Login.Login) & Login.Code2AF.Length == 5);
         void LoginTryskins()
         {
@@ -275,8 +284,8 @@ namespace ItemChecker.MVVM.ViewModel
 
             BaseModel.Browser.Navigate().GoToUrl("https://table.altskins.com/login/steam");
 
-            IWebElement account = BaseModel.WebDriverWait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//div[@class='OpenID_loggedInAccount']")));
-            IWebElement signins = BaseModel.WebDriverWait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//input[@class='btn_green_white_innerfade']")));
+            IWebElement account = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//div[@class='OpenID_loggedInAccount']")));
+            IWebElement signins = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@class='btn_green_white_innerfade']")));
             signins.Click();
             Thread.Sleep(300);
 
@@ -289,7 +298,7 @@ namespace ItemChecker.MVVM.ViewModel
             Status = "Login Cs.Money...";
 
             BaseModel.Browser.Navigate().GoToUrl("https://cs.money/pending-trades");
-            IWebElement html = BaseModel.WebDriverWait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//pre")));
+            IWebElement html = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//pre")));
             string json = html.Text;
 
             if (json.Contains("error"))
@@ -299,7 +308,7 @@ namespace ItemChecker.MVVM.ViewModel
                 {
                     Main.Browser.Navigate().GoToUrl("https://auth.dota.trade/login?redirectUrl=https://cs.money/&callbackUrl=https://cs.money/login");
 
-                    IWebElement signins = BaseModel.WebDriverWait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//input[@class='btn_green_white_innerfade']")));
+                    IWebElement signins = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@class='btn_green_white_innerfade']")));
                     signins.Click();
                     Thread.Sleep(500);
                 }

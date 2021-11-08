@@ -340,6 +340,7 @@ namespace ItemChecker.MVVM.ViewModel
 
                 CsmTimer = BuyOrderProperties.Default.TimerCsm,
                 MaxDeviation = BuyOrderProperties.Default.MaxDeviation,
+                UserItems = BuyOrderProperties.Default.UserItems,
 
                 FloatTimer = BuyOrderProperties.Default.TimerFloat,
                 MaxPrecent = BuyOrderProperties.Default.MaxPrecent,
@@ -443,6 +444,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OrderSevices config = obj as OrderSevices;
                 BuyOrderProperties.Default.TimerCsm = config.CsmTimer;
                 BuyOrderProperties.Default.MaxDeviation = config.MaxDeviation;
+                BuyOrderProperties.Default.UserItems = config.UserItems;
                 BuyOrderProperties.Default.Save();
 
                 Main.Timer.Elapsed += timerTick;
@@ -765,10 +767,10 @@ namespace ItemChecker.MVVM.ViewModel
                     WithdrawService withdraw = new();
                     JArray inventory = withdraw.checkInventory();
                     JArray items = new();
-                    if (inventory.Any())
+                    if (inventory.Any() & !Main.token.IsCancellationRequested)
                         items = withdraw.getItems(inventory);
 
-                    if (!items.Any())
+                    if (!items.Any() | Main.token.IsCancellationRequested)
                         return;
 
                     CurrentProgress = 0;

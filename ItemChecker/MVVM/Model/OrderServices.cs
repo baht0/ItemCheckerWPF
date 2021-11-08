@@ -11,6 +11,7 @@ namespace ItemChecker.MVVM.Model
         //Favorite
         public int CsmTimer { get; set; }
         public decimal MaxDeviation { get; set; }
+        public bool UserItems { get; set; }
 
         //float
         public int FloatTimer { get; set; }

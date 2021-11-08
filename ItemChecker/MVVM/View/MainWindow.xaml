@@ -39,11 +39,11 @@
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
                 <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Grid.Column="0">
-                    <Image Source="../../Resources/icon.png" Height="18" Margin="2">
+                    <Image Source="../../Resources/ico.png" Height="18" Margin="1"
+                           MouseDown="Image_MouseDown">
                         <Image.ContextMenu>
-                            <ContextMenu>
+                            <ContextMenu Style="{StaticResource MaterialDesignContextMenu}">
                                 <MenuItem Header="OpenFolder" Command="{Binding OpenFolderCommand}"></MenuItem>
-                                <MenuItem Header="Restart"></MenuItem>
                                 <MenuItem Header="Exit" Command="{Binding ExitCommand}"></MenuItem>
                             </ContextMenu>
                         </Image.ContextMenu>
@@ -60,7 +60,7 @@
                 <StackPanel Margin="0 0 -10 0" HorizontalAlignment="Right" Orientation="Horizontal" Grid.Column="1">
                     <TextBlock Text="BETA" VerticalAlignment="Center"/>
                     <Button Height="25" Style="{StaticResource MaterialDesignToolButton}">
-                        <materialDesign:PackIcon Kind="BellNotification"/>
+                        <materialDesign:PackIcon Kind="Bell"/>
                     </Button>
                     <Button Height="25" Style="{StaticResource MaterialDesignToolButton}" Click="Setting_Click">
                         <materialDesign:PackIcon Kind="Settings"/>
@@ -75,6 +75,9 @@
             </Grid>
             <!--body-->
             <ContentControl Grid.Row="1" Content="{Binding}" Margin="10" />
+            <Border VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 25 0 0"
+                    Height="150" Width="500" Background="WhiteSmoke" Visibility="Hidden"
+                    BorderBrush="LightSlateGray" BorderThickness="0.5"></Border>
             <!--/body-->
             <Grid Grid.Row="2" x:Name="StatusBar" VerticalAlignment="Center" Background="WhiteSmoke">
                 <Grid.ColumnDefinitions>

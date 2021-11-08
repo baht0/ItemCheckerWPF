@@ -320,6 +320,7 @@
                                 <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding PrecentTo}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                                 <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding DifferenceTo}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
 
+                                <CheckBox Content="Have" IsChecked="{Binding Have}" HorizontalAlignment="Left" Grid.Row="2" Grid.Column="0"/>
                                 <StackPanel Grid.Row="2" Grid.ColumnSpan="4" Orientation="Horizontal" HorizontalAlignment="Right">
                                     <CheckBox Content="Hide (-100%)" IsChecked="{Binding Hide100}"/>
                                     <CheckBox Content="Hide (0%)" IsChecked="{Binding Hide0}"/>

@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Xml.Linq;
 using System.IO;
+using OpenQA.Selenium.Chrome;
 
 namespace ItemChecker.MVVM.Model
 {
@@ -16,42 +17,34 @@ namespace ItemChecker.MVVM.Model
     {
         static void CheckVersion()
         {
-            try
-            {
-                Assembly assembly = Assembly.GetExecutingAssembly();
+            Assembly assembly = Assembly.GetExecutingAssembly();
 
-                assembly = Assembly.LoadFrom(BaseModel.AppPath + "ItemChecker.Net.dll");
-                string ItemCheckerNet = assembly.GetName().Version.ToString();
+            assembly = Assembly.LoadFrom(BaseModel.AppPath + "ItemChecker.Net.dll");
+            string ItemCheckerNet = assembly.GetName().Version.ToString();
 
-                assembly = Assembly.LoadFrom(BaseModel.AppPath + "ItemChecker.Support.dll");
-                string ItemCheckerSupport = assembly.GetName().Version.ToString();
+            assembly = Assembly.LoadFrom(BaseModel.AppPath + "ItemChecker.Support.dll");
+            string ItemCheckerSupport = assembly.GetName().Version.ToString();
 
-                assembly = Assembly.LoadFrom(BaseModel.AppPath + "Newtonsoft.Json.dll");
-                string NewtonsoftJson = assembly.GetName().Version.ToString();
+            assembly = Assembly.LoadFrom(BaseModel.AppPath + "Newtonsoft.Json.dll");
+            string NewtonsoftJson = assembly.GetName().Version.ToString();
 
-                assembly = Assembly.LoadFrom(BaseModel.AppPath + "WebDriver.dll");
-                string WebDriver = assembly.GetName().Version.ToString();
+            assembly = Assembly.LoadFrom(BaseModel.AppPath + "WebDriver.dll");
+            string WebDriver = assembly.GetName().Version.ToString();
 
-                assembly = Assembly.LoadFrom(BaseModel.AppPath + "WebDriver.Support.dll");
-                string WebDriverSupport = assembly.GetName().Version.ToString();
+            assembly = Assembly.LoadFrom(BaseModel.AppPath + "WebDriver.Support.dll");
+            string WebDriverSupport = assembly.GetName().Version.ToString();
 
-                assembly = Assembly.LoadFrom(BaseModel.AppPath + "MaterialDesignColors.dll");
-                string MaterialDesignColors = assembly.GetName().Version.ToString();
+            assembly = Assembly.LoadFrom(BaseModel.AppPath + "MaterialDesignColors.dll");
+            string MaterialDesignColors = assembly.GetName().Version.ToString();
 
-                assembly = Assembly.LoadFrom(BaseModel.AppPath + "MaterialDesignThemes.Wpf.dll");
-                string MaterialDesignThemesWpf = assembly.GetName().Version.ToString();
+            assembly = Assembly.LoadFrom(BaseModel.AppPath + "MaterialDesignThemes.Wpf.dll");
+            string MaterialDesignThemesWpf = assembly.GetName().Version.ToString();
 
-                ICapabilities capabilities = ((RemoteWebDriver)Main.Browser).Capabilities;
-                var chromedriver = (capabilities.GetCapability("chrome") as Dictionary<string, object>)["chromedriverVersion"].ToString().Split(' ');
-                string ChromeDriver = chromedriver[0];
+            ICapabilities capabilities = ((ChromeDriver)Browser).Capabilities;
+            var chromedriver = (capabilities.GetCapability("chrome") as Dictionary<string, object>)["chromedriverVersion"].ToString().Split(' ');
+            string DriverVersion = chromedriver[0];
 
-                ProjectInfo.CurrentVersion = new ProjectInfo(BaseModel.Version, ItemCheckerNet, ItemCheckerSupport, NewtonsoftJson, WebDriver, WebDriverSupport, MaterialDesignColors, MaterialDesignThemesWpf, ChromeDriver);
-            }
-            catch (Exception exp)
-            {
-                errorLog(exp);
-                errorMessage(exp);
-            }
+            ProjectInfo.CurrentVersion = new ProjectInfo(BaseModel.Version, ItemCheckerNet, ItemCheckerSupport, NewtonsoftJson, WebDriver, WebDriverSupport, MaterialDesignColors, MaterialDesignThemesWpf, DriverVersion);
         }
         public static void CheckUpdate()
         {

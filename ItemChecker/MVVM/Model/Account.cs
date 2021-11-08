@@ -51,8 +51,8 @@ namespace ItemChecker.MVVM.Model
             try
             {
                 Browser.Navigate().GoToUrl("https://steamcommunity.com/market");
-                IWebElement count = WebDriverWait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//span[@id='my_market_buylistings_number']")));
-                IWebElement balance = WebDriverWait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//a[@id='header_wallet_balance']")));
+                IWebElement count = WebDriverWait.Until(e => e.FindElement(By.XPath("//span[@id='my_market_buylistings_number']")));
+                IWebElement balance = WebDriverWait.Until(e => e.FindElement(By.XPath("//a[@id='header_wallet_balance']")));
 
                 Balance = Edit.removeRub(balance.Text);
                 OrdersCount = int.Parse(count.Text);
@@ -68,7 +68,7 @@ namespace ItemChecker.MVVM.Model
             try
             {
                 Browser.Navigate().GoToUrl("https://cs.money/personal-info/");
-                IWebElement balance = WebDriverWait.Until(ExpectedConditions.ElementExists(By.XPath("//span[@class='styles_price__1m7op TradeBalance_balance__2Hxq3']/span")));
+                IWebElement balance = WebDriverWait.Until(e => e.FindElement(By.XPath("//span[@class='styles_price__1m7op TradeBalance_balance__2Hxq3']/span")));
                 BalanceCsmUsd = Edit.removeDol(balance.GetAttribute("textContent"));
                 BalanceCsm = Math.Round(BalanceCsmUsd * GeneralProperties.Default.CurrencyValue, 2);
             }
@@ -80,20 +80,20 @@ namespace ItemChecker.MVVM.Model
         public static String GetSteamApiKey()
         {
             Browser.Navigate().GoToUrl("https://steamcommunity.com/dev/apikey");
-            IWebElement register = WebDriverWait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//div[@id='bodyContents_ex']/h2")));
+            IWebElement register = WebDriverWait.Until(e => e.FindElement(By.XPath("//div[@id='bodyContents_ex']/h2")));
 
             if (register.Text == "Register for a new Steam Web API Key")
             {
-                register = WebDriverWait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//input[@id='domain']")));
+                register = WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@id='domain']")));
                 register.SendKeys("localhost");
-                register = WebDriverWait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//input[@id='agreeToTerms']")));
+                register = WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@id='agreeToTerms']")));
                 register.Click();
-                register = WebDriverWait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//input[@class='btn_green_white_innerfade btn_border_2px btn_medium']")));
+                register = WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@class='btn_green_white_innerfade btn_border_2px btn_medium']")));
                 register.Click();
                 Thread.Sleep(500);
             }
 
-            IWebElement steam_api = WebDriverWait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//div[@id='bodyContents_ex']/p")));
+            IWebElement steam_api = WebDriverWait.Until(e => e.FindElement(By.XPath("//div[@id='bodyContents_ex']/p")));
             return steam_api.Text.Replace("Key: ", null);
         }
         public static void GetAvailableAmount()

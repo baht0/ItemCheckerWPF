@@ -14,10 +14,11 @@ namespace ItemChecker.MVVM.Model
         public decimal Precent { get; set; }
         public decimal Difference { get; set; }
         public string Status { get; set; }
+        public bool Have { get; set; }
 
         public static ObservableCollection<ParserData> ParserItems = new();
 
-        public ParserData(string ItemType, string ItemName, decimal Price1, decimal Price2, decimal Price3, decimal Price4, decimal Precent, decimal Difference, string Status)
+        public ParserData(string ItemType, string ItemName, decimal Price1, decimal Price2, decimal Price3, decimal Price4, decimal Precent, decimal Difference, string Status, bool Have)
         {
             this.ItemType = ItemType;
             this.ItemName = ItemName;
@@ -28,6 +29,7 @@ namespace ItemChecker.MVVM.Model
             this.Precent = Precent;
             this.Difference = Difference;
             this.Status = Status;
+            this.Have = Have;
         }
     }
 }

@@ -22,7 +22,7 @@ namespace ItemChecker.Services
                         break;
 
                     Browser.Navigate().GoToUrl("https://cs.money/3.0/load_user_inventory/730?limit=60&noCache=true&offset=" + offset + "&order=desc&sort=price");
-                    IWebElement html = WebDriverWait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//pre")));
+                    IWebElement html = WebDriverWait.Until(e => e.FindElement(By.XPath("//pre")));
                     string json = html.Text;
                     json = JObject.Parse(json)["items"].ToString();
 
@@ -53,12 +53,11 @@ namespace ItemChecker.Services
             JArray items = new();
             foreach (JObject item in inventory)
             {
-                Thread.Sleep(1500);
                 if (item.ContainsKey("stackSize"))
                 {
                     Thread.Sleep(1500);
                     Browser.Navigate().GoToUrl("https://cs.money/2.0/get_user_stack/730/" + item["stackId"].ToString());
-                    IWebElement html = WebDriverWait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//pre")));
+                    IWebElement html = WebDriverWait.Until(e => e.FindElement(By.XPath("//pre")));
                     string json = html.Text;
                     JArray stack = JArray.Parse(json);
 

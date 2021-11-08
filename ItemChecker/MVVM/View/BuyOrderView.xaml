@@ -84,7 +84,7 @@
                             <Grid DataContext="{Binding ServicesConfig, UpdateSourceTrigger=PropertyChanged}">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="100"/>
-                                    <RowDefinition Height="130"/>
+                                    <RowDefinition Height="160"/>
                                     <RowDefinition Height="160"/>
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
@@ -118,6 +118,7 @@
                                             <RowDefinition/>
                                             <RowDefinition/>
                                             <RowDefinition/>
+                                            <RowDefinition/>
                                         </Grid.RowDefinitions>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition/>
@@ -128,7 +129,9 @@
                                                     VerticalAlignment="Center"
                                                     HorizontalAlignment="Left"
                                                     Orientation="Horizontal">
-                                            <TextBox Width="70" Text="{Binding MaxDeviation}" TextInput="Decimal_PreviewTextInput" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
+                                            <TextBox Width="70" Text="{Binding MaxDeviation}" 
+                                                     TextInput="Decimal_PreviewTextInput" ToolTip="How much more expensive an item can be"
+                                                     Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                                             <TextBlock Text="$" Margin="2 0 0 0" VerticalAlignment="Bottom"/>
                                         </StackPanel>
                                         <TextBlock Grid.Row="1" Text="Timer:" Height="15"/>
@@ -139,7 +142,10 @@
                                             <TextBox Width="70" Text="{Binding CsmTimer}" PreviewTextInput="Number_PreviewTextInput"/>
                                             <TextBlock Text="Sec." Margin="2 0 0 0" VerticalAlignment="Bottom"/>
                                         </StackPanel>
-                                        <StackPanel Grid.Row="2" Orientation="Horizontal"
+                                        <CheckBox Grid.Row="2" Grid.Column="1"
+                                                  Content="User Items" ToolTip="Allow checking user items"
+                                                  IsChecked="{Binding UserItems}"/>
+                                        <StackPanel Grid.Row="3" Orientation="Horizontal"
                                                 VerticalAlignment="Center">
                                             <Button HorizontalAlignment="Left" Style="{StaticResource MaterialDesignToolButton}" ToolTip="Add item list"
                                                     Command="{Binding DataContext.AddCsmListCommand, RelativeSource={RelativeSource AncestorType=UserControl}}">
@@ -147,7 +153,7 @@
                                             </Button>
                                             <TextBlock Text="{Binding DataContext.CsmListCount, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat='({0})'}" VerticalAlignment="Center"/>
                                         </StackPanel>
-                                        <Button Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right"
+                                        <Button Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right"
                                             Style="{StaticResource MaterialDesignFlatButton}"
                                             Command="{Binding DataContext.CsmCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding DataContext.ServicesConfig, RelativeSource={RelativeSource AncestorType=UserControl}}">
@@ -181,7 +187,8 @@
                                     VerticalAlignment="Center"
                                     HorizontalAlignment="Left"
                                     Orientation="Horizontal">
-                                            <TextBox Width="70" Text="{Binding MaxPrecent}" PreviewTextInput="Number_PreviewTextInput"/>
+                                            <TextBox Width="70" Text="{Binding MaxPrecent}" ToolTip="Acceptable item price from 'Compare Price'"
+                                                     PreviewTextInput="Number_PreviewTextInput"/>
                                             <TextBlock Text="%" Margin="2 0 0 0" VerticalAlignment="Bottom"/>
                                         </StackPanel>
                                         <TextBlock Grid.Row="2" Text="Timer:" Height="15"/>
@@ -195,8 +202,8 @@
                                         <StackPanel Grid.Row="3" Orientation="Horizontal"
                                                 VerticalAlignment="Center">
                                             <Button HorizontalAlignment="Left" ToolTip="Add item list"
-                                            Style="{StaticResource MaterialDesignToolButton}"
-                                            Command="{Binding DataContext.AddFloatListCommand, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                                    Style="{StaticResource MaterialDesignToolButton}"
+                                                    Command="{Binding DataContext.AddFloatListCommand, RelativeSource={RelativeSource AncestorType=UserControl}}">
                                                 <materialDesign:PackIcon Kind="ViewList"/>
                                             </Button>
                                             <TextBlock Text="{Binding DataContext.FloatListCount, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat='({0})'}" VerticalAlignment="Center"/>
@@ -285,7 +292,8 @@
                                     VerticalAlignment="Center"
                                     HorizontalAlignment="Left"
                                     Orientation="Horizontal">
-                                        <TextBox Width="70" Text="{Binding ServicesConfig.MaxPrice}" PreviewTextInput="Number_PreviewTextInput"/>
+                                        <TextBox Width="70" Text="{Binding ServicesConfig.MaxPrice}"
+                                                 PreviewTextInput="Number_PreviewTextInput" ToolTip="Allowable selling price"/>
                                         <TextBlock Text="₽" Margin="2 0 0 0" VerticalAlignment="Bottom"/>
                                     </StackPanel>
                                     <Button Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right"
@@ -357,16 +365,18 @@
                                     <ColumnDefinition Width="31"/>
                                     <ColumnDefinition Width="31"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" VerticalAlignment="Center"
+                                <TextBox Grid.Column="0" VerticalAlignment="Center" x:Name="FavItemTextBox"
                                          Text="{Binding SelectedFavItem}"/>
                                 <Button Grid.Column="1" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
                                         Command="{Binding AddFavoriteCommand}"
-                                        CommandParameter="{Binding SelectedFavItem}">
+                                        CommandParameter="{Binding SelectedFavItem}"
+                                        Click="FavItemTextBoxClear_Click">
                                     <materialDesign:PackIcon Kind="Add"/>
                                 </Button>
                                 <Button Grid.Column="2" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
                                         Command="{Binding RemoveFavoriteCommand}"
-                                        CommandParameter="{Binding SelectedFavItem}">
+                                        CommandParameter="{Binding SelectedFavItem}"
+                                        Click="FavItemTextBoxClear_Click">
                                     <materialDesign:PackIcon Kind="Minus"/>
                                 </Button>
                             </Grid>

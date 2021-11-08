@@ -1,6 +1,7 @@
 ﻿using ItemChecker.MVVM.Model;
 using ItemChecker.MVVM.ViewModel;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace ItemChecker.MVVM.View
@@ -48,6 +49,18 @@ namespace ItemChecker.MVVM.View
         {
             e.Cancel = true;
             this.Visibility = Visibility.Hidden;
+        }
+
+        private void Image_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                Image rectangle = sender as Image;
+                ContextMenu contextMenu = rectangle.ContextMenu;
+                contextMenu.PlacementTarget = rectangle;
+                contextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+                contextMenu.IsOpen = true;
+            }
         }
     }
 }

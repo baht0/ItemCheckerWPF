@@ -11,7 +11,7 @@ namespace ItemChecker.MVVM.Model
         public bool KnifeGlove { get; set; }
         public bool KnifeGloveStattrak { get; set; }
         //status
-        public bool Tradable { get; set; }
+        public bool Tradable { get; set; } = true;
         public bool Ordered { get; set; }
         public bool Overstock { get; set; }
         public bool Unavailable { get; set; }
@@ -61,5 +61,6 @@ namespace ItemChecker.MVVM.Model
         public decimal DifferenceTo { get; set; }
         public bool Hide100 { get; set; } = true;
         public bool Hide0 { get; set; } = true;
+        public bool Have { get; set; }
     }
 }

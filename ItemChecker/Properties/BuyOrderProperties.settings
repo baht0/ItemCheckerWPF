@@ -11,20 +11,23 @@
     <Setting Name="TimerFloat" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">10</Value>
     </Setting>
+    <Setting Name="CsmList" Type="System.Collections.Generic.List&lt;System.String&gt;" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
     <Setting Name="MaxDeviation" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)">0.01</Value>
+    </Setting>
+    <Setting Name="UserItems" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="FloatList" Type="System.Collections.Generic.List&lt;System.String&gt;" Scope="User">
+      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="Compare" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="MaxPrecent" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)">7</Value>
-    </Setting>
-    <Setting Name="CsmList" Type="System.Collections.Generic.List&lt;System.String&gt;" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="FloatList" Type="System.Collections.Generic.List&lt;System.String&gt;" Scope="User">
-      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="MaxPrice" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">100</Value>

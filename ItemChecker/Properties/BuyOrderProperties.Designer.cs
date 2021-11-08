@@ -61,6 +61,17 @@ namespace ItemChecker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Generic.List<System.String> CsmList {
+            get {
+                return ((global::System.Collections.Generic.List<System.String>)(this["CsmList"]));
+            }
+            set {
+                this["CsmList"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0.01")]
         public decimal MaxDeviation {
             get {
@@ -68,6 +79,29 @@ namespace ItemChecker.Properties {
             }
             set {
                 this["MaxDeviation"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool UserItems {
+            get {
+                return ((bool)(this["UserItems"]));
+            }
+            set {
+                this["UserItems"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Generic.List<System.String> FloatList {
+            get {
+                return ((global::System.Collections.Generic.List<System.String>)(this["FloatList"]));
+            }
+            set {
+                this["FloatList"] = value;
             }
         }
         
@@ -92,28 +126,6 @@ namespace ItemChecker.Properties {
             }
             set {
                 this["MaxPrecent"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Generic.List<System.String> CsmList {
-            get {
-                return ((global::System.Collections.Generic.List<System.String>)(this["CsmList"]));
-            }
-            set {
-                this["CsmList"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Generic.List<System.String> FloatList {
-            get {
-                return ((global::System.Collections.Generic.List<System.String>)(this["FloatList"]));
-            }
-            set {
-                this["FloatList"] = value;
             }
         }
         

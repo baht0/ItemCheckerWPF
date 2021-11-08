@@ -13,13 +13,12 @@ namespace ItemChecker.Services
 
         public static void AddQueue(string itemName, decimal price)
         {
-            if (Account.MyOrders.Any(n => n.ItemName == itemName) & OrderPlace.Queue.Contains(itemName))
-                return;
-            if ((Parser.DataCurrency == "USD" & price > Account.BalanceUsd) | (Parser.DataCurrency == "RUB" & price > Account.Balance))
+            if (Parser.DataCurrency == "USD")
+                price = Math.Round(price * GeneralProperties.Default.CurrencyValue, 2);
+
+            if (Account.MyOrders.Any(n => n.ItemName == itemName) | OrderPlace.Queue.Contains(itemName) | price > Account.Balance | OrderPlace.AmountRub + price > Account.AvailableAmount)
                 return;
 
-            if (Parser.DataCurrency == "USD")
-                OrderPlace.AmountRub = Math.Round(price * GeneralProperties.Default.CurrencyValue, 2);
             OrderPlace.AmountRub += price;
             OrderPlace.Queue.Add(itemName);
         }
@@ -31,7 +30,7 @@ namespace ItemChecker.Services
             decimal price = ParserData.ParserItems.First(p => p.ItemName == itemName).Price2;
 
             if (Parser.DataCurrency == "USD")
-                OrderPlace.AmountRub -= Math.Round(price * GeneralProperties.Default.CurrencyValue, 2);
+                price = Math.Round(price * GeneralProperties.Default.CurrencyValue, 2);
             OrderPlace.AmountRub -= price;
             OrderPlace.Queue.Remove(itemName);
         }
