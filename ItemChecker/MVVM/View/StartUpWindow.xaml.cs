@@ -14,7 +14,7 @@ namespace ItemChecker.MVVM.View
             this.DataContext = new StartUpViewModel(this);
         }
 
-        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
+        private void Window_DragMove(object sender, MouseButtonEventArgs e)
         {
             this.DragMove();
         }

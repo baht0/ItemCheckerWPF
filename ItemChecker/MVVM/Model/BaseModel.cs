@@ -15,7 +15,6 @@ namespace ItemChecker.MVVM.Model
         public static string Version { get; set; } = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         public static IWebDriver Browser { get; set; }
         public static WebDriverWait WebDriverWait { get; set; }
-        public static string SessionId { get; set; }
 
         public static CancellationTokenSource cts = new();
         public static CancellationToken token = cts.Token;

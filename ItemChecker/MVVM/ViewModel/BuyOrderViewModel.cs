@@ -583,6 +583,7 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 CsmCheckService csmCheck = new();
                 Account.GetInformations();
+                Account.GetCsmBalance();
                 UpdateInformation();
 
                 MaxProgress = BuyOrderProperties.Default.CsmList.Count;
@@ -622,6 +623,7 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 FloatCheckService floatCheck = new();
                 Account.GetInformations();
+                Account.GetSteamAccount();
                 UpdateInformation();
 
                 MaxProgress = BuyOrderProperties.Default.FloatList.Count;

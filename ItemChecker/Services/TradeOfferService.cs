@@ -16,7 +16,7 @@ namespace ItemChecker.Services
             try
             {
                 TradeOffer.TradeOffers = new();
-                string json = Get.TradeOffers(GeneralProperties.Default.SteamApiKey);
+                string json = Get.TradeOffers(Account.ApiKey);
                 JArray trades = (JArray)JObject.Parse(json)["response"]["trade_offers_received"];
                 foreach (var trade in trades)
                 {
@@ -44,7 +44,7 @@ namespace ItemChecker.Services
         {
             Browser.Navigate().GoToUrl("https://steamcommunity.com/tradeoffer/" + tradeOfferId);
             Thread.Sleep(500);
-            Browser.ExecuteJavaScript(Post.AcceptTrade(tradeOfferId, partnerId, SessionId));
+            Browser.ExecuteJavaScript(Post.AcceptTrade(tradeOfferId, partnerId, Account.SessionId));
         }
     }
 }

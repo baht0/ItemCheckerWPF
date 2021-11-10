@@ -85,13 +85,37 @@ namespace ItemChecker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string SteamApiKey {
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool SetHours {
             get {
-                return ((string)(this["SteamApiKey"]));
+                return ((bool)(this["SetHours"]));
             }
             set {
-                this["SteamApiKey"] = value;
+                this["SetHours"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("01/01/0001 17:30:00")]
+        public global::System.DateTime TurnOn {
+            get {
+                return ((global::System.DateTime)(this["TurnOn"]));
+            }
+            set {
+                this["TurnOn"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("01/01/0001 07:30:00")]
+        public global::System.DateTime TurnOff {
+            get {
+                return ((global::System.DateTime)(this["TurnOff"]));
+            }
+            set {
+                this["TurnOff"] = value;
             }
         }
         

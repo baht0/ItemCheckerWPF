@@ -608,7 +608,7 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 Task.Run(() =>
                 {
-                    if (!CheckList.Any() & ParserConfig.Manual)
+                    if (ParserConfig.Manual & !CheckList.Any())
                         return;
 
                     Parser parserConfig = (Parser)obj;
@@ -808,7 +808,7 @@ namespace ItemChecker.MVVM.ViewModel
                 string item = obj as string;
                 PlaceOrderService.RemoveQueue(item);
                 OrderAmout = OrderPlace.AmountRub;
-            }, (obj) => OrderPlace.Queue.Any());
+            }, (obj) => OrderPlace.Queue.Any() & !string.IsNullOrEmpty(SelectedQueue));
         public ICommand ClearQueueCommand =>
             new RelayCommand((obj) =>
             {

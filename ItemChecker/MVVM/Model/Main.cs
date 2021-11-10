@@ -10,6 +10,8 @@ namespace ItemChecker.MVVM.Model
     public class Main : BaseModel
     {
         public static bool IsLoading { get; set; }
+
+        public static string Theme { get; set; } = "Light";
         public static string StatusCommunity { get; set; }
 
         public static List<string> Overstock = new();
@@ -22,9 +24,9 @@ namespace ItemChecker.MVVM.Model
         {
             try
             {
-                if (String.IsNullOrEmpty(GeneralProperties.Default.SteamApiKey))
+                if (String.IsNullOrEmpty(Account.ApiKey))
                     return;
-                string json = Get.GameServersStatus(GeneralProperties.Default.SteamApiKey);
+                string json = Get.GameServersStatus(Account.ApiKey);
                 StatusCommunity = JObject.Parse(json)["result"]["services"]["SteamCommunity"].ToString();
             }
             catch

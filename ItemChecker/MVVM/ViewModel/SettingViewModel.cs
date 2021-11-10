@@ -6,12 +6,17 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.IO;
 using System.Windows.Input;
+using System.Windows;
+using System;
+using ItemChecker.Support;
+using OpenQA.Selenium.Support.Extensions;
+using System.Threading.Tasks;
 
 namespace ItemChecker.MVVM.ViewModel
 {
     public class SettingViewModel : ObservableObject
     {
-        private string _steamApiKey;
+        private string _theme;
         private Settings _settings;
         //profile
         ObservableCollection<string> _profiles;
@@ -22,15 +27,15 @@ namespace ItemChecker.MVVM.ViewModel
         private string _latestVersion;
         private string _isUpdate;
 
-        public string SteamApiKey
+        public string Theme
         {
             get
             {
-                return _steamApiKey;
+                return _theme;
             }
             set
             {
-                _steamApiKey = value;
+                _theme = value;
                 OnPropertyChanged();
             }
         }
@@ -123,7 +128,10 @@ namespace ItemChecker.MVVM.ViewModel
 
         public SettingViewModel()
         {
-            SteamApiKey = GeneralProperties.Default.SteamApiKey;
+            if (Main.Theme == "Light")
+                Theme = "WeatherNight";
+            if (Main.Theme == "Dark")
+                Theme = "WhiteBalanceSunny";
 
             CheckProfiles();
 
@@ -138,8 +146,16 @@ namespace ItemChecker.MVVM.ViewModel
                 Currency = GeneralProperties.Default.Currency,
                 ExitChrome = GeneralProperties.Default.ExitChrome,
                 Guard = GeneralProperties.Default.Guard,
+                SetHours = GeneralProperties.Default.SetHours,
+                TurnOn = GeneralProperties.Default.TurnOn,
+                TurnOff = GeneralProperties.Default.TurnOff,
+
+                SteamApiKey = Account.ApiKey,
                 NotEnoughBalance = GeneralProperties.Default.NotEnoughBalance,
                 CancelOrder = GeneralProperties.Default.CancelOrder,
+                SteamId = Account.Id64,
+                Account = Account.AccountName,
+                SteamMarket = Account.SteamMarket,
 
                 FactoryNew = FloatProperties.Default.maxFloatValue_FN,
                 MinimalWear = FloatProperties.Default.maxFloatValue_MW,
@@ -174,16 +190,39 @@ namespace ItemChecker.MVVM.ViewModel
                 });
             }
         }
-        public ICommand GetSteamApiCommand
-        {
-            get
+        //steam
+        public ICommand LogoutCommand =>
+            new RelayCommand((obj) =>
             {
-                return new RelayCommand((obj) =>
-                {
-                    SteamApiKey = Account.GetSteamApiKey();
-                }, (obj) => !Main.IsLoading);
-            }
-        }
+                MessageBoxResult result = MessageBox.Show("Are you sure you want to logout?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.No)
+                    return;
+
+                BaseModel.cts.Cancel();
+                Task.Run(() => {
+                    BaseModel.Browser.Navigate().GoToUrl("https://steamcommunity.com/market/");
+                    BaseModel.Browser.ExecuteJavaScript("Logout();");
+                    BaseModel.BrowserExit();
+                }).Wait(6000);
+                Application.Current.Shutdown();
+            }, (obj) => !Main.IsLoading & !Main.Timer.Enabled);
+        public ICommand CopyIdCommand =>
+            new RelayCommand((obj) =>
+            {
+                Clipboard.SetText(Account.Id64);
+            });
+        public ICommand OpenMarketCommand =>
+            new RelayCommand((obj) =>
+            {
+                Edit.openUrl("https://help.steampowered.com/en/faqs/view/71D3-35C2-AD96-AA3A");
+            }, (obj) => Account.SteamMarket == "Disabled");
+        public ICommand GetSteamApiCommand =>
+            new RelayCommand((obj) =>
+            {
+                Account.GetSteamApiKey();
+                Settings.SteamApiKey = Account.ApiKey;
+            }, (obj) => !Main.IsLoading);
+        //profile
         public ICommand AddProfileCommand
         {
             get
@@ -211,6 +250,7 @@ namespace ItemChecker.MVVM.ViewModel
                 }, (obj) => Profiles.Count != 1);
             }
         }
+        //about
         public ICommand WhatIsNewCommand => 
             new RelayCommand((obj) =>
             {
@@ -242,11 +282,14 @@ namespace ItemChecker.MVVM.ViewModel
             }, (obj) => !Main.IsLoading);
         void SaveConfig(Settings settings)
         {
-            GeneralProperties.Default.SteamApiKey = SteamApiKey;
             GeneralProperties.Default.CurrencyApiKey = settings.CurrencyApi;
             GeneralProperties.Default.Currency = settings.Currency;
             GeneralProperties.Default.ExitChrome = settings.ExitChrome;
             GeneralProperties.Default.Guard = settings.Guard;
+            GeneralProperties.Default.SetHours = settings.SetHours;
+            GeneralProperties.Default.TurnOn = settings.TurnOn;
+            GeneralProperties.Default.TurnOff = settings.TurnOff;
+
             GeneralProperties.Default.NotEnoughBalance = settings.NotEnoughBalance;
             GeneralProperties.Default.CancelOrder = settings.CancelOrder;
 
@@ -260,5 +303,23 @@ namespace ItemChecker.MVVM.ViewModel
 
             GeneralProperties.Default.Save();
         }
+
+        public ICommand ThemeCommand =>
+            new RelayCommand((obj) =>
+            {
+                App app = (App)Application.Current;
+                if (Main.Theme == "Light")
+                {
+                    Theme = "WhiteBalanceSunny";
+                    app.ChangeTheme(new("/Themes/Dark.xaml", UriKind.RelativeOrAbsolute));
+                    Main.Theme = "Dark";
+                }
+                else if (Main.Theme == "Dark")
+                {
+                    Theme = "WeatherNight";
+                    app.ChangeTheme(new("/Themes/Light.xaml", UriKind.RelativeOrAbsolute));
+                    Main.Theme = "Light";
+                }
+            });
     }
 }

@@ -135,7 +135,7 @@ namespace ItemChecker.Services
                     MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
             {
-                Main.Browser.ExecuteJavaScript(Post.BuyListing(listing_id, fee, subtotal, total, SessionId));
+                Main.Browser.ExecuteJavaScript(Post.BuyListing(listing_id, fee, subtotal, total, Account.SessionId));
                 OrderStatistic.PurchasesMade++;
             }
         }

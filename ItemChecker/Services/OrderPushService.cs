@@ -14,6 +14,7 @@ namespace ItemChecker.Services
             try
             {
                 Account.GetInformations();
+                Account.GetSteamAccount();
                 OrderCheckService order = new();
                 order.SteamOrders();
             }
@@ -32,9 +33,9 @@ namespace ItemChecker.Services
 
             if (highest_buy_order > order.OrderPrice & Account.Balance >= highest_buy_order & (highest_buy_order - order.OrderPrice) <= Account.AvailableAmount)
             {
-                Browser.ExecuteJavaScript(Post.CancelBuyOrder(order.OrderId, SessionId));
+                Browser.ExecuteJavaScript(Post.CancelBuyOrder(order.OrderId, Account.SessionId));
                 Thread.Sleep(2000);
-                Browser.ExecuteJavaScript(Post.CreateBuyOrder(market_hash_name, highest_buy_order, SessionId));
+                Browser.ExecuteJavaScript(Post.CreateBuyOrder(market_hash_name, highest_buy_order, Account.SessionId));
                 Thread.Sleep(1500);
                 OrderStatistic.Push++;
             }

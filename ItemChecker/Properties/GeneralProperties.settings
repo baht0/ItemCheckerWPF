@@ -17,8 +17,14 @@
     <Setting Name="Guard" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="SteamApiKey" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+    <Setting Name="SetHours" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="TurnOn" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)">01/01/0001 17:30:00</Value>
+    </Setting>
+    <Setting Name="TurnOff" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)">01/01/0001 07:30:00</Value>
     </Setting>
     <Setting Name="NotEnoughBalance" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>

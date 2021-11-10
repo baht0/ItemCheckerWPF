@@ -78,7 +78,8 @@
                       ItemsSource="{Binding ParserGridView, UpdateSourceTrigger=PropertyChanged}"
                       SelectedItem="{Binding SelectedParserItem}"
                       KeyDown="DataGrid_KeyDown"
-                      MouseDoubleClick="DataGrid_MouseDoubleClick">
+                      MouseDoubleClick="DataGrid_MouseDoubleClick"
+                      ToolTip="Press 'Insert' to add to queue&#x0a;Press 'F' to add to favorites">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="" Binding="{Binding Type}" CanUserResize="False" Width="1" Visibility="Hidden"/>
                     <DataGridTextColumn Binding="{Binding ItemName}" CanUserResize="False" Width="auto" MaxWidth="380" MinWidth="250">
@@ -120,19 +121,19 @@
                     <ColumnDefinition Width="30"/>
                 </Grid.ColumnDefinitions>
                 <Button Grid.Column="0" x:Name="OpenFilter"
-                        Style="{StaticResource MaterialDesignToolButton}">
+                        Style="{StaticResource MaterialDesignToolForegroundButton}">
                     <materialDesign:PackIcon Kind="FormatListBulleted"/>
                 </Button>
                 <TextBlock Grid.Column="1" Text="Search Item:" VerticalAlignment="Center"/>
                 <TextBox Grid.Column="2" VerticalAlignment="Center"
                          Text="{Binding SearchString}"/>
-                <Button Grid.Column="3" Style="{StaticResource MaterialDesignToolButton}">
+                <Button Grid.Column="3" Style="{StaticResource MaterialDesignToolForegroundButton}">
                     <materialDesign:PackIcon Kind="Close"/>
                 </Button>
             </Grid>
             <!--filter-->
             <Border x:Name="FilterGrid" HorizontalAlignment="Left" Grid.RowSpan="4" Margin="-20 0 0 0"
-                    Width="0" Background="WhiteSmoke"
+                    Width="0" Background="{DynamicResource ElementBackground}"
                     BorderBrush="LightSlateGray" BorderThickness="0.5">
                 <Grid Margin="5">
                     <Grid.RowDefinitions>
@@ -328,7 +329,7 @@
                             </Grid>
                         </GroupBox>
                     </Grid>
-                    <Button Grid.Row="1" Style="{StaticResource MaterialDesignToolButton}"
+                    <Button Grid.Row="1" Style="{StaticResource MaterialDesignToolForegroundButton}"
                             HorizontalAlignment="Left" VerticalAlignment="Bottom"
                             Margin="20 0 0 0" x:Name="CloseFilter">
                         <materialDesign:PackIcon Kind="ArrowLeft"/>
@@ -366,9 +367,9 @@
                 </Grid.RowDefinitions>
                 <materialDesign:ColorZone Background="Transparent" Grid.Row="0">
                     <StackPanel Orientation="Horizontal" Margin="2" HorizontalAlignment="Center">
-                        <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="tryskinsTab" Margin="2" Content="TrySkins" IsChecked="{Binding Tryskins}"/>
-                        <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="manualTab" Margin="2" Content="Manual" IsChecked="{Binding Manual}"/>
-                        <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="queueTab" Margin="2" Content="Queue" IsChecked="{Binding Queue}"/>
+                        <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="tryskinsTab" Margin="2" Content="TrySkins" IsChecked="{Binding Tryskins, UpdateSourceTrigger=PropertyChanged}"/>
+                        <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="manualTab" Margin="2" Content="Manual" IsChecked="{Binding Manual, UpdateSourceTrigger=PropertyChanged}"/>
+                        <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="queueTab" Margin="2" Content="Queue" IsChecked="{Binding Queue, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                 </materialDesign:ColorZone>
                 <Border Grid.Row="1"
@@ -478,7 +479,7 @@
                                         Command="{Binding DataContext.ClearListCommand, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}">
                                 <materialDesign:PackIcon Kind="Remove"/>
                             </Button>
-                            <ListBox Background="WhiteSmoke" Grid.Row="3" x:Name="checkList"
+                            <ListBox Background="{DynamicResource ElementBackground}" Grid.Row="3" x:Name="checkList"
                                      ItemsSource="{Binding DataContext.CheckList, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}"
                                      SelectedItem="{Binding DataContext.SelectedItem, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
                             <Grid Grid.Row="4">
@@ -537,7 +538,7 @@
                                     <materialDesign:PackIcon Kind="Minus"/>
                                 </Button>
                             </Grid>
-                            <ListBox Background="WhiteSmoke" Grid.Row="2"
+                            <ListBox Background="{DynamicResource ElementBackground}" Grid.Row="2"
                                      ItemsSource="{Binding DataContext.PlaceOrderItems, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}"
                                      SelectedItem="{Binding DataContext.SelectedQueue, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
                         </Grid>
@@ -599,9 +600,8 @@
                             CommandParameter="{Binding ParserConfig}">
                     <materialDesign:PackIcon Kind="Play"/>
                 </Button>
-                <ProgressBar Grid.ColumnSpan="3"
-                             VerticalAlignment="Bottom"
-                             Height="3"
+                <ProgressBar Grid.ColumnSpan="3" VerticalAlignment="Bottom"
+                             Height="3" Style="{StaticResource MaterialDesignLinearProgressBar}"
                              Value="{Binding CurrentProgress}"
                              Maximum="{Binding MaxProgress}"/>
             </Grid>

@@ -38,11 +38,11 @@ namespace ItemChecker.Services
         {
             var market_hash_name = Edit.MarketHashName(itemName);
             Main.Browser.Navigate().GoToUrl("https://steamcommunity.com/market/listings/730/" + market_hash_name);
-            var item_nameid = Edit.ItemNameId(Main.Browser.PageSource);
+            var item_nameid = Edit.ItemNameId(Browser.PageSource);
             var highest_buy_order = Get.ItemOrdersHistogram(item_nameid);
 
             if (Account.Balance > highest_buy_order)
-                Main.Browser.ExecuteJavaScript(Post.CreateBuyOrder(market_hash_name, highest_buy_order, Main.SessionId));
+                Main.Browser.ExecuteJavaScript(Post.CreateBuyOrder(market_hash_name, highest_buy_order, Account.SessionId));
         }
     }
 }

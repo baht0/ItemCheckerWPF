@@ -16,7 +16,7 @@ namespace ItemChecker.MVVM.View
             InitializeComponent();
             DataContext = new BuyOrderViewModel();
         }
-        private void DragMove_MouseDown(object sender, MouseButtonEventArgs e)
+        private void Window_DragMove(object sender, MouseButtonEventArgs e)
         {
             this.DragMove();
         }

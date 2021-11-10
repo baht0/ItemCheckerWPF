@@ -62,7 +62,7 @@ namespace ItemChecker.Services
             var sell_price = item.Price;
             sell_price = Edit.CommissionSteam(sell_price - 0.01m);
 
-            Browser.ExecuteJavaScript(Post.SellItem(item.AssetId, (sell_price * 100).ToString(), SessionId));
+            Browser.ExecuteJavaScript(Post.SellItem(item.AssetId, (sell_price * 100).ToString(), Account.SessionId));
         }
         Decimal checkPrice(string name)
         {

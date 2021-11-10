@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net5.0-windows</TargetFramework>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>Resources\logo-taskbar.ico</ApplicationIcon>
@@ -27,7 +27,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Selenium.Support" Version="4.0.1" />
     <PackageReference Include="Selenium.WebDriver" Version="4.0.1" />
-    <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="95.0.4638.5401" />
+    <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="95.0.4638.6900" />
   </ItemGroup>
 
   <ItemGroup>

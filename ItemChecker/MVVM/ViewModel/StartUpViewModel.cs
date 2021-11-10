@@ -103,14 +103,14 @@ namespace ItemChecker.MVVM.ViewModel
                 CompletionUpdate();
                 LaunchBrowser();
                 CheckUpdate();
-                Status = "Status Steam...";
-                Main.StatusSteam();
-
-                LoginSteam();
-                LoginTryskins();
-                LoginCsm();
                 Status = "Get Informations...";
                 Account.GetInformations();
+
+                SteamAccount();
+                LoginCsm();
+                LoginTryskins();
+                Status = "Status Steam...";
+                Main.StatusSteam();
                 Status = "Check Steam Orders...";
                 OrderCheckService order = new();
                 order.SteamOrders();
@@ -221,19 +221,18 @@ namespace ItemChecker.MVVM.ViewModel
             ProjectInfoService.CheckUpdate();
         }
 
-        void LoginSteam()
+        void SteamAccount()
         {
             if (BaseModel.token.IsCancellationRequested)
                 return;
-            Status = "Login Steam...";
-            BaseModel.Browser.Navigate().GoToUrl("https://steamcommunity.com/login/home/?goto=");
-            string cookie = BaseModel.Browser.Manage().Cookies.GetCookieNamed("sessionid").ToString();
-            BaseModel.SessionId = cookie.Substring(10, 24);
+            Status = "Steam Account...";
+
+            BaseModel.Browser.Navigate().GoToUrl("https://steamcommunity.com/login/");
 
             if (BaseModel.Browser.Url.Contains("id") | BaseModel.Browser.Url.Contains("profiles"))
             {
-                IWebElement account = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//span[@class='persona online']")));
-                Account.AccountName = account.GetAttribute("textContent");
+                Account.GetSteamAccount();
+                Account.GetSteamApiKey();
                 return;
             }
 
@@ -259,7 +258,7 @@ namespace ItemChecker.MVVM.ViewModel
             code.SendKeys(OpenQA.Selenium.Keys.Enter);
 
             Thread.Sleep(4000);
-            LoginSteam();
+            SteamAccount();
         }
         public ICommand LoginCommand =>
             new RelayCommand((obj) =>
@@ -272,6 +271,31 @@ namespace ItemChecker.MVVM.ViewModel
                 //    Directory.Delete($"{BaseModel.AppPath}\\Profiles\\{GeneralProperties.Default.Profile}", true);
 
             }, (obj) => IsLogin & !String.IsNullOrEmpty(Login.Login) & Login.Code2AF.Length == 5);
+        void LoginCsm()
+        {
+            if (BaseModel.token.IsCancellationRequested | GeneralProperties.Default.Guard)
+                return;
+            Status = "Login Cs.Money...";
+
+            BaseModel.Browser.Navigate().GoToUrl("https://cs.money/pending-trades");
+            IWebElement html = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//pre")));
+            string json = html.Text;
+
+            if (json.Contains("error"))
+            {
+                string code_error = JObject.Parse(json)["error"].ToString();
+                if (code_error == "6")
+                {
+                    BaseModel.Browser.Navigate().GoToUrl("https://auth.dota.trade/login?redirectUrl=https://cs.money/&callbackUrl=https://cs.money/login");
+
+                    IWebElement signins = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@class='btn_green_white_innerfade']")));
+                    signins.Click();
+                    Thread.Sleep(500);
+                }
+                LoginCsm();
+            }
+            Account.GetCsmBalance();
+        }
         void LoginTryskins()
         {
             if (BaseModel.token.IsCancellationRequested)
@@ -290,30 +314,6 @@ namespace ItemChecker.MVVM.ViewModel
             Thread.Sleep(300);
 
             LoginTryskins();
-        }
-        void LoginCsm()
-        {
-            if (BaseModel.token.IsCancellationRequested | GeneralProperties.Default.Guard)
-                return;
-            Status = "Login Cs.Money...";
-
-            BaseModel.Browser.Navigate().GoToUrl("https://cs.money/pending-trades");
-            IWebElement html = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//pre")));
-            string json = html.Text;
-
-            if (json.Contains("error"))
-            {
-                var code_error = JObject.Parse(json)["error"].ToString();
-                if (code_error == "6")
-                {
-                    Main.Browser.Navigate().GoToUrl("https://auth.dota.trade/login?redirectUrl=https://cs.money/&callbackUrl=https://cs.money/login");
-
-                    IWebElement signins = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@class='btn_green_white_innerfade']")));
-                    signins.Click();
-                    Thread.Sleep(500);
-                }
-                LoginCsm();
-            }
         }
     }
 }

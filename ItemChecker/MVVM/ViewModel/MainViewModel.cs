@@ -11,7 +11,7 @@ namespace ItemChecker.MVVM.ViewModel
 {
     public class MainViewModel : ObservableObject
     {
-        string _accountName;
+        string _user;
         decimal _course;
         decimal _balance;
         decimal _balanceCsm;
@@ -23,12 +23,12 @@ namespace ItemChecker.MVVM.ViewModel
         string _statusSessions;
         //favorite
         private ObservableCollection<string> _favoriteList = new();
-        public string AccountName
+        public string User
         {
-            get { return _accountName; }
+            get { return _user; }
             set
             {
-                _accountName = value;
+                _user = value;
                 OnPropertyChanged();
             }
         }
@@ -136,7 +136,7 @@ namespace ItemChecker.MVVM.ViewModel
         }
         protected void UpdateInformation()
         {
-            AccountName = Account.AccountName;
+            User = Account.User;
             Course = GeneralProperties.Default.CurrencyValue;
             Balance = Account.Balance;
             BalanceCsm = Account.BalanceCsm;

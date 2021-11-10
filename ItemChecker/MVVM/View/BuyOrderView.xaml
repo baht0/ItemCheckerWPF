@@ -28,7 +28,7 @@
                                     Orientation="Horizontal" VerticalAlignment="Center"
                                     VirtualizationMode="Recycling">
                 <Button HorizontalAlignment="Right" VerticalAlignment="Center"
-                        Style="{StaticResource MaterialDesignToolButton}"
+                        Style="{StaticResource MaterialDesignToolForegroundButton}"
                         Command="{Binding ReloadCommand}">
                     <materialDesign:PackIcon Kind="Reload"/>
                 </Button>
@@ -44,7 +44,8 @@
                       ItemsSource="{Binding OrderedGrid, UpdateSourceTrigger=PropertyChanged}"
                       SelectedItem="{Binding SelectedOrderItem}"
                       KeyDown="DataGrid_KeyDown"
-                      MouseDoubleClick="DataGrid_MouseDoubleClick">
+                      MouseDoubleClick="DataGrid_MouseDoubleClick"
+                      ToolTip="Press 'Backspace' to cancel order&#x0a;Press 'F' to add to favorites">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="" Binding="{Binding Type}" CanUserResize="False" Width="1" Visibility="Hidden"/>
                     <DataGridTextColumn Header="Item" Binding="{Binding ItemName}" CanUserResize="False" Width="auto" MaxWidth="380" MinWidth="250"/>
@@ -147,7 +148,7 @@
                                                   IsChecked="{Binding UserItems}"/>
                                         <StackPanel Grid.Row="3" Orientation="Horizontal"
                                                 VerticalAlignment="Center">
-                                            <Button HorizontalAlignment="Left" Style="{StaticResource MaterialDesignToolButton}" ToolTip="Add item list"
+                                            <Button HorizontalAlignment="Left" Style="{StaticResource MaterialDesignToolForegroundButton}" ToolTip="Add item list"
                                                     Command="{Binding DataContext.AddCsmListCommand, RelativeSource={RelativeSource AncestorType=UserControl}}">
                                                 <materialDesign:PackIcon Kind="ViewList"/>
                                             </Button>
@@ -202,7 +203,7 @@
                                         <StackPanel Grid.Row="3" Orientation="Horizontal"
                                                 VerticalAlignment="Center">
                                             <Button HorizontalAlignment="Left" ToolTip="Add item list"
-                                                    Style="{StaticResource MaterialDesignToolButton}"
+                                                    Style="{StaticResource MaterialDesignToolForegroundButton}"
                                                     Command="{Binding DataContext.AddFloatListCommand, RelativeSource={RelativeSource AncestorType=UserControl}}">
                                                 <materialDesign:PackIcon Kind="ViewList"/>
                                             </Button>
@@ -356,7 +357,7 @@
                                     <materialDesign:PackIcon Kind="Remove"/>
                                 </Button>
                             </Grid>
-                            <ListBox Grid.Row="2" Background="WhiteSmoke"
+                            <ListBox Grid.Row="2" Background="{DynamicResource ElementBackground}"
                                      ItemsSource="{Binding FavoriteList, UpdateSourceTrigger=PropertyChanged}"
                                      SelectedItem="{Binding SelectedFavItem}"/>
                             <Grid Grid.Row="3">
@@ -390,9 +391,8 @@
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <ProgressBar Grid.ColumnSpan="2"
-                             VerticalAlignment="Bottom"
-                             Height="3"
+                <ProgressBar Grid.ColumnSpan="2" VerticalAlignment="Bottom"
+                             Height="3" Style="{StaticResource MaterialDesignLinearProgressBar}"
                              Maximum="{Binding MaxProgress}"
                              Value="{Binding CurrentProgress}"/>
                 <TextBlock Grid.Column="0" Text="{Binding TimerStatus}" 

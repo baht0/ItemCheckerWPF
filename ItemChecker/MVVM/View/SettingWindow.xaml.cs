@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
 using ItemChecker.MVVM.ViewModel;
@@ -16,11 +17,11 @@ namespace ItemChecker.MVVM.View
             this.DataContext = new SettingViewModel();
         }
 
-        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void Window_DragMove(object sender, MouseButtonEventArgs e)
         {
             this.DragMove();
         }
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void Button_Close(object sender, RoutedEventArgs e)
         {
             this.Close();
         }

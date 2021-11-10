@@ -8,8 +8,8 @@
         mc:Ignorable="d"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         d:DataContext="{d:DesignInstance Type=viewModel:BuyOrderViewModel}"
-        TextElement.Foreground="{StaticResource MaterialDesignBody}"
-        Background="{StaticResource MaterialDesignLightBackground}"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource Background}"
         TextElement.FontWeight="Normal"
         TextElement.FontSize="12"
         FontFamily="{materialDesign:MaterialDesignFont}"
@@ -33,14 +33,15 @@
                 <RowDefinition/>
                 <RowDefinition Height="25"/>
             </Grid.RowDefinitions>
-            <Grid Grid.Row="0" x:Name="TitleBar" Background="WhiteSmoke">
+            <Grid Grid.Row="0" MouseLeftButtonDown="Window_DragMove"
+                  Background="Transparent">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
                 <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Grid.Column="0">
                     <Image Source="../../Resources/ico.png" Height="18" Margin="1"
-                           MouseDown="Image_MouseDown">
+                           MouseLeftButtonDown="Image_MouseDown">
                         <Image.ContextMenu>
                             <ContextMenu Style="{StaticResource MaterialDesignContextMenu}">
                                 <MenuItem Header="OpenFolder" Command="{Binding OpenFolderCommand}"></MenuItem>
@@ -59,10 +60,10 @@
                 </StackPanel>
                 <StackPanel Margin="0 0 -10 0" HorizontalAlignment="Right" Orientation="Horizontal" Grid.Column="1">
                     <TextBlock Text="BETA" VerticalAlignment="Center"/>
-                    <Button Height="25" Style="{StaticResource MaterialDesignToolButton}">
+                    <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}">
                         <materialDesign:PackIcon Kind="Bell"/>
                     </Button>
-                    <Button Height="25" Style="{StaticResource MaterialDesignToolButton}" Click="Setting_Click">
+                    <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}" Click="Setting_Click">
                         <materialDesign:PackIcon Kind="Settings"/>
                     </Button>
                     <Button Height="25" Style="{StaticResource MaterialDesignFlatButton}" Click="MinWin_Click">
@@ -79,15 +80,15 @@
                     Height="150" Width="500" Background="WhiteSmoke" Visibility="Hidden"
                     BorderBrush="LightSlateGray" BorderThickness="0.5"></Border>
             <!--/body-->
-            <Grid Grid.Row="2" x:Name="StatusBar" VerticalAlignment="Center" Background="WhiteSmoke">
+            <Grid Grid.Row="2" x:Name="StatusBar" VerticalAlignment="Center">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0">
                     <TextBlock.Text>
-                        <MultiBinding StringFormat="Account: {0} | Balance: {1}₽ / {2}₽">
-                            <Binding Path="AccountName"/>
+                        <MultiBinding StringFormat="User: {0} | Balance: {1}₽ / {2}₽">
+                            <Binding Path="User"/>
                             <Binding Path="Balance" />
                             <Binding Path="BalanceCsm" />
                         </MultiBinding>
@@ -116,8 +117,8 @@
                             <ToolTip Content="Overstock/Unavailable"/>
                         </TextBlock.ToolTip>
                     </TextBlock>
-                    <TextBlock x:Name="steamStatusOk">                    
-                    <materialDesign:PackIcon Kind="{Binding StatusCommunity}"/>
+                    <TextBlock x:Name="steamStatusOk">
+                        <materialDesign:PackIcon Kind="{Binding StatusCommunity}"/>
                         <TextBlock.ToolTip>
                             <ToolTip Content="Steam Status"/>
                         </TextBlock.ToolTip>

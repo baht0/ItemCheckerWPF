@@ -12,22 +12,26 @@ namespace ItemChecker.MVVM.Model
 {
     public class Account : Main
     {
-        //start
+        //login
         public string Login { get; set; }
         public string Password { get; set; }
         public bool Remember { get; set; }
         public string Code2AF { get; set; }
 
         //informations
+        public static string SessionId { get; set; }
+        public static string Id64 { get; set; }
         public static string AccountName { get; set; }
+        public static string User { get; set; }
+        public static string SteamMarket { get; set; } = "Enabled";
         public static decimal Balance { get; set; } = 0.00m;
         public static decimal BalanceUsd { get; set; } = 0.00m;
         public static decimal BalanceCsm { get; set; } = 0.00m;
         public static decimal BalanceCsmUsd { get; set; } = 0.00m;
+        public static string ApiKey { get; set; }
 
         //orders
         public static List<OrderData> MyOrders = new();
-        public static int OrdersCount { get; set; } = 0;
         public static decimal AvailableAmount { get; set; } = 0.00m;
 
         public static void GetInformations()
@@ -38,32 +42,40 @@ namespace ItemChecker.MVVM.Model
                 GeneralProperties.Default.CurrencyValue = course;
                 GeneralProperties.Default.Save();
             }
-            GetSteamBalance();
-            if (!GeneralProperties.Default.Guard)
-                GetCsmBalance();
 
             Get get = new();
             Overstock = get.Overstock();
             Unavailable = get.Unavailable();
         }
-        static void GetSteamBalance()
+        public static void GetSteamAccount()
         {
             try
             {
-                Browser.Navigate().GoToUrl("https://steamcommunity.com/market");
-                IWebElement count = WebDriverWait.Until(e => e.FindElement(By.XPath("//span[@id='my_market_buylistings_number']")));
+                Browser.Navigate().GoToUrl("https://steamcommunity.com/market/");
+                ICookieJar cookie = Browser.Manage().Cookies;
+                SessionId = cookie.GetCookieNamed("sessionid").Value.ToString();
+                string steamLoginSecure = cookie.GetCookieNamed("steamLoginSecure").Value.ToString();
+                Id64 = steamLoginSecure.Substring(0, 17);
+                Browser.Manage().Cookies.AddCookie(new Cookie("Steam_Language", "english", "steamcommunity.com", "/", DateTime.Now.AddYears(5), true, false, "None"));
+
                 IWebElement balance = WebDriverWait.Until(e => e.FindElement(By.XPath("//a[@id='header_wallet_balance']")));
+                IWebElement user = WebDriverWait.Until(e => e.FindElement(By.XPath("//span[@id='account_pulldown']")));
+                IWebElement account = WebDriverWait.Until(e => e.FindElement(By.XPath("//span[@class='persona online']")));
 
                 Balance = Edit.removeRub(balance.Text);
-                OrdersCount = int.Parse(count.Text);
                 BalanceUsd = Math.Round(Balance / GeneralProperties.Default.CurrencyValue, 2);
+                User = user.Text;
+                AccountName = account.GetAttribute("textContent");
+
+                if (Browser.FindElement(By.XPath("//id[@class='market_headertip_container market_headertip_container_warning']")).Displayed)
+                    SteamMarket = "Disabled";
             }
             catch (Exception exp)
             {
                 errorLog(exp);
             }
         }
-        static void GetCsmBalance()
+        public static void GetCsmBalance()
         {
             try
             {
@@ -77,7 +89,7 @@ namespace ItemChecker.MVVM.Model
                 errorLog(exp);
             }
         }
-        public static String GetSteamApiKey()
+        public static void GetSteamApiKey()
         {
             Browser.Navigate().GoToUrl("https://steamcommunity.com/dev/apikey");
             IWebElement register = WebDriverWait.Until(e => e.FindElement(By.XPath("//div[@id='bodyContents_ex']/h2")));
@@ -94,7 +106,7 @@ namespace ItemChecker.MVVM.Model
             }
 
             IWebElement steam_api = WebDriverWait.Until(e => e.FindElement(By.XPath("//div[@id='bodyContents_ex']/p")));
-            return steam_api.Text.Replace("Key: ", null);
+            ApiKey = steam_api.Text.Replace("Key: ", null);
         }
         public static void GetAvailableAmount()
         {

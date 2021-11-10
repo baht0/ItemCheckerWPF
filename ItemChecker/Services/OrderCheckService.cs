@@ -51,18 +51,18 @@ namespace ItemChecker.MVVM.Model
         }
         void getSteamlist()
         {
-            BaseModel.Browser.Navigate().GoToUrl("https://steamcommunity.com/market/");
+            Browser.Navigate().GoToUrl("https://steamcommunity.com/market/");
 
             int table_index = 1;
-            IWebElement table = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//div[@class='my_listing_section market_content_block market_home_listing_table']/h3/span[1]")));
+            IWebElement table = WebDriverWait.Until(e => e.FindElement(By.XPath("//div[@class='my_listing_section market_content_block market_home_listing_table']/h3/span[1]")));
             if (table.Text == "My listings awaiting confirmation") table_index = 2;
 
-            List<IWebElement> items = BaseModel.Browser.FindElements(By.XPath("//div[@class='my_listing_section market_content_block market_home_listing_table'][" + table_index + "]/div[@class='market_listing_row market_recent_listing_row']")).ToList();
+            List<IWebElement> items = Browser.FindElements(By.XPath("//div[@class='my_listing_section market_content_block market_home_listing_table'][" + table_index + "]/div[@class='market_listing_row market_recent_listing_row']")).ToList();
             int i = 2;
             foreach (IWebElement item in items)
             {
                 string[] str = item.Text.Split("\n");
-                IWebElement id = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//div[@class='my_listing_section market_content_block market_home_listing_table'][" + table_index + "]/div[" + i + "]")));
+                IWebElement id = WebDriverWait.Until(e => e.FindElement(By.XPath("//div[@class='my_listing_section market_content_block market_home_listing_table'][" + table_index + "]/div[" + i + "]")));
                 
                 string itemName = str[2].Trim();
                 string type = "White";

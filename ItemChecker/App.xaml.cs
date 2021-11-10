@@ -2,11 +2,13 @@
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Drawing;
 using Forms = System.Windows.Forms;
+using Model = ItemChecker.MVVM.Model;
 using ItemChecker.MVVM.ViewModel;
 using ItemChecker.MVVM.View;
 using ItemChecker.Support;
-using System.Drawing;
+using ItemChecker.Properties;
 
 namespace ItemChecker
 {
@@ -20,6 +22,15 @@ namespace ItemChecker
         public App()
         {
             notifyIcon = new();
+        }
+        public ResourceDictionary ThemeDictionary => Resources.MergedDictionaries[0];
+
+        public void ChangeTheme(Uri uri)
+        {
+            string current = ThemeDictionary.MergedDictionaries[0].Source.ToString();
+
+            ThemeDictionary.MergedDictionaries.Clear();
+            ThemeDictionary.MergedDictionaries.Add(new ResourceDictionary() { Source = uri });
         }
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -44,6 +55,22 @@ namespace ItemChecker
         }
         private void ApplicationStart(object sender, StartupEventArgs e)
         {
+            if (GeneralProperties.Default.SetHours)
+            {
+                var turnOn = DateTime.Today.Date + GeneralProperties.Default.TurnOn.TimeOfDay;
+                var turnOff = (DateTime.Now.Date + GeneralProperties.Default.TurnOff.TimeOfDay).AddDays(1);
+                if (turnOn < DateTime.Now & turnOff > DateTime.Now)
+                {
+                    Model.Main.Theme = "Dark";
+                    ChangeTheme(new("/Themes/Dark.xaml", UriKind.RelativeOrAbsolute));
+                }
+                else
+                {
+                    Model.Main.Theme = "Light";
+                    ChangeTheme(new("/Themes/Light.xaml", UriKind.RelativeOrAbsolute));
+                }
+            }
+
             Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
             Window start = new StartWindow();
             start.ShowDialog();

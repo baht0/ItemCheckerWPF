@@ -11,7 +11,7 @@ namespace ItemChecker.Services
         //delete order
         public void CancelOrder(OrderData order)
         {
-            Browser.ExecuteJavaScript(Post.CancelBuyOrder(order.OrderId, Main.SessionId));
+            Browser.ExecuteJavaScript(Post.CancelBuyOrder(order.OrderId, Account.SessionId));
             Account.MyOrders.Remove(order);
 
             Account.GetAvailableAmount();
