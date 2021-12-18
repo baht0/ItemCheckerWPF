@@ -15,7 +15,7 @@ namespace ItemChecker.Services
         {
             try
             {
-                TradeOffer.TradeOffers = new();
+                DataTradeOffer.TradeOffers = new();
                 string json = Get.TradeOffers(Account.ApiKey);
                 JArray trades = (JArray)JObject.Parse(json)["response"]["trade_offers_received"];
                 foreach (var trade in trades)
@@ -23,7 +23,7 @@ namespace ItemChecker.Services
                     var trade_status = trade["trade_offer_state"].ToString();
                     if (trade_status == "2")
                     {
-                        TradeOffer.TradeOffers.Add(new TradeOffer()
+                        DataTradeOffer.TradeOffers.Add(new DataTradeOffer()
                         {
                             TradeOfferId = trade["tradeofferid"].ToString(),
                             PartnerId = trade["accountid_other"].ToString()
@@ -33,7 +33,7 @@ namespace ItemChecker.Services
                         continue;
                 }
 
-                return TradeOffer.TradeOffers.Any();
+                return DataTradeOffer.TradeOffers.Any();
             }
             catch
             {

@@ -2,11 +2,11 @@
 
 namespace ItemChecker.MVVM.Model
 {
-    public class TradeOffer
+    public class DataTradeOffer
     {
         public string TradeOfferId { get; set; }
         public string PartnerId { get; set; }
 
-        public static List<TradeOffer> TradeOffers = new();
+        public static List<DataTradeOffer> TradeOffers = new();
     }
 }

@@ -7,7 +7,7 @@
         xmlns:viewModel="clr-namespace:ItemChecker.MVVM.ViewModel"
         mc:Ignorable="d"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        d:DataContext="{d:DesignInstance Type=viewModel:BuyOrderViewModel}"
+        d:DataContext="{d:DesignInstance Type=viewModel:HomeViewModel}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource Background}"
         TextElement.FontWeight="Normal"
@@ -19,7 +19,7 @@
         WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="NoResize"
         Closing="Window_Closing">
     <Window.Resources>
-        <DataTemplate DataType="{x:Type viewModel:BuyOrderViewModel}">
+        <DataTemplate DataType="{x:Type viewModel:HomeViewModel}">
             <view:BuyOrderView DataContext="{Binding}"/>
         </DataTemplate>
         <DataTemplate DataType="{x:Type viewModel:ParserViewModel}">
@@ -33,19 +33,28 @@
                 <RowDefinition/>
                 <RowDefinition Height="25"/>
             </Grid.RowDefinitions>
-            <Grid Grid.Row="0" MouseLeftButtonDown="Window_DragMove"
+            <Grid Grid.Row="0"
                   Background="Transparent">
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="162.643333333333"/>
                     <ColumnDefinition/>
-                    <ColumnDefinition/>
+                    <ColumnDefinition Width="172.93"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Grid.Column="0">
                     <Image Source="../../Resources/ico.png" Height="18" Margin="1"
                            MouseLeftButtonDown="Image_MouseDown">
                         <Image.ContextMenu>
                             <ContextMenu Style="{StaticResource MaterialDesignContextMenu}">
-                                <MenuItem Header="OpenFolder" Command="{Binding OpenFolderCommand}"></MenuItem>
-                                <MenuItem Header="Exit" Command="{Binding ExitCommand}"></MenuItem>
+                                <MenuItem Header="Links">
+                                    <MenuItem Header="TrySkins"/>
+                                    <Separator/>
+                                    <MenuItem Header="Cs.Money"/>
+                                    <Separator/>
+                                    <MenuItem Header="Inventory"/>
+                                    <MenuItem Header="SteamMarket"/>
+                                </MenuItem>
+                                <MenuItem Header="OpenFolder" Command="{Binding OpenFolderCommand}"/>
+                                <MenuItem Header="Exit" Command="{Binding ExitCommand}"/>
                             </ContextMenu>
                         </Image.ContextMenu>
                     </Image>
@@ -58,7 +67,9 @@
                         <TextBlock Text="Parser"/>
                     </Button>
                 </StackPanel>
-                <StackPanel Margin="0 0 -10 0" HorizontalAlignment="Right" Orientation="Horizontal" Grid.Column="1">
+                <Grid Background="Transparent" Grid.Column="1"  MouseLeftButtonDown="Window_DragMove"/>
+                <StackPanel Grid.Column="2" Margin="0 0 -10 0"
+                            HorizontalAlignment="Right" Orientation="Horizontal">
                     <TextBlock Text="BETA" VerticalAlignment="Center"/>
                     <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}">
                         <materialDesign:PackIcon Kind="Bell"/>
@@ -78,7 +89,8 @@
             <ContentControl Grid.Row="1" Content="{Binding}" Margin="10" />
             <Border VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 25 0 0"
                     Height="150" Width="500" Background="WhiteSmoke" Visibility="Hidden"
-                    BorderBrush="LightSlateGray" BorderThickness="0.5"></Border>
+                    BorderBrush="LightSlateGray" BorderThickness="0.5">
+            </Border>
             <!--/body-->
             <Grid Grid.Row="2" x:Name="StatusBar" VerticalAlignment="Center">
                 <Grid.ColumnDefinitions>

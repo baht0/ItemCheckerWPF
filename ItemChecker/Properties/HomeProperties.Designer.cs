@@ -12,12 +12,12 @@ namespace ItemChecker.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.10.0.0")]
-    internal sealed partial class BuyOrderProperties : global::System.Configuration.ApplicationSettingsBase {
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.0.3.0")]
+    internal sealed partial class HomeProperties : global::System.Configuration.ApplicationSettingsBase {
         
-        private static BuyOrderProperties defaultInstance = ((BuyOrderProperties)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new BuyOrderProperties())));
+        private static HomeProperties defaultInstance = ((HomeProperties)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new HomeProperties())));
         
-        public static BuyOrderProperties Default {
+        public static HomeProperties Default {
             get {
                 return defaultInstance;
             }

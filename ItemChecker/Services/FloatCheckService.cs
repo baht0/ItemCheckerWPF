@@ -15,7 +15,7 @@ namespace ItemChecker.Services
 {
     public class FloatCheckService : BaseService
     {
-        FloatData floatData = new();
+        DataFloat floatData = new();
         public void checkFloat(string item)
         {
             string market_hash_name = Edit.MarketHashName(item);
@@ -42,7 +42,7 @@ namespace ItemChecker.Services
                     decimal price = total / 100;
 
                     floatData.Precent = Edit.Precent(floatData.PriceCompare, price);
-                    if (floatData.Precent > BuyOrderProperties.Default.MaxPrecent)
+                    if (floatData.Precent > HomeProperties.Default.MaxPrecent)
                         break;
 
                     string ass_id = JObject.Parse(json)["listinginfo"][listing_id]["asset"]["id"].ToString();
@@ -64,7 +64,7 @@ namespace ItemChecker.Services
                 {
                     continue;
                 }
-                if (Main.token.IsCancellationRequested)
+                if (BaseModel.token.IsCancellationRequested)
                     break;
             }
         }
@@ -90,7 +90,7 @@ namespace ItemChecker.Services
                 floatData.CsmPrice = Convert.ToDecimal(JObject.Parse(response.Item1)["csm"]["sell"].ToString());
                 floatData.CsmPrice = Math.Round(floatData.CsmPrice * GeneralProperties.Default.CurrencyValue, 2);
 
-                switch (BuyOrderProperties.Default.Compare)
+                switch (HomeProperties.Default.Compare)
                 {
                     case 0:
                         floatData.PriceCompare = floatData.LowestPrice;
@@ -135,8 +135,8 @@ namespace ItemChecker.Services
                     MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
             {
-                Main.Browser.ExecuteJavaScript(Post.BuyListing(listing_id, fee, subtotal, total, Account.SessionId));
-                OrderStatistic.PurchasesMade++;
+                BaseModel.Browser.ExecuteJavaScript(Post.BuyListing(listing_id, fee, subtotal, total, Account.SessionId));
+                Home.PurchasesMade++;
             }
         }
 

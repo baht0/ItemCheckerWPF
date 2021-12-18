@@ -1,7 +1,5 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using ItemChecker.Support;
@@ -86,12 +84,11 @@ namespace ItemChecker.Net
         {
             return Request(@"http://api.steampowered.com/IEconService/GetTradeOffers/v1/?key=" + steam_api_key + "&get_received_offers=1&active_only=100");
         }
-        public static Decimal ItemOrdersHistogram(int item_nameid)
+        public static JObject ItemOrdersHistogram(int item_nameid)
         {
-            var json = Request("https://steamcommunity.com/market/itemordershistogram?country=RU&language=english&currency=5&item_nameid=" + item_nameid + "&two_factor=0");
+            string json = Request("https://steamcommunity.com/market/itemordershistogram?country=RU&language=english&currency=5&item_nameid=" + item_nameid + "&two_factor=0");
 
-            var highest_buy_order = Convert.ToDecimal(JObject.Parse(json)["highest_buy_order"].ToString());
-            return highest_buy_order / 100;
+            return JObject.Parse(json);
         }
 
         public static Decimal Course(string currency_api_key)
@@ -117,33 +114,6 @@ namespace ItemChecker.Net
             {
                 return 0;
             }
-        }
-
-        public List<string> Overstock()
-        {
-            WebClient client = new();
-            var str = client.DownloadString("https://cs.money/list_overstock?appId=730");
-            var json = JsonConvert.DeserializeObject<RootObject[]>(str);
-            List<string> list = new();
-
-            foreach (var rootObject in json)
-                list.Add(Edit.replaceSymbols(rootObject.market_hash_name));
-            return list;
-        }
-        public List<string> Unavailable()
-        {
-            WebClient client = new();
-            var str = client.DownloadString("https://cs.money/list_unavailable?appId=730");
-            var json = JsonConvert.DeserializeObject<RootObject[]>(str);
-            List<string> list = new();
-
-            foreach (var rootObject in json)
-                list.Add(Edit.replaceSymbols(rootObject.market_hash_name));
-            return list;
-        }
-        private class RootObject
-        {
-            public string market_hash_name { get; set; }
         }
     }
 }

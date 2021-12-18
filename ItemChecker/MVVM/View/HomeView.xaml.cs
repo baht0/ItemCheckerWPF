@@ -12,7 +12,7 @@ namespace ItemChecker.MVVM.View
         public BuyOrderView()
         {
             InitializeComponent();
-            this.DataContext = new BuyOrderViewModel();
+            this.DataContext = new HomeViewModel();
         }
         private void Number_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
@@ -30,7 +30,7 @@ namespace ItemChecker.MVVM.View
             {
                 if (e.Key == Key.Back)
                 {
-                    BuyOrderViewModel viewModel = (BuyOrderViewModel)DataContext;
+                    HomeViewModel viewModel = (HomeViewModel)DataContext;
                     if (viewModel.CancelOrderCommand.CanExecute(null))
                         viewModel.CancelOrderCommand.Execute(viewModel.SelectedOrderItem);
                 }
@@ -38,7 +38,7 @@ namespace ItemChecker.MVVM.View
                 {
                     MainViewModel viewModel = (MainViewModel)DataContext;
                     if (viewModel.AddFavoriteCommand.CanExecute(null))
-                        viewModel.AddFavoriteCommand.Execute(((BuyOrderViewModel)DataContext).SelectedOrderItem);
+                        viewModel.AddFavoriteCommand.Execute(((HomeViewModel)DataContext).SelectedOrderItem);
                 }
             }
         }
@@ -73,14 +73,12 @@ namespace ItemChecker.MVVM.View
                 }
             }
         }
-
         private void TimerTextBlock_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            BuyOrderViewModel viewModel = (BuyOrderViewModel)DataContext;
+            HomeViewModel viewModel = (HomeViewModel)DataContext;
             if (viewModel.TimerCommand.CanExecute(null))
                 viewModel.TimerCommand.Execute(null);
         }
-
         private void FavItemTextBoxClear_Click(object sender, RoutedEventArgs e)
         {
             FavItemTextBox.Text = string.Empty;

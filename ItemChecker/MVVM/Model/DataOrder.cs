@@ -1,6 +1,9 @@
-﻿namespace ItemChecker.MVVM.Model
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+
+namespace ItemChecker.MVVM.Model
 {
-    public class OrderData
+    public class DataOrder
     {
         public string Type { get; set; }
         public string ItemName { get; set; }
@@ -11,8 +14,14 @@
         public decimal CsmBuy { get; set; }
         public decimal Precent { get; set; }
         public decimal Difference { get; set; }
+        //my orders
+        public static List<DataOrder> Orders { get; set; } = new();
+        public static decimal AvailableAmount { get; set; } = 0.00m;
+        //place
+        public static ObservableCollection<string> Queue { get; set; } = new();
+        public static decimal AmountRub { get; set; } = 0;
 
-        public OrderData(string Type, string ItemName, string OrderId, decimal StmPrice, decimal OrderPrice, decimal CsmPrice, decimal CsmBuy, decimal Precent, decimal Difference)
+        public DataOrder(string Type, string ItemName, string OrderId, decimal StmPrice, decimal OrderPrice, decimal CsmPrice, decimal CsmBuy, decimal Precent, decimal Difference)
         {
             this.Type = Type;
             this.ItemName = ItemName;

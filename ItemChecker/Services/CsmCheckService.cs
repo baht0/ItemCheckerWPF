@@ -22,7 +22,7 @@ namespace ItemChecker.Services
         {
             string[] item_line = checkItem.Split(';');
 
-            string json = Get.InventoriesCsMoney(Edit.MarketHashName(item_line[0]), BuyOrderProperties.Default.UserItems);
+            string json = Get.InventoriesCsMoney(Edit.MarketHashName(item_line[0]), HomeProperties.Default.UserItems);
             if (!json.Contains("error"))
             {
                 JArray items = new();
@@ -31,9 +31,9 @@ namespace ItemChecker.Services
                 {
                     if ((string)item["fullName"] != item_line[0])
                         continue;
-                    if (checkItem.Contains(";"))
+                    if (checkItem.Contains(';'))
                     {
-                        decimal maxPrice = decimal.Parse(item_line[1]) + BuyOrderProperties.Default.MaxDeviation;
+                        decimal maxPrice = decimal.Parse(item_line[1]) + HomeProperties.Default.MaxDeviation;
                         decimal price = Convert.ToDecimal(item["price"]);
                         if (price > maxPrice)
                             break;
@@ -51,6 +51,19 @@ namespace ItemChecker.Services
                 if (items.Any())
                     addCart(items);
             }
+        }
+        public void CheckItem()
+        {
+            //string[] item_line = itemName.Split(';');
+
+            //List<DataInventoryCsm> items = DataInventoryCsm.Inventory.Where(n => n.NameCsmId == 56).ToList();
+            //if (items.Any())
+            //{
+            //    foreach (var item in items)
+            //    {
+
+            //    }
+            //}
         }
         Boolean addCart(JArray items)
         {
@@ -136,7 +149,7 @@ namespace ItemChecker.Services
                         new JProperty("action", "confirm"));
             string body = json.ToString(Formatting.None);
             Browser.ExecuteJavaScript(Post.FetchRequest("application/json", body, "https://cs.money/confirm_virtual_offer"));
-            OrderStatistic.SuccessfulTrades++;
+            Home.SuccessfulTrades++;
             Thread.Sleep(1500);
             old_id.Add(id);
         }

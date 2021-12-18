@@ -3,6 +3,7 @@ using ItemChecker.Net;
 using ItemChecker.Support;
 using OpenQA.Selenium.Support.Extensions;
 using System;
+using System.Linq;
 using System.Threading;
 
 namespace ItemChecker.Services
@@ -13,7 +14,7 @@ namespace ItemChecker.Services
         {
             try
             {
-                Account.GetInformations();
+                Account.GetBase();
                 Account.GetSteamAccount();
                 OrderCheckService order = new();
                 order.SteamOrders();
@@ -23,21 +24,20 @@ namespace ItemChecker.Services
                 errorLog(exp);
             }
         }
-        public void PushItems(OrderData order)
+        public void PushItems(DataOrder order)
         {
             string market_hash_name = Edit.MarketHashName(order.ItemName);
             Browser.Navigate().GoToUrl("https://steamcommunity.com/market/listings/730/" + market_hash_name);
-            Thread.Sleep(500);
-            int item_nameid = Edit.ItemNameId(Browser.PageSource);
-            decimal highest_buy_order = Get.ItemOrdersHistogram(item_nameid);
+            int item_nameid = ItemBase.SkinsBase.Where(x => x.ItemName == order.ItemName).Select(x => x.SteamId).FirstOrDefault();
+            decimal highest_buy_order = Convert.ToDecimal(Get.ItemOrdersHistogram(item_nameid)["highest_buy_order"]) / 100;
 
-            if (highest_buy_order > order.OrderPrice & Account.Balance >= highest_buy_order & (highest_buy_order - order.OrderPrice) <= Account.AvailableAmount)
+            if (highest_buy_order > order.OrderPrice & Account.Balance >= highest_buy_order & (highest_buy_order - order.OrderPrice) <= DataOrder.AvailableAmount)
             {
                 Browser.ExecuteJavaScript(Post.CancelBuyOrder(order.OrderId, Account.SessionId));
                 Thread.Sleep(2000);
                 Browser.ExecuteJavaScript(Post.CreateBuyOrder(market_hash_name, highest_buy_order, Account.SessionId));
                 Thread.Sleep(1500);
-                OrderStatistic.Push++;
+                Home.Push++;
             }
             CheckConditions(order, highest_buy_order);
         }

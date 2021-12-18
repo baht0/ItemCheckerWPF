@@ -4,6 +4,8 @@ namespace ItemChecker.MVVM.Model
 {
     public class Filter
     {
+        public static Filter FilterConfig { get; set; }
+
         //category
         public bool Normal { get; set; }
         public bool Stattrak { get; set; }

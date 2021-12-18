@@ -61,12 +61,12 @@ namespace ItemChecker
                 var turnOff = (DateTime.Now.Date + GeneralProperties.Default.TurnOff.TimeOfDay).AddDays(1);
                 if (turnOn < DateTime.Now & turnOff > DateTime.Now)
                 {
-                    Model.Main.Theme = "Dark";
+                    Model.BaseModel.Theme = "Dark";
                     ChangeTheme(new("/Themes/Dark.xaml", UriKind.RelativeOrAbsolute));
                 }
                 else
                 {
-                    Model.Main.Theme = "Light";
+                    Model.BaseModel.Theme = "Light";
                     ChangeTheme(new("/Themes/Light.xaml", UriKind.RelativeOrAbsolute));
                 }
             }

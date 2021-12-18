@@ -1,14 +1,33 @@
 ﻿using ItemChecker.MVVM.Model;
+using ItemChecker.Net;
+using ItemChecker.Support;
 using Microsoft.Win32;
+using OpenQA.Selenium;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace ItemChecker.Services
 {
-    public class BaseService : Main
+    public class BaseService : BaseModel
     {
+        protected String ParseMrinka(string itemName)
+        {
+            Tuple<String, Boolean> response = Tuple.Create(string.Empty, false);
+            do
+            {
+                response = Get.MrinkaRequest(Edit.MarketHashName(itemName));
+                if (!response.Item2)
+                {
+                    Thread.Sleep(30000);
+                }
+            }
+            while (!response.Item2);
+
+            return response.Item1;
+        }
         protected List<string> OpenFileDialog(string filter)
         {
             List<string> itemList = new();

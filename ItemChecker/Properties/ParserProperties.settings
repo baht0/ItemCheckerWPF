@@ -2,52 +2,58 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ItemChecker.Properties" GeneratedClassName="ParserProperties">
   <Profiles />
   <Settings>
-    <Setting Name="tryskins" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
-    </Setting>
-    <Setting Name="manual" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
-    <Setting Name="queue" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
-    <Setting Name="serviceOne" Type="System.Int32" Scope="User">
+    <Setting Name="ServiceOne" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="serviceTwo" Type="System.Int32" Scope="User">
+    <Setting Name="ServiceTwo" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">1</Value>
     </Setting>
-    <Setting Name="maxPrecent" Type="System.Decimal" Scope="User">
+    <Setting Name="MaxPrecent" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)">60</Value>
     </Setting>
-    <Setting Name="minPrecent" Type="System.Decimal" Scope="User">
+    <Setting Name="MinPrecent" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)">35</Value>
     </Setting>
-    <Setting Name="maxPrice" Type="System.Decimal" Scope="User">
+    <Setting Name="MaxPrice" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="minPrice" Type="System.Decimal" Scope="User">
+    <Setting Name="MinPrice" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="steamSales" Type="System.Int32" Scope="User">
+    <Setting Name="SteamSales" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="nameContains" Type="System.String" Scope="User">
+    <Setting Name="NameContains" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="knife" Type="System.Boolean" Scope="User">
+    <Setting Name="KnifeTS" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="stattrak" Type="System.Boolean" Scope="User">
+    <Setting Name="StattrakTS" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="souvenir" Type="System.Boolean" Scope="User">
+    <Setting Name="SouvenirTS" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="sticker" Type="System.Boolean" Scope="User">
+    <Setting Name="StickerTS" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="checkList" Type="System.Collections.ObjectModel.ObservableCollection&lt;System.String&gt;" Scope="User">
+    <Setting Name="SouvenirM" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="StattrakM" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="KnifeGloveM" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="KnifeGloveStattrakM" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="OverstockM" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="CheckList" Type="System.Collections.Generic.List&lt;System.String&gt;" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>

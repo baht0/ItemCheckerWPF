@@ -1,6 +1,6 @@
 ﻿namespace ItemChecker.MVVM.Model
 {
-    public class OrderStatistic
+    public class HomeStatistic
     {
         public static string CurrentService { get; set; } = "Unknown";
         public static bool PushService { get; set; }

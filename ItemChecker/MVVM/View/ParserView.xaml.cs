@@ -50,6 +50,7 @@ namespace ItemChecker.MVVM.View
                 object item = parserGrid.CurrentItem;
                 PropertyInfo info = item.GetType().GetProperty("ItemName");
                 string ItemName = (string)info.GetValue(item, null);
+                ItemName = Edit.removeDoppler(ItemName);
 
                 string market_has_name = Edit.MarketHashName(ItemName);
                 int columnIndex = parserGrid.CurrentColumn.DisplayIndex;
@@ -84,6 +85,11 @@ namespace ItemChecker.MVVM.View
                         break;
                 }
             }
+        }
+        private void TextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+                SearchTxt.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
         }
     }
 }

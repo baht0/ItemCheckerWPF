@@ -2,6 +2,7 @@
 using ItemChecker.Net;
 using ItemChecker.Properties;
 using OpenQA.Selenium.Support.Extensions;
+using System.Linq;
 
 namespace ItemChecker.Services
 {
@@ -9,29 +10,29 @@ namespace ItemChecker.Services
     {
 
         //delete order
-        public void CancelOrder(OrderData order)
+        public void CancelOrder(DataOrder order)
         {
             Browser.ExecuteJavaScript(Post.CancelBuyOrder(order.OrderId, Account.SessionId));
-            Account.MyOrders.Remove(order);
+            DataOrder.Orders.Remove(order);
 
             Account.GetAvailableAmount();
         }
-        protected void CheckConditions(OrderData order, decimal orderPrice)
+        protected void CheckConditions(DataOrder order, decimal orderPrice)
         {
             if (GeneralProperties.Default.NotEnoughBalance & Account.Balance < orderPrice)
             {
                 CancelOrder(order);
-                OrderStatistic.Cancel++;
+                Home.Cancel++;
             }
             if (GeneralProperties.Default.CancelOrder > order.Precent & order.Precent != -100)
             {
                 CancelOrder(order);
-                OrderStatistic.Cancel++;
+                Home.Cancel++;
             }
-            if (Main.Overstock.Contains(order.ItemName) | Main.Unavailable.Contains(order.ItemName))
+            if (ItemBase.Overstock.Any(x => x.ItemName == order.ItemName) | ItemBase.Unavailable.Any(x => x.ItemName == order.ItemName))
             {
                 CancelOrder(order);
-                OrderStatistic.Cancel++;
+                Home.Cancel++;
             }
         }
     }

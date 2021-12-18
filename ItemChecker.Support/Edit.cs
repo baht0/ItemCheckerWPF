@@ -75,6 +75,21 @@ namespace ItemChecker.Support
             int id = Convert.ToInt32(System.Text.RegularExpressions.Regex.Replace(str, @"[^\d]+", ""));
             return id;
         }
+        public static String removeDoppler(string itemName)
+        {
+            if (itemName.Contains("★") & itemName.Contains("Doppler"))
+            {
+                itemName = itemName.Replace(" Phase 1", string.Empty);
+                itemName = itemName.Replace(" Phase 2", string.Empty);
+                itemName = itemName.Replace(" Phase 3", string.Empty);
+                itemName = itemName.Replace(" Phase 4", string.Empty);
+                itemName = itemName.Replace(" Ruby", string.Empty);
+                itemName = itemName.Replace(" Sapphire", string.Empty);
+                itemName = itemName.Replace(" Black Pearl", string.Empty);
+                itemName = itemName.Replace(" Emerald", string.Empty);
+            }
+            return itemName;
+        }
 
         public static String replaceSymbols(string str)
         {
@@ -82,9 +97,13 @@ namespace ItemChecker.Support
             str = str.Replace("â˜…", "★");
             return str;
         }
-        public static decimal Converter(decimal value, decimal currency)
+        public static Decimal ConverterToRub(decimal value, decimal currency)
         {
             return Math.Round(value * currency, 2);
+        }
+        public static Decimal ConverterToUsd(decimal value, decimal currency)
+        {
+            return Math.Round(value / currency, 2);
         }
         public static Decimal Precent(decimal a, decimal b) //from A to B
         {
@@ -103,14 +122,10 @@ namespace ItemChecker.Support
         }
 
         //time
-        public static String convertTime(double time)
+        public static DateTime ConvertFromUnixTimestamp(double timestamp)
         {
-            DateTime start = UnixTimeToDateTime(time);
-            DateTime end = DateTime.Now;
-            double tick = (end - start).TotalSeconds;
-
-            TimeSpan tm = TimeSpan.FromSeconds(tick);
-            return tm.ToString("hh':'mm");
+            DateTime origin = new(1970, 1, 1, 0, 0, 0, 0);
+            return origin.AddMilliseconds(timestamp).ToLocalTime();
         }
         public static DateTime UnixTimeToDateTime(double unixtime)
         {

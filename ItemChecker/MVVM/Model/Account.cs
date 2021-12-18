@@ -1,16 +1,16 @@
 ﻿using ItemChecker.Net;
 using ItemChecker.Properties;
+using ItemChecker.Services;
 using ItemChecker.Support;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
 namespace ItemChecker.MVVM.Model
 {
-    public class Account : Main
+    public class Account : BaseModel
     {
         //login
         public string Login { get; set; }
@@ -30,11 +30,7 @@ namespace ItemChecker.MVVM.Model
         public static decimal BalanceCsmUsd { get; set; } = 0.00m;
         public static string ApiKey { get; set; }
 
-        //orders
-        public static List<OrderData> MyOrders = new();
-        public static decimal AvailableAmount { get; set; } = 0.00m;
-
-        public static void GetInformations()
+        public static void GetBase()
         {
             decimal course = Get.Course(GeneralProperties.Default.CurrencyApiKey);
             if (course != 0)
@@ -43,9 +39,10 @@ namespace ItemChecker.MVVM.Model
                 GeneralProperties.Default.Save();
             }
 
-            Get get = new();
-            Overstock = get.Overstock();
-            Unavailable = get.Unavailable();
+            ItemBaseService get = new();
+            get.Overstock();
+            get.Unavailable();
+            get.ItemsBase();
         }
         public static void GetSteamAccount()
         {
@@ -110,12 +107,12 @@ namespace ItemChecker.MVVM.Model
         }
         public static void GetAvailableAmount()
         {
-            AvailableAmount = Balance * 10;
-            if (MyOrders.Any())
+            DataOrder.AvailableAmount = Balance * 10;
+            if (DataOrder.Orders.Any())
             {
-                decimal sum = MyOrders.Sum(s => s.OrderPrice);
+                decimal sum = DataOrder.Orders.Sum(s => s.OrderPrice);
 
-                AvailableAmount = Math.Round(AvailableAmount - sum, 2);
+                DataOrder.AvailableAmount = Math.Round(DataOrder.AvailableAmount - sum, 2);
             }
         }
     }

@@ -131,8 +131,8 @@ namespace ItemChecker.MVVM.ViewModel
         {
             UpdateInformation();
 
-            if (BuyOrderProperties.Default.FavoriteList != null)
-                FavoriteList = BuyOrderProperties.Default.FavoriteList;
+            if (HomeProperties.Default.FavoriteList != null)
+                FavoriteList = HomeProperties.Default.FavoriteList;
         }
         protected void UpdateInformation()
         {
@@ -142,10 +142,10 @@ namespace ItemChecker.MVVM.ViewModel
             BalanceCsm = Account.BalanceCsm;
             BalanceUsd = Account.BalanceUsd;
             BalanceCsmUsd = Account.BalanceCsmUsd;
-            Overstock = Main.Overstock.Count;
-            Unavailable = Main.Unavailable.Count;
+            Overstock = ItemBase.Overstock.Count;
+            Unavailable = ItemBase.Unavailable.Count;
             StatusCommunity = "CheckCircle";
-            if (Main.StatusCommunity != "normal")
+            if (BaseModel.StatusCommunity != "normal")
                 StatusCommunity = "CloseCircle";
         }
         public ICommand OpenFolderCommand =>
@@ -167,24 +167,26 @@ namespace ItemChecker.MVVM.ViewModel
             new RelayCommand((obj) =>
             {
                 string itemName = string.Empty;
-                if (obj is OrderData)
+                if (obj is DataOrder)
                 {
-                    var item = obj as OrderData;
+                    var item = obj as DataOrder;
                     itemName = item.ItemName;
                 }
-                else if (obj is ParserData)
+                else if (obj is DataParser)
                 {
-                    var item = obj as ParserData;
+                    var item = obj as DataParser;
                     itemName = item.ItemName;
                 }
                 else if (obj is string)
                 {
                     itemName = (string)obj;
+                    if (string.IsNullOrEmpty(itemName))
+                        return;
                 }
-                if (!BuyOrderProperties.Default.FavoriteList.Contains(itemName))
+                if (HomeProperties.Default.FavoriteList != null & !HomeProperties.Default.FavoriteList.Contains(itemName))
                 {
-                    BuyOrderProperties.Default.FavoriteList.Add(itemName);
-                    BuyOrderProperties.Default.Save();
+                    HomeProperties.Default.FavoriteList.Add(itemName);
+                    HomeProperties.Default.Save();
                 }
             });
     }

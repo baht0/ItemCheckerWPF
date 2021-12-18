@@ -1,6 +1,6 @@
 ﻿using ItemChecker.Properties;
+using ItemChecker.Support;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,40 +14,65 @@ namespace ItemChecker.MVVM.Model
         {
             string[] str = item.Text.Split("\n");
             string item_name = str[0].Trim();
-            ParserData response = CheckItems(item_name);
+            DataParser response = CheckList(item_name);
 
-            ParserData.ParserItems.Add(response);
+            DataParser.ParserItems.Add(response);
+        }
+
+        void LoginTryskins()
+        {
+            if (BaseModel.token.IsCancellationRequested)
+                return;
+
+            BaseModel.Browser.Navigate().GoToUrl("https://table.altskins.com/site/items");
+            if (BaseModel.Browser.Url.Contains("items"))
+                return;
+
+            BaseModel.Browser.Navigate().GoToUrl("https://table.altskins.com/login/steam");
+
+            IWebElement account = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//div[@class='OpenID_loggedInAccount']")));
+            IWebElement signins = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@class='btn_green_white_innerfade']")));
+            signins.Click();
+            Thread.Sleep(300);
+
+            LoginTryskins();
         }
         public List<IWebElement> GetItems()
         {
             try
             {
-                decimal min_sta = 2;
-                if (ParserProperties.Default.minPrice == 0)
+                LoginTryskins();
+                decimal minPrice = ParserProperties.Default.MinPrice;
+                int bal = 15;
+                while (bal < Account.BalanceUsd & ParserProperties.Default.MinPrice == 0)
                 {
-                    int j = 15;
-                    do
-                    {
-                        j += 15;
-                        min_sta += 5;
-                    }
-                    while (j < Account.BalanceUsd);
-                    min_sta -= 2;
+                    bal += 15;
+                    minPrice += 5;
                 }
-                else min_sta = ParserProperties.Default.minPrice;
-                decimal max_sta = Account.BalanceUsd;
-                if (ParserProperties.Default.maxPrice != 0)
-                    max_sta = ParserProperties.Default.maxPrice;
 
-                string serviceOne = getService(ParserProperties.Default.serviceOne);
-                string serviceTwo = getService(ParserProperties.Default.serviceTwo);
-                int knife = getType(ParserProperties.Default.knife);
-                int stattrak = getType(ParserProperties.Default.stattrak);
-                int souvenir = getType(ParserProperties.Default.souvenir);
-                int sticker = getType(ParserProperties.Default.sticker);
+                decimal maxPrice = Account.BalanceUsd;
+                if (ParserProperties.Default.MaxPrice != 0)
+                    maxPrice = ParserProperties.Default.MaxPrice;
+                string sales = string.Empty;
+                if (ParserProperties.Default.SteamSales != 0)
+                    sales = ParserProperties.Default.SteamSales.ToString();
+                string minPrecent = string.Empty;
+                if (ParserProperties.Default.MinPrecent != 0)
+                    minPrecent = ParserProperties.Default.MinPrecent.ToString();
+                string maxPrecent = string.Empty;
+                if (ParserProperties.Default.MaxPrecent != 0)
+                    maxPrecent = ParserProperties.Default.MaxPrecent.ToString();
+
+                int knife = getType(ParserProperties.Default.KnifeTS);
+                int stattrak = getType(ParserProperties.Default.StattrakTS);
+                int souvenir = getType(ParserProperties.Default.SouvenirTS);
+                int sticker = getType(ParserProperties.Default.StickerTS);
+                string serviceOne = getService(ParserProperties.Default.ServiceOne);
+                string serviceTwo = getService(ParserProperties.Default.ServiceTwo);
+                string marketHashName = Edit.MarketHashName(ParserProperties.Default.NameContains);
 
                 List<IWebElement> items = new();
-                string url = "https://table.altskins.com/site/items?ItemsFilter%5Bknife%5D=0&ItemsFilter%5Bknife%5D=" + knife + "&ItemsFilter%5Bstattrak%5D=0&ItemsFilter%5Bstattrak%5D=" + stattrak + "&ItemsFilter%5Bsouvenir%5D=0&ItemsFilter%5Bsouvenir%5D=" + souvenir + "&ItemsFilter%5Bsticker%5D=0&ItemsFilter%5Bsticker%5D=" + sticker + "&ItemsFilter%5Btype%5D=1&ItemsFilter%5Bservice1%5D=" + serviceOne + "&ItemsFilter%5Bservice2%5D=" + serviceTwo + "&ItemsFilter%5Bunstable1%5D=1&ItemsFilter%5Bunstable2%5D=1&ItemsFilter%5Bhours1%5D=192&ItemsFilter%5Bhours2%5D=192&ItemsFilter%5BpriceFrom1%5D=" + min_sta + "&ItemsFilter%5BpriceTo1%5D=" + max_sta + "&ItemsFilter%5BpriceFrom2%5D=&ItemsFilter%5BpriceTo2%5D=&ItemsFilter%5BsalesBS%5D=&ItemsFilter%5BsalesTM%5D=&ItemsFilter%5BsalesST%5D=" + ParserProperties.Default.steamSales + "&ItemsFilter%5Bname%5D=&ItemsFilter%5Bservice1Minutes%5D=&ItemsFilter%5Bservice2Minutes%5D=&ItemsFilter%5BpercentFrom1%5D=" + ParserProperties.Default.minPrecent + "&ItemsFilter%5BpercentFrom2%5D=&ItemsFilter%5Btimeout%5D=5&ItemsFilter%5Bservice1CountFrom%5D=1&ItemsFilter%5Bservice1CountTo%5D=&ItemsFilter%5Bservice2CountFrom%5D=1&ItemsFilter%5Bservice2CountTo%5D=&ItemsFilter%5BpercentTo1%5D=" + ParserProperties.Default.maxPrecent + "&ItemsFilter%5BpercentTo2%5D=&page=1&per-page=30";
+                string url = "https://table.altskins.com/site/items?ItemsFilter%5Bknife%5D=0&ItemsFilter%5Bknife%5D=" + knife + "&ItemsFilter%5Bstattrak%5D=0&ItemsFilter%5Bstattrak%5D=" + stattrak + "&ItemsFilter%5Bsouvenir%5D=0&ItemsFilter%5Bsouvenir%5D=" + souvenir + "&ItemsFilter%5Bsticker%5D=0&ItemsFilter%5Bsticker%5D=" + sticker + "&ItemsFilter%5Btype%5D=1&ItemsFilter%5Bservice1%5D=" + serviceOne + "&ItemsFilter%5Bservice2%5D=" + serviceTwo + "&ItemsFilter%5Bunstable1%5D=1&ItemsFilter%5Bunstable2%5D=1&ItemsFilter%5Bhours1%5D=192&ItemsFilter%5Bhours2%5D=192&ItemsFilter%5BpriceFrom1%5D=" + minPrice + "&ItemsFilter%5BpriceTo1%5D=" + maxPrice + "&ItemsFilter%5BpriceFrom2%5D=&ItemsFilter%5BpriceTo2%5D=&ItemsFilter%5BsalesBS%5D=&ItemsFilter%5BsalesTM%5D=&ItemsFilter%5BsalesST%5D=" + sales + "&ItemsFilter%5Bname%5D=" + marketHashName + "&ItemsFilter%5Bservice1Minutes%5D=&ItemsFilter%5Bservice2Minutes%5D=&ItemsFilter%5BpercentFrom1%5D=" + minPrecent + "&ItemsFilter%5BpercentFrom2%5D=&ItemsFilter%5Btimeout%5D=5&ItemsFilter%5Bservice1CountFrom%5D=1&ItemsFilter%5Bservice1CountTo%5D=&ItemsFilter%5Bservice2CountFrom%5D=1&ItemsFilter%5Bservice2CountTo%5D=&ItemsFilter%5BpercentTo1%5D=" + maxPrecent + "&ItemsFilter%5BpercentTo2%5D=&page=1&per-page=30";
                 BaseModel.Browser.Navigate().GoToUrl(url);
                 int last;
                 do
@@ -59,17 +84,21 @@ namespace ItemChecker.MVVM.Model
                     jse.ExecuteScript("arguments[0].scrollIntoView(true); window.scrollBy(0, -window.innerHeight / 4);", element);
                     Thread.Sleep(1000);
                     items = BaseModel.Browser.FindElements(By.XPath("//table[@class='table table-bordered']/tbody/tr")).ToList();
+
+                    if (BaseModel.token.IsCancellationRequested)
+                        break;
+
                 } while (items.Count > last);
 
                 return checkList(items);
             }
             catch (Exception exp)
             {
-                errorLog(exp);
+                BaseModel.errorLog(exp);
                 return new List<IWebElement>();
-            }            
+            }
         }
-        private String getService(int serviceInt)
+        String getService(int serviceInt)
         {
             string service;
             switch (serviceInt)
@@ -88,7 +117,7 @@ namespace ItemChecker.MVVM.Model
             }
             return service;
         }
-        private Int32 getType(bool type)
+        Int32 getType(bool type)
         {
             int typeStatus;
             switch (type)
@@ -102,7 +131,7 @@ namespace ItemChecker.MVVM.Model
             }
             return typeStatus;
         }
-        private List<IWebElement> checkList(List<IWebElement> items)
+        List<IWebElement> checkList(List<IWebElement> items)
         {
             for (int i = 0; i < items.Count; i++)
             {
@@ -111,7 +140,7 @@ namespace ItemChecker.MVVM.Model
 
                 if (item_name.Contains("Или криво настроили фильтры") | item_name.Contains("Or poorly configured filters"))
                     items.Clear();
-                else if (Main.Overstock.Contains(item_name) | Main.Unavailable.Contains(item_name) | Account.MyOrders.Any(i => i.ItemName == item_name))
+                else if (ItemBase.Overstock.Any(x => x.ItemName == item_name) | ItemBase.Unavailable.Any(x => x.ItemName == item_name) | DataOrder.Orders.Any(i => i.ItemName == item_name))
                     items.RemoveAt(i);
             }
             return items;

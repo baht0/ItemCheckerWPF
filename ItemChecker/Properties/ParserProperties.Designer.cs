@@ -12,7 +12,7 @@ namespace ItemChecker.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.10.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.0.3.0")]
     internal sealed partial class ParserProperties : global::System.Configuration.ApplicationSettingsBase {
         
         private static ParserProperties defaultInstance = ((ParserProperties)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new ParserProperties())));
@@ -25,192 +25,216 @@ namespace ItemChecker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool tryskins {
-            get {
-                return ((bool)(this["tryskins"]));
-            }
-            set {
-                this["tryskins"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool manual {
-            get {
-                return ((bool)(this["manual"]));
-            }
-            set {
-                this["manual"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool queue {
-            get {
-                return ((bool)(this["queue"]));
-            }
-            set {
-                this["queue"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int serviceOne {
+        public int ServiceOne {
             get {
-                return ((int)(this["serviceOne"]));
+                return ((int)(this["ServiceOne"]));
             }
             set {
-                this["serviceOne"] = value;
+                this["ServiceOne"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1")]
-        public int serviceTwo {
+        public int ServiceTwo {
             get {
-                return ((int)(this["serviceTwo"]));
+                return ((int)(this["ServiceTwo"]));
             }
             set {
-                this["serviceTwo"] = value;
+                this["ServiceTwo"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("60")]
-        public decimal maxPrecent {
+        public decimal MaxPrecent {
             get {
-                return ((decimal)(this["maxPrecent"]));
+                return ((decimal)(this["MaxPrecent"]));
             }
             set {
-                this["maxPrecent"] = value;
+                this["MaxPrecent"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("35")]
-        public decimal minPrecent {
+        public decimal MinPrecent {
             get {
-                return ((decimal)(this["minPrecent"]));
+                return ((decimal)(this["MinPrecent"]));
             }
             set {
-                this["minPrecent"] = value;
+                this["MinPrecent"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public decimal maxPrice {
+        public decimal MaxPrice {
             get {
-                return ((decimal)(this["maxPrice"]));
+                return ((decimal)(this["MaxPrice"]));
             }
             set {
-                this["maxPrice"] = value;
+                this["MaxPrice"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public decimal minPrice {
+        public decimal MinPrice {
             get {
-                return ((decimal)(this["minPrice"]));
+                return ((decimal)(this["MinPrice"]));
             }
             set {
-                this["minPrice"] = value;
+                this["MinPrice"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int steamSales {
+        public int SteamSales {
             get {
-                return ((int)(this["steamSales"]));
+                return ((int)(this["SteamSales"]));
             }
             set {
-                this["steamSales"] = value;
+                this["SteamSales"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string nameContains {
+        public string NameContains {
             get {
-                return ((string)(this["nameContains"]));
+                return ((string)(this["NameContains"]));
             }
             set {
-                this["nameContains"] = value;
+                this["NameContains"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool knife {
+        public bool KnifeTS {
             get {
-                return ((bool)(this["knife"]));
+                return ((bool)(this["KnifeTS"]));
             }
             set {
-                this["knife"] = value;
+                this["KnifeTS"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool stattrak {
+        public bool StattrakTS {
             get {
-                return ((bool)(this["stattrak"]));
+                return ((bool)(this["StattrakTS"]));
             }
             set {
-                this["stattrak"] = value;
+                this["StattrakTS"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool souvenir {
+        public bool SouvenirTS {
             get {
-                return ((bool)(this["souvenir"]));
+                return ((bool)(this["SouvenirTS"]));
             }
             set {
-                this["souvenir"] = value;
+                this["SouvenirTS"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool sticker {
+        public bool StickerTS {
             get {
-                return ((bool)(this["sticker"]));
+                return ((bool)(this["StickerTS"]));
             }
             set {
-                this["sticker"] = value;
+                this["StickerTS"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.ObjectModel.ObservableCollection<System.String> checkList {
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool SouvenirM {
             get {
-                return ((global::System.Collections.ObjectModel.ObservableCollection<System.String>)(this["checkList"]));
+                return ((bool)(this["SouvenirM"]));
             }
             set {
-                this["checkList"] = value;
+                this["SouvenirM"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool StattrakM {
+            get {
+                return ((bool)(this["StattrakM"]));
+            }
+            set {
+                this["StattrakM"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool KnifeGloveM {
+            get {
+                return ((bool)(this["KnifeGloveM"]));
+            }
+            set {
+                this["KnifeGloveM"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool KnifeGloveStattrakM {
+            get {
+                return ((bool)(this["KnifeGloveStattrakM"]));
+            }
+            set {
+                this["KnifeGloveStattrakM"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool OverstockM {
+            get {
+                return ((bool)(this["OverstockM"]));
+            }
+            set {
+                this["OverstockM"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Generic.List<System.String> CheckList {
+            get {
+                return ((global::System.Collections.Generic.List<System.String>)(this["CheckList"]));
+            }
+            set {
+                this["CheckList"] = value;
             }
         }
     }

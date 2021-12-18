@@ -13,7 +13,7 @@ using OpenQA.Selenium.Chrome;
 
 namespace ItemChecker.MVVM.Model
 {
-    public class ProjectInfoService : Main
+    public class ProjectInfoService : BaseModel
     {
         static void CheckVersion()
         {

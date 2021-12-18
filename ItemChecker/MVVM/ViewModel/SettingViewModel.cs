@@ -128,9 +128,9 @@ namespace ItemChecker.MVVM.ViewModel
 
         public SettingViewModel()
         {
-            if (Main.Theme == "Light")
+            if (BaseModel.Theme == "Light")
                 Theme = "WeatherNight";
-            if (Main.Theme == "Dark")
+            if (BaseModel.Theme == "Dark")
                 Theme = "WhiteBalanceSunny";
 
             CheckProfiles();
@@ -205,7 +205,7 @@ namespace ItemChecker.MVVM.ViewModel
                     BaseModel.BrowserExit();
                 }).Wait(6000);
                 Application.Current.Shutdown();
-            }, (obj) => !Main.IsLoading & !Main.Timer.Enabled);
+            }, (obj) => !BaseModel.IsLoading & !BaseModel.Timer.Enabled);
         public ICommand CopyIdCommand =>
             new RelayCommand((obj) =>
             {
@@ -221,7 +221,7 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 Account.GetSteamApiKey();
                 Settings.SteamApiKey = Account.ApiKey;
-            }, (obj) => !Main.IsLoading);
+            }, (obj) => !BaseModel.IsLoading);
         //profile
         public ICommand AddProfileCommand
         {
@@ -279,7 +279,7 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 Settings settings = obj as Settings;
                 SaveConfig(settings);
-            }, (obj) => !Main.IsLoading);
+            }, (obj) => !BaseModel.IsLoading);
         void SaveConfig(Settings settings)
         {
             GeneralProperties.Default.CurrencyApiKey = settings.CurrencyApi;
@@ -308,17 +308,17 @@ namespace ItemChecker.MVVM.ViewModel
             new RelayCommand((obj) =>
             {
                 App app = (App)Application.Current;
-                if (Main.Theme == "Light")
+                if (BaseModel.Theme == "Light")
                 {
                     Theme = "WhiteBalanceSunny";
                     app.ChangeTheme(new("/Themes/Dark.xaml", UriKind.RelativeOrAbsolute));
-                    Main.Theme = "Dark";
+                    BaseModel.Theme = "Dark";
                 }
-                else if (Main.Theme == "Dark")
+                else if (BaseModel.Theme == "Dark")
                 {
                     Theme = "WeatherNight";
                     app.ChangeTheme(new("/Themes/Light.xaml", UriKind.RelativeOrAbsolute));
-                    Main.Theme = "Light";
+                    BaseModel.Theme = "Light";
                 }
             });
     }

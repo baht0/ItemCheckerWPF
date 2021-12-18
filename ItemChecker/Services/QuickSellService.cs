@@ -22,7 +22,7 @@ namespace ItemChecker.Services
             JObject rgInventory = (JObject)JObject.Parse(json)["rgInventory"];
             JObject rgDescriptions = (JObject)JObject.Parse(json)["rgDescriptions"];
 
-            QuickSell.SellItems = new();
+            DataSell.SellItems = new();
             foreach (var jObject in rgInventory)
             {
                 string assetid = jObject.Value["id"].ToString();
@@ -40,16 +40,16 @@ namespace ItemChecker.Services
                     continue;
 
                 decimal price;
-                if (!QuickSell.SellItems.Any(c => c.ItemName == name))
+                if (!DataSell.SellItems.Any(c => c.ItemName == name))
                 {
                     price = checkPrice(name);
                     if (price == -1)
                         continue;
                 }
                 else
-                    price = QuickSell.SellItems.First(i => i.ItemName == name).Price;
+                    price = DataSell.SellItems.First(i => i.ItemName == name).Price;
 
-                QuickSell.SellItems.Add( new QuickSell() 
+                DataSell.SellItems.Add( new DataSell() 
                 {
                     AssetId = assetid,
                     ItemName = name,
@@ -57,7 +57,7 @@ namespace ItemChecker.Services
                 });
             }
         }
-        public void sellItems(QuickSell item)
+        public void sellItems(DataSell item)
         {
             var sell_price = item.Price;
             sell_price = Edit.CommissionSteam(sell_price - 0.01m);
@@ -88,7 +88,7 @@ namespace ItemChecker.Services
             decimal price = lowest_price;
             if (lowest_price < median_price)
                 price = median_price;
-            if (price > BuyOrderProperties.Default.MaxPrice | price == 0)
+            if (price > HomeProperties.Default.MaxPrice | price == 0)
                 return -1;
 
             return price;

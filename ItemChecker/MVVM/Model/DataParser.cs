@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 
 namespace ItemChecker.MVVM.Model
 {
-    public class ParserData
+    public class DataParser
     {
         public string ItemType { get; set; }
         public string ItemName { get; set; }
@@ -15,10 +15,9 @@ namespace ItemChecker.MVVM.Model
         public decimal Difference { get; set; }
         public string Status { get; set; }
         public bool Have { get; set; }
+        public static ObservableCollection<DataParser> ParserItems { get; set; } = new();
 
-        public static ObservableCollection<ParserData> ParserItems = new();
-
-        public ParserData(string ItemType, string ItemName, decimal Price1, decimal Price2, decimal Price3, decimal Price4, decimal Precent, decimal Difference, string Status, bool Have)
+        public DataParser(string ItemType, string ItemName, decimal Price1, decimal Price2, decimal Price3, decimal Price4, decimal Precent, decimal Difference, string Status, bool Have)
         {
             this.ItemType = ItemType;
             this.ItemName = ItemName;

@@ -14,7 +14,7 @@ namespace ItemChecker.MVVM.View
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = new BuyOrderViewModel();
+            DataContext = new HomeViewModel();
         }
         private void Window_DragMove(object sender, MouseButtonEventArgs e)
         {
@@ -22,12 +22,12 @@ namespace ItemChecker.MVVM.View
         }
         private void Home_Click(object sender, RoutedEventArgs e)
         {
-            if (!Main.IsLoading & !Main.Timer.Enabled)
-                DataContext = new BuyOrderViewModel();
+            if (!BaseModel.IsLoading & !BaseModel.Timer.Enabled)
+                DataContext = new HomeViewModel();
         }
         private void Parser_Click(object sender, RoutedEventArgs e)
         {
-            if (!Main.IsLoading & !Main.Timer.Enabled)
+            if (!BaseModel.IsLoading & !BaseModel.Timer.Enabled)
                 DataContext = new ParserViewModel();
         }
 

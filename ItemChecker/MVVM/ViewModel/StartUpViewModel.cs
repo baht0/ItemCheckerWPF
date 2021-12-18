@@ -76,7 +76,7 @@ namespace ItemChecker.MVVM.ViewModel
             };
             _view = view;
             Version = BaseModel.Version;
-            Main.IsLoading = true;
+            BaseModel.IsLoading = true;
             startTask = Task.Run(() => { Starting(); });
         }
         public ICommand ExitCommand =>
@@ -103,21 +103,20 @@ namespace ItemChecker.MVVM.ViewModel
                 CompletionUpdate();
                 LaunchBrowser();
                 CheckUpdate();
-                Status = "Get Informations...";
-                Account.GetInformations();
+                Status = "Get Base...";
+                Account.GetBase();
 
                 SteamAccount();
                 LoginCsm();
-                LoginTryskins();
                 Status = "Status Steam...";
-                Main.StatusSteam();
+                BaseModel.StatusSteam();
                 Status = "Check Steam Orders...";
                 OrderCheckService order = new();
                 order.SteamOrders();
 
                 if (BaseModel.token.IsCancellationRequested)
                     return;
-                Main.IsLoading = false;
+                BaseModel.IsLoading = false;
                 LoginSuccessful = true;
                 Application.Current.Dispatcher.Invoke(() => { Hide(); });
             }
@@ -171,7 +170,7 @@ namespace ItemChecker.MVVM.ViewModel
                     Directory.Delete(update, true);
                 }
                 GeneralProperties.Default.Upgrade();
-                BuyOrderProperties.Default.Upgrade();
+                HomeProperties.Default.Upgrade();
                 ParserProperties.Default.Upgrade();
                 FloatProperties.Default.Upgrade();
 
@@ -267,15 +266,13 @@ namespace ItemChecker.MVVM.ViewModel
                 Login.Password = (string)propertyInfo.GetValue(obj, null);
                 if (Login.Password != "")
                     IsLogin = false;
-                //if (!Login.Remember)
-                //    Directory.Delete($"{BaseModel.AppPath}\\Profiles\\{GeneralProperties.Default.Profile}", true);
 
             }, (obj) => IsLogin & !String.IsNullOrEmpty(Login.Login) & Login.Code2AF.Length == 5);
         void LoginCsm()
         {
             if (BaseModel.token.IsCancellationRequested | GeneralProperties.Default.Guard)
                 return;
-            Status = "Login Cs.Money...";
+            Status = "Cs.Money...";
 
             BaseModel.Browser.Navigate().GoToUrl("https://cs.money/pending-trades");
             IWebElement html = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//pre")));
@@ -295,25 +292,6 @@ namespace ItemChecker.MVVM.ViewModel
                 LoginCsm();
             }
             Account.GetCsmBalance();
-        }
-        void LoginTryskins()
-        {
-            if (BaseModel.token.IsCancellationRequested)
-                return;
-            Status = "Login TrySkins...";
-
-            BaseModel.Browser.Navigate().GoToUrl("https://table.altskins.com/site/items");
-            if (BaseModel.Browser.Url.Contains("items"))
-                return;
-
-            BaseModel.Browser.Navigate().GoToUrl("https://table.altskins.com/login/steam");
-
-            IWebElement account = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//div[@class='OpenID_loggedInAccount']")));
-            IWebElement signins = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@class='btn_green_white_innerfade']")));
-            signins.Click();
-            Thread.Sleep(300);
-
-            LoginTryskins();
         }
     }
 }

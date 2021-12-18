@@ -6,8 +6,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>Resources\logo-taskbar.ico</ApplicationIcon>
-    <AssemblyVersion>1.0.0.5</AssemblyVersion>
-    <FileVersion>1.0.0.5</FileVersion>
+    <AssemblyVersion>1.0.0.6</AssemblyVersion>
+    <FileVersion>1.0.0.6</FileVersion>
     <Win32Resource />
   </PropertyGroup>
 
@@ -22,12 +22,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MaterialDesignColors" Version="2.0.3" />
-    <PackageReference Include="MaterialDesignThemes" Version="4.2.1" />
+    <PackageReference Include="MaterialDesignColors" Version="2.0.4" />
+    <PackageReference Include="MaterialDesignThemes" Version="4.3.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="Selenium.Support" Version="4.0.1" />
-    <PackageReference Include="Selenium.WebDriver" Version="4.0.1" />
-    <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="95.0.4638.6900" />
+    <PackageReference Include="Selenium.Support" Version="4.1.0" />
+    <PackageReference Include="Selenium.WebDriver" Version="4.1.0" />
+    <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="96.0.4664.4500" />
   </ItemGroup>
 
   <ItemGroup>
@@ -62,10 +62,10 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>StartUpProperties.settings</DependentUpon>
     </Compile>
-    <Compile Update="Properties\BuyOrderProperties.Designer.cs">
+    <Compile Update="Properties\HomeProperties.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
-      <DependentUpon>BuyOrderProperties.settings</DependentUpon>
+      <DependentUpon>HomeProperties.settings</DependentUpon>
     </Compile>
   </ItemGroup>
 
@@ -86,9 +86,9 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>StartUpProperties.Designer.cs</LastGenOutput>
     </None>
-    <None Update="Properties\BuyOrderProperties.settings">
+    <None Update="Properties\HomeProperties.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>BuyOrderProperties.Designer.cs</LastGenOutput>
+      <LastGenOutput>HomeProperties.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
 

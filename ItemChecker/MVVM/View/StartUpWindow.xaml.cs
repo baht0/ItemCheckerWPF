@@ -21,7 +21,7 @@ namespace ItemChecker.MVVM.View
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (Main.IsLoading)
+            if (BaseModel.IsLoading)
                 e.Cancel = true;
         }
         private void Close_Click(object sender, RoutedEventArgs e)

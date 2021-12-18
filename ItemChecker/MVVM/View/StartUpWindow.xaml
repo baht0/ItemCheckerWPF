@@ -28,7 +28,7 @@
                 <RowDefinition Height="16"/>
                 <!--Footer-->
             </Grid.RowDefinitions>
-            <Rectangle
+            <Rectangle MouseLeftButtonDown="Window_DragMove"
                 Grid.RowSpan="2"
                 Grid.ColumnSpan="2"
                 HorizontalAlignment="Center"
@@ -57,13 +57,13 @@
                 </StackPanel>
             </Grid>
             <!--Body-->
-            <Grid Grid.Row="1">
-                <Image Grid.Row="1"
+            <Grid Grid.Row="1" IsEnabled="{Binding IsLogin}">
+                <Image Grid.Row="1" MouseLeftButtonDown="Window_DragMove"
                    Source="../../Resources/logo-white.png"
                    Width="80"
                    Margin="0 10 0 0"
                    VerticalAlignment="Top"/>
-                <Rectangle Width="250" Height="260" 
+                <Rectangle Width="250" Height="260"
                            Fill="{StaticResource Background}" Margin="0 50 0 0" 
                            RadiusX="12" RadiusY="12">
                     <Rectangle.Effect>
@@ -74,50 +74,41 @@
                                       ShadowDepth="1"/>
                     </Rectangle.Effect>
                 </Rectangle>
-                <Grid Width="250" Height="260" Margin="0 50 0 0"
-                      IsEnabled="{Binding IsLogin}" >
+                <Grid Width="200" Height="200"
+                      Margin="10 40 10 10"
+                      DataContext="{Binding Login}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="25"/>
                         <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="40"/>
                     </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Text="ItemChecker" FontSize="15"
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.ColumnSpan="2" Text="ItemChecker" FontSize="15"
                                HorizontalAlignment="Center"
-                               VerticalAlignment="Bottom"/>
-                    <Grid Grid.Row="1" Margin="10 0 10 25" DataContext="{Binding Login}">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="140"/>
-                            <RowDefinition/>
-                        </Grid.RowDefinitions>
-                        <GroupBox Grid.Row="0" Header="Steam"
-                                  Style="{DynamicResource ma}">
-                            <Grid Margin="5">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition Width="120"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="Account Name:" Grid.Row="0" VerticalAlignment="Center"/>
-                                <TextBlock Text="Password:" Grid.Row="1" VerticalAlignment="Center"/>
-                                <TextBox x:Name="loginTextbox" Grid.Row="0" Grid.Column="1" Margin="5" Text="{Binding Login, UpdateSourceTrigger=PropertyChanged}"/>
-                                <PasswordBox  x:Name="passTextbox" Grid.Row="1" Grid.Column="1" Margin="5"/>
-                                <CheckBox x:Name="rememberBox" Grid.Row="2" Grid.Column="1" Margin="5" IsChecked="{Binding Remember, UpdateSourceTrigger=PropertyChanged}">Remember me</CheckBox>
-                            </Grid>
-                        </GroupBox>
-                        <GroupBox Grid.Row="1" Header="2AF Code:"
-                                  Style="{DynamicResource None}">
-                            <TextBox x:Name="codeTextbox" VerticalAlignment="Top"
+                               VerticalAlignment="Top"/>
+                    <TextBlock Text="Account Name:" Grid.Row="1" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="1" Grid.Column="1" Height="25"
+                             Text="{Binding Login, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBlock Text="Password:" Grid.Row="2" VerticalAlignment="Center"/>
+                    <PasswordBox x:Name="passTextbox" Grid.Row="2" Grid.Column="1" Height="25"/>
+                    <CheckBox Grid.Row="3" Grid.Column="1" IsChecked="{Binding Remember, UpdateSourceTrigger=PropertyChanged}">Remember me</CheckBox>
+                    <Separator Grid.Row="4" Grid.ColumnSpan="2"
+                               Width="200" VerticalAlignment="Top"/>
+                    <TextBlock Text="2AF Code:" Grid.Row="4" VerticalAlignment="Bottom"/>
+                    <TextBox Grid.Row="5" Grid.ColumnSpan="2"
+                                     VerticalAlignment="Center"
                                      MaxLength="5" FontSize="20"
                                      Margin="5" TextAlignment="Center"
                                      CharacterCasing="Upper"
                                      FontWeight="Bold" KeyDown="codeTextbox_KeyDown"
                                      FontFamily="Consolas"
                                      Text="{Binding Code2AF, UpdateSourceTrigger=PropertyChanged}"/>
-                        </GroupBox>
-                    </Grid>
                 </Grid>
                 <Button Content="Sign In"
                         VerticalAlignment="Bottom" Margin="120 0 120 45"

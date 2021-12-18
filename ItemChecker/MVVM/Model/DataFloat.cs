@@ -1,7 +1,7 @@
 ﻿
 namespace ItemChecker.MVVM.Model
 {
-    public class FloatData
+    public class DataFloat
     {
         public decimal LowestPrice { get; set; }
         public decimal MedianPrice { get; set; }
