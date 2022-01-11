@@ -1,39 +1,38 @@
 ﻿using ItemChecker.MVVM.Model;
 using ItemChecker.Net;
 using ItemChecker.Properties;
-using OpenQA.Selenium.Support.Extensions;
+using ItemChecker.Support;
+using System;
 using System.Linq;
 
 namespace ItemChecker.Services
 {
     public class OrderService : BaseService
     {
-
         //delete order
-        public void CancelOrder(DataOrder order)
+        public static void CancelOrder(DataOrder order)
         {
-            Browser.ExecuteJavaScript(Post.CancelBuyOrder(order.OrderId, Account.SessionId));
-            DataOrder.Orders.Remove(order);
+            string market_hash_name = Edit.MarketHashName(order.ItemName);
 
-            Account.GetAvailableAmount();
+            Post.CancelBuyOrder(SettingsProperties.Default.SteamCookies, market_hash_name, order.OrderId);
+            DataOrder.Orders.Remove(order);
         }
-        protected void CheckConditions(DataOrder order, decimal orderPrice)
+        protected Boolean CheckConditions(DataOrder order, decimal orderPrice)
         {
-            if (GeneralProperties.Default.NotEnoughBalance & Account.Balance < orderPrice)
+            bool cancel = false;
+            if (SettingsProperties.Default.NotEnoughBalance & SteamAccount.Balance < orderPrice)
             {
-                CancelOrder(order);
-                Home.Cancel++;
+                cancel = true;
             }
-            if (GeneralProperties.Default.CancelOrder > order.Precent & order.Precent != -100)
+            else if (SettingsProperties.Default.CancelOrder > order.Precent & order.Precent != -100)
             {
-                CancelOrder(order);
-                Home.Cancel++;
+                cancel = true;
             }
-            if (ItemBase.Overstock.Any(x => x.ItemName == order.ItemName) | ItemBase.Unavailable.Any(x => x.ItemName == order.ItemName))
+            else if (ItemBase.Overstock.Any(x => x.ItemName == order.ItemName) | ItemBase.Unavailable.Any(x => x.ItemName == order.ItemName))
             {
-                CancelOrder(order);
-                Home.Cancel++;
+                cancel = true;
             }
+            return cancel;
         }
     }
 }

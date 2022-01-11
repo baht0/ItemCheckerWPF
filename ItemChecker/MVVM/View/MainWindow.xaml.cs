@@ -1,40 +1,23 @@
-﻿using ItemChecker.MVVM.Model;
-using ItemChecker.MVVM.ViewModel;
+﻿using ItemChecker.MVVM.ViewModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace ItemChecker.MVVM.View
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
+        HomeViewModel homeViewModel = new();
+        ParserViewModel parserViewModel = new();
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = new HomeViewModel();
+            DataContext = new MainViewModel();
+            bodyContent.Content = homeViewModel;
         }
         private void Window_DragMove(object sender, MouseButtonEventArgs e)
         {
             this.DragMove();
-        }
-        private void Home_Click(object sender, RoutedEventArgs e)
-        {
-            if (!BaseModel.IsLoading & !BaseModel.Timer.Enabled)
-                DataContext = new HomeViewModel();
-        }
-        private void Parser_Click(object sender, RoutedEventArgs e)
-        {
-            if (!BaseModel.IsLoading & !BaseModel.Timer.Enabled)
-                DataContext = new ParserViewModel();
-        }
-
-        private void Setting_Click(object sender, RoutedEventArgs e)
-        {
-            SettingWindow settingWindow = new();
-            settingWindow.ShowDialog();
         }
         private void MinWin_Click(object sender, RoutedEventArgs e)
         {
@@ -44,11 +27,21 @@ namespace ItemChecker.MVVM.View
         {
             Close();
         }
-
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             e.Cancel = true;
             this.Visibility = Visibility.Hidden;
+        }
+
+        private void Home_Click(object sender, RoutedEventArgs e)
+        {
+            if (bodyContent.Content != homeViewModel)
+                bodyContent.Content = homeViewModel;
+        }
+        private void Parser_Click(object sender, RoutedEventArgs e)
+        {
+            if (bodyContent.Content != parserViewModel)
+                bodyContent.Content = parserViewModel;
         }
 
         private void Image_MouseDown(object sender, MouseButtonEventArgs e)
@@ -61,6 +54,16 @@ namespace ItemChecker.MVVM.View
                 contextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
                 contextMenu.IsOpen = true;
             }
+        }
+        private void Calc_Click(object sender, RoutedEventArgs e)
+        {
+            CalculatorWindow calculator = new();
+            calculator.Show();
+        }
+        private void Set_Click(object sender, RoutedEventArgs e)
+        {
+            SettingWindow setting = new();
+            setting.ShowDialog();
         }
     }
 }

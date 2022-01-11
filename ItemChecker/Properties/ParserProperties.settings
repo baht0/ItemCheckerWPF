@@ -2,59 +2,44 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ItemChecker.Properties" GeneratedClassName="ParserProperties">
   <Profiles />
   <Settings>
+    <Setting Name="CheckList" Type="System.Collections.Generic.List&lt;System.String&gt;" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
     <Setting Name="ServiceOne" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="ServiceTwo" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">1</Value>
     </Setting>
-    <Setting Name="MaxPrecent" Type="System.Decimal" Scope="User">
-      <Value Profile="(Default)">60</Value>
+    <Setting Name="Souvenir" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="MinPrecent" Type="System.Decimal" Scope="User">
-      <Value Profile="(Default)">35</Value>
+    <Setting Name="Stattrak" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="MaxPrice" Type="System.Decimal" Scope="User">
-      <Value Profile="(Default)">0</Value>
+    <Setting Name="KnifeGlove" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="KnifeGloveStattrak" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="Overstock" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="Ordered" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="Dopplers" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="OnlyDopplers" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="MinPrice" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="SteamSales" Type="System.Int32" Scope="User">
+    <Setting Name="MaxPrice" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)">0</Value>
-    </Setting>
-    <Setting Name="NameContains" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="KnifeTS" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
-    </Setting>
-    <Setting Name="StattrakTS" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
-    </Setting>
-    <Setting Name="SouvenirTS" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
-    </Setting>
-    <Setting Name="StickerTS" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
-    <Setting Name="SouvenirM" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
-    <Setting Name="StattrakM" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
-    <Setting Name="KnifeGloveM" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
-    <Setting Name="KnifeGloveStattrakM" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
-    <Setting Name="OverstockM" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
-    <Setting Name="CheckList" Type="System.Collections.Generic.List&lt;System.String&gt;" Scope="User">
-      <Value Profile="(Default)" />
     </Setting>
   </Settings>
 </SettingsFile>

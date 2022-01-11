@@ -1,7 +1,10 @@
 ﻿using ItemChecker.Core;
 using ItemChecker.MVVM.Model;
 using ItemChecker.Properties;
+using ItemChecker.Services;
 using ItemChecker.Support;
+using MaterialDesignThemes.Wpf;
+using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows;
@@ -11,109 +14,30 @@ namespace ItemChecker.MVVM.ViewModel
 {
     public class MainViewModel : ObservableObject
     {
-        string _user;
-        decimal _course;
-        decimal _balance;
-        decimal _balanceCsm;
-        decimal _balanceUsd;
-        decimal _balanceCsmUsd;
-        int _overstock;
-        int _unavailable;
-        string _statusCommunity;
-        string _statusSessions;
-        //favorite
-        private ObservableCollection<string> _favoriteList = new();
-        public string User
+        delegate void ThemeDeleg();
+        event ThemeDeleg OnThemeDeleg;
+        SnackbarMessageQueue _message = new();
+        Main _mainInfo;        
+        private ObservableCollection<string> _favoriteList = HomeProperties.Default.FavoriteList ?? (new());
+
+        public SnackbarMessageQueue Message
         {
-            get { return _user; }
+            get { return _message; }
             set
             {
-                _user = value;
+                _message = value;
                 OnPropertyChanged();
             }
         }
-        public decimal Course
+        public Main MainInfo
         {
-            get { return _course; }
+            get { return _mainInfo; }
             set
             {
-                _course = value;
+                _mainInfo = value;
                 OnPropertyChanged();
             }
         }
-        public decimal Balance
-        {
-            get { return _balance; }
-            set
-            {
-                _balance = value;
-                OnPropertyChanged();
-            }
-        }
-        public decimal BalanceCsm
-        {
-            get { return _balanceCsm; }
-            set
-            {
-                _balanceCsm = value;
-                OnPropertyChanged();
-            }
-        }
-        public decimal BalanceUsd
-        {
-            get { return _balanceUsd; }
-            set
-            {
-                _balanceUsd = value;
-                OnPropertyChanged();
-            }
-        }
-        public decimal BalanceCsmUsd
-        {
-            get { return _balanceCsmUsd; }
-            set
-            {
-                _balanceCsmUsd = value;
-                OnPropertyChanged();
-            }
-        }
-        public int Overstock
-        {
-            get { return _overstock; }
-            set
-            {
-                _overstock = value;
-                OnPropertyChanged();
-            }
-        }
-        public int Unavailable
-        {
-            get { return _unavailable; }
-            set
-            {
-                _unavailable = value;
-                OnPropertyChanged();
-            }
-        }
-        public string StatusCommunity
-        {
-            get { return _statusCommunity; }
-            set
-            {
-                _statusCommunity = value;
-                OnPropertyChanged();
-            }
-        }
-        public string StatusSessions
-        {
-            get { return _statusSessions; }
-            set
-            {
-                _statusSessions = value;
-                OnPropertyChanged();
-            }
-        }
-        //favorite
         public ObservableCollection<string> FavoriteList
         {
             get
@@ -125,28 +49,14 @@ namespace ItemChecker.MVVM.ViewModel
                 _favoriteList = value;
                 OnPropertyChanged();
             }
-        }
+        } //favorite
 
         public MainViewModel()
         {
+            if (DataProjectInfo.IsUpdate)
+                Message.Enqueue("Update available!");
+            HomeProperties.Default.FavoriteList = HomeProperties.Default.FavoriteList ?? (new());
             UpdateInformation();
-
-            if (HomeProperties.Default.FavoriteList != null)
-                FavoriteList = HomeProperties.Default.FavoriteList;
-        }
-        protected void UpdateInformation()
-        {
-            User = Account.User;
-            Course = GeneralProperties.Default.CurrencyValue;
-            Balance = Account.Balance;
-            BalanceCsm = Account.BalanceCsm;
-            BalanceUsd = Account.BalanceUsd;
-            BalanceCsmUsd = Account.BalanceCsmUsd;
-            Overstock = ItemBase.Overstock.Count;
-            Unavailable = ItemBase.Unavailable.Count;
-            StatusCommunity = "CheckCircle";
-            if (BaseModel.StatusCommunity != "normal")
-                StatusCommunity = "CloseCircle";
         }
         public ICommand OpenFolderCommand =>
             new RelayCommand((obj) =>
@@ -158,7 +68,7 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 Task.Run(() => {
                     BaseModel.cts.Cancel();
-                    BaseModel.BrowserExit();
+                    BaseService.BrowserExit();
                 }).Wait(5000);
                 Application.Current.Shutdown();
             });
@@ -183,11 +93,28 @@ namespace ItemChecker.MVVM.ViewModel
                     if (string.IsNullOrEmpty(itemName))
                         return;
                 }
-                if (HomeProperties.Default.FavoriteList != null & !HomeProperties.Default.FavoriteList.Contains(itemName))
+                if (!HomeProperties.Default.FavoriteList.Contains(itemName))
                 {
                     HomeProperties.Default.FavoriteList.Add(itemName);
                     HomeProperties.Default.Save();
+                    FavoriteList = HomeProperties.Default.FavoriteList;
+                    Message.Enqueue("Success. Item added to Favorites");
                 }
             });
+        void UpdateInformation()
+        {
+            Task.Run(() => {
+                while (true)
+                {
+                    MainInfo = new();
+                    if (SettingsProperties.Default.SetHours)
+                    {
+                        App app = (App)Application.Current;
+                        Application.Current.Dispatcher.Invoke(() => { app.AutoChangeTheme(); });                        
+                    }
+                    System.Threading.Thread.Sleep(1500);
+                }
+            });
+        }
     }
 }

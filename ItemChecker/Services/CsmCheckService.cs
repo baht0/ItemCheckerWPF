@@ -16,9 +16,10 @@ namespace ItemChecker.Services
 {
     public class CsmCheckService : BaseService
     {
-        private static List<string> old_id = new();
+        static List<string> old_id = new();
+        int successfulTrades = 0;
 
-        public void checkCsm(string checkItem)
+        public Int32 checkCsm(string checkItem)
         {
             string[] item_line = checkItem.Split(';');
 
@@ -51,19 +52,8 @@ namespace ItemChecker.Services
                 if (items.Any())
                     addCart(items);
             }
-        }
-        public void CheckItem()
-        {
-            //string[] item_line = itemName.Split(';');
 
-            //List<DataInventoryCsm> items = DataInventoryCsm.Inventory.Where(n => n.NameCsmId == 56).ToList();
-            //if (items.Any())
-            //{
-            //    foreach (var item in items)
-            //    {
-
-            //    }
-            //}
+            return successfulTrades;
         }
         Boolean addCart(JArray items)
         {
@@ -149,7 +139,7 @@ namespace ItemChecker.Services
                         new JProperty("action", "confirm"));
             string body = json.ToString(Formatting.None);
             Browser.ExecuteJavaScript(Post.FetchRequest("application/json", body, "https://cs.money/confirm_virtual_offer"));
-            Home.SuccessfulTrades++;
+            successfulTrades++;
             Thread.Sleep(1500);
             old_id.Add(id);
         }

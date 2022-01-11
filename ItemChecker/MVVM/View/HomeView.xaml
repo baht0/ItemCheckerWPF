@@ -27,18 +27,23 @@
             <VirtualizingStackPanel Grid.Row="0" Background="Transparent"
                                     Orientation="Horizontal" VerticalAlignment="Center"
                                     VirtualizationMode="Recycling">
-                <Button HorizontalAlignment="Right" VerticalAlignment="Center"
+                <Button VerticalAlignment="Center"
                         Style="{StaticResource MaterialDesignToolForegroundButton}"
-                        Command="{Binding ReloadCommand}">
+                        Command="{Binding OrdersCommand}"
+                        CommandParameter="0">
                     <materialDesign:PackIcon Kind="Reload"/>
                 </Button>
-                <TextBlock Text="My Buy Orders" 
-                       VerticalAlignment="Center"
-                       FontSize="18"/>
-                <TextBlock Text="{Binding OrderedGrid.Count, StringFormat=' ({0})'}" 
+                <TextBlock Text="{Binding OrderedGrid.Count, StringFormat='My Buy Orders: {0}'}" 
                        VerticalAlignment="Center"
                        FontSize="18"/>
             </VirtualizingStackPanel>
+            <Button HorizontalAlignment="Right" VerticalAlignment="Center"
+                    Style="{StaticResource MaterialDesignToolForegroundButton}"
+                    Command="{Binding OrdersCommand}"
+                    CommandParameter="1"
+                    ToolTip="Cancel all orders">
+                <materialDesign:PackIcon Kind="Close"/>
+            </Button>
             <DataGrid x:Name="ordersGrid" Grid.Row="1" AlternationCount="2" AlternatingRowBackground="{DynamicResource ElementBackground}"
                       AutoGenerateColumns="False" IsReadOnly="True"
                       ItemsSource="{Binding OrderedGrid, UpdateSourceTrigger=PropertyChanged}"
@@ -59,14 +64,7 @@
             </DataGrid>
         </Grid>
         <!--panel-->
-        <Grid Grid.Column="1"
-              Background="Transparent">
-            <Grid.RowDefinitions>
-                <RowDefinition/>
-                <RowDefinition Height="35"/>
-            </Grid.RowDefinitions>
-            <!--tools-->
-            <Grid>
+            <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="40"/>
                     <RowDefinition/>
@@ -83,174 +81,175 @@
                         <!--Services-->
                         <Grid Visibility="{Binding IsChecked, ElementName=serviceTab, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <Grid.RowDefinitions>
-                                <RowDefinition/>
-                                <RowDefinition Height="60"/>
+                                <RowDefinition Height="100"/>
+                                <RowDefinition Height="140"/>
+                                <RowDefinition Height="160"/>
                             </Grid.RowDefinitions>
-                            <Grid DataContext="{Binding ServicesConfig, UpdateSourceTrigger=PropertyChanged}">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="80"/>
-                                    <RowDefinition Height="140"/>
-                                    <RowDefinition Height="160"/>
-                                </Grid.RowDefinitions>
-                                <!--BuyOrder Pusher-->
-                                <Grid Grid.Row="0">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="32"/>
-                                        <RowDefinition/>
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="BuyOrder Pusher" VerticalAlignment="Center" FontWeight="Bold"/>
-                                    <Separator Grid.Row="0" Grid.ColumnSpan="2" VerticalAlignment="Bottom"/>
-                                    <Button Grid.Column="1" HorizontalAlignment="Right"
-                                            Style="{StaticResource MaterialDesignFlatButton}"
-                                            Command="{Binding DataContext.PushCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                            CommandParameter="{Binding DataContext.ServicesConfig, RelativeSource={RelativeSource AncestorType=UserControl}}">
-                                        <materialDesign:PackIcon Kind="Play"/>
-                                    </Button>
-                                    <TextBlock Grid.Row="1" Text="Timer:" Height="15"/>
-                                    <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal"
-                                            VerticalAlignment="Center" HorizontalAlignment="Left">
-                                        <TextBox Width="70" Text="{Binding PushTimer}" PreviewTextInput="Number_PreviewTextInput"/>
-                                        <TextBlock Text="Min." Margin="2 0 0 0" VerticalAlignment="Bottom"/>
-                                    </StackPanel>
-                                </Grid>
-                                <!--Cs.Money Check-->
-                                <Grid Grid.Row="1">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="32"/>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Cs.Money Check" VerticalAlignment="Center" FontWeight="Bold"/>
-                                    <Button Grid.Column="1" HorizontalAlignment="Right"
-                                            Style="{StaticResource MaterialDesignFlatButton}"
-                                            Command="{Binding DataContext.CsmCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                            CommandParameter="{Binding DataContext.ServicesConfig, RelativeSource={RelativeSource AncestorType=UserControl}}">
-                                        <materialDesign:PackIcon Kind="Play"/>
-                                    </Button>
-                                    <Separator Grid.ColumnSpan="2" VerticalAlignment="Bottom"/>
-                                    <TextBlock Grid.Row="1" Text="Max. Deviation:" Height="15"/>
-                                    <VirtualizingStackPanel Grid.Row="1" Grid.Column="1"
-                                                    VerticalAlignment="Center"
-                                                    HorizontalAlignment="Left"
-                                                    Orientation="Horizontal">
-                                        <TextBox Width="70" Text="{Binding MaxDeviation}" 
-                                                     TextInput="Decimal_PreviewTextInput" ToolTip="How much more expensive an item can be"
-                                                     Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
-                                        <TextBlock Text="$" Margin="2 0 0 0" VerticalAlignment="Bottom"/>
-                                    </VirtualizingStackPanel>
-                                    <TextBlock Grid.Row="2" Text="Timer:" Height="15"/>
-                                    <VirtualizingStackPanel Grid.Row="2" Grid.Column="1"
-                                                    VerticalAlignment="Center"
-                                                    HorizontalAlignment="Left"
-                                                    Orientation="Horizontal">
-                                        <TextBox Width="70" Text="{Binding CsmTimer}" PreviewTextInput="Number_PreviewTextInput"/>
-                                        <TextBlock Text="Sec." Margin="2 0 0 0" VerticalAlignment="Bottom"/>
-                                    </VirtualizingStackPanel>
-                                    <VirtualizingStackPanel Grid.Row="3" Orientation="Horizontal"
-                                                VerticalAlignment="Center">
-                                        <Button HorizontalAlignment="Left" Style="{StaticResource MaterialDesignToolForegroundButton}" ToolTip="Add item list"
-                                                    Command="{Binding DataContext.AddCsmListCommand, RelativeSource={RelativeSource AncestorType=UserControl}}">
-                                            <materialDesign:PackIcon Kind="ViewList"/>
-                                        </Button>
-                                        <TextBlock Text="{Binding DataContext.CsmListCount, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat='({0})'}" VerticalAlignment="Center"/>
-                                    </VirtualizingStackPanel>
-                                </Grid>
-                                <!--Float Check-->
-                                <Grid Grid.Row="2">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="32"/>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Float Check" VerticalAlignment="Center" FontWeight="Bold"/>
-                                    <Button Grid.Column="1" HorizontalAlignment="Right"
-                                            Style="{StaticResource MaterialDesignFlatButton}"
-                                            Command="{Binding DataContext.FloatCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                            CommandParameter="{Binding DataContext.ServicesConfig, RelativeSource={RelativeSource AncestorType=UserControl}}">
-                                        <materialDesign:PackIcon Kind="Play"/>
-                                    </Button>
-                                    <Separator Grid.ColumnSpan="2" VerticalAlignment="Bottom"/>
-                                    <TextBlock Grid.Row="1" Text="Compare Price:" Height="15"/>
-                                    <ComboBox Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left"
-                                          Width="85" Height="25"
-                                          ItemsSource="{Binding ComparePrices}"
-                                          SelectedIndex="{Binding Compare}"/>
-                                    <TextBlock Grid.Row="2" Text="Max. Precent:" Height="15"/>
-                                    <VirtualizingStackPanel Grid.Row="2" Grid.Column="1"
-                                                            VerticalAlignment="Center"
-                                                            HorizontalAlignment="Left"
-                                                            Orientation="Horizontal">
-                                        <TextBox Width="70" Text="{Binding MaxPrecent}" ToolTip="Acceptable item price from 'Compare Price'"
-                                                     PreviewTextInput="Number_PreviewTextInput"/>
-                                        <TextBlock Text="%" Margin="2 0 0 0" VerticalAlignment="Bottom"/>
-                                    </VirtualizingStackPanel>
-                                    <TextBlock Grid.Row="3" Text="Timer:" Height="15"/>
-                                    <VirtualizingStackPanel Grid.Row="3" Grid.Column="1"
-                                                            VerticalAlignment="Center"
-                                                            HorizontalAlignment="Left"
-                                                            Orientation="Horizontal">
-                                        <TextBox Width="70" Text="{Binding FloatTimer}" PreviewTextInput="Number_PreviewTextInput"/>
-                                        <TextBlock Text="Min." Margin="2 0 0 0" VerticalAlignment="Bottom"/>
-                                    </VirtualizingStackPanel>
-                                    <VirtualizingStackPanel Grid.Row="4"
-                                                        Orientation="Horizontal"
-                                                        VerticalAlignment="Center">
-                                        <Button HorizontalAlignment="Left" ToolTip="Add item list"
-                                                    Style="{StaticResource MaterialDesignToolForegroundButton}"
-                                                    Command="{Binding DataContext.AddFloatListCommand, RelativeSource={RelativeSource AncestorType=UserControl}}">
-                                            <materialDesign:PackIcon Kind="ViewList"/>
-                                        </Button>
-                                        <TextBlock Text="{Binding DataContext.FloatListCount, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat='({0})'}" VerticalAlignment="Center"/>
-                                    </VirtualizingStackPanel>
-                                </Grid>
-                            </Grid>
-                            <!--statistic-->
-                            <Grid Grid.Row="1">
+                            <!--BuyOrder Pusher-->
+                            <Grid Grid.Row="0">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="32"/>
                                     <RowDefinition/>
                                     <RowDefinition/>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="100"/>
                                     <ColumnDefinition/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="{Binding CurrentService, StringFormat='Statistic ({0})', UpdateSourceTrigger=PropertyChanged}"
-                                           FontWeight="Bold" Height="15" Grid.ColumnSpan="2"/>
-                                <Separator Grid.ColumnSpan="2" VerticalAlignment="Bottom"/>
-                                <TextBlock Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right"
-                                           Text="{Binding Check, StringFormat='Check: {0}'}"/>
-                                <Grid Grid.Row="2" Grid.ColumnSpan="2"
-                                      Visibility="{Binding PushService, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                    <!--pusher-->
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="{Binding Push, StringFormat='Push: {0}'}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding Cancel, StringFormat='Cancel: {0}'}" VerticalAlignment="Center"/>
-                                </Grid>
-                                <TextBlock Grid.Row="2" Grid.ColumnSpan="2" VerticalAlignment="Center"
-                                           Text="{Binding SuccessfulTrades, StringFormat='Successful Trades: {0}'}"
-                                           Visibility="{Binding CsmService, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                                <TextBlock Grid.Row="2" Grid.ColumnSpan="2" VerticalAlignment="Center"
-                                           Text="{Binding PurchasesMade, StringFormat='Purchases made: {0}'}"
-                                           Visibility="{Binding FloatService, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                <TextBlock VerticalAlignment="Center" FontWeight="Bold"
+                                           Grid.ColumnSpan="2" PreviewMouseDown="TimerPush_PreviewMouseDown">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="BuyOrder Pusher: {0} | {1}">
+                                            <Binding Path="HomeStatistics.CheckPush"/>
+                                            <Binding Path="HomeStatistics.TimerPush"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                                <ProgressBar Grid.ColumnSpan="2" VerticalAlignment="Bottom"
+                                                 Height="3" Style="{StaticResource MaterialDesignLinearProgressBar}"
+                                                 Maximum="{Binding HomeStatistics.MaxProgressPush}"
+                                                 Value="{Binding HomeStatistics.ProgressPush}"/>
+                                <Button Grid.Column="1" HorizontalAlignment="Right"
+                                            Style="{StaticResource MaterialDesignFlatButton}"
+                                            Command="{Binding PushCommand}"
+                                            CommandParameter="{Binding HomeConfig}">
+                                    <materialDesign:PackIcon Kind="{Binding HomeStatistics.PushButton}"/>
+                                </Button>
+                                <TextBlock Grid.Row="1" Text="Timer:" Height="15"/>
+                                <VirtualizingStackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal"
+                                            VerticalAlignment="Center" HorizontalAlignment="Left">
+                                    <TextBox Width="70" Text="{Binding HomeConfig.PushTimer}" PreviewTextInput="Number_PreviewTextInput"/>
+                                    <TextBlock Text="Min." Margin="2 0 0 0" VerticalAlignment="Bottom"/>
+                                </VirtualizingStackPanel>
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="{Binding HomeStatistics.Push, StringFormat='Push: {0}'}" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding HomeStatistics.Cancel, StringFormat='Cancel: {0}'}" VerticalAlignment="Center"/>
+                            </Grid>
+                            <!--Cs.Money Check-->
+                            <Grid Grid.Row="1">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="32"/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock VerticalAlignment="Center" FontWeight="Bold"
+                                           Grid.ColumnSpan="2" PreviewMouseDown="TimerCsm_PreviewMouseDown">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="Cs.Money Check: {0} | {1}">
+                                            <Binding Path="HomeStatistics.CheckCsm"/>
+                                            <Binding Path="HomeStatistics.TimerCsm"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                                <Button Grid.Column="1" HorizontalAlignment="Right"
+                                            Style="{StaticResource MaterialDesignFlatButton}"
+                                            Command="{Binding CsmCommand}"
+                                            CommandParameter="{Binding HomeConfig}">
+                                    <materialDesign:PackIcon Kind="{Binding HomeStatistics.CsmButton}"/>
+                                </Button>
+                                <ProgressBar Grid.ColumnSpan="2" VerticalAlignment="Bottom"
+                                                 Height="3" Style="{StaticResource MaterialDesignLinearProgressBar}"
+                                                 Maximum="{Binding HomeStatistics.MaxProgressCsm}"
+                                                 Value="{Binding HomeStatistics.ProgressCsm}"/>
+                                <TextBlock Grid.Row="1" Text="Max. Deviation:" Height="15"/>
+                                <VirtualizingStackPanel Grid.Row="1" Grid.Column="1"
+                                                            VerticalAlignment="Center"
+                                                            HorizontalAlignment="Left"
+                                                            Orientation="Horizontal">
+                                    <TextBox Width="70" Text="{Binding HomeConfig.MaxDeviation}" 
+                                                 TextInput="Decimal_PreviewTextInput" ToolTip="How much more expensive an item can be"
+                                                 Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
+                                    <TextBlock Text="$" Margin="2 0 0 0" VerticalAlignment="Bottom"/>
+                                </VirtualizingStackPanel>
+                                <TextBlock Grid.Row="2" Text="Timer:" Height="15"/>
+                                <VirtualizingStackPanel Grid.Row="2" Grid.Column="1"
+                                                    VerticalAlignment="Center"
+                                                    HorizontalAlignment="Left"
+                                                    Orientation="Horizontal">
+                                    <TextBox Width="70" Text="{Binding HomeConfig.CsmTimer}" PreviewTextInput="Number_PreviewTextInput"/>
+                                    <TextBlock Text="Sec." Margin="2 0 0 0" VerticalAlignment="Bottom"/>
+                                </VirtualizingStackPanel>
+                                <VirtualizingStackPanel Grid.Row="3" Orientation="Horizontal"
+                                                VerticalAlignment="Center">
+                                    <Button HorizontalAlignment="Left" Style="{StaticResource MaterialDesignToolForegroundButton}" ToolTip="Add item list"
+                                                    Command="{Binding AddCsmListCommand}">
+                                        <materialDesign:PackIcon Kind="ViewList"/>
+                                    </Button>
+                                <TextBlock Text="{Binding HomeStatistics.CsmListCount, StringFormat='({0})'}" VerticalAlignment="Center"/>
+                                </VirtualizingStackPanel>
+                                <TextBlock Grid.Row="3" Grid.Column="2" VerticalAlignment="Center"
+                                           Text="{Binding HomeStatistics.SuccessfulTrades, StringFormat='Successful Trades: {0}'}"/>
+                            </Grid>
+                            <!--Float Check-->
+                            <Grid Grid.Row="2">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="32"/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock VerticalAlignment="Center" FontWeight="Bold"
+                                           Grid.ColumnSpan="2" PreviewMouseDown="TimerFloat_PreviewMouseDown">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="Float Check: {0} | {1}">
+                                            <Binding Path="HomeStatistics.CheckFloat"/>
+                                            <Binding Path="HomeStatistics.TimerFloat"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                                <Button Grid.Column="1" HorizontalAlignment="Right"
+                                            Style="{StaticResource MaterialDesignFlatButton}"
+                                            Command="{Binding FloatCommand}"
+                                            CommandParameter="{Binding HomeConfig}">
+                                    <materialDesign:PackIcon Kind="{Binding HomeStatistics.FloatButton}"/>
+                                </Button>
+                                <ProgressBar Grid.ColumnSpan="2" VerticalAlignment="Bottom"
+                                                 Height="3" Style="{StaticResource MaterialDesignLinearProgressBar}"
+                                                 Maximum="{Binding HomeStatistics.MaxProgressFloat}"
+                                                 Value="{Binding HomeStatistics.ProgressFloat}"/>
+                                <TextBlock Grid.Row="1" Text="Compare Price:" Height="15"/>
+                                <ComboBox Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left"
+                                              Width="85" Height="25"
+                                              ItemsSource="{Binding HomeConfig.ComparePrices}"
+                                              SelectedIndex="{Binding HomeConfig.Compare}"/>
+                                <TextBlock Grid.Row="2" Text="Max. Precent:" Height="15"/>
+                                <VirtualizingStackPanel Grid.Row="2" Grid.Column="1"
+                                                            VerticalAlignment="Center"
+                                                            HorizontalAlignment="Left"
+                                                            Orientation="Horizontal">
+                                    <TextBox Width="70" Text="{Binding HomeConfig.MaxPrecent}" ToolTip="Acceptable item price from 'Compare Price'"
+                                                     PreviewTextInput="Number_PreviewTextInput"/>
+                                    <TextBlock Text="%" Margin="2 0 0 0" VerticalAlignment="Bottom"/>
+                                </VirtualizingStackPanel>
+                                <TextBlock Grid.Row="3" Text="Timer:" Height="15"/>
+                                <VirtualizingStackPanel Grid.Row="3" Grid.Column="1"
+                                                            VerticalAlignment="Center"
+                                                            HorizontalAlignment="Left"
+                                                            Orientation="Horizontal">
+                                    <TextBox Width="70" Text="{Binding HomeConfig.FloatTimer}" PreviewTextInput="Number_PreviewTextInput"/>
+                                    <TextBlock Text="Min." Margin="2 0 0 0" VerticalAlignment="Bottom"/>
+                                </VirtualizingStackPanel>
+                                <VirtualizingStackPanel Grid.Row="4"
+                                                        Orientation="Horizontal"
+                                                        VerticalAlignment="Center">
+                                    <Button HorizontalAlignment="Left" ToolTip="Add item list"
+                                                    Style="{StaticResource MaterialDesignToolForegroundButton}"
+                                                    Command="{Binding AddFloatListCommand}">
+                                        <materialDesign:PackIcon Kind="ViewList"/>
+                                    </Button>
+                                <TextBlock Text="{Binding HomeStatistics.FloatListCount, StringFormat='({0})'}" VerticalAlignment="Center"/>
+                                </VirtualizingStackPanel>
+                                <TextBlock Grid.Row="4" Grid.Column="2" VerticalAlignment="Center"
+                                           Text="{Binding HomeStatistics.PurchasesMade, StringFormat='Purchases made: {0}'}"/>
                             </Grid>
                         </Grid>
                         <!--Tools-->
@@ -274,10 +273,13 @@
                                 <Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right"
                                             Style="{StaticResource MaterialDesignFlatButton}"
                                             Command="{Binding TradeOfferCommand}">
-                                    <materialDesign:PackIcon Kind="Play"/>
+                                    <materialDesign:PackIcon Kind="{Binding HomeStatistics.TradeButton}"/>
                                 </Button>
-                                <Separator Grid.ColumnSpan="2" VerticalAlignment="Bottom"/>
-                                <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding Trades, StringFormat='Trades: {0}'}" VerticalAlignment="Center"/>
+                                <ProgressBar Grid.ColumnSpan="2" VerticalAlignment="Bottom"
+                                                 Height="3" Style="{StaticResource MaterialDesignLinearProgressBar}"
+                                                 Maximum="{Binding HomeStatistics.MaxProgressTrade}"
+                                                 Value="{Binding HomeStatistics.ProgressTrade}"/>
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding HomeStatistics.Trades, StringFormat='Trades: {0}'}" VerticalAlignment="Center"/>
                             </Grid>
                             <!--Quick Sale-->
                             <Grid Grid.Row="1">
@@ -291,24 +293,26 @@
                                     <ColumnDefinition/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Quick Sale" VerticalAlignment="Center" FontWeight="Bold"/>
-                                <Button Grid.Column="1" HorizontalAlignment="Right"
+                                <Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right"
                                             Style="{StaticResource MaterialDesignFlatButton}"
-                                            Command="{Binding QuickSellCommand}"
-                                            CommandParameter="{Binding ServicesConfig.MaxPrice}">
-                                    <materialDesign:PackIcon Kind="Play"/>
+                                            Command="{Binding QuickSellCommand}">
+                                    <materialDesign:PackIcon Kind="{Binding HomeStatistics.SellButton}"/>
                                 </Button>
-                                <Separator Grid.ColumnSpan="2" VerticalAlignment="Bottom"/>
+                                <ProgressBar Grid.ColumnSpan="2" VerticalAlignment="Bottom"
+                                                 Height="3" Style="{StaticResource MaterialDesignLinearProgressBar}"
+                                                 Maximum="{Binding HomeStatistics.MaxProgressSell}"
+                                                 Value="{Binding HomeStatistics.ProgressSell}"/>
                                 <TextBlock Grid.Row="1" Text="Max. Price:" Height="15"/>
                                 <VirtualizingStackPanel Grid.Row="1" Grid.Column="1"
-                                    VerticalAlignment="Center"
-                                    HorizontalAlignment="Left"
-                                    Orientation="Horizontal">
-                                    <TextBox Width="70" Text="{Binding ServicesConfig.MaxPrice}"
+                                                        VerticalAlignment="Center"
+                                                        HorizontalAlignment="Left"
+                                                        Orientation="Horizontal">
+                                    <TextBox Width="70" Text="{Binding HomeConfig.MaxPrice}"
                                                  PreviewTextInput="Number_PreviewTextInput" ToolTip="Allowable selling price"/>
-                                    <TextBlock Text="₽" Margin="2 0 0 0" VerticalAlignment="Bottom"/>
+                                <TextBlock Text="₽" Margin="2 0 0 0" VerticalAlignment="Bottom"/>
                                 </VirtualizingStackPanel>
-                                <TextBlock Grid.Row="2" Grid.Column="0" Text="{Binding SellItems, StringFormat='Items: {0}'}"  VerticalAlignment="Center"/>
-                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Sum, StringFormat='Sum: {0}₽'}"  VerticalAlignment="Center"/>
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="{Binding HomeStatistics.SellItems, StringFormat='Items: {0}'}"  VerticalAlignment="Center"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding HomeStatistics.Sum, StringFormat='Sum: {0}₽'}"  VerticalAlignment="Center"/>
                             </Grid>
                             <!--Withdraw-->
                             <Grid Grid.Row="2">
@@ -321,13 +325,16 @@
                                     <ColumnDefinition/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Withdraw" VerticalAlignment="Center" FontWeight="Bold"/>
-                                <Separator Grid.Row="0" Grid.ColumnSpan="2" VerticalAlignment="Bottom"/>
-                                <Button Grid.Column="1" HorizontalAlignment="Right"
-                                        Style="{StaticResource MaterialDesignFlatButton}"
-                                        Command="{Binding WithdrawCommand}">
-                                    <materialDesign:PackIcon Kind="Play"/>
+                                <Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right"
+                                            Style="{StaticResource MaterialDesignFlatButton}"
+                                            Command="{Binding WithdrawCommand}">
+                                    <materialDesign:PackIcon Kind="{Binding HomeStatistics.WithdrawButton}"/>
                                 </Button>
-                                <TextBlock Grid.Row="1" Text="{Binding WithdrawItems, StringFormat='Items: {0}'}" VerticalAlignment="Center"/>
+                                <ProgressBar Grid.ColumnSpan="2" VerticalAlignment="Bottom"
+                                                 Height="3" Style="{StaticResource MaterialDesignLinearProgressBar}"
+                                                 Maximum="{Binding HomeStatistics.MaxProgressWithdraw}"
+                                                 Value="{Binding HomeStatistics.ProgressWithdraw}"/>
+                                <TextBlock Grid.Row="1" Text="{Binding HomeStatistics.WithdrawItems, StringFormat='Items: {0}'}" VerticalAlignment="Center"/>
                             </Grid>
                         </Grid>
                         <!--Favorite-->
@@ -338,26 +345,22 @@
                                 <RowDefinition/>
                                 <RowDefinition Height="35"/>
                             </Grid.RowDefinitions>
-                            <VirtualizingStackPanel Orientation="Horizontal">
-                                <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}" ToolTip="Add BuyOrders in favorite list"
+                        <VirtualizingStackPanel Orientation="Horizontal">
+                            <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}" ToolTip="Add BuyOrders in favorite list"
                                         Command="{Binding AddOrdersFavCommand}"
                                         CommandParameter="{Binding OrderedGrid}">
-                                    <materialDesign:PackIcon Kind="FileDocument"/>
-                                </Button>
-                                <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}" ToolTip="Extract favorite list"
-                                        Command="{Binding ExportFavCommand}">
-                                    <materialDesign:PackIcon Kind="FileDownload"/>
-                                </Button>
-                                <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}" ToolTip="Import favorite list"
-                                        Command="{Binding ImportFavCommand}">
-                                    <materialDesign:PackIcon Kind="FileUpload"/>
-                                </Button>
-                            </VirtualizingStackPanel>
-                            <Button Height="25" Style="{StaticResource MaterialDesignFlatButton}" HorizontalAlignment="Right" ToolTip="PlaceOrder favorite list"
-                                    Command="{Binding PlaceOrderFavCommand}">
-                                <materialDesign:PackIcon Kind="Play"/>
+                                <materialDesign:PackIcon Kind="FileDocument"/>
                             </Button>
-                            <Separator VerticalAlignment="Bottom"/>
+                            <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}" ToolTip="Extract favorite list"
+                                        Command="{Binding ExportFavCommand}">
+                                <materialDesign:PackIcon Kind="FileDownload"/>
+                            </Button>
+                            <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}" ToolTip="Import favorite list"
+                                        Command="{Binding ImportFavCommand}">
+                                <materialDesign:PackIcon Kind="FileUpload"/>
+                            </Button>
+                        </VirtualizingStackPanel>
+                        <Separator VerticalAlignment="Bottom"/>
                             <TextBlock Grid.Row="1"
                                        HorizontalAlignment="Left" VerticalAlignment="Center"
                                        Text="{Binding FavoriteList.Count, StringFormat='Count: {0}'}"/>
@@ -394,28 +397,5 @@
                     </Grid>
                 </Border>
             </Grid>
-            <!--statusBar-->
-            <Grid Grid.Row="1" Margin="10 0 10 0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-                <ProgressBar Grid.ColumnSpan="2" VerticalAlignment="Bottom"
-                             Height="3" Style="{StaticResource MaterialDesignLinearProgressBar}"
-                             Maximum="{Binding MaxProgress}"
-                             Value="{Binding CurrentProgress}"/>
-                <TextBlock Grid.Column="0" Text="{Binding TimerStatus}" 
-                           Visibility="{Binding TimerVisible, Converter={StaticResource BooleanToVisibilityConverter}, UpdateSourceTrigger=PropertyChanged}"
-                           VerticalAlignment="Center" HorizontalAlignment="Left"
-                           PreviewMouseDown="TimerTextBlock_PreviewMouseDown"/>
-                <Button Grid.Column="1"
-                        Style="{StaticResource MaterialDesignFlatButton}"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Right"
-                        Command="{Binding StopCommand}">
-                    <materialDesign:PackIcon Kind="Stop"/>
-                </Button>
-            </Grid>
         </Grid>
-    </Grid>
 </UserControl>

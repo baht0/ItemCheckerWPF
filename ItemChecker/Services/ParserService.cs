@@ -1,8 +1,6 @@
-﻿using ItemChecker.Net;
-using ItemChecker.Properties;
+﻿using ItemChecker.Properties;
 using ItemChecker.Services;
 using ItemChecker.Support;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,239 +13,143 @@ namespace ItemChecker.MVVM.Model
 {
     public class ParserService : ItemBaseService
     {
-        string _itemType { get; set; }
-        string _itemName { get; set; }
-        decimal _price1 { get; set; }
-        decimal _price2 { get; set; }
-        decimal _price3 { get; set; }
-        decimal _price4 { get; set; }
-        decimal _precent { get; set; }
-        decimal _difference { get; set; }
-        string _status { get; set; }
-        bool _have { get; set; }
-
-        void DefaultValue()
+        public static bool ApplyFilter(ParserFilter filterConfig, DataParser item)
         {
-            this._itemType = "Normal";
-            this._itemName = String.Empty;
-            this._price1 = 0;
-            this._price2 = 0;
-            this._price3 = 0;
-            this._price4 = 0;
-            this._precent = 0;
-            this._difference = 0;
-            this._status = "Tradable";
-            this._have = false;
-        }
-        protected DataParser CheckList(string itemName)
-        {
-            DefaultValue();
-            _itemName = itemName;
-            ItemType();
+            //category
+            bool category = true;
+            if (filterConfig.Normal | filterConfig.Stattrak | filterConfig.Souvenir | filterConfig.KnifeGlove | filterConfig.KnifeGloveStattrak)
+            {
+                category = false;
+                if (filterConfig.Normal)
+                    category = item.ItemType.Contains("Normal");
+                if (filterConfig.Stattrak & !category)
+                    category = item.ItemType.Contains("Souvenir");
+                if (filterConfig.Souvenir & !category)
+                    category = item.ItemType.Contains("Stattrak");
+                if (filterConfig.KnifeGlove & !category)
+                    category = item.ItemType.Contains("KnifeGlove");
+                if (filterConfig.KnifeGloveStattrak & !category)
+                    category = item.ItemType.Contains("KnifeGloveStattrak");
+            }
+            //status
+            bool status = true;
+            if (filterConfig.Tradable | filterConfig.Ordered | filterConfig.Overstock | filterConfig.Unavailable | filterConfig.Unknown)
+            {
+                status = false;
+                if (filterConfig.Tradable)
+                    status = item.Status.Contains("Tradable");
+                if (filterConfig.Ordered & !status)
+                    status = item.Status.Contains("Ordered");
+                if (filterConfig.Overstock & !status)
+                    status = item.Status.Contains("Overstock");
+                if (filterConfig.Unavailable & !status)
+                    status = item.Status.Contains("Unavailable");
+                if (filterConfig.Unknown & !status)
+                    status = item.Status.Contains("Unknown");
+            }
+            //exterior
+            bool exterior = true;
+            if (filterConfig.NotPainted | filterConfig.BattleScarred | filterConfig.WellWorn | filterConfig.FieldTested | filterConfig.MinimalWear | filterConfig.FactoryNew)
+            {
+                exterior = false;
+                if (filterConfig.NotPainted)
+                    exterior = !item.ItemName.Contains("Battle-Scarred") &
+                        !item.ItemName.Contains("Well-Worn") &
+                        !item.ItemName.Contains("Field-Tested") &
+                        !item.ItemName.Contains("Minimal Wear") &
+                        !item.ItemName.Contains("Factory New") &
+                        item.ItemType.Contains("KnifeGlove");
+                if (filterConfig.BattleScarred & !exterior)
+                    exterior = item.ItemName.Contains("Battle-Scarred");
+                if (filterConfig.WellWorn & !exterior)
+                    exterior = item.ItemName.Contains("Well-Worn");
+                if (filterConfig.FieldTested & !exterior)
+                    exterior = item.ItemName.Contains("Field-Tested");
+                if (filterConfig.MinimalWear & !exterior)
+                    exterior = item.ItemName.Contains("Minimal Wear");
+                if (filterConfig.FactoryNew & !exterior)
+                    exterior = item.ItemName.Contains("Factory New");
+            }
+            //types
+            bool types = true;
+            if (filterConfig.Weapon | filterConfig.Knife | filterConfig.Gloves | filterConfig.Sticker | filterConfig.Patch | filterConfig.Pin | filterConfig.Key | filterConfig.Pass | filterConfig.MusicKit | filterConfig.Graffiti | filterConfig.Case | filterConfig.Package)
+            {
+                types = false;
+                if (filterConfig.Weapon)
+                    types = !item.ItemName.Contains("Sticker ") &
+                        !item.ItemName.Contains("Patch ") &
+                        !item.ItemName.Contains(" Pin") &
+                        !item.ItemName.Contains(" Key") &
+                        !item.ItemName.Contains(" Pass") &
+                        !item.ItemName.Contains("Music Kit") &
+                        !item.ItemName.Contains("Sealed Graffiti") &
+                        !item.ItemName.Contains("Case") &
+                        !item.ItemName.Contains(" Package");
+                if (filterConfig.Knife & !types)
+                    types = item.ItemName.Contains("Knife");
+                if (filterConfig.Gloves & !types)
+                    types = item.ItemName.Contains("Gloves |") | item.ItemName.Contains("★ Hand");
+                if (filterConfig.Sticker & !types)
+                    types = item.ItemName.Contains("Sticker ");
+                if (filterConfig.Patch & !types)
+                    types = item.ItemName.Contains("Patch ");
+                if (filterConfig.Pin & !types)
+                    types = item.ItemName.Contains(" Pin");
+                if (filterConfig.Key & !types)
+                    types = item.ItemName.Contains(" Key");
+                if (filterConfig.Pass & !types)
+                    types = item.ItemName.Contains(" Pass");
+                if (filterConfig.MusicKit & !types)
+                    types = item.ItemName.Contains("Music Kit");
+                if (filterConfig.Graffiti & !types)
+                    types = item.ItemName.Contains("Sealed Graffiti");
+                if (filterConfig.Case & !types)
+                    types = item.ItemName.Contains("Case");
+                if (filterConfig.Package & !types)
+                    types = item.ItemName.Contains(" Package");
+            }
+            //Prices
+            bool prices = true;
+            if (filterConfig.Price1 | filterConfig.Price2 | filterConfig.Price3 | filterConfig.Price4)
+            {
+                if (filterConfig.Price1)
+                    prices = filterConfig.Price1From < item.Price1 & filterConfig.Price1To > item.Price1;
+                if (filterConfig.Price2 & prices)
+                    prices = filterConfig.Price2From < item.Price2 & filterConfig.Price2To > item.Price2;
+                if (filterConfig.Price3 & prices)
+                    prices = filterConfig.Price3From < item.Price3 & filterConfig.Price3To > item.Price3;
+                if (filterConfig.Price4 & prices)
+                    prices = filterConfig.Price4From < item.Price4 & filterConfig.Price4To > item.Price4;
+            }
+            //other
+            bool other = true;
+            if (filterConfig.PrecentFrom != 0 | filterConfig.PrecentTo != 0 | filterConfig.DifferenceFrom != 0 | filterConfig.DifferenceTo != 0 | filterConfig.Hide100 | filterConfig.Hide0 | filterConfig.Have)
+            {
+                if (filterConfig.PrecentFrom != 0)
+                    other = filterConfig.PrecentFrom < item.Precent;
+                if (filterConfig.PrecentTo != 0 & other)
+                    other = filterConfig.PrecentTo > item.Precent;
+                if (filterConfig.DifferenceFrom != 0 & other)
+                    other = filterConfig.DifferenceFrom < item.Difference;
+                if (filterConfig.DifferenceTo != 0 & other)
+                    other = filterConfig.DifferenceTo > item.Difference;
 
-            JObject json = null;
-            if (ParserProperties.Default.ServiceOne == 0 | ParserProperties.Default.ServiceTwo == 0)
-            {
-                ItemBase Item = ItemBase.SkinsBase.Where(x => x.ItemName == itemName).First();
-                json = Get.ItemOrdersHistogram(Item.SteamId);
+                if (filterConfig.Hide100 & other)
+                    other = item.Precent != -100;
+                if (filterConfig.Hide0 & other)
+                    other = item.Precent != 0;
+                if (filterConfig.Have & other)
+                    other = item.Have;
             }
 
-            ServiceOne(json);
-            ServiceTwo(json);
-            Calculate();
-
-            return new DataParser(_itemType, _itemName, _price1, _price2, _price3, _price4, _precent, _difference, _status, _have);
+            bool isShow = category & status & exterior & types & prices & other;
+            return isShow;
         }
-        void ServiceOne(JObject json)
-        {
-            switch (ParserProperties.Default.ServiceOne)
-            {
-                case 0: //st
-                    {
-                        DataSteamMarket steamItem = MarketItems(json);
-                        DataSteamMarket.MarketItems.Add(steamItem);
-
-                        _price1 = steamItem.LowestSellOrder;
-                        _price2 = steamItem.HighestBuyOrder;
-                        if (GeneralProperties.Default.Currency == 0)
-                        {
-                            _price1 = Edit.ConverterToUsd(_price1, GeneralProperties.Default.CurrencyValue);
-                            _price2 = Edit.ConverterToUsd(_price2, GeneralProperties.Default.CurrencyValue);
-                        }
-                        if (DataOrder.Orders.Any(n => n.ItemName.Contains(_itemName)))
-                            _status = "Ordered";
-                        _have = _price1 != 0;
-                        break;
-                    }
-                case 1: //csm
-                    {
-                        List<DataInventoryCsm> CsmItems = DataInventoryCsm.Inventory.Where(x => x.ItemName == _itemName).ToList();
-                        _price1 = CsmItems.Select(x => x.Price).Min();
-                        _price2 = Math.Round(_price1 * 0.95m, 2);
-                        if (GeneralProperties.Default.Currency == 1)
-                        {
-                            _price1 = Edit.ConverterToRub(_price1, GeneralProperties.Default.CurrencyValue);
-                            _price2 = Edit.ConverterToRub(_price2, GeneralProperties.Default.CurrencyValue);
-                        }
-                        _have = _price1 != 0;
-                        break;
-                    }
-                case 2: //lf
-                    {
-                        DataInventoryLf LfItem = DataInventoryLf.Inventory.Where(x => x.ItemName == _itemName).First();
-                        _price1 = LfItem.DefaultPrice;
-                        _price2 = Math.Round(_price1 * 0.95m, 2);
-                        if (GeneralProperties.Default.Currency == 1)
-                        {
-                            _price1 = Edit.ConverterToRub(_price1, GeneralProperties.Default.CurrencyValue);
-                            _price2 = Edit.ConverterToRub(_price2, GeneralProperties.Default.CurrencyValue);
-                        }
-                        _have = LfItem.Have > 0;
-                        break;
-                    }
-            }
-        }
-        void ServiceTwo(JObject json)
-        {
-            switch (ParserProperties.Default.ServiceTwo)
-            {
-                case 0:
-                    {
-                        if (!String.IsNullOrEmpty(json["lowest_sell_order"].ToString()))
-                            _price3 = Convert.ToDecimal(json["lowest_sell_order"]) / 100;
-                        if (!String.IsNullOrEmpty(json["highest_buy_order"].ToString()))
-                            _price4 = Math.Round(Convert.ToDecimal(json["highest_buy_order"]) / 100 * 0.8696m, 2);
-                        if (GeneralProperties.Default.Currency == 0)
-                        {
-                            _price3 = Edit.ConverterToUsd(_price3, GeneralProperties.Default.CurrencyValue);
-                            _price4 = Edit.ConverterToUsd(_price4, GeneralProperties.Default.CurrencyValue);
-                        }
-                        break;
-                    }
-                case 1:
-                    {
-                        ItemBase Item = ItemBase.SkinsBase.Where(x => x.ItemName == _itemName).First();
-                        _price3 = Item.PriceCsm;
-                        _price4 = Math.Round(_price3 * 0.95m, 2); 
-                        if (GeneralProperties.Default.Currency == 1)
-                        {
-                            _price3 = Edit.ConverterToRub(_price3, GeneralProperties.Default.CurrencyValue);
-                            _price4 = Edit.ConverterToRub(_price4, GeneralProperties.Default.CurrencyValue);
-                        }
-
-                        if (ItemBase.Unavailable.Any(x => x.ItemName == _itemName))
-                            _status = "Unavailable";
-                        else if (ItemBase.Overstock.Any(x => x.ItemName == _itemName))
-                            _status = "Overstock";
-                        break;
-                    }
-                case 2:
-                    {
-                        if (!DataInventoryLf.Inventory.Any(x=> x.ItemName == _itemName))
-                        {
-                            _status = "Unknown";
-                            break;
-                        }
-                        DataInventoryLf LfItem = DataInventoryLf.Inventory.Where(x => x.ItemName == _itemName).First();
-                        _price3 = LfItem.DefaultPrice;
-                        _price4 = Math.Round(_price3 * 0.95m, 2);
-                        if(GeneralProperties.Default.Currency == 1)
-                        {
-                            _price3 = Edit.ConverterToRub(_price3, GeneralProperties.Default.CurrencyValue);
-                            _price4 = Edit.ConverterToRub(_price4, GeneralProperties.Default.CurrencyValue);
-                        }
-                        if (LfItem.IsOverstock)
-                            _status = "Overstock";
-                        break;
-                    }
-            }
-        }
-        void ItemType()
-        {
-            if (_itemName.Contains("Souvenir"))
-                _itemType = "Souvenir";
-            if (_itemName.Contains("StatTrak"))
-                _itemType = "Stattrak";
-            if (_itemName.Contains("★ "))
-                _itemType = "KnifeGlove";
-            if (_itemName.Contains("★ StatTrak"))
-                _itemType = "KnifeGloveStattrak";
-        }
-        void Calculate()
-        {
-            if (ParserProperties.Default.ServiceOne == 0) //steam -> (any)
-            {
-                _precent = Edit.Precent(_price2, _price4);
-                _difference = Edit.Difference(_price4, _price2);
-            }
-            else //(any) -> (any)
-            {
-                _precent = Edit.Precent(_price1, _price4);
-                _difference = Edit.Difference(_price4, _price1);
-            }
-            switch (GeneralProperties.Default.Currency)
-            {
-                case 0:
-                    {
-                        ParserList.DataCurrency = "USD";
-                        break;
-                    }
-                case 1:
-                    {
-                        ParserList.DataCurrency = "RUB";
-                        break;
-                    }
-            }
-        }
-        DataSteamMarket MarketItems(JObject json)
-        {
-            decimal high = 0;
-            decimal low = 0;
-            List<decimal> buyOrderGraph = new();
-            List<decimal> sellOrderGraph = new();
-            if (!String.IsNullOrEmpty(json["highest_buy_order"].ToString()))
-                high = Convert.ToDecimal(json["highest_buy_order"]) / 100;
-            if (!String.IsNullOrEmpty(json["lowest_sell_order"].ToString()))
-                low = Convert.ToDecimal(json["lowest_sell_order"]) / 100;
-            int i = 1;
-            if (((JArray)json["buy_order_graph"]).Any())
-            {
-                foreach (var order in json["buy_order_graph"])
-                {
-                    if (i > 6)
-                        break;
-                    buyOrderGraph.Add(Convert.ToDecimal(order[0]));
-                    i++;
-                }
-                buyOrderGraph.RemoveAt(0);
-            }
-            i = 1;
-            if (((JArray)json["sell_order_graph"]).Any())
-            {
-                foreach (var order in json["sell_order_graph"])
-                {
-                    if (i > 6)
-                        break;
-                    sellOrderGraph.Add(Convert.ToDecimal(order[0]));
-                    i++;
-                }
-                sellOrderGraph.RemoveAt(0);
-            }
-            return new DataSteamMarket()
-            {
-                ItemName = _itemName,
-                HighestBuyOrder = high,
-                LowestSellOrder = low,
-                BuyOrderGraph = buyOrderGraph,
-                SellOrderGraph = sellOrderGraph
-            };
-        }
-
         //CSV
-        public void ExportCsv(ICollectionView collectionView, string mode)
+        public void ExportCsv(ObservableCollection<DataParser> parserGrid, ICollectionView collectionView, string mode)
         {
-            dynamic source = DataParser.ParserItems;
-            if (collectionView.Cast<DataParser>().Count() != DataParser.ParserItems.Count)
+            dynamic source = parserGrid;
+            if (collectionView.Cast<DataParser>().Count() != parserGrid.Count)
             {
                 MessageBoxResult result = MessageBox.Show($"Export with filter applied?\n\nClick \"No\" to export the entire list.", "Question", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
                 if (result == MessageBoxResult.Cancel)
@@ -256,7 +158,7 @@ namespace ItemChecker.MVVM.Model
                     source = collectionView;
             }
 
-            string csv = $"{ParserList.DataCurrency},{ParserProperties.Default.ServiceOne},{ParserProperties.Default.ServiceTwo}\r\n";
+            string csv = $"{ParserStatistics.DataCurrency},{ParserProperties.Default.ServiceOne},{ParserProperties.Default.ServiceTwo}\r\n";
             foreach (var item in source)
             {
                 string itemName = item.ItemName;
@@ -269,7 +171,7 @@ namespace ItemChecker.MVVM.Model
             string path = $"{BaseModel.AppPath}\\extract";
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
-            File.WriteAllText(path + $"\\Parser_{mode}_{ParserList.DataCurrency}_{DateTime.Now:dd.MM.yyyy_hh.mm}.csv", Edit.replaceSymbols(csv));
+            File.WriteAllText(path + $"\\Parser_{mode}_{ParserStatistics.DataCurrency}_{DateTime.Now:dd.MM.yyyy_hh.mm}.csv", Edit.replaceSymbols(csv));
         }
         public ObservableCollection<DataParser> ImportCsv()
         {
@@ -283,7 +185,7 @@ namespace ItemChecker.MVVM.Model
                 string[] line = info.Split(',');
                 if (line.Length == 3)
                 {
-                    ParserList.DataCurrency = line[0].ToString();
+                    ParserStatistics.DataCurrency = line[0].ToString();
                     ParserProperties.Default.ServiceOne = int.Parse(line[1]);
                     ParserProperties.Default.ServiceTwo = int.Parse(line[2]);
                     continue;
@@ -320,13 +222,13 @@ namespace ItemChecker.MVVM.Model
             string txt = null;
             if (result == MessageBoxResult.Yes)
             {
-                if (ParserList.DataCurrency == "RUB")
+                if (ParserStatistics.DataCurrency == "RUB")
                     MessageBox.Show("Attention, prices in \"RUB\" after conversion may not be accurate.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                 foreach (DataParser item in collectionView)
                 {
                     decimal price = item.Price1;
-                    if (ParserList.DataCurrency == "RUB")
-                        price = Math.Round(item.Price1 / GeneralProperties.Default.CurrencyValue, 2);
+                    if (ParserStatistics.DataCurrency == "RUB")
+                        price = Math.Round(item.Price1 / SettingsProperties.Default.CurrencyValue, 2);
 
                     txt += $"{item.ItemName};{price}\r\n";
                 }
@@ -341,7 +243,7 @@ namespace ItemChecker.MVVM.Model
             string path = $"{BaseModel.AppPath}\\extract";
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
-            File.WriteAllText(path + $"\\Parser_{mode}_{ParserList.DataCurrency}_{result}_{DateTime.Now:dd.MM.yyyy_hh.mm}.txt", Edit.replaceSymbols(txt));
+            File.WriteAllText(path + $"\\Parser_{mode}_{ParserStatistics.DataCurrency}_{result}_{DateTime.Now:dd.MM.yyyy_hh.mm}.txt", Edit.replaceSymbols(txt));
         }
     }
 }

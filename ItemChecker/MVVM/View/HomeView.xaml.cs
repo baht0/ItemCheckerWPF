@@ -12,7 +12,6 @@ namespace ItemChecker.MVVM.View
         public BuyOrderView()
         {
             InitializeComponent();
-            this.DataContext = new HomeViewModel();
         }
         private void Number_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
@@ -73,11 +72,23 @@ namespace ItemChecker.MVVM.View
                 }
             }
         }
-        private void TimerTextBlock_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        private void TimerPush_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             HomeViewModel viewModel = (HomeViewModel)DataContext;
             if (viewModel.TimerCommand.CanExecute(null))
-                viewModel.TimerCommand.Execute(null);
+                viewModel.TimerCommand.Execute(0);
+        }
+        private void TimerCsm_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            HomeViewModel viewModel = (HomeViewModel)DataContext;
+            if (viewModel.TimerCommand.CanExecute(null))
+                viewModel.TimerCommand.Execute(1);
+        }
+        private void TimerFloat_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            HomeViewModel viewModel = (HomeViewModel)DataContext;
+            if (viewModel.TimerCommand.CanExecute(null))
+                viewModel.TimerCommand.Execute(2);
         }
         private void FavItemTextBoxClear_Click(object sender, RoutedEventArgs e)
         {

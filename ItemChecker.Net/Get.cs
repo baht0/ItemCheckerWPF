@@ -3,46 +3,36 @@ using System;
 using System.IO;
 using System.Net;
 using ItemChecker.Support;
+using System.Text;
 
 namespace ItemChecker.Net
 {
     public class Get
     {
+        public static Cookie GetSteamSessionId()
+        {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("https://steamcommunity.com/market/");
+            request.CookieContainer = new();
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();            
+            return response.Cookies["sessionid"];
+        }
+
         public static String Request(string url)
         {
-            WebRequest request = WebRequest.Create(url);
-            WebResponse response = request.GetResponse();
-            Stream stream = response.GetResponseStream();
-            StreamReader sr = new(stream);
-            var json = sr.ReadToEnd();
-
-            return json;
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            using StreamReader stream = new(response.GetResponseStream(), Encoding.UTF8);
+            return stream.ReadToEnd();
         }
-        public static String Request(string url, string address)
+        public static String Request(CookieContainer cookie, string url)
         {
-            WebRequest request = WebRequest.Create(url);
-            request.Proxy = new WebProxy(address.Trim(), true);
-            request.Timeout = 5000;
-            WebResponse response = request.GetResponse();
-            Stream stream = response.GetResponseStream();
-            StreamReader sr = new StreamReader(stream);
-            var json = sr.ReadToEnd();
-
-            return json;
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.CookieContainer = cookie;
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            using StreamReader stream = new(response.GetResponseStream(), Encoding.UTF8);
+            return stream.ReadToEnd();
         }
         //csm
-        public static Tuple<String, Boolean> MrinkaRequest(string str)
-        {
-            try
-            {
-                string url = @"http://188.166.72.201:8080/singleitem?i=" + str;
-                return Tuple.Create(Request(url), true);
-            }
-            catch
-            {
-                return Tuple.Create(string.Empty, false);
-            }
-        }
         public static String InventoriesCsMoney(string market_hash_name, bool userItems)
         {
             string isMarket = string.Empty;
@@ -74,9 +64,9 @@ namespace ItemChecker.Net
             decimal median_price = 0m;
 
             if (response.ContainsKey("lowest_price"))
-                lowest_price = Edit.removeRub(JObject.Parse(json)["lowest_price"].ToString());
+                lowest_price = Edit.GetPrice(response["lowest_price"].ToString());
             if (response.ContainsKey("median_price"))
-                median_price = Edit.removeRub(JObject.Parse(json)["median_price"].ToString());
+                median_price = Edit.GetPrice(response["median_price"].ToString());
 
             return Tuple.Create(lowest_price, median_price);
         }

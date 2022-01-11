@@ -3,12 +3,10 @@ using ItemChecker.Net;
 using ItemChecker.Properties;
 using ItemChecker.Support;
 using Newtonsoft.Json.Linq;
-using OpenQA.Selenium.Support.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Media;
-using System.Threading;
 using System.Windows;
 
 namespace ItemChecker.Services
@@ -16,7 +14,8 @@ namespace ItemChecker.Services
     public class FloatCheckService : BaseService
     {
         DataFloat floatData = new();
-        public void checkFloat(string item)
+        int purchasesMade = 0;
+        public Int32 checkFloat(string item)
         {
             string market_hash_name = Edit.MarketHashName(item);
             getPrice(market_hash_name);
@@ -67,6 +66,8 @@ namespace ItemChecker.Services
                 if (BaseModel.token.IsCancellationRequested)
                     break;
             }
+
+            return purchasesMade;
         }
 
         void getPrice(string market_hash_name)
@@ -77,18 +78,18 @@ namespace ItemChecker.Services
                 floatData.LowestPrice = prices.Item1;
                 floatData.MedianPrice = prices.Item2;
 
-                Tuple<String, Boolean> response = Tuple.Create(string.Empty, false);
-                do
-                {
-                    response = Get.MrinkaRequest(market_hash_name);
-                    if (!response.Item2)
-                    {
-                        Thread.Sleep(30000);
-                    }
-                }
-                while (!response.Item2);
-                floatData.CsmPrice = Convert.ToDecimal(JObject.Parse(response.Item1)["csm"]["sell"].ToString());
-                floatData.CsmPrice = Math.Round(floatData.CsmPrice * GeneralProperties.Default.CurrencyValue, 2);
+                //Tuple<String, Boolean> response = Tuple.Create(string.Empty, false);
+                //do
+                //{
+                //    response = Get.MrinkaRequest(market_hash_name);
+                //    if (!response.Item2)
+                //    {
+                //        Thread.Sleep(30000);
+                //    }
+                //}
+                //while (!response.Item2);
+                //floatData.CsmPrice = Convert.ToDecimal(JObject.Parse(response.Item1)["csm"]["sell"].ToString());
+                //floatData.CsmPrice = Math.Round(floatData.CsmPrice * SettingsProperties.Default.CurrencyValue, 2);
 
                 switch (HomeProperties.Default.Compare)
                 {
@@ -125,7 +126,7 @@ namespace ItemChecker.Services
         }
         void buyItem(string item, decimal price, string listing_id, decimal fee, decimal subtotal, decimal total)
         {
-            Browser.Navigate().GoToUrl("https://steamcommunity.com/market/");
+            //Browser.Navigate().GoToUrl("https://steamcommunity.com/market/");
 
             string message = $"Found item:\n{item}\n{floatData.LowestPrice}₽ (Lowest price) | {floatData.MedianPrice}₽ (Median price)\n\nFloat: {floatData.FloatValue}\nPrice ST: {price}₽ ({Math.Round(floatData.LowestPrice - price, 2)}₽)\nPrice CSM: {floatData.CsmPrice}₽ ({Math.Round(floatData.CsmPrice - price, 2)}₽)\n\nClick YES if you want to buy the item";
             SystemSounds.Asterisk.Play();
@@ -135,8 +136,8 @@ namespace ItemChecker.Services
                     MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
             {
-                BaseModel.Browser.ExecuteJavaScript(Post.BuyListing(listing_id, fee, subtotal, total, Account.SessionId));
-                Home.PurchasesMade++;
+                //BaseModel.Browser.ExecuteJavaScript(Post.BuyListing(listing_id, fee, subtotal, total, Account.SessionId));
+                purchasesMade++;
             }
         }
 

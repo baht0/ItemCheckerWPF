@@ -3,11 +3,9 @@ using ItemChecker.Net;
 using ItemChecker.Properties;
 using ItemChecker.Support;
 using Newtonsoft.Json.Linq;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Support.Extensions;
-using OpenQA.Selenium.Support.UI;
 using System;
 using System.Linq;
+using System.Net;
 using System.Threading;
 
 namespace ItemChecker.Services
@@ -16,9 +14,7 @@ namespace ItemChecker.Services
     {
         public void checkInventory()
         {
-            Browser.Navigate().GoToUrl("http://steamcommunity.com/my/inventory/json/730/2");
-            IWebElement html = WebDriverWait.Until(e => e.FindElement(By.XPath("//pre")));
-            string json = html.Text;
+            var json = Get.Request(SettingsProperties.Default.SteamCookies, "http://steamcommunity.com/my/inventory/json/730/2");
             JObject rgInventory = (JObject)JObject.Parse(json)["rgInventory"];
             JObject rgDescriptions = (JObject)JObject.Parse(json)["rgDescriptions"];
 
@@ -59,10 +55,9 @@ namespace ItemChecker.Services
         }
         public void sellItems(DataSell item)
         {
-            var sell_price = item.Price;
-            sell_price = Edit.CommissionSteam(sell_price - 0.01m);
+            int sell_price = (int)((item.Price * 100 - 0.01m) * Calculator.CommissionSteam);
 
-            Browser.ExecuteJavaScript(Post.SellItem(item.AssetId, (sell_price * 100).ToString(), Account.SessionId));
+            Post.SellItem(SettingsProperties.Default.SteamCookies, SteamAccount.User, item.AssetId, sell_price);
         }
         Decimal checkPrice(string name)
         {

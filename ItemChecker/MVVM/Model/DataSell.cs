@@ -4,10 +4,10 @@ namespace ItemChecker.MVVM.Model
 {
     public class DataSell
     {
-        public string AssetId { get; set; }
         public string ItemName { get; set; }
+        public string AssetId { get; set; }
         public decimal Price { get; set; }
 
-        public static List<DataSell> SellItems = new();
+        public static List<DataSell> SellItems { get; set; } = new();
     }
 }

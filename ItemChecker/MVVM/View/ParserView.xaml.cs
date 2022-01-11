@@ -12,7 +12,6 @@ namespace ItemChecker.MVVM.View
         public ParserView()
         {
             InitializeComponent();
-            this.DataContext = new ParserViewModel();
         }
         private void InputDecimal(object sender, TextCompositionEventArgs e)
         {
@@ -47,6 +46,7 @@ namespace ItemChecker.MVVM.View
         {
             if (!parserGrid.Items.IsEmpty)
             {
+                ParserViewModel viewModel = (ParserViewModel)DataContext;
                 object item = parserGrid.CurrentItem;
                 PropertyInfo info = item.GetType().GetProperty("ItemName");
                 string ItemName = (string)info.GetValue(item, null);
@@ -57,27 +57,27 @@ namespace ItemChecker.MVVM.View
                 switch (columnIndex)
                 {
                     case 2:
-                        if (Service1.Text.Contains("SteamMarket"))
+                        if (viewModel.ParserStatistics.Service1 == "SteamMarket" | viewModel.ParserStatistics.Service1 == "SteamMarket(A)")
                             Edit.openUrl("https://steamcommunity.com/market/listings/730/" + market_has_name);
-                        else if (Service1.Text.Contains("Cs.Money"))
+                        else if (viewModel.ParserStatistics.Service1 == "Cs.Money")
                             Edit.openCsm(market_has_name);
                         break;
                     case 3:
-                        if (Service1.Text.Contains("SteamMarket"))
+                        if (viewModel.ParserStatistics.Service1 == "SteamMarket" | viewModel.ParserStatistics.Service1 == "SteamMarket(A)")
                             Edit.openUrl("https://steamcommunity.com/market/listings/730/" + market_has_name);
-                        else if (Service1.Text.Contains("Cs.Money"))
+                        else if (viewModel.ParserStatistics.Service1 == "Cs.Money")
                             Edit.openCsm(market_has_name);
                         break;
                     case 4:
-                        if (Service2.Text.Contains("SteamMarket"))
+                        if (viewModel.ParserStatistics.Service1 == "SteamMarket" | viewModel.ParserStatistics.Service1 == "SteamMarket(A)")
                             Edit.openUrl("https://steamcommunity.com/market/listings/730/" + market_has_name);
-                        else if (Service2.Text.Contains("Cs.Money"))
+                        else if (viewModel.ParserStatistics.Service2 == "Cs.Money")
                             Edit.openCsm(market_has_name);
                         break;
                     case 5:
-                        if (Service2.Text.Contains("SteamMarket"))
+                        if (viewModel.ParserStatistics.Service1 == "SteamMarket" | viewModel.ParserStatistics.Service1 == "SteamMarket(A)")
                             Edit.openUrl("https://steamcommunity.com/market/listings/730/" + market_has_name);
-                        else if (Service2.Text.Contains("Cs.Money"))
+                        else if (viewModel.ParserStatistics.Service2 == "Cs.Money")
                             Edit.openCsm(market_has_name);
                         break;
                     default:

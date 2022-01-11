@@ -16,8 +16,7 @@
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Normal"
         FontFamily="{materialDesign:MaterialDesignFont}"
-        WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="NoResize"
-        Closing="Window_Closing">
+        WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="NoResize">
     <Border BorderBrush="DimGray" BorderThickness="0.5">
         <Grid>
             <Grid.RowDefinitions>
@@ -41,7 +40,7 @@
                         <GradientStop Color="#FF464646" Offset="10"/>
                     </LinearGradientBrush>
                 </Rectangle.Fill>
-            </Rectangle>
+            </Rectangle>            
             <!--Title-->
             <Grid Grid.Row="0" Background="Transparent"
                   MouseLeftButtonDown="Window_DragMove">
@@ -102,13 +101,14 @@
                                Width="200" VerticalAlignment="Top"/>
                     <TextBlock Text="2AF Code:" Grid.Row="4" VerticalAlignment="Bottom"/>
                     <TextBox Grid.Row="5" Grid.ColumnSpan="2"
-                                     VerticalAlignment="Center"
-                                     MaxLength="5" FontSize="20"
-                                     Margin="5" TextAlignment="Center"
-                                     CharacterCasing="Upper"
-                                     FontWeight="Bold" KeyDown="codeTextbox_KeyDown"
-                                     FontFamily="Consolas"
-                                     Text="{Binding Code2AF, UpdateSourceTrigger=PropertyChanged}"/>
+                             VerticalAlignment="Center"
+                             MaxLength="5" FontSize="20"
+                             Margin="5" TextAlignment="Center"
+                             CharacterCasing="Upper"
+                             FontWeight="Bold"
+                             FontFamily="Consolas"
+                             KeyDown="TextBox_KeyDown"
+                             Text="{Binding Code2AF, UpdateSourceTrigger=PropertyChanged}"/>
                 </Grid>
                 <Button Content="Sign In"
                         VerticalAlignment="Bottom" Margin="120 0 120 45"
@@ -127,6 +127,7 @@
                    HorizontalAlignment="Right"
                    VerticalAlignment="Center"/>
             </Grid>
+            <materialDesign:Snackbar Grid.Row="1" MessageQueue="{Binding Message}"/>
         </Grid>
     </Border>
 </Window>

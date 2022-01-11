@@ -1,31 +1,29 @@
 ﻿using ItemChecker.Core;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Support.UI;
 using System;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Newtonsoft.Json.Linq;
 using ItemChecker.MVVM.Model;
 using System.Windows;
+using System.Globalization;
+using ItemChecker.Services;
 using System.Diagnostics;
 using System.Linq;
-using ItemChecker.Properties;
-using System.Globalization;
+using MaterialDesignThemes.Wpf;
+using System.Threading;
 
 namespace ItemChecker.MVVM.ViewModel
 {
     public class StartUpViewModel : ObservableObject
     {
         IView _view;
-        Task startTask;
-        string _version;
+        string _version = DataProjectInfo.CurrentVersion;
+        bool _isLogin = false;
         string _status;
-        bool _isLogin;
-        private Account _login;
+        SnackbarMessageQueue _mess = new();
+        private SteamLogin _login = new();
 
+        Task startTask { get; set; }
         public bool LoginSuccessful { get; set; }
         public string Version
         {
@@ -33,15 +31,6 @@ namespace ItemChecker.MVVM.ViewModel
             set
             {
                 _version = value;
-                OnPropertyChanged();
-            }
-        }
-        public string Status
-        {
-            get { return _status; }
-            set
-            {
-                _status = value;
                 OnPropertyChanged();
             }
         }
@@ -54,7 +43,25 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        public Account Login
+        public string Status
+        {
+            get { return _status; }
+            set
+            {
+                _status = value;
+                OnPropertyChanged();
+            }
+        }
+        public SnackbarMessageQueue Message
+        {
+            get { return _mess; }
+            set
+            {
+                _mess = value;
+                OnPropertyChanged();
+            }
+        }
+        public SteamLogin Login
         {
             get { return _login; }
             set
@@ -66,30 +73,24 @@ namespace ItemChecker.MVVM.ViewModel
 
         public StartUpViewModel(IView view)
         {
+            _view = view;
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.CreateSpecificCulture("en-Us");
             CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.CreateSpecificCulture("en-Us");
-            Login = new Account()
-            {
-                Login = string.Empty,
-                Remember = false,
-                Code2AF = string.Empty,
-            };
-            _view = view;
-            Version = BaseModel.Version;
-            BaseModel.IsLoading = true;
-            startTask = Task.Run(() => { Starting(); });
+
+            startTask = Task.Run(() => Starting());
         }
         public ICommand ExitCommand =>
             new RelayCommand((obj) =>
             {
-                Task.Run(() =>
-                {
+                Task.Run(() => {
                     BaseModel.cts.Cancel();
+                    startTask.Wait(4000);
                     Status = "Exit...";
-                    startTask.Wait(5000);
-                    BaseModel.BrowserExit();
-                }).Wait();
-                Application.Current.Shutdown();
+                    if (BaseModel.Browser != null)
+                        BaseService.BrowserExit();
+
+                    Application.Current.Dispatcher.Invoke(() => { Application.Current.Shutdown(); });
+                });                
             });
         void Hide()
         {
@@ -99,34 +100,51 @@ namespace ItemChecker.MVVM.ViewModel
         {
             try
             {
-                KillProccess();
-                CompletionUpdate();
-                LaunchBrowser();
-                CheckUpdate();
-                Status = "Get Base...";
-                Account.GetBase();
+                Status = "Check Update...";
+                ProjectInfoService.AppUpdate();
 
-                SteamAccount();
-                LoginCsm();
-                Status = "Status Steam...";
-                BaseModel.StatusSteam();
-                Status = "Check Steam Orders...";
+                Status = "Signing In...";
+                Task.Run(() => {
+                    while (true)
+                        if (!BaseModel.LoginSteam.IsLoggedIn)
+                        {
+                            IsLogin = true;
+                            Message.Enqueue("Please, Sign In...");
+                            Status = "Please, Sign In...";
+                            Thread.Sleep(500);
+                        }
+                });
+                bool isLogin = false;
+                do
+                {
+                    if (BaseModel.token.IsCancellationRequested)
+                        break;
+                    Proccess();
+                    isLogin = BaseModel.GetCookies();
+                } while (!isLogin);
+
+                Status = "Get Base...";
+                BaseService.GetBase();
+                Status = "Steam Account...";
+                SteamAccount.GetSteamAccount();
+                if (BaseModel.token.IsCancellationRequested)
+                    return;
+                Status = "My Orders...";
                 OrderCheckService order = new();
                 order.SteamOrders();
 
                 if (BaseModel.token.IsCancellationRequested)
                     return;
-                BaseModel.IsLoading = false;
                 LoginSuccessful = true;
                 Application.Current.Dispatcher.Invoke(() => { Hide(); });
             }
             catch (Exception exp)
             {
-                BaseModel.errorLog(exp);
-                BaseModel.errorMessage(exp);
+                BaseService.errorLog(exp);
+                BaseService.errorMessage(exp);
             }
         }
-        void KillProccess()
+        void Proccess()
         {
             if (Process.GetProcessesByName(Path.GetFileNameWithoutExtension(System.Reflection.Assembly.GetEntryAssembly().Location)).Count() > 1)
             {
@@ -137,8 +155,7 @@ namespace ItemChecker.MVVM.ViewModel
                     MessageBoxImage.Error);
                 Process.GetCurrentProcess().Kill();
             }
-            if (GeneralProperties.Default.ExitChrome)
-                foreach (Process proc in Process.GetProcessesByName("chrome")) proc.Kill();
+            //foreach (Process proc in Process.GetProcessesByName("chrome")) proc.Kill();
             foreach (Process proc in Process.GetProcessesByName("chromedriver")) proc.Kill();
             foreach (Process proc in Process.GetProcessesByName("conhost"))
             {
@@ -152,146 +169,18 @@ namespace ItemChecker.MVVM.ViewModel
                 }
             }
         }
-        void CompletionUpdate()
-        {
-            if (BaseModel.token.IsCancellationRequested)
-                return;
-            if (StartUpProperties.Default.completionUpdate)
-            {
-                Status = "Completion Update...";
-                string update = BaseModel.AppPath + @"\update";
-                if (Directory.Exists(update))
-                {
-                    string path = BaseModel.AppPath;
-                    string updaterExe = "ItemChecker.Updater.exe";
-                    string updaterDll = "ItemChecker.Updater.dll";
-                    File.Move($"{update}\\{updaterExe}", path + updaterExe, true);
-                    File.Move($"{update}\\{updaterDll}", path + updaterDll, true);
-                    Directory.Delete(update, true);
-                }
-                GeneralProperties.Default.Upgrade();
-                HomeProperties.Default.Upgrade();
-                ParserProperties.Default.Upgrade();
-                FloatProperties.Default.Upgrade();
-
-                StartUpProperties.Default.completionUpdate = false;
-                StartUpProperties.Default.Save();
-            }
-        }
-        void LaunchBrowser()
-        {
-            if (BaseModel.token.IsCancellationRequested)
-                return;
-
-            string profilesDir = BaseModel.AppPath + "Profiles";
-
-            if (!Directory.Exists(profilesDir))
-                Directory.CreateDirectory(profilesDir);
-
-            DirectoryInfo dirInfo = new(profilesDir);
-            dirInfo.Attributes = FileAttributes.Hidden;
-
-            Status = "Launch Browser...";
-            ChromeDriverService chromeDriverService = ChromeDriverService.CreateDefaultService();
-            chromeDriverService.HideCommandPromptWindow = true;
-            ChromeOptions option = new();
-            option.AddArguments(
-                "--headless",
-                "--disable-gpu",
-                "no-sandbox",
-                "--window-size=1920,2160",
-                "--disable-extensions",
-                "--disable-blink-features=AutomationControlled",
-                "ignore-certificate-errors");
-
-            option.AddArguments($"--user-data-dir={profilesDir}\\{GeneralProperties.Default.Profile}", "profile-directory=Default");
-            option.Proxy = null;
-
-
-            BaseModel.Browser = new ChromeDriver(chromeDriverService, option, TimeSpan.FromSeconds(30));
-            BaseModel.Browser.Manage().Window.Maximize();
-            BaseModel.WebDriverWait = new WebDriverWait(BaseModel.Browser, TimeSpan.FromSeconds(10));
-        }
-        void CheckUpdate()
-        {
-            if (BaseModel.token.IsCancellationRequested)
-                return;
-            Status = "Check Update...";
-            ProjectInfoService.CheckUpdate();
-        }
-
-        void SteamAccount()
-        {
-            if (BaseModel.token.IsCancellationRequested)
-                return;
-            Status = "Steam Account...";
-
-            BaseModel.Browser.Navigate().GoToUrl("https://steamcommunity.com/login/");
-
-            if (BaseModel.Browser.Url.Contains("id") | BaseModel.Browser.Url.Contains("profiles"))
-            {
-                Account.GetSteamAccount();
-                Account.GetSteamApiKey();
-                return;
-            }
-
-            IWebElement username = BaseModel.Browser.FindElement(By.XPath("//input[@name='username']"));
-            IWebElement password = BaseModel.Browser.FindElement(By.XPath("//input[@name='password']"));
-            try
-            {
-                IWebElement remember = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@name='remember_login']")));
-                remember.Click();
-            } catch { }
-            IWebElement signin = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//button[@class='btn_blue_steamui btn_medium login_btn']")));
-
-            IsLogin = true;
-            while (IsLogin)
-                Thread.Sleep(500);
-            username.SendKeys(Login.Login);
-            password.SendKeys(Login.Password);
-            signin.Click();
-
-            Thread.Sleep(2000);
-            IWebElement code = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@id='twofactorcode_entry']")));
-            code.SendKeys(Login.Code2AF);
-            code.SendKeys(OpenQA.Selenium.Keys.Enter);
-
-            Thread.Sleep(4000);
-            SteamAccount();
-        }
         public ICommand LoginCommand =>
             new RelayCommand((obj) =>
             {
                 var propertyInfo = obj.GetType().GetProperty("Password");
                 Login.Password = (string)propertyInfo.GetValue(obj, null);
-                if (Login.Password != "")
-                    IsLogin = false;
-
-            }, (obj) => IsLogin & !String.IsNullOrEmpty(Login.Login) & Login.Code2AF.Length == 5);
-        void LoginCsm()
-        {
-            if (BaseModel.token.IsCancellationRequested | GeneralProperties.Default.Guard)
-                return;
-            Status = "Cs.Money...";
-
-            BaseModel.Browser.Navigate().GoToUrl("https://cs.money/pending-trades");
-            IWebElement html = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//pre")));
-            string json = html.Text;
-
-            if (json.Contains("error"))
-            {
-                string code_error = JObject.Parse(json)["error"].ToString();
-                if (code_error == "6")
+                if (!String.IsNullOrEmpty(Login.Password))
                 {
-                    BaseModel.Browser.Navigate().GoToUrl("https://auth.dota.trade/login?redirectUrl=https://cs.money/&callbackUrl=https://cs.money/login");
-
-                    IWebElement signins = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@class='btn_green_white_innerfade']")));
-                    signins.Click();
-                    Thread.Sleep(500);
+                    BaseModel.LoginSteam = Login;
+                    BaseModel.LoginSteam.IsLoggedIn = true;
+                    Status = "Continue Signing In...";
+                    IsLogin = false;
                 }
-                LoginCsm();
-            }
-            Account.GetCsmBalance();
-        }
+            }, (obj) => !BaseModel.LoginSteam.IsLoggedIn & !String.IsNullOrEmpty(Login.Login) & Login.Code2AF.Length == 5);
     }
 }

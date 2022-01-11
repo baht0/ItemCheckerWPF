@@ -12,12 +12,12 @@ namespace ItemChecker.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.10.0.0")]
-    internal sealed partial class GeneralProperties : global::System.Configuration.ApplicationSettingsBase {
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.0.3.0")]
+    internal sealed partial class SettingsProperties : global::System.Configuration.ApplicationSettingsBase {
         
-        private static GeneralProperties defaultInstance = ((GeneralProperties)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new GeneralProperties())));
+        private static SettingsProperties defaultInstance = ((SettingsProperties)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new SettingsProperties())));
         
-        public static GeneralProperties Default {
+        public static SettingsProperties Default {
             get {
                 return defaultInstance;
             }
@@ -49,7 +49,7 @@ namespace ItemChecker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("74")]
+        [global::System.Configuration.DefaultSettingValueAttribute("72")]
         public decimal CurrencyValue {
             get {
                 return ((decimal)(this["CurrencyValue"]));
@@ -61,25 +61,13 @@ namespace ItemChecker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool ExitChrome {
-            get {
-                return ((bool)(this["ExitChrome"]));
-            }
-            set {
-                this["ExitChrome"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool Guard {
+        public bool Quit {
             get {
-                return ((bool)(this["Guard"]));
+                return ((bool)(this["Quit"]));
             }
             set {
-                this["Guard"] = value;
+                this["Quit"] = value;
             }
         }
         
@@ -145,13 +133,12 @@ namespace ItemChecker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Default")]
-        public string Profile {
+        public global::System.Net.CookieContainer SteamCookies {
             get {
-                return ((string)(this["Profile"]));
+                return ((global::System.Net.CookieContainer)(this["SteamCookies"]));
             }
             set {
-                this["Profile"] = value;
+                this["SteamCookies"] = value;
             }
         }
     }

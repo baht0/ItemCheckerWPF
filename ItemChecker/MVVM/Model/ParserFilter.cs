@@ -1,10 +1,8 @@
-﻿using System.Collections.Generic;
-
-namespace ItemChecker.MVVM.Model
+﻿namespace ItemChecker.MVVM.Model
 {
-    public class Filter
+    public class ParserFilter
     {
-        public static Filter FilterConfig { get; set; }
+        public static ParserFilter FilterConfig { get; set; }
 
         //category
         public bool Normal { get; set; }

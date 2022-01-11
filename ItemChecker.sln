@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31624.102
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ItemChecker", "ItemChecker\ItemChecker.csproj", "{41A2DCCE-3882-42ED-8D90-1D77EF40B3C9}"
 EndProject
@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ItemChecker.Net", "ItemChec
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ItemChecker.Support", "ItemChecker.Support\ItemChecker.Support.csproj", "{6D126737-0EA3-430F-98D8-10F57575E9A7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ItemChecker.Updater", "ItemChecker.Updater\ItemChecker.Updater.csproj", "{E307A14A-FE58-4A19-9795-3FAA70E7489B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ItemChecker.Updater", "ItemChecker.Updater\ItemChecker.Updater.csproj", "{E307A14A-FE58-4A19-9795-3FAA70E7489B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UpdateBase", "UpdateBase\UpdateBase.csproj", "{47E57ED0-430A-4572-B2FE-A52D604213B0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{E307A14A-FE58-4A19-9795-3FAA70E7489B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E307A14A-FE58-4A19-9795-3FAA70E7489B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E307A14A-FE58-4A19-9795-3FAA70E7489B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47E57ED0-430A-4572-B2FE-A52D604213B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47E57ED0-430A-4572-B2FE-A52D604213B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47E57ED0-430A-4572-B2FE-A52D604213B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47E57ED0-430A-4572-B2FE-A52D604213B0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -43,24 +43,25 @@ namespace ItemChecker.Services
             string json = Post.DropboxRead("SkinsBase.json");
             JArray items = JArray.Parse(json);
 
-            json = Get.Request("https://csm.auction/api/skins_base");
-            JObject csm_base = JObject.Parse(json);
+            string csm = Get.Request("https://csm.auction/api/skins_base");
+            JObject csm_base = JObject.Parse(csm);
 
             foreach (JObject item in items)
             {
                 string name = item["Name"].ToString();
                 int steamId = Convert.ToInt32(item["SteamId"]);
                 int csmId = Convert.ToInt32(item["CsmId"]);
-                decimal defPrice = 0;
+
+                decimal csmPrice = 0;
                 if (csmId != 0)
-                    defPrice = Convert.ToDecimal(csm_base[csmId.ToString()]["a"]);
+                    csmPrice = Convert.ToDecimal(csm_base[csmId.ToString()]["a"]);
 
                 ItemBase.SkinsBase.Add(new ItemBase()
                 {
                     ItemName = name.Replace(";", ","),
                     SteamId = steamId,
                     CsmId = csmId,
-                    PriceCsm = defPrice
+                    PriceCsm = csmPrice
                 });
             }
         }

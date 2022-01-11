@@ -18,12 +18,6 @@ namespace ItemChecker.MVVM.View
         {
             this.DragMove();
         }
-
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            if (BaseModel.IsLoading)
-                e.Cancel = true;
-        }
         private void Close_Click(object sender, RoutedEventArgs e)
         {
             MessageBoxResult result = MessageBox.Show("Are you sure you want to close?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
@@ -34,7 +28,7 @@ namespace ItemChecker.MVVM.View
                 viewModel.ExitCommand.Execute(null);
         }
 
-        private void codeTextbox_KeyDown(object sender, KeyEventArgs e)
+        private void TextBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {

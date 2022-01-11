@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 namespace ItemChecker.MVVM.Model
 {
@@ -16,10 +15,6 @@ namespace ItemChecker.MVVM.Model
         public decimal Difference { get; set; }
         //my orders
         public static List<DataOrder> Orders { get; set; } = new();
-        public static decimal AvailableAmount { get; set; } = 0.00m;
-        //place
-        public static ObservableCollection<string> Queue { get; set; } = new();
-        public static decimal AmountRub { get; set; } = 0;
 
         public DataOrder(string Type, string ItemName, string OrderId, decimal StmPrice, decimal OrderPrice, decimal CsmPrice, decimal CsmBuy, decimal Precent, decimal Difference)
         {

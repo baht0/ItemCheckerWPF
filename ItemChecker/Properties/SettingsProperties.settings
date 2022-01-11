@@ -1,5 +1,5 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ItemChecker.Properties" GeneratedClassName="GeneralProperties">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ItemChecker.Properties" GeneratedClassName="SettingsProperties">
   <Profiles />
   <Settings>
     <Setting Name="CurrencyApiKey" Type="System.String" Scope="User">
@@ -9,12 +9,9 @@
       <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="CurrencyValue" Type="System.Decimal" Scope="User">
-      <Value Profile="(Default)">74</Value>
+      <Value Profile="(Default)">72</Value>
     </Setting>
-    <Setting Name="ExitChrome" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
-    <Setting Name="Guard" Type="System.Boolean" Scope="User">
+    <Setting Name="Quit" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="SetHours" Type="System.Boolean" Scope="User">
@@ -32,8 +29,8 @@
     <Setting Name="CancelOrder" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">20</Value>
     </Setting>
-    <Setting Name="Profile" Type="System.String" Scope="User">
-      <Value Profile="(Default)">Default</Value>
+    <Setting Name="SteamCookies" Type="System.Net.CookieContainer" Scope="User">
+      <Value Profile="(Default)"></Value>
     </Setting>
   </Settings>
 </SettingsFile>

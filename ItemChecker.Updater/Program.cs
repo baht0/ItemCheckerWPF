@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net;
-using System.Text.Json;
 using System.Threading;
 
 namespace ItemChecker.Updater
@@ -17,103 +16,67 @@ namespace ItemChecker.Updater
         {
             try
             {
-                if (!args.Any())
-                    Environment.Exit(0);
-                Console.WriteLine("Startup: success");
-
+                if (args.FirstOrDefault() != "1")
+                    return;
                 do
                     Thread.Sleep(1000);
                 while (Process.GetProcessesByName("chromedriver").Any() | Process.GetProcessesByName("ItemChecker").Any());
+
+                Console.WriteLine("Startup: success");
 
                 if (Directory.Exists(path))
                     dirInfo.Delete(true);
                 dirInfo.Create();
                 dirInfo.Attributes = FileAttributes.Hidden;
 
-                List<string> files = new();
-                files.Add("ItemChecker.exe");
-                files.Add("ItemChecker.dll");
-                if (args[0] == "True")
-                    files.Add("ItemChecker.Net.dll");
-                if (args[1] == "True")
-                    files.Add("ItemChecker.Support.dll");
-                if (args[2] == "True")
-                    files.Add("Newtonsoft.Json.dll");
-                if (args[3] == "True")
-                    files.Add("WebDriver.dll");
-                if (args[4] == "True")
-                    files.Add("WebDriver.Support.dll");
-                if (args[5] == "True")
-                    files.Add("MaterialDesignColors.dll");
-                if (args[6] == "True")
-                    files.Add("MaterialDesignThemes.Wpf.dll");
-                if (args[7] == "True")
-                    files.Add("chromedriver.exe");
-                files.Add("ItemChecker.Updater.exe");
-                files.Add("ItemChecker.Updater.dll");
-                Console.WriteLine("Preparation: success");
-
                 Console.WriteLine("\nDownloading...");
-                Console.WriteLine("============================");
-                foreach (string file in files)
-                {
-                    string link = TemporaryLinkDropbox(file);
-                    DownloadFile(link, file);
-                    Console.WriteLine($"{file}: done");
-                }
-                Console.WriteLine("============================");
+                DropboxDownloadZip();
                 Console.WriteLine("Download: success");
 
-                files.Remove("ItemChecker.Updater.exe");
-                files.Remove("ItemChecker.Updater.dll");
-                foreach (string file in files)
+                ZipFile.ExtractToDirectory(path + "\\ItemChecker.zip", path);
+                Thread.Sleep(2000);
+                DirectoryInfo info = new(path + "\\ItemChecker\\");
+                do
                 {
-                    string newPath = AppDomain.CurrentDomain.BaseDirectory + @"\" + file;
-                    File.Move($"{path}\\{file}", newPath, true);
+                    info = new(path + "\\ItemChecker\\");
+                } while (info == null);
+                FileInfo[] Files = info.GetFiles();
+
+                foreach (var file in Files)
+                {
+                    if (!file.Name.Contains("ItemChecker.Updater"))
+                    {
+                        string newPath = AppDomain.CurrentDomain.BaseDirectory + "\\" + file.Name;
+                        File.Move(file.FullName, newPath, true);
+                    }
                 }
-                Console.WriteLine("Update complete: success");
+                Console.WriteLine("\nUpdate completed.");
+                Process.Start(AppDomain.CurrentDomain.BaseDirectory + @"\ItemChecker.exe");
             }
             catch (Exception exp)
             {
                 Console.WriteLine("\nSomething went wrong :(");
                 Console.WriteLine("***\n" + exp.Message + "\n***");
-            }
-            finally
-            {
+
                 Console.WriteLine("\nPress any key to proceed...");
                 Console.ReadKey();
-                Process.Start(AppDomain.CurrentDomain.BaseDirectory + @"\ItemChecker.exe");
             }
         }
-        public static String TemporaryLinkDropbox(string file)
+        public static void DropboxDownloadZip()
         {
-            HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create("https://api.dropboxapi.com/2/files/get_temporary_link");
+            HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create("https://content.dropboxapi.com/2/files/download_zip");
 
             httpRequest.Method = "POST";
-            httpRequest.ContentType = "application/json";
             httpRequest.Headers["Authorization"] = "Bearer a94CSH6hwyUAAAAAAAAAAf3zRyhyZknI9J8KM3VZihWEILAuv6Vr3ht_-4RQcJxs";
-            var data = "{\"path\": \"/ItemChecker/" + file + "\"}";
-
-            using (var streamWriter = new StreamWriter(httpRequest.GetRequestStream()))
-            {
-                streamWriter.Write(data);
-            }
+            httpRequest.Headers["Dropbox-API-Arg"] = "{\"path\": \"/ItemChecker\"}";
 
             var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
-            using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+            using (Stream stream = httpResponse.GetResponseStream())
             {
-                string json = streamReader.ReadToEnd();
-                JsonDocument jDoc = JsonDocument.Parse(json);
-                JsonElement root = jDoc.RootElement;
-                string link = root.GetProperty("link").ToString();
-                return link;
-            }
-        }
-        public static void DownloadFile(string link, string fileName)
-        {
-            using (WebClient client = new())
-            {
-                client.DownloadFile(link, path + $"\\{fileName}");
+                using (Stream zip = File.OpenWrite(path + @"\ItemChecker.zip"))
+                {
+                    stream.CopyTo(zip);
+                }
             }
         }
     }

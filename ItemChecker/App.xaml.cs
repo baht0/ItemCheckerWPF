@@ -27,10 +27,26 @@ namespace ItemChecker
 
         public void ChangeTheme(Uri uri)
         {
-            string current = ThemeDictionary.MergedDictionaries[0].Source.ToString();
-
             ThemeDictionary.MergedDictionaries.Clear();
             ThemeDictionary.MergedDictionaries.Add(new ResourceDictionary() { Source = uri });
+        }
+        public void AutoChangeTheme()
+        {
+            var now = DateTime.Now;
+            var turnOn = now.Date + SettingsProperties.Default.TurnOn.TimeOfDay;
+            var turnOff = now.Date + SettingsProperties.Default.TurnOff.TimeOfDay;
+            bool dark = turnOn < now & now < turnOff.AddDays(1);
+            bool light = turnOn > now & now > turnOff;
+            if (dark & Model.BaseModel.Theme == "Light")
+            {
+                Model.BaseModel.Theme = "Dark";
+                ChangeTheme(new("/Themes/Dark.xaml", UriKind.RelativeOrAbsolute));
+            }
+            if (light & Model.BaseModel.Theme == "Dark")
+            {
+                Model.BaseModel.Theme = "Light";
+                ChangeTheme(new("/Themes/Light.xaml", UriKind.RelativeOrAbsolute));
+            }
         }
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -40,7 +56,7 @@ namespace ItemChecker
             notifyIcon.MouseDoubleClick += notifyIconMouseDoubleClick;
 
             notifyIcon.ContextMenuStrip = new();
-            notifyIcon.ContextMenuStrip.Items.Add("Setting", null, SettingClicked);
+            notifyIcon.ContextMenuStrip.Items.Add("Calculator", null, CalculatorClicked);
             notifyIcon.ContextMenuStrip.Items.Add(new Forms.ToolStripDropDownButton("Links", null,
                 new Forms.ToolStripButton("TrySkins", null, OpenTrySkins),
                 new Forms.ToolStripSeparator(),
@@ -55,21 +71,8 @@ namespace ItemChecker
         }
         private void ApplicationStart(object sender, StartupEventArgs e)
         {
-            if (GeneralProperties.Default.SetHours)
-            {
-                var turnOn = DateTime.Today.Date + GeneralProperties.Default.TurnOn.TimeOfDay;
-                var turnOff = (DateTime.Now.Date + GeneralProperties.Default.TurnOff.TimeOfDay).AddDays(1);
-                if (turnOn < DateTime.Now & turnOff > DateTime.Now)
-                {
-                    Model.BaseModel.Theme = "Dark";
-                    ChangeTheme(new("/Themes/Dark.xaml", UriKind.RelativeOrAbsolute));
-                }
-                else
-                {
-                    Model.BaseModel.Theme = "Light";
-                    ChangeTheme(new("/Themes/Light.xaml", UriKind.RelativeOrAbsolute));
-                }
-            }
+            if (SettingsProperties.Default.SetHours)
+                AutoChangeTheme();
 
             Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
             Window start = new StartWindow();
@@ -108,10 +111,10 @@ namespace ItemChecker
             if (MainWindow.DataContext is MainViewModel mainVM)
                 mainVM.ExitCommand.Execute(null);
         }
-        void SettingClicked(object sender, EventArgs e)
+        void CalculatorClicked(object sender, EventArgs e)
         {
-            Window window = new SettingWindow();
-            window.ShowDialog();
+            Window window = new CalculatorWindow();
+            window.Show();
         }
         void OpenTrySkins(object sender, EventArgs e)
         {

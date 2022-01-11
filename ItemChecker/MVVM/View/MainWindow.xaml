@@ -7,7 +7,7 @@
         xmlns:viewModel="clr-namespace:ItemChecker.MVVM.ViewModel"
         mc:Ignorable="d"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        d:DataContext="{d:DesignInstance Type=viewModel:HomeViewModel}"
+        d:DataContext="{d:DesignInstance Type=viewModel:MainViewModel}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource Background}"
         TextElement.FontWeight="Normal"
@@ -20,10 +20,10 @@
         Closing="Window_Closing">
     <Window.Resources>
         <DataTemplate DataType="{x:Type viewModel:HomeViewModel}">
-            <view:BuyOrderView DataContext="{Binding}"/>
+            <view:BuyOrderView/>
         </DataTemplate>
         <DataTemplate DataType="{x:Type viewModel:ParserViewModel}">
-            <view:ParserView DataContext="{Binding}"/>
+            <view:ParserView />
         </DataTemplate>
     </Window.Resources>
     <Border BorderBrush="DimGray" BorderThickness="0.5">
@@ -33,12 +33,13 @@
                 <RowDefinition/>
                 <RowDefinition Height="25"/>
             </Grid.RowDefinitions>
+            <!--top-->
             <Grid Grid.Row="0"
                   Background="Transparent">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="162.643333333333"/>
+                    <ColumnDefinition Width="160"/>
                     <ColumnDefinition/>
-                    <ColumnDefinition Width="172.93"/>
+                    <ColumnDefinition Width="190"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Grid.Column="0">
                     <Image Source="../../Resources/ico.png" Height="18" Margin="1"
@@ -71,10 +72,13 @@
                 <StackPanel Grid.Column="2" Margin="0 0 -10 0"
                             HorizontalAlignment="Right" Orientation="Horizontal">
                     <TextBlock Text="BETA" VerticalAlignment="Center"/>
+                    <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}" Click="Calc_Click">
+                        <materialDesign:PackIcon Kind="Calculator"/>
+                    </Button>
                     <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}">
                         <materialDesign:PackIcon Kind="Bell"/>
                     </Button>
-                    <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}" Click="Setting_Click">
+                    <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}" Click="Set_Click">
                         <materialDesign:PackIcon Kind="Settings"/>
                     </Button>
                     <Button Height="25" Style="{StaticResource MaterialDesignFlatButton}" Click="MinWin_Click">
@@ -84,15 +88,16 @@
                         <materialDesign:PackIcon Kind="Close"/>
                     </Button>
                 </StackPanel>
-            </Grid>
+            </Grid>            
             <!--body-->
-            <ContentControl Grid.Row="1" Content="{Binding}" Margin="10" />
+            <ContentControl Grid.Row="1" x:Name="bodyContent" Content="{Binding}" Margin="10" />
             <Border VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 25 0 0"
                     Height="150" Width="500" Background="WhiteSmoke" Visibility="Hidden"
                     BorderBrush="LightSlateGray" BorderThickness="0.5">
             </Border>
-            <!--/body-->
-            <Grid Grid.Row="2" x:Name="StatusBar" VerticalAlignment="Center">
+            <!--footer-->
+            <Grid Grid.Row="2" VerticalAlignment="Center"
+                  DataContext="{Binding MainInfo}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
@@ -117,26 +122,15 @@
                         </TextBlock>
                     </TextBlock.ToolTip>
                 </TextBlock>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <TextBlock Margin="0 0 5 0">
-                        <TextBlock.Text>
-                            <MultiBinding StringFormat="Availability: {0}/{1}">
-                                <Binding Path="Overstock" />
-                                <Binding Path="Unavailable" />
-                            </MultiBinding>
-                        </TextBlock.Text>
-                        <TextBlock.ToolTip>
-                            <ToolTip Content="Overstock/Unavailable"/>
-                        </TextBlock.ToolTip>
-                    </TextBlock>
-                    <TextBlock x:Name="steamStatusOk">
+                <VirtualizingStackPanel Grid.Column="1" Orientation="Horizontal"
+                                        HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding CurrencyString, StringFormat='{}{0} | Steam Status:'}" Margin="0 0 2 0"/>
+                    <TextBlock >
                         <materialDesign:PackIcon Kind="{Binding StatusCommunity}"/>
-                        <TextBlock.ToolTip>
-                            <ToolTip Content="Steam Status"/>
-                        </TextBlock.ToolTip>
                     </TextBlock>
-                </StackPanel>
+                </VirtualizingStackPanel>
             </Grid>
+            <materialDesign:Snackbar Grid.Row="1" MessageQueue="{Binding Message}"/>
         </Grid>
     </Border>
 </Window>

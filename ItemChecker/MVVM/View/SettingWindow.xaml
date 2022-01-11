@@ -13,15 +13,11 @@
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Normal"
         FontFamily="{materialDesign:MaterialDesignFont}"
-        WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="NoResize">
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None" ResizeMode="NoResize">
     <Window.Resources>
         <ControlTemplate x:Key="ValidError"/>
     </Window.Resources>
-    <Window.Effect>
-        <DropShadowEffect Color="#FFA0A0A0">
-
-        </DropShadowEffect>
-    </Window.Effect>
     <Border BorderBrush="Gray" BorderThickness="0.5">
         <Grid Margin="10 0 10 10">
             <Grid.RowDefinitions>
@@ -50,7 +46,7 @@
             </Grid>
             <TabControl Grid.Row="1" Style="{StaticResource MaterialDesignNavigatilRailTabControl}"
                         DataContext="{Binding Settings}">
-                <TabItem Header="General" Height="54">
+                <TabItem Header="General" Height="67.5">
                     <Grid Margin="3">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="130"/>
@@ -76,21 +72,17 @@
                                 <Button Grid.Row="0" Grid.Column="2" ToolTip="Open services in browser"
                                         Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
                                         Command="{Binding DataContext.GetCurrencyApiCommand, RelativeSource={RelativeSource AncestorType=Window}}">
-                                    <materialDesign:PackIcon Kind="OpenInBrowser"/>
+                                    <materialDesign:PackIcon Kind="OpenInNew"/>
                                 </Button>
                                 <TextBlock Grid.Row="1" Grid.Column="0"
                                            Text="Currency:" VerticalAlignment="Center"/>
                                 <ComboBox Grid.Row="1" Grid.Column="1" VerticalAlignment="Center"
                                           ItemsSource="{Binding CurrencyList}" ToolTip="Displaying prices in tables"
                                           SelectedIndex="{Binding Currency}"/>
-                                <CheckBox Grid.Row="2" Grid.Column="0" ToolTip="Close all Google Chrome proccess"
-                                          Content="Exit Chrome" HorizontalAlignment="Left" 
-                                          IsChecked="{Binding ExitChrome}">
-                                </CheckBox>
-                                <CheckBox Grid.Row="2" Grid.Column="1" ToolTip="Disable Cs.Money"
-                                          Content="Guard" HorizontalAlignment="Left" 
-                                          IsChecked="{Binding Guard}">
-                                </CheckBox>
+                                <CheckBox Grid.Row="2" Grid.Column="0" VerticalAlignment="Center"
+                                          Content="Quit Driver"
+                                          ToolTip="Destroy the browser after work"
+                                          IsChecked="{Binding Quit}"/>
                             </Grid>
                         </GroupBox>
                         <GroupBox Grid.Row="1" Style="{DynamicResource None}" Header="Theme">
@@ -117,7 +109,7 @@
                         </GroupBox>
                     </Grid>
                 </TabItem>
-                <TabItem Header="Steam" Height="54">
+                <TabItem Header="Steam" Height="67.5">
                     <Grid Margin="3">
                         <Grid.RowDefinitions>
                             <RowDefinition/>
@@ -142,7 +134,7 @@
                                     <Button Grid.Column="2" Height="25" ToolTip="Get API Key"
                                 Style="{StaticResource MaterialDesignToolForegroundButton}" 
                                 Command="{Binding DataContext.GetSteamApiCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
-                                        <materialDesign:PackIcon Kind="GetApp"/>
+                                        <materialDesign:PackIcon Kind="OpenInNew"/>
                                     </Button>
                                 </Grid>
                                 <CheckBox Grid.Row="1" Content="Not enough balance" ToolTip="Cancel order if balance isn't enough"
@@ -173,7 +165,7 @@
                                     <ColumnDefinition Width="30"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Account:" Height="15"/>
-                                <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{Binding Account}"/>
+                                <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{Binding AccountName}"/>
                                 <Button Grid.Column="2" Height="25" ToolTip="Logout"
                                             Style="{StaticResource MaterialDesignToolForegroundButton}" 
                                             Command="{Binding DataContext.LogoutCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
@@ -197,7 +189,7 @@
                         </GroupBox>
                     </Grid>
                 </TabItem>
-                <TabItem Header="Float" Height="54">
+                <TabItem Header="Float" Height="67.5">
                     <GroupBox Margin="3" Style="{DynamicResource None}" Header="Max. Float Value">
                         <Grid Margin="5">
                             <Grid.RowDefinitions>
@@ -260,54 +252,7 @@
                         </Grid>
                     </GroupBox>
                 </TabItem>
-                <TabItem Header="Profile" Height="54">
-                    <GroupBox Margin="3" Style="{DynamicResource None}" Header="Profile">
-                        <Grid Margin="5">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="35"/>
-                                <RowDefinition Height="35"/>
-                                <RowDefinition/>
-                            </Grid.RowDefinitions>
-                            <Grid Grid.Row="0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="90"/>
-                                    <ColumnDefinition/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Current:" Height="15"/>
-                                <ComboBox Grid.Column="1" Width="150" Height="25" HorizontalAlignment="Left"
-                                     ItemsSource="{Binding DataContext.Profiles, RelativeSource={RelativeSource AncestorType=Window}, UpdateSourceTrigger=PropertyChanged}"
-                                     SelectedItem="{Binding CurrentProfile}"/>
-                            </Grid>
-                            <Grid Grid.Row="1">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="90"/>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition Width="60"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Profile Name:" VerticalAlignment="Center"/>
-                                <TextBox Grid.Column="1" VerticalAlignment="Center" 
-                                     Text="{Binding DataContext.SelectedProfile, RelativeSource={RelativeSource AncestorType=Window}}"
-                                     PreviewTextInput="String_PreviewTextInput"/>
-                                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
-                                        Command="{Binding DataContext.AddProfileCommand, RelativeSource={RelativeSource AncestorType=Window}, UpdateSourceTrigger=PropertyChanged}"
-                                        CommandParameter="{Binding DataContext.SelectedProfile, RelativeSource={RelativeSource AncestorType=Window}}">
-                                        <materialDesign:PackIcon Kind="Add"/>
-                                    </Button>
-                                    <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
-                                        Command="{Binding DataContext.RemoveProfileCommand, RelativeSource={RelativeSource AncestorType=Window}, UpdateSourceTrigger=PropertyChanged}"
-                                        CommandParameter="{Binding DataContext.SelectedProfile, RelativeSource={RelativeSource AncestorType=Window}}">
-                                        <materialDesign:PackIcon Kind="Minus"/>
-                                    </Button>
-                                </StackPanel>
-                            </Grid>
-                            <ListBox Background="{DynamicResource ElementBackground}" Grid.Row="2"
-                                 ItemsSource="{Binding DataContext.Profiles, RelativeSource={RelativeSource AncestorType=Window}, UpdateSourceTrigger=PropertyChanged}"
-                                 SelectedItem="{Binding DataContext.SelectedProfile, RelativeSource={RelativeSource AncestorType=Window}, UpdateSourceTrigger=PropertyChanged}"/>
-                        </Grid>
-                    </GroupBox>
-                </TabItem>
-                <TabItem Header="About" Height="54">
+                <TabItem Header="About" Height="67.5">
                     <GroupBox Margin="3" Style="{DynamicResource None}" Header="About">
                         <Grid Margin="5">
                             <Grid.RowDefinitions>
@@ -330,7 +275,7 @@
                             <TextBlock Grid.Row="1" Text="Autor:" VerticalAlignment="Center"/>
                             <TextBlock Grid.Row="2" Text="Current version:" VerticalAlignment="Center"/>
                             <TextBlock Grid.Row="3" Text="Latest version:" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="8" Text="© 2018-2021" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="8" Text="© 2018-2022" VerticalAlignment="Center"/>
                             <TextBlock Grid.Row="1" Grid.Column="1" Text="baht0"  VerticalAlignment="Center"/>
                             <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DataContext.CurrentVersion, RelativeSource={RelativeSource AncestorType=Window}}" VerticalAlignment="Center"/>
                             <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding DataContext.LatestVersion, RelativeSource={RelativeSource AncestorType=Window}}" VerticalAlignment="Center"/>
@@ -362,6 +307,7 @@
                     <TextBlock Text="Cancel"/>
                 </Button>
             </StackPanel>
+            <materialDesign:Snackbar Grid.Row="1" MessageQueue="{Binding Message}" />
         </Grid>
     </Border>
 </Window>

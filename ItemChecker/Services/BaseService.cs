@@ -1,33 +1,100 @@
 ﻿using ItemChecker.MVVM.Model;
 using ItemChecker.Net;
-using ItemChecker.Support;
+using ItemChecker.Properties;
 using Microsoft.Win32;
-using OpenQA.Selenium;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
+using System.Windows;
 
 namespace ItemChecker.Services
 {
     public class BaseService : BaseModel
     {
-        protected String ParseMrinka(string itemName)
+        public static void GetBase()
         {
-            Tuple<String, Boolean> response = Tuple.Create(string.Empty, false);
-            do
+            if (BaseModel.token.IsCancellationRequested)
+                return;
+            decimal course = Get.Course(SettingsProperties.Default.CurrencyApiKey);
+            if (course != 0)
             {
-                response = Get.MrinkaRequest(Edit.MarketHashName(itemName));
-                if (!response.Item2)
+                SettingsProperties.Default.CurrencyValue = course;
+                SettingsProperties.Default.Save();
+            }
+
+            ItemBaseService get = new();
+            get.Overstock();
+            get.Unavailable();
+            get.ItemsBase();
+        }
+        public static void StatusSteam()
+        {
+            try
+            {
+                if (String.IsNullOrEmpty(SteamAccount.ApiKey))
+                    return;
+                string json = Get.GameServersStatus(SteamAccount.ApiKey);
+                StatusCommunity = JObject.Parse(json)["result"]["services"]["SteamCommunity"].ToString();
+            }
+            catch
+            {
+                StatusCommunity = "error";
+            }
+        }
+
+        public static void BrowserExit()
+        {
+            try
+            {
+                if (Browser != null)
                 {
-                    Thread.Sleep(30000);
+                    Browser.Quit();
+                    Browser = null;
                 }
             }
-            while (!response.Item2);
-
-            return response.Item1;
+            catch
+            {
+                foreach (Process proc in Process.GetProcessesByName("chrome")) proc.Kill();
+                foreach (Process proc in Process.GetProcessesByName("chromedriver")) proc.Kill();
+                foreach (Process proc in Process.GetProcessesByName("conhost"))
+                {
+                    try
+                    {
+                        proc.Kill();
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                }
+            }
         }
+
+        public static void Log(string text)
+        {
+            if (!File.Exists("Log.txt"))
+                File.WriteAllText("Log.txt", "v." + DataProjectInfo.CurrentVersion + " [" + DateTime.Now + "]\n" + text + "\n");
+            else
+                File.WriteAllText("Log.txt", string.Format("{0}{1}", "v." + DataProjectInfo.CurrentVersion + " [" + DateTime.Now + "]\n" + text + "\n", File.ReadAllText("Log.txt")));
+        }
+        public static void errorLog(Exception exp)
+        {
+            string message = null;
+            message += exp.Message + "\n";
+            message += exp.StackTrace;
+            if (!File.Exists("errorsLog.txt"))
+                File.WriteAllText("errorsLog.txt", "v." + DataProjectInfo.CurrentVersion + " [" + DateTime.Now + "]\n" + message + "\n");
+            else
+                File.WriteAllText("errorsLog.txt", string.Format("{0}{1}", "v." + DataProjectInfo.CurrentVersion + " [" + DateTime.Now + "]\n" + message + "\n", File.ReadAllText("errorsLog.txt")));
+        }
+        public static void errorMessage(Exception exp)
+        {
+            MessageBox.Show("Something went wrong :(", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
         protected List<string> OpenFileDialog(string filter)
         {
             List<string> itemList = new();

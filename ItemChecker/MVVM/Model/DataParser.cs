@@ -15,7 +15,6 @@ namespace ItemChecker.MVVM.Model
         public decimal Difference { get; set; }
         public string Status { get; set; }
         public bool Have { get; set; }
-        public static ObservableCollection<DataParser> ParserItems { get; set; } = new();
 
         public DataParser(string ItemType, string ItemName, decimal Price1, decimal Price2, decimal Price3, decimal Price4, decimal Precent, decimal Difference, string Status, bool Have)
         {

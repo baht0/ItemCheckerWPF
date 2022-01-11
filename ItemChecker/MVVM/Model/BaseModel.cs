@@ -1,90 +1,132 @@
-﻿using ItemChecker.Net;
+﻿using HtmlAgilityPack;
+using ItemChecker.Core;
+using ItemChecker.Net;
 using ItemChecker.Properties;
-using Newtonsoft.Json.Linq;
 using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Threading;
-using System.Windows;
 
 namespace ItemChecker.MVVM.Model
 {
-    public class BaseModel
+    public class BaseModel : ObservableObject
     {
         //app
         public static string AppPath { get; set; } = AppDomain.CurrentDomain.BaseDirectory;
-        public static string Version { get; set; } = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        public static string Theme { get; set; } = "Light";
+        //loading
+        public static bool IsParsing { get; set; }
+        public static bool IsWorking { get; set; }
+        public static bool IsBrowser { get; set; }
+        public static CancellationTokenSource cts { get; set; } = new();
+        public static CancellationToken token { get; set; } = cts.Token;
         //selenium
         public static IWebDriver Browser { get; set; }
         public static WebDriverWait WebDriverWait { get; set; }
-        //loading
-        public static bool IsLoading { get; set; }
-        public static CancellationTokenSource cts = new();
-        public static CancellationToken token = cts.Token;
-
-        public static string Theme { get; set; } = "Light";
+        //steam
         public static string StatusCommunity { get; set; }
-        //timer
-        public static System.Timers.Timer Timer { get; set; } = new(1000);
-        public static int TimerTick { get; set; }
 
-        public static void StatusSteam()
+        public static SteamLogin LoginSteam { get; set; } = new();
+
+        public static Boolean GetCookies()
         {
             try
             {
-                if (String.IsNullOrEmpty(Account.ApiKey))
-                    return;
-                string json = Get.GameServersStatus(Account.ApiKey);
-                StatusCommunity = JObject.Parse(json)["result"]["services"]["SteamCommunity"].ToString();
-            }
-            catch
-            {
-                StatusCommunity = "error";
-            }
-        }
-        public static void BrowserExit()
-        {
-            try
-            {
-                if (Browser != null)
-                    Browser.Quit();
-            }
-            catch
-            {
-                if (GeneralProperties.Default.ExitChrome)
-                    foreach (Process proc in Process.GetProcessesByName("chrome")) proc.Kill();
-                foreach (Process proc in Process.GetProcessesByName("chromedriver")) proc.Kill();
-                foreach (Process proc in Process.GetProcessesByName("conhost"))
+                string url = "https://steamcommunity.com/login/home/?goto=my/profile";
+                if (SettingsProperties.Default.SteamCookies != null)
                 {
-                    try
-                    {
-                        proc.Kill();
-                    }
-                    catch
-                    {
-                        continue;
-                    }
+                    string html = Get.Request(SettingsProperties.Default.SteamCookies, url);
+                    HtmlDocument htmlDoc = new();
+                    htmlDoc.LoadHtml(html);
+                    string title = htmlDoc.DocumentNode.SelectSingleNode("html/head/title").InnerText;
+                    if (!title.Contains("Sign In"))
+                        return true;
                 }
+                if (Browser == null)
+                    OpenBrowser();
+                Browser.Navigate().GoToUrl(url);
+
+                while (!Browser.Url.Contains("id") & !Browser.Url.Contains("profiles"))
+                {
+                    LoginSteam.IsLoggedIn = false;
+                    Steam();
+                }
+                LoginSteam.IsLoggedIn = true;
+                ICookieJar cookies = Browser.Manage().Cookies;
+                string steamLoginSecure = cookies.GetCookieNamed("steamLoginSecure").Value.ToString();
+
+                SettingsProperties.Default.SteamCookies = new();
+                SettingsProperties.Default.SteamCookies.Add(Get.GetSteamSessionId());
+                SettingsProperties.Default.SteamCookies.Add(new System.Net.Cookie("steamLoginSecure", steamLoginSecure, "/", "steamcommunity.com"));
+                SettingsProperties.Default.Save();
+
+                if (SettingsProperties.Default.Quit)
+                {
+                    Browser.Quit();
+                    Browser = null;
+                }
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
+        static void OpenBrowser()
+        {
+            string profilesDir = AppPath + "profile";
 
-        public static void errorLog(Exception exp)
-        {
-            string message = null;
-            message += exp.Message + "\n";
-            message += exp.StackTrace;
-            if (!File.Exists("errorsLog.txt"))
-                File.WriteAllText("errorsLog.txt", "v." + Version + " [" + DateTime.Now + "]\n" + message + "\n");
-            else
-                File.WriteAllText("errorsLog.txt", string.Format("{0}{1}", "v." + Version + " [" + DateTime.Now + "]\n" + message + "\n", File.ReadAllText("errorsLog.txt")));
+            if (!Directory.Exists(profilesDir))
+                Directory.CreateDirectory(profilesDir);
+
+            DirectoryInfo dirInfo = new(profilesDir);
+            dirInfo.Attributes = FileAttributes.Hidden;
+
+            ChromeDriverService chromeDriverService = ChromeDriverService.CreateDefaultService();
+            chromeDriverService.HideCommandPromptWindow = true;
+            ChromeOptions option = new();
+            option.AddArguments(
+                "--headless",
+                "--disable-gpu",
+                "no-sandbox",
+                "--window-size=1920,2160",
+                "--disable-extensions",
+                "--disable-blink-features=AutomationControlled",
+                "ignore-certificate-errors");
+
+            option.AddArguments($"--user-data-dir={profilesDir}", "profile-directory=Default");
+            option.Proxy = null;
+
+            Browser = new ChromeDriver(chromeDriverService, option, TimeSpan.FromSeconds(30));
+            Browser.Manage().Window.Maximize();
+            WebDriverWait = new WebDriverWait(Browser, TimeSpan.FromSeconds(10));
         }
-        public static void errorMessage(Exception exp)
+        static void Steam()
         {
-            MessageBox.Show("Something went wrong :(", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
+            IWebElement username = Browser.FindElement(By.XPath("//input[@name='username']"));
+            IWebElement password = Browser.FindElement(By.XPath("//input[@name='password']"));
+            try
+            {
+                IWebElement remember = WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@name='remember_login']")));
+                remember.Click();
+            }
+            catch { }
+            IWebElement signin = WebDriverWait.Until(e => e.FindElement(By.XPath("//button[@class='btn_blue_steamui btn_medium login_btn']")));
+
+            while (!LoginSteam.IsLoggedIn)
+                Thread.Sleep(500);
+            username.SendKeys(LoginSteam.Login);
+            password.SendKeys(LoginSteam.Password);
+            signin.Click();
+
+            Thread.Sleep(2000);
+            IWebElement code = WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@id='twofactorcode_entry']")));
+            code.SendKeys(LoginSteam.Code2AF);
+            code.SendKeys(Keys.Enter);
+
+            Thread.Sleep(4000);
+        }        
     }
 }

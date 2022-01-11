@@ -7,6 +7,6 @@ namespace ItemChecker.MVVM.Model
         public string TradeOfferId { get; set; }
         public string PartnerId { get; set; }
 
-        public static List<DataTradeOffer> TradeOffers = new();
+        public static List<DataTradeOffer> TradeOffers { get; set; } = new();
     }
 }

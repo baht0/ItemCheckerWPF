@@ -2,13 +2,14 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
+using System.Linq;
 using System.Net;
+using System.Text;
 
 namespace ItemChecker.Net
 {
     public class Post
     {
-        //main
         public static String FetchRequest(string contentType, string body, string url)
         {
             string js_fetch = @"
@@ -43,48 +44,115 @@ namespace ItemChecker.Net
             return js_fetch;
         }
         //steam
-        public static String BuyListing(string listing_id, decimal fee, decimal subtotal, decimal total, string sessionid)
+        static HttpWebResponse SteamRequest(CookieContainer cookies, string body, string url, string referer)
         {
-            string body = $"sessionid={sessionid}&currency=5&fee={(int)fee}&subtotal={(int)subtotal}&total={(int)total}&quantity=1&first_name=&last_name=&billing_address=&billing_address_two=&billing_country=&billing_city=&billing_state=&billing_postal_code=&save_my_address=1";
-            string url = "https://steamcommunity.com/market/buylisting/" + listing_id;
+            byte[] bytes = Encoding.UTF8.GetBytes(body);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.CookieContainer = cookies;
+            request.Method = "POST";
+            request.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
+            request.Host = "steamcommunity.com";
+            request.Accept = "*/*";
+            request.Referer = referer;
+            request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36";
+            request.ContentLength = bytes.Length;
+            Stream stream = request.GetRequestStream();
+            stream.Write(bytes, 0, bytes.Length);
+            stream.Close();
+            WebResponse response = request.GetResponse();
 
-            return FetchRequest("application/x-www-form-urlencoded", body, url);
+            return (HttpWebResponse)response;
         }
-        public static String CreateBuyOrder(string market_hash_name, decimal last_order, string sessionid)
+        public static HttpWebResponse CreateBuyOrder(CookieContainer cookies, string marketHashName, decimal price)
         {
-            int price_total = (int)(last_order * 100 + 1);
-            string body = $"sessionid={sessionid}&currency=5&appid=730&market_hash_name={market_hash_name}&price_total={price_total}&quantity=1&billing_state=&save_my_address=0";
+            CookieCollection cookieCollection = cookies.GetAllCookies();
+            Cookie sessionId = cookieCollection.FirstOrDefault(x => x.Name == "sessionid");
+            int price_total = (int)(price * 100 + 1);
+            string body = $"sessionid={sessionId.Value}&currency=5&appid=730&market_hash_name={marketHashName}&price_total={price_total}&quantity=1&billing_state=&save_my_address=0";
             string url = "https://steamcommunity.com/market/createbuyorder/";
+            string referer = "https://steamcommunity.com/market/listings/730/" + marketHashName;
 
-            return FetchRequest("application/x-www-form-urlencoded", body, url);
+            return SteamRequest(cookies, body, url, referer);
         }
-        public static String CancelBuyOrder(string buy_orderid, string sessionid)
+        public static HttpWebResponse CancelBuyOrder(CookieContainer cookies, string marketHashName, string buyOrderId)
         {
-            string body = $"sessionid={sessionid}&buy_orderid={buy_orderid}";
+            CookieCollection cookieCollection = cookies.GetAllCookies();
+            Cookie sessionId = cookieCollection.FirstOrDefault(x => x.Name == "sessionid");
+            string body = $"sessionid={sessionId.Value}&buy_orderid={buyOrderId}";
             string url = "https://steamcommunity.com/market/cancelbuyorder/";
+            string referer = "https://steamcommunity.com/market/listings/730/" + marketHashName;
 
-            return FetchRequest("application/x-www-form-urlencoded", body, url);
+            return SteamRequest(cookies, body, url, referer);
         }
-        public static String AcceptTrade(string tradeofferid, string partner_id, string sessionid)
+        public static HttpWebResponse BuyListing(CookieContainer cookies, string marketHashName, string listingId, decimal fee, decimal subtotal, decimal total)
         {
-            string body = "sessionid=" + sessionid + @"&serverid=1&tradeofferid=" + tradeofferid + @"&partner=" + partner_id + @"&captcha=";
-            string url = "https://steamcommunity.com/tradeoffer/" + tradeofferid + "/accept";
+            CookieCollection cookieCollection = cookies.GetAllCookies();
+            Cookie sessionId = cookieCollection.FirstOrDefault(x => x.Name == "sessionid");
+            string body = $"sessionid={sessionId.Value}&currency=5&fee={(int)fee}&subtotal={(int)subtotal}&total={(int)total}&quantity=1&first_name=&last_name=&billing_address=&billing_address_two=&billing_country=&billing_city=&billing_state=&billing_postal_code=&save_my_address=1";
+            string url = "https://steamcommunity.com/market/buylisting/" + listingId;
+            string referer = "https://steamcommunity.com/market/listings/730/" + marketHashName;
 
-            return FetchRequest("application/x-www-form-urlencoded", body, url);
+            return SteamRequest(cookies, body, url, referer);
         }
-        public static String SellItem(string assetid, string price, string sessionid)
+        public static HttpWebResponse SellItem(CookieContainer cookies, string user, string assetId, int price)
         {
-            string body = $"sessionid={sessionid}&appid=730&contextid=2&assetid={assetid}&amount=1&price={price}";
+            CookieCollection cookieCollection = cookies.GetAllCookies();
+            Cookie sessionId = cookieCollection.FirstOrDefault(x => x.Name == "sessionid");
+            string body = $"sessionid={sessionId.Value}&appid=730&contextid=2&assetid={assetId}&amount=1&price={price}";
             string url = "https://steamcommunity.com/market/sellitem/";
+            string referer = "https://steamcommunity.com/id/" + user + "/inventory/";
 
-            return FetchRequest("application/x-www-form-urlencoded", body, url);
+            return SteamRequest(cookies, body, url, referer);
         }
+        public static HttpWebResponse AcceptTrade(CookieContainer cookies, string tradeOfferId, string partnerId)
+        {
+            CookieCollection cookieCollection = cookies.GetAllCookies();
+            Cookie sessionId = cookieCollection.FirstOrDefault(x => x.Name == "sessionid");
+            string body = "sessionid=" + sessionId.Value + "&serverid=1&tradeofferid=" + tradeOfferId + @"&partner=" + partnerId + @"&captcha=";
+            string url = "https://steamcommunity.com/tradeoffer/" + tradeOfferId + "/accept";
+            string referer = "https://steamcommunity.com/id/baht0/inventory/";
+
+            return SteamRequest(cookies, body, url, referer);
+        }
+        //cs.money
+        static HttpWebResponse CsmRequest(Cookie csmSc, string body, string url, string referer)
+        {
+            CookieContainer cookies = new();
+            cookies.Add(csmSc);
+
+            byte[] bytes = Encoding.UTF8.GetBytes(body);
+
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.CookieContainer = cookies;
+            request.Method = "POST";
+            request.ContentType = "application/json; charset=UTF-8";
+            request.Host = "cs.money";
+            request.UserAgent = "Mozilla / 5.0(Windows NT 10.0; Win64; x64) AppleWebKit / 537.36(KHTML, like Gecko) Chrome / 96.0.4664.110 Safari / 537.36";
+            request.Referer = referer;
+            request.ContentLength = bytes.Length;
+            Stream stream = request.GetRequestStream();
+            stream.Write(bytes, 0, bytes.Length);
+            stream.Close();
+            WebResponse response = request.GetResponse();
+
+            return (HttpWebResponse)response;
+        }
+        public static HttpWebResponse WithdrawSkins(Cookie csmSc, JObject json)
+        {
+            string body = json.ToString();
+
+            string url = "https://cs.money/2.0/withdraw_skins";
+            string referer = "https://cs.money/csgo/trade/";
+
+            return CsmRequest(csmSc, body, url, referer);
+        }
+
         //dropbox
-        public static String DropboxRead(string file)
+        public static String DropboxRead(string path)
         {
             HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create("https://content.dropboxapi.com/2/files/download");
 
-            httpRequest.Headers["Dropbox-API-Arg"] = "{\"path\": \"/" + file + "\"}";
+            httpRequest.Headers["Dropbox-API-Arg"] = "{\"path\": \"/" + path + "\"}";
             httpRequest.Headers["Authorization"] = "Bearer a94CSH6hwyUAAAAAAAAAAf3zRyhyZknI9J8KM3VZihWEILAuv6Vr3ht_-4RQcJxs";
 
             HttpWebResponse httpResponse = (HttpWebResponse)httpRequest.GetResponse();
@@ -120,6 +188,104 @@ namespace ItemChecker.Net
             var streamReader = new StreamReader(httpResponse.GetResponseStream());
 
             return streamReader.ReadToEnd();
+        }
+        public static String DropboxDelete(string path)
+        {
+            JObject json = new(
+                           new JProperty("path", $"/{path}"));
+            string data = json.ToString(Formatting.None);
+            var httpRequest = (HttpWebRequest)WebRequest.Create("https://api.dropboxapi.com/2/files/delete_v2");
+
+            httpRequest.Method = "POST";
+            httpRequest.Headers["Authorization"] = "Bearer a94CSH6hwyUAAAAAAAAAAf3zRyhyZknI9J8KM3VZihWEILAuv6Vr3ht_-4RQcJxs";
+            httpRequest.ContentType = "application/json";
+
+            using (var streamWriter = new StreamWriter(httpRequest.GetRequestStream()))
+            {
+                streamWriter.Write(data);
+            }
+
+            var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
+            using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+            {
+                var result = streamReader.ReadToEnd();
+                return result;
+            }
+        }
+        public static String DropboxFolder(string path)
+        {
+            JObject json = new(
+                           new JProperty("path", $"/{path}"),
+                           new JProperty("autorename", false));
+            string data = json.ToString(Formatting.None);
+            var httpRequest = (HttpWebRequest)WebRequest.Create("https://api.dropboxapi.com/2/files/create_folder_v2");
+
+            httpRequest.Method = "POST";
+            httpRequest.Headers["Authorization"] = "Bearer a94CSH6hwyUAAAAAAAAAAf3zRyhyZknI9J8KM3VZihWEILAuv6Vr3ht_-4RQcJxs";
+            httpRequest.ContentType = "application/json";
+
+            using (var streamWriter = new StreamWriter(httpRequest.GetRequestStream()))
+            {
+                streamWriter.Write(data);
+            }
+
+            var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
+            using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+            {
+                var result = streamReader.ReadToEnd();
+                return result;
+            }
+        }
+        public static String DropboxUpload(string path, string data)
+        {
+            JObject json = new(
+                           new JProperty("path", $"/{path}"),
+                           new JProperty("mode", "add"),
+                           new JProperty("autorename", false),
+                           new JProperty("mute", false),
+                           new JProperty("strict_conflict", false));
+            string args = json.ToString(Formatting.None);
+
+            var httpRequest = (HttpWebRequest)WebRequest.Create("https://content.dropboxapi.com/2/files/upload");
+
+            httpRequest.Method = "POST";
+            httpRequest.ContentType = "application/octet-stream";
+            httpRequest.Headers["Dropbox-API-Arg"] = args;
+            httpRequest.Headers["Authorization"] = "Bearer a94CSH6hwyUAAAAAAAAAAf3zRyhyZknI9J8KM3VZihWEILAuv6Vr3ht_-4RQcJxs";
+
+            using (var streamWriter = new StreamWriter(httpRequest.GetRequestStream()))
+            {
+                streamWriter.Write(data);
+            }
+
+            var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
+            using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+            {
+                var result = streamReader.ReadToEnd();
+                return result;
+            }
+        }
+        public static void DropboxUploadFile(string path, string filePath)
+        {
+            JObject json = new(
+                           new JProperty("path", $"/{path}"),
+                           new JProperty("mode", "add"),
+                           new JProperty("autorename", false),
+                           new JProperty("mute", false),
+                           new JProperty("strict_conflict", false));
+            string args = json.ToString(Formatting.None);
+
+            using (WebClient client = new())
+            {
+                client.Headers.Add("Content-Type", "application/octet-stream");
+                client.Headers.Add("Dropbox-API-Arg", args);
+                client.Headers.Add("Authorization", "Bearer a94CSH6hwyUAAAAAAAAAAf3zRyhyZknI9J8KM3VZihWEILAuv6Vr3ht_-4RQcJxs");
+                using (Stream fileStream = File.OpenRead(filePath))
+                using (Stream requestStream = client.OpenWrite(new Uri("https://content.dropboxapi.com/2/files/upload"), "POST"))
+                {
+                    fileStream.CopyTo(requestStream);
+                }
+            }
         }
     }
 }
