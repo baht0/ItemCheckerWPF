@@ -109,7 +109,6 @@ namespace ItemChecker.MVVM.ViewModel
                         if (!BaseModel.LoginSteam.IsLoggedIn)
                         {
                             IsLogin = true;
-                            Message.Enqueue("Please, Sign In...");
                             Status = "Please, Sign In...";
                             Thread.Sleep(500);
                         }

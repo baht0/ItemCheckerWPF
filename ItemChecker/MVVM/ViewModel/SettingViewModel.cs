@@ -160,10 +160,11 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand CreateCurrentVersionCommand =>
             new RelayCommand((obj) =>
             {
-                bool status = false;
-                Task.Run(() => { status = ProjectInfoService.CreateCurrentVersion(); });
-                string mess = status ? "Success" : "Something went wrong...";
-                Message.Enqueue(mess);
+                Task.Run(() => {
+                    bool status = ProjectInfoService.CreateCurrentVersion();
+                    string mess = status ? "Success" : "Something went wrong...";
+                    Message.Enqueue(mess);
+                });
             }, (obj) => SteamAccount.AccountName == "bahtiarov116");
 
         public ICommand ApplyCommand =>

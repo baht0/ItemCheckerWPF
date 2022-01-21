@@ -31,7 +31,7 @@ namespace ItemChecker.MVVM.ViewModel
         //panel
         private ParserConfig _parserConfig = new();
         private ParserInfo _parserInfo = new();
-        private int _manualCount;
+        private int _manualCount = ParserProperties.Default.CheckList != null ? ParserProperties.Default.CheckList.Count : 0;
         private ParserQueue _parserQueue = new();
 
         public ObservableCollection<DataParser> ParserGrid
@@ -192,7 +192,7 @@ namespace ItemChecker.MVVM.ViewModel
 
         public ParserViewModel()
         {
-            ManualCount = ParserProperties.Default.CheckList != null ? ParserProperties.Default.CheckList.Count : 0;
+            ParserProperties.Default.CheckList = ParserProperties.Default.CheckList ?? (new());
         }
 
         //filter
@@ -261,12 +261,6 @@ namespace ItemChecker.MVVM.ViewModel
                     ManualCount = ParserProperties.Default.CheckList.Count;
                 });
             }, (obj) => !BaseModel.IsParsing);
-        public ICommand StopCommand =>
-            new RelayCommand((obj) =>
-            {
-                ParserConfig.cts.Cancel();
-                ParserStatistics.CurrentProgress = ParserStatistics.MaxProgress;
-            }, (obj) => BaseModel.IsParsing);
         public ICommand CheckCommand =>
             new RelayCommand((obj) =>
             {
@@ -277,19 +271,13 @@ namespace ItemChecker.MVVM.ViewModel
                     PreparationCheck((ParserConfig)obj);
                 });
                 SaveConfig((ParserConfig)obj);
-            }, (obj) => !BaseModel.IsParsing & !ParserConfig.Timer.Enabled & ParserConfig.ServiceOne != ParserConfig.ServiceTwo & ParserProperties.Default.CheckList != null);
-        public ICommand UpdateInventoryCommand =>
+            }, (obj) => !BaseModel.IsParsing & !ParserConfig.Timer.Enabled & ParserConfig.ServiceOne != ParserConfig.ServiceTwo & ParserProperties.Default.CheckList.Any());
+        public ICommand StopCommand =>
             new RelayCommand((obj) =>
             {
-                BaseModel.IsWorking = true;
-                Task.Run(() => {
-                    if (ParserStatistics.Service1 == "Cs.Money")
-                        ItemBaseService.LoadBotsInventoryCsm();
-                    else if (ParserStatistics.Service1 == "Loot.Farm")
-                        ItemBaseService.LoadBotsInventoryLf();
-                    BaseModel.IsWorking = false;
-                });
-            }, (obj) => ParserGrid.Any() & !BaseModel.IsWorking & !BaseModel.IsParsing);
+                ParserConfig.cts.Cancel();
+                ParserStatistics.CurrentProgress = ParserStatistics.MaxProgress;
+            }, (obj) => BaseModel.IsParsing);
         void PreparationCheck(ParserConfig parserConfig)
         {
             try
@@ -314,6 +302,7 @@ namespace ItemChecker.MVVM.ViewModel
             }
             catch (Exception exp)
             {
+                ParserConfig.cts.Cancel();
                 BaseService.errorLog(exp);
                 BaseService.errorMessage(exp);
             }
@@ -456,6 +445,18 @@ namespace ItemChecker.MVVM.ViewModel
             });
         }
 
+        public ICommand UpdateInventoryCommand =>
+            new RelayCommand((obj) =>
+            {
+                BaseModel.IsWorking = true;
+                Task.Run(() => {
+                    if (ParserStatistics.Service1 == "Cs.Money")
+                        ItemBaseService.LoadBotsInventoryCsm();
+                    else if (ParserStatistics.Service1 == "Loot.Farm")
+                        ItemBaseService.LoadBotsInventoryLf();
+                    BaseModel.IsWorking = false;
+                });
+            }, (obj) => ParserGrid.Any() & !BaseModel.IsWorking & !BaseModel.IsParsing);
         //order
         public ICommand AddQueueCommand =>
             new RelayCommand((obj) =>

@@ -85,7 +85,7 @@
                                           IsChecked="{Binding Quit}"/>
                             </Grid>
                         </GroupBox>
-                        <GroupBox Grid.Row="1" Style="{DynamicResource None}" Header="Theme">
+                        <GroupBox Grid.Row="1" Style="{DynamicResource None}" Header="Dark Theme">
                             <Grid Margin="5">
                                 <Grid.RowDefinitions>
                                     <RowDefinition/>
@@ -96,7 +96,7 @@
                                     <ColumnDefinition Width="120"/>
                                     <ColumnDefinition/>
                                 </Grid.ColumnDefinitions>                                
-                                <CheckBox Grid.Row="0" Content="Set hours (Dark)"
+                                <CheckBox Grid.Row="0" Content="Set hours"
                                           ToolTip="Automatic theme change"
                                           HorizontalAlignment="Left"
                                           IsChecked="{Binding SetHours}">

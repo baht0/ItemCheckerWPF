@@ -87,8 +87,8 @@ namespace ItemChecker.Services
                     tradeLock = Edit.ConvertFromUnixTimestamp(Convert.ToDouble(item["t"][0]));
                 bool rareItem = item.ContainsKey("ar");
 
-                string name = ItemBase.SkinsBase.Where(x => x.CsmId == id).Select(x => x.ItemName).First();
-                decimal defPrice = ItemBase.SkinsBase.Where(x => x.CsmId == id).Select(x => x.PriceCsm).First();
+                string name = ItemBase.SkinsBase.FirstOrDefault(x => x.CsmId == id).ItemName;
+                decimal defPrice = ItemBase.SkinsBase.FirstOrDefault(x => x.CsmId == id).PriceCsm;
 
                 DataInventoryCsm.Inventory.Add(new DataInventoryCsm()
                 {

@@ -69,13 +69,13 @@ namespace ItemChecker.MVVM.View
                             Edit.openCsm(market_has_name);
                         break;
                     case 4:
-                        if (viewModel.ParserStatistics.Service1 == "SteamMarket" | viewModel.ParserStatistics.Service1 == "SteamMarket(A)")
+                        if (viewModel.ParserStatistics.Service2 == "SteamMarket" | viewModel.ParserStatistics.Service2 == "SteamMarket(A)")
                             Edit.openUrl("https://steamcommunity.com/market/listings/730/" + market_has_name);
                         else if (viewModel.ParserStatistics.Service2 == "Cs.Money")
                             Edit.openCsm(market_has_name);
                         break;
                     case 5:
-                        if (viewModel.ParserStatistics.Service1 == "SteamMarket" | viewModel.ParserStatistics.Service1 == "SteamMarket(A)")
+                        if (viewModel.ParserStatistics.Service2 == "SteamMarket" | viewModel.ParserStatistics.Service2 == "SteamMarket(A)")
                             Edit.openUrl("https://steamcommunity.com/market/listings/730/" + market_has_name);
                         else if (viewModel.ParserStatistics.Service2 == "Cs.Money")
                             Edit.openCsm(market_has_name);
