@@ -1,41 +1,59 @@
 ﻿using ItemChecker.Properties;
+using System.Collections.ObjectModel;
+using System.Threading;
 
 namespace ItemChecker.MVVM.Model
 {
-    public class HomeStatistics : BaseModel
+    public class HomeConfig
+    {
+        //pusher
+        public int PushTimer { get; set; } = HomeProperties.Default.TimerPush;
+        public int Reserve { get; set; } = HomeProperties.Default.Reserve;
+        public static System.Timers.Timer TimerPush { get; set; } = new(1000);
+        public static int TimerPushTick { get; set; }
+        public static CancellationTokenSource ctsPush { get; set; } = new();
+        public static CancellationToken tokenPush { get; set; } = ctsPush.Token;
+
+        //cs money
+        public int CsmTimer { get; set; } = HomeProperties.Default.TimerCsm;
+        public decimal MaxDeviation { get; set; } = HomeProperties.Default.MaxDeviation;
+        public bool UserItems { get; set; } = HomeProperties.Default.UserItems;
+        public static System.Timers.Timer TimerCsm { get; set; } = new(1000);
+        public static int TimerCsmTick { get; set; }
+        public static CancellationTokenSource ctsCsm { get; set; } = new();
+        public static CancellationToken tokenCsm { get; set; } = ctsCsm.Token;
+
+        //float
+        public int FloatTimer { get; set; } = HomeProperties.Default.TimerFloat;
+        public int Compare { get; set; } = HomeProperties.Default.Compare;
+        public ObservableCollection<string> ComparePrices { get; set; } = new ObservableCollection<string>()
+                {
+                    "Lowest ST",
+                    "Median ST",
+                    "Buy CSM"
+                };
+        public decimal MaxPrecent { get; set; } = HomeProperties.Default.MaxPrecent;
+        public static System.Timers.Timer TimerFloat { get; set; } = new(1000);
+        public static int TimerFloatTick { get; set; }
+        public static CancellationTokenSource ctsFloat { get; set; } = new();
+        public static CancellationToken tokenFloat { get; set; } = ctsFloat.Token;
+
+        //trade
+        public static CancellationTokenSource ctsTrade { get; set; } = new();
+        public static CancellationToken tokenTrade { get; set; } = ctsTrade.Token;
+        //sale
+        public int MaxPrice { get; set; } = HomeProperties.Default.MaxPrice;
+        public static CancellationTokenSource ctsSale { get; set; } = new();
+        public static CancellationToken tokenSale { get; set; } = ctsSale.Token;
+        //withdraw
+        public static CancellationTokenSource ctsWithdraw { get; set; } = new();
+        public static CancellationToken tokenWithdraw { get; set; } = ctsWithdraw.Token;
+        //fav
+        public bool Unwanted { get; set; } = HomeProperties.Default.Unwanted;
+    }
+    public class HomeStatistics: BaseModel
     {
         //services
-        private string _pushButton = "Play";
-        private string _csmButton = "Play";
-        private string _floatButton = "Play";
-        public string PushButton
-        {
-            get { return _pushButton; }
-            set
-            {
-                _pushButton = value;
-                OnPropertyChanged();
-            }
-        }
-        public string CsmButton
-        {
-            get { return _csmButton; }
-            set
-            {
-                _csmButton = value;
-                OnPropertyChanged();
-            }
-        }
-        public string FloatButton
-        {
-            get { return _floatButton; }
-            set
-            {
-                _floatButton = value;
-                OnPropertyChanged();
-            }
-        }
-
         private bool _pushService;
         private bool _csmService;
         private bool _floatService;
@@ -107,7 +125,6 @@ namespace ItemChecker.MVVM.Model
         private int _checkCsm = 0;
         private int _checkFloat = 0;
         private int _push = 0;
-        private int _cancel = 0;
         private int _successfulTrades = 0;
         private int _purchasesMade = 0;
         public int CheckPush
@@ -155,18 +172,6 @@ namespace ItemChecker.MVVM.Model
             set
             {
                 _push = value;
-                OnPropertyChanged();
-            }
-        }
-        public int Cancel
-        {
-            get
-            {
-                return _cancel;
-            }
-            set
-            {
-                _cancel = value;
                 OnPropertyChanged();
             }
         }
@@ -287,37 +292,6 @@ namespace ItemChecker.MVVM.Model
         }
 
         //tools
-        private string _tradeButton = "Play";
-        private string _sellButton = "Play";
-        private string _withdrawButton = "Play";
-        public string TradeButton
-        {
-            get { return _tradeButton; }
-            set
-            {
-                _tradeButton = value;
-                OnPropertyChanged();
-            }
-        }
-        public string SellButton
-        {
-            get { return _sellButton; }
-            set
-            {
-                _sellButton = value;
-                OnPropertyChanged();
-            }
-        }
-        public string WithdrawButton
-        {
-            get { return _withdrawButton; }
-            set
-            {
-                _withdrawButton = value;
-                OnPropertyChanged();
-            }
-        }
-
         private bool _tradeTool;
         private bool _sellTool;
         private bool _withdrawTool;

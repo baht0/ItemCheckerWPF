@@ -1,7 +1,5 @@
-﻿using ItemChecker.MVVM.Model;
-using ItemChecker.Net;
+﻿using ItemChecker.Net;
 using ItemChecker.Properties;
-using ItemChecker.Support;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OpenQA.Selenium;
@@ -11,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Web;
 
 namespace ItemChecker.Services
 {
@@ -23,7 +22,7 @@ namespace ItemChecker.Services
         {
             string[] item_line = checkItem.Split(';');
 
-            string json = Get.InventoriesCsMoney(Edit.MarketHashName(item_line[0]), HomeProperties.Default.UserItems);
+            string json = Get.InventoriesCsMoney(HttpUtility.UrlEncode(item_line[0]), HomeProperties.Default.UserItems);
             if (!json.Contains("error"))
             {
                 JArray items = new();

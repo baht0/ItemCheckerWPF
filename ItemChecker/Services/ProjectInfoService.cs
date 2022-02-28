@@ -48,14 +48,21 @@ namespace ItemChecker.MVVM.Model
             JObject json = JObject.Parse(Post.DropboxRead("Updates/Version.json"));
 
             DataProjectInfo.LatestVersion = (string)json["LatestVersion"];
-            DataProjectInfo.IsUpdate = DataProjectInfo.LatestVersion != DataProjectInfo.CurrentVersion;
+            int latest = Convert.ToInt32(DataProjectInfo.LatestVersion.Replace(".", string.Empty));
+            int current = Convert.ToInt32(DataProjectInfo.CurrentVersion.Replace(".", string.Empty));
+            DataProjectInfo.IsUpdate = latest > current;
+            if (DataProjectInfo.IsUpdate)
+            {
+                Main.Notifications.Add(new()
+                {
+                    Title = "Update available!",
+                    Message = $"Latest version: {DataProjectInfo.LatestVersion}"
+                });
+                Main.Message.Enqueue("Update available!");
+            }
         }
         public static void Update()
         {
-            MessageBoxResult result = MessageBox.Show($"Want to upgrade from {DataProjectInfo.CurrentVersion} to {DataProjectInfo.LatestVersion}?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (result == MessageBoxResult.No)
-                return;
-
             ProcessStartInfo updater = new();
             updater.FileName = AppPath + "ItemChecker.Updater.exe";
             updater.Arguments = "1";
@@ -90,6 +97,7 @@ namespace ItemChecker.MVVM.Model
             catch (Exception ex)
             {
                 errorLog(ex);
+                errorMessage(ex);
                 return false;
             }
         }

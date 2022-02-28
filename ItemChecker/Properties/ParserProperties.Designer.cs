@@ -48,13 +48,49 @@ namespace ItemChecker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2")]
         public int ServiceTwo {
             get {
                 return ((int)(this["ServiceTwo"]));
             }
             set {
                 this["ServiceTwo"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public decimal MinPrice {
+            get {
+                return ((decimal)(this["MinPrice"]));
+            }
+            set {
+                this["MinPrice"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public decimal MaxPrice {
+            get {
+                return ((decimal)(this["MaxPrice"]));
+            }
+            set {
+                this["MaxPrice"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool Normal {
+            get {
+                return ((bool)(this["Normal"]));
+            }
+            set {
+                this["Normal"] = value;
             }
         }
         
@@ -151,30 +187,6 @@ namespace ItemChecker.Properties {
             }
             set {
                 this["OnlyDopplers"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public decimal MinPrice {
-            get {
-                return ((decimal)(this["MinPrice"]));
-            }
-            set {
-                this["MinPrice"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public decimal MaxPrice {
-            get {
-                return ((decimal)(this["MaxPrice"]));
-            }
-            set {
-                this["MaxPrice"] = value;
             }
         }
     }

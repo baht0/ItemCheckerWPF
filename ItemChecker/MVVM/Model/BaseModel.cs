@@ -7,6 +7,7 @@ using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using System;
 using System.IO;
+using System.Net;
 using System.Threading;
 
 namespace ItemChecker.MVVM.Model
@@ -26,18 +27,21 @@ namespace ItemChecker.MVVM.Model
         public static IWebDriver Browser { get; set; }
         public static WebDriverWait WebDriverWait { get; set; }
         //steam
-        public static string StatusCommunity { get; set; }
-
+        public static CookieContainer SteamCookies { get; set; } = new();
         public static SteamLogin LoginSteam { get; set; } = new();
+        public static string StatusCommunity { get; set; } = string.Empty;
 
         public static Boolean GetCookies()
         {
             try
             {
+                System.Net.Cookie steamSessionId = Get.SteamSessionId();
                 string url = "https://steamcommunity.com/login/home/?goto=my/profile";
-                if (SettingsProperties.Default.SteamCookies != null)
+                if (!String.IsNullOrEmpty(SettingsProperties.Default.SteamLoginSecure))
                 {
-                    string html = Get.Request(SettingsProperties.Default.SteamCookies, url);
+                    SteamCookies.Add(steamSessionId);
+                    SteamCookies.Add(new System.Net.Cookie("steamLoginSecure", SettingsProperties.Default.SteamLoginSecure, "/", "steamcommunity.com"));
+                    string html = Get.Request(SteamCookies, url);
                     HtmlDocument htmlDoc = new();
                     htmlDoc.LoadHtml(html);
                     string title = htmlDoc.DocumentNode.SelectSingleNode("html/head/title").InnerText;
@@ -54,14 +58,18 @@ namespace ItemChecker.MVVM.Model
                     Steam();
                 }
                 LoginSteam.IsLoggedIn = true;
+
                 ICookieJar cookies = Browser.Manage().Cookies;
                 string steamLoginSecure = cookies.GetCookieNamed("steamLoginSecure").Value.ToString();
+                SteamCookies = new();
+                SteamCookies.Add(steamSessionId);
+                SteamCookies.Add(new System.Net.Cookie("steamLoginSecure", steamLoginSecure, "/", "steamcommunity.com"));
 
-                SettingsProperties.Default.SteamCookies = new();
-                SettingsProperties.Default.SteamCookies.Add(Get.GetSteamSessionId());
-                SettingsProperties.Default.SteamCookies.Add(new System.Net.Cookie("steamLoginSecure", steamLoginSecure, "/", "steamcommunity.com"));
-                SettingsProperties.Default.Save();
-
+                if (StartUpProperties.Default.Remember)
+                {
+                    SettingsProperties.Default.SteamLoginSecure = steamLoginSecure;
+                    SettingsProperties.Default.Save();
+                }
                 if (SettingsProperties.Default.Quit)
                 {
                     Browser.Quit();
@@ -74,7 +82,7 @@ namespace ItemChecker.MVVM.Model
                 return false;
             }
         }
-        static void OpenBrowser()
+        public static void OpenBrowser()
         {
             string profilesDir = AppPath + "profile";
 
@@ -126,6 +134,8 @@ namespace ItemChecker.MVVM.Model
             code.SendKeys(LoginSteam.Code2AF);
             code.SendKeys(Keys.Enter);
 
+            StartUpProperties.Default.Remember = LoginSteam.Remember;
+            StartUpProperties.Default.Save();
             Thread.Sleep(4000);
         }        
     }

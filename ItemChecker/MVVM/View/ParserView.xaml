@@ -53,14 +53,14 @@
                 <RowDefinition Height="40"/>
             </Grid.RowDefinitions>
             <!--top-->
-            <StackPanel Grid.Row="0" Background="Transparent"
+            <StackPanel Grid.Row="0"
                         Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock Text="{Binding ParserGrid.Count, StringFormat='Parser: {0}'}"
                            FontWeight="Normal" FontStyle="Normal" 
                            FontSize="18" TextDecorations="{x:Null}"/>
                 <TextBlock Text="{Binding ParserStatistics.Timer}" Visibility="{Binding ParserStatistics.TimerOn, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="10 0 0 0" VerticalAlignment="Bottom" FontSize="14"/>
             </StackPanel>
-            <Border Grid.Row="1" Background="Transparent">
+            <Border Grid.Row="1">
                 <TextBlock>
                     <TextBlock.Text>
                         <MultiBinding StringFormat="Mode: {0}, {1} To {2}. ({3})">
@@ -78,10 +78,9 @@
                       ItemsSource="{Binding ParserGridView, UpdateSourceTrigger=PropertyChanged}"
                       SelectedItem="{Binding SelectedParserItem}"
                       KeyDown="DataGrid_KeyDown" MouseDoubleClick="DataGrid_MouseDoubleClick"
-                      ToolTip="Press 'Insert' to add to queue&#x0a;Press 'F' to add to favorites">
+                      ToolTip="Press 'Insert' to add to queue&#x0a;Press 'F' to add to favorites&#x0a;Press 'F+Ctrl' to remove from favorites">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="" Binding="{Binding Type}" CanUserResize="False" Width="1" Visibility="Hidden"/>
-                    <DataGridTextColumn Binding="{Binding ItemName}" CanUserResize="False" Width="auto" MaxWidth="380" MinWidth="250">
+                    <DataGridTextColumn Binding="{Binding ItemName}" CanUserResize="False" Width="auto" MaxWidth="400" MinWidth="320">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{Binding DataContext.ParserGridView.Count, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat='Item: {0}'}"/>
                         </DataGridTextColumn.Header>
@@ -108,7 +107,6 @@
                     </DataGridTextColumn>
                     <DataGridTextColumn Header="Precent" Binding="{Binding Precent}" CanUserResize="False" Width="auto"/>
                     <DataGridTextColumn Header="Differece" Binding="{Binding Difference}" CanUserResize="False" Width="auto" MaxWidth="110"/>
-                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" CanUserResize="False" Width="auto"/>
                 </DataGrid.Columns>
             </DataGrid>
             <!--search-->
@@ -205,8 +203,8 @@
                                 <CheckBox Grid.Row="5" Content="Factory New" IsChecked="{Binding FactoryNew}"/>
                             </Grid>
                         </GroupBox>
-                        <GroupBox Header="Reversion:" Grid.Row="1" Grid.Column="1"
-                              Style="{DynamicResource None}" IsEnabled="False">
+                        <GroupBox Header="Quality:" Grid.Row="1" Grid.Column="1"
+                              Style="{DynamicResource None}">
                             <Grid Margin="2">
                                 <Grid.RowDefinitions>
                                     <RowDefinition/>
@@ -214,12 +212,14 @@
                                     <RowDefinition/>
                                     <RowDefinition/>
                                     <RowDefinition/>
+                                    <RowDefinition/>
                                 </Grid.RowDefinitions>
-                                <CheckBox Grid.Row="1" Content="Category" IsChecked="{Binding Category}"/>
-                                <CheckBox Grid.Row="2" Content="Status"  IsChecked="{Binding Status}"/>
-                                <CheckBox Grid.Row="3" Content="Exterior" IsChecked="{Binding Exterior}"/>
-                                <CheckBox Grid.Row="4" Content="Types" IsChecked="{Binding Types}"/>
-                                <TextBlock Grid.Row="0" Text="Hides the selected." VerticalAlignment="Center" HorizontalAlignment="Center" FontStyle="Italic"/>
+                                <CheckBox Grid.Row="0" Content="Industrial" IsChecked="{Binding Industrial}" Foreground="#FF5E98D9"/>
+                                <CheckBox Grid.Row="1" Content="Mil-Spec" IsChecked="{Binding MilSpec}" Foreground="#FF4B69FF"/>
+                                <CheckBox Grid.Row="2" Content="Restricted"  IsChecked="{Binding Restricted}" Foreground="#FF8847FF"/>
+                                <CheckBox Grid.Row="3" Content="Classified" IsChecked="{Binding Classified}" Foreground="#FFD32CE6"/>
+                                <CheckBox Grid.Row="4" Content="Covert" IsChecked="{Binding Covert}" Foreground="#FFEB4B4B"/>
+                                <CheckBox Grid.Row="5" Content="Contraband" IsChecked="{Binding Contraband}" Foreground="#FFE4AE39"/>
                             </Grid>
                         </GroupBox>
                         <GroupBox Header="Types:" Grid.Row="2" Grid.ColumnSpan="2"
@@ -236,20 +236,24 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition/>
                                     <ColumnDefinition/>
+                                    <ColumnDefinition/>
                                 </Grid.ColumnDefinitions>
                                 <CheckBox Grid.Row="0" Grid.Column="0" Content="Weapon" IsChecked="{Binding Weapon}"/>
                                 <CheckBox Grid.Row="1" Grid.Column="0" Content="Knife" IsChecked="{Binding Knife}"/>
                                 <CheckBox Grid.Row="2" Grid.Column="0" Content="Gloves" IsChecked="{Binding Gloves}"/>
-                                <CheckBox Grid.Row="3" Grid.Column="0" Content="Sticker" IsChecked="{Binding Sticker}"/>
-                                <CheckBox Grid.Row="4" Grid.Column="0" Content="Patch" IsChecked="{Binding Patch}"/>
-                                <CheckBox Grid.Row="5" Grid.Column="0" Content="Pin" IsChecked="{Binding Pin}"/>
+                                <CheckBox Grid.Row="3" Grid.Column="0" Content="Agent" IsChecked="{Binding Agent}"/>
+                                <CheckBox Grid.Row="4" Grid.Column="0" Content="Music Kit" IsChecked="{Binding MusicKit}"/>
+                                <CheckBox Grid.Row="5" Grid.Column="0" Content="Collectible" IsChecked="{Binding Collectible}"/>
 
-                                <CheckBox Grid.Row="0" Grid.Column="1" Content="Key" IsChecked="{Binding Key}"/>
-                                <CheckBox Grid.Row="1" Grid.Column="1" Content="Pass" IsChecked="{Binding Pass}"/>
-                                <CheckBox Grid.Row="2" Grid.Column="1" Content="Music Kit" IsChecked="{Binding MusicKit}"/>
-                                <CheckBox Grid.Row="3" Grid.Column="1" Content="Graffiti" IsChecked="{Binding Graffiti}"/>
-                                <CheckBox Grid.Row="4" Grid.Column="1" Content="Case" IsChecked="{Binding Case}"/>
-                                <CheckBox Grid.Row="5" Grid.Column="1" Content="Package" IsChecked="{Binding Package}"/>
+                                <CheckBox Grid.Row="0" Grid.Column="1" Content="Sticker" IsChecked="{Binding Sticker}"/>
+                                <CheckBox Grid.Row="1" Grid.Column="1" Content="Patch" IsChecked="{Binding Patch}"/>
+                                <CheckBox Grid.Row="2" Grid.Column="1" Content="Graffiti" IsChecked="{Binding Graffiti}"/>
+                                <CheckBox Grid.Row="3" Grid.Column="1" Content="Pass" IsChecked="{Binding Pass}"/>
+                                <CheckBox Grid.Row="4" Grid.Column="1" Content="Key" IsChecked="{Binding Key}"/>
+                                
+                                <CheckBox Grid.Row="0" Grid.Column="2" Content="Case" IsChecked="{Binding Case}"/>
+                                <CheckBox Grid.Row="1" Grid.Column="2" Content="Capsule" IsChecked="{Binding Capsule}"/>
+                                <CheckBox Grid.Row="2" Grid.Column="2" Content="Package" IsChecked="{Binding Package}"/>
                             </Grid>
                         </GroupBox>
                         <GroupBox Header="Prices:" Grid.Row="3" Grid.ColumnSpan="2"
@@ -382,9 +386,9 @@
                                 <RowDefinition Height="32"/>
                                 <RowDefinition Height="25"/>
                                 <RowDefinition Height="25"/>
+                                <RowDefinition Height="32"/>
                                 <RowDefinition Height="25"/>
                                 <RowDefinition Height="25"/>
-                                <RowDefinition Height="35"/>
                                 <RowDefinition Height="25"/>
                                 <RowDefinition Height="25"/>
                                 <RowDefinition Height="25"/>
@@ -394,42 +398,38 @@
                                 <ColumnDefinition/>
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.ColumnSpan="2" Text="{Binding ManualCount, StringFormat='Check: {0}'}" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock Grid.ColumnSpan="2" VerticalAlignment="Center" FontWeight="Bold"
+                                       Text="{Binding ManualCount, StringFormat='Check List: {0}'}"/>
                             <Button Grid.Column="1" Style="{StaticResource MaterialDesignToolForegroundButton}" HorizontalAlignment="Right"
                                     Command="{Binding AddListCommand}"
-                                    CommandParameter="-1">
+                                    CommandParameter="0">
                                 <materialDesign:PackIcon Kind="Remove"/>
                             </Button>
                             <Separator Grid.ColumnSpan="2" VerticalAlignment="Bottom"/>
-                            <Button Grid.Row="1" Grid.ColumnSpan="2"
-                                    Content="Select File"
+                            <Button Content="Select File" Grid.Row="1"
                                     FontSize="11" Height="20" Width="100"
                                     Style="{StaticResource MaterialDesignFlatButton}"
                                     Command="{Binding AddListCommand}"
-                                    CommandParameter="0"/>
-                            <Button Content="Get SkinsBase" FontSize="11" Height="20"
-                                        Grid.Row="2" Grid.Column="0"
-                                        Style="{StaticResource MaterialDesignFlatButton}"
-                                        Command="{Binding AddListCommand}"
-                                        CommandParameter="1"/>
-                            <Button Content="Get LF Base" FontSize="11" Height="20"
-                                    Grid.Row="2" Grid.Column="1"
-                                            Style="{StaticResource MaterialDesignFlatButton}" 
-                                            Command="{Binding AddListCommand}"
-                                            CommandParameter="2"/>
-                            <Button Content="Get Favorites" FontSize="11" Height="20"
-                                        Grid.Row="3" Grid.Column="0"
-                                            Style="{StaticResource MaterialDesignFlatButton}"
-                                            Command="{Binding AddListCommand}"
-                                            CommandParameter="3"/>
-                            <Button Content="Get Orders" FontSize="11" Height="20"
-                                        Grid.Row="3" Grid.Column="1"
-                                            Style="{StaticResource MaterialDesignFlatButton}" 
-                                            Command="{Binding AddListCommand}"
-                                            CommandParameter="4"/>
-                            <TextBlock Grid.Row="4" Text="{Binding ParserStatistics.CountList, StringFormat='Generated list: {0}'}" VerticalAlignment="Center"/>
-                            <Separator Grid.Row="4" Grid.ColumnSpan="2" VerticalAlignment="Bottom"/>
-                            <Grid Grid.Row="5" Grid.ColumnSpan="2" VerticalAlignment="Center">
+                                    CommandParameter="1"/>
+                            <Button Content="Get LF Base" Grid.Row="1" Grid.Column="1"
+                                    FontSize="11" Height="20"
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    Command="{Binding AddListCommand}"
+                                    CommandParameter="2"/>
+                            <Button Content="Get Favorites" Grid.Row="2"
+                                    FontSize="11" Height="20"
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    Command="{Binding AddListCommand}"
+                                    CommandParameter="3"/>
+                            <Button Content="Get Orders" Grid.Row="2" Grid.Column="1"
+                                    FontSize="11" Height="20"
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    Command="{Binding AddListCommand}"
+                                    CommandParameter="4"/>
+                            <TextBlock Grid.Row="3" Grid.ColumnSpan="2" VerticalAlignment="Center"
+                                       Text="{Binding ParserStatistics.CountList, StringFormat='Generated list: {0}'}"/>
+                            <Separator Grid.Row="3" Grid.ColumnSpan="2" VerticalAlignment="Bottom"/>
+                            <Grid Grid.Row="4" Grid.ColumnSpan="2" VerticalAlignment="Center">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition/>
                                     <ColumnDefinition/>
@@ -443,6 +443,9 @@
                                 <TextBox Grid.Column="3" Text="{Binding ParserConfig.MaxPrice}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                                 <TextBlock Grid.Column="4" Text="$" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                             </Grid>
+                            <CheckBox Grid.Row="5" Grid.Column="0" 
+                                              IsChecked="{Binding ParserConfig.Normal}" 
+                                              Content="Normal"/>
                             <CheckBox Grid.Row="6" Grid.Column="0" 
                                               IsChecked="{Binding ParserConfig.Souvenir}" 
                                               Content="Souvenir"/>
@@ -609,11 +612,11 @@
                             <TextBlock Grid.Row="0" VerticalAlignment="Center" TextWrapping="Wrap"
                                            Text="{Binding ItemCsm.ItemName, StringFormat='Item: {0}'}"/>
                             <TextBlock Grid.Row="1" VerticalAlignment="Center"
-                                           Text="{Binding ItemCsm.DefaultPrice, StringFormat='Default Price: {0}$'}"/>
+                                           Text="{Binding ItemCsm.Price, StringFormat='Default Price: {0}$'}"/>
                             <Slider Grid.Row="2" Width="200" VerticalAlignment="Center"
                                         Maximum="{Binding InfoItemCount}"
                                         Value="{Binding InfoItemCurrent}"/>
-                            <Border Grid.Row="3" Background="{StaticResource ElementBackground}">
+                            <Border Grid.Row="3" Background="{DynamicResource ElementBackground}">
                                 <Grid Margin="10" DataContext="{Binding ItemCsm}">
                                     <Grid.RowDefinitions>
                                         <RowDefinition/>
@@ -687,48 +690,57 @@
                     <!--queue-->
                     <Grid Visibility="{Binding IsChecked, ElementName=queueTab, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="80"/>
+                            <RowDefinition Height="32"/>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="25"/>
                             <RowDefinition Height="25"/>
                             <RowDefinition/>
                         </Grid.RowDefinitions>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="32"/>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                            </Grid.RowDefinitions>
-                            <TextBlock Text="{Binding ParserQueue.Items.Count, StringFormat='Place Order: {0}'}" VerticalAlignment="Center" FontWeight="Bold"/>
-                            <Button HorizontalAlignment="Right" Style="{StaticResource MaterialDesignFlatButton}" VerticalAlignment="Bottom"
-                                            Command="{Binding PlaceOrderCommand}">
-                                <materialDesign:PackIcon Kind="Play"/>
-                            </Button>
-                            <ProgressBar VerticalAlignment="Bottom"
-                                         Height="3" Style="{StaticResource MaterialDesignLinearProgressBar}"
-                                         Value="{Binding ParserQueue.CurrentProgress}"
-                                         Maximum="{Binding ParserQueue.MaxProgress}"/>
-                            <TextBlock Grid.Row="1" Text="{Binding MainInfo.AvailableAmount, StringFormat='Available: {0}₽'}" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="2" Text="{Binding ParserQueue.OrderAmout, StringFormat='Amount: {0}₽'}" VerticalAlignment="Center"/>
-                        </Grid>
-                        <Grid Grid.Row="1" VerticalAlignment="Center">
-                            <Button Height="25" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignToolForegroundButton}"
-                                        Command="{Binding ClearQueueCommand}">
-                                <materialDesign:PackIcon Kind="Remove"/>
-                            </Button>
-                            <Button Height="25" HorizontalAlignment="Left" Style="{StaticResource MaterialDesignToolForegroundButton}"
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="110"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.ColumnSpan="2" VerticalAlignment="Center" FontWeight="Bold"
+                                   Text="{Binding QueueInfo.Items.Count, StringFormat='Place Order: {0}'}"/>
+                        <Button Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Style="{StaticResource MaterialDesignFlatButton}"
+                                Command="{Binding PlaceOrderCommand}">
+                            <materialDesign:PackIcon Kind="Play"/>
+                        </Button>
+                        <ProgressBar Grid.ColumnSpan="2" VerticalAlignment="Bottom" Height="3" Style="{StaticResource MaterialDesignLinearProgressBar}"
+                                     Value="{Binding QueueInfo.CurrentProgress}"
+                                     Maximum="{Binding QueueInfo.MaxProgress}"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Total Allowed:" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding QueueInfo.TotalAllowed, StringFormat='{}{0}₽'}" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="{Binding QueueInfo.AvailableAmountPrecent, StringFormat='Available ({0}%):'}" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding QueueInfo.AvailableAmount, StringFormat='{}{0}₽'}" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Orders:" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding QueueInfo.OrderAmout, StringFormat='{}{0}₽'}" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Remaining:" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding QueueInfo.Remaining, StringFormat='{}{0}₽'}" VerticalAlignment="Center"/>                        
+                        <Button Grid.Row="5" Grid.Column="0" HorizontalAlignment="Left" Style="{StaticResource MaterialDesignToolForegroundButton}"
                                         Command="{Binding RemoveQueueCommand}"
-                                        CommandParameter="{Binding ParserQueue.SelectedQueue}">
-                                <materialDesign:PackIcon Kind="Minus"/>
-                            </Button>
-                        </Grid>
-                        <DataGrid Grid.Row="2" FontSize="11"
-                                  ItemsSource="{Binding ParserQueue.Items}" SelectedItem="{Binding ParserQueue.SelectedQueue}"
+                                        CommandParameter="{Binding QueueInfo.SelectedQueue}">
+                            <materialDesign:PackIcon Kind="Minus"/>
+                        </Button>
+                        <Button Grid.Row="5" Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignToolForegroundButton}"
+                                        Command="{Binding ClearQueueCommand}">
+                            <materialDesign:PackIcon Kind="Remove"/>
+                        </Button>
+                        <DataGrid Grid.Row="6" FontSize="11" Grid.ColumnSpan="2"
+                                  ItemsSource="{Binding QueueInfo.Items}" SelectedItem="{Binding QueueInfo.SelectedQueue}"
                                   AlternationCount="2" AlternatingRowBackground="{DynamicResource ElementBackground}"
                                   AutoGenerateColumns="False" IsReadOnly="True">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Item" CanUserResize="False"
                                                     Binding="{Binding ItemName}"
                                                     Width="Auto"/>
-                                <DataGridTextColumn Header="Price" CanUserResize="False" Binding="{Binding OrderPrice}"
+                                <DataGridTextColumn Header="Price" CanUserResize="False"
+                                                    Binding="{Binding OrderPrice}"
+                                                    Width="Auto"/>
+                                <DataGridTextColumn Header="Precent" CanUserResize="False"
+                                                    Binding="{Binding Precent}"
                                                     Width="Auto"/>
                             </DataGrid.Columns>
                         </DataGrid>

@@ -1,12 +1,32 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.Text;
+using System.Web;
 
 namespace ItemChecker.Support
 {
     public class Edit
     {
         //url
+        public static String Decode(string itemName)
+        {
+            if (itemName.Contains("&#39"))
+                itemName = itemName.Replace("&#39", "&#39;");
+            return HttpUtility.HtmlDecode(itemName);
+        }
+        public static String ToUnicodeEncode(string itemName)
+        {
+            itemName = itemName.Replace("'", "&#39");
+            itemName = itemName.Replace("★", @"\u2605");
+            itemName = itemName.Replace("™", @"\u2122");
+            itemName = itemName.Replace("ö", @"\u00f6");
+            itemName = itemName.Replace("壱", @"\u58f1");
+            itemName = itemName.Replace("弐", @"\u5f10");
+            itemName = itemName.Replace("龍王", @"\u9f8d\u738b");
+
+            return itemName;
+        }
         public static String MarketHashName(string name)
         {
             name = name.Replace("★", "%E2%98%85");
@@ -15,7 +35,6 @@ namespace ItemChecker.Support
             name = name.Replace("|", "%7C");
             name = name.Replace("(", "%28");
             name = name.Replace(")", "%29");
-            name = name.Replace("\r\n", "\n");
 
             return name;
         }
@@ -108,13 +127,12 @@ namespace ItemChecker.Support
                 return time.ToString("hh'h 'mm'min'");
             else if (min > 1)
                 return time.ToString("mm'min 'ss'sec.'");
-            else
-                return time.ToString("ss'sec.'");
+
+            return time.ToString("ss'sec.'");
         }
-        public static Double calcTimeLeftSpeed(DateTime start, int i)
+        static Double calcTimeLeftSpeed(DateTime start, int i)
         {
-            DateTime now = DateTime.Now;
-            var time_passed = now.Subtract(start).TotalMinutes;
+            var time_passed = DateTime.Now.Subtract(start).TotalMinutes;
             return Math.Round(++i / time_passed, 2);
         }
     }

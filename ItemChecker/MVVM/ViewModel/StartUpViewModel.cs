@@ -16,6 +16,7 @@ namespace ItemChecker.MVVM.ViewModel
 {
     public class StartUpViewModel : ObservableObject
     {
+        #region prop
         IView _view;
         string _version = DataProjectInfo.CurrentVersion;
         bool _isLogin = false;
@@ -70,6 +71,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+        #endregion
 
         public StartUpViewModel(IView view)
         {
@@ -77,6 +79,12 @@ namespace ItemChecker.MVVM.ViewModel
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.CreateSpecificCulture("en-Us");
             CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.CreateSpecificCulture("en-Us");
 
+            Main.Notifications.Add(new()
+            {
+                IsRead = true,
+                Title = "Welcome!",
+                Message = "The program has been launched!"
+            });
             startTask = Task.Run(() => Starting());
         }
         public ICommand ExitCommand =>
@@ -84,8 +92,8 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 Task.Run(() => {
                     BaseModel.cts.Cancel();
-                    startTask.Wait(4000);
                     Status = "Exit...";
+                    startTask.Wait(4000);
                     if (BaseModel.Browser != null)
                         BaseService.BrowserExit();
 
@@ -122,10 +130,14 @@ namespace ItemChecker.MVVM.ViewModel
                     isLogin = BaseModel.GetCookies();
                 } while (!isLogin);
 
-                Status = "Get Base...";
-                BaseService.GetBase();
+                Status = "Preparation...";
+                ItemBaseService get = new();
+                get.CreateItemsBase();
+                BaseService.GetCurrency();
+
                 Status = "Steam Account...";
                 SteamAccount.GetSteamAccount();
+
                 if (BaseModel.token.IsCancellationRequested)
                     return;
                 Status = "My Orders...";

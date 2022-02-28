@@ -56,14 +56,6 @@ namespace ItemChecker
             notifyIcon.MouseDoubleClick += notifyIconMouseDoubleClick;
 
             notifyIcon.ContextMenuStrip = new();
-            notifyIcon.ContextMenuStrip.Items.Add("Calculator", null, CalculatorClicked);
-            notifyIcon.ContextMenuStrip.Items.Add(new Forms.ToolStripDropDownButton("Links", null,
-                new Forms.ToolStripButton("TrySkins", null, OpenTrySkins),
-                new Forms.ToolStripSeparator(),
-                new Forms.ToolStripButton("Cs.Money", null, OpenCsm),
-                new Forms.ToolStripSeparator(),
-                new Forms.ToolStripButton("Inventory", null, OpenInventory),
-                new Forms.ToolStripButton("SteamMarket", null, OpenStm)));
             notifyIcon.ContextMenuStrip.Items.Add("Exit", null, ExitClicked);
 
             notifyIcon.Visible = true;
@@ -110,27 +102,6 @@ namespace ItemChecker
                 startVM.ExitCommand.Execute(null);
             if (MainWindow.DataContext is MainViewModel mainVM)
                 mainVM.ExitCommand.Execute(null);
-        }
-        void CalculatorClicked(object sender, EventArgs e)
-        {
-            Window window = new CalculatorWindow();
-            window.Show();
-        }
-        void OpenTrySkins(object sender, EventArgs e)
-        {
-            Edit.openUrl("https://table.altskins.com/");
-        }
-        void OpenCsm(object sender, EventArgs e)
-        {
-            Edit.openUrl("https://cs.money/");
-        }
-        void OpenInventory(object sender, EventArgs e)
-        {
-            Edit.openUrl("https://steamcommunity.com/my/inventory/");
-        }
-        void OpenStm(object sender, EventArgs e)
-        {
-            Edit.openUrl("https://steamcommunity.com/market/");
         }
     }
 }

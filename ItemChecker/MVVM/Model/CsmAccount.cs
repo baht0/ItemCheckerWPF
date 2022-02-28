@@ -14,7 +14,7 @@ namespace ItemChecker.MVVM.Model
         public static decimal BalanceCsm { get; set; } = 0.00m;
         public static decimal BalanceCsmUsd { get; set; } = 0.00m;
 
-        Boolean LoginCsm()
+        public static Boolean LoginCsm()
         {
             try
             {
@@ -42,12 +42,12 @@ namespace ItemChecker.MVVM.Model
                 return false;
             }            
         }
-        void GetCsmBalance()
+        static void GetCsmBalance()
         {
             try
             {
                 Browser.Navigate().GoToUrl("https://cs.money/personal-info/");
-                OpenQA.Selenium.IWebElement balance = WebDriverWait.Until(e => e.FindElement(OpenQA.Selenium.By.XPath("//span[@class='styles_price__1m7op TradeBalance_balance__2Hxq3']/span")));
+                IWebElement balance = WebDriverWait.Until(e => e.FindElement(By.XPath("//span[@class='styles_price__1m7op TradeBalance_balance__2Hxq3']/span")));
                 BalanceCsmUsd = Edit.GetPrice(balance.GetAttribute("textContent"));
                 BalanceCsm = Math.Round(BalanceCsmUsd * SettingsProperties.Default.CurrencyValue, 2);
             }

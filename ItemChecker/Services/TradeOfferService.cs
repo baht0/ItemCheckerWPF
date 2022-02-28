@@ -15,8 +15,8 @@ namespace ItemChecker.Services
             try
             {
                 DataTradeOffer.TradeOffers = new();
-                string json = Get.TradeOffers(SteamAccount.ApiKey);
-                JArray trades = (JArray)JObject.Parse(json)["response"]["trade_offers_received"];
+                JObject json = Get.TradeOffers(SteamAccount.ApiKey);
+                JArray trades = (JArray)json["response"]["trade_offers_received"];
                 foreach (var trade in trades)
                 {
                     var trade_status = trade["trade_offer_state"].ToString();
@@ -30,7 +30,6 @@ namespace ItemChecker.Services
                     else
                         continue;
                 }
-
                 return DataTradeOffer.TradeOffers.Any();
             }
             catch
@@ -41,7 +40,7 @@ namespace ItemChecker.Services
         public void acceptTrade(string tradeOfferId, string partnerId)
         {
             Thread.Sleep(1000);
-            Post.AcceptTrade(SettingsProperties.Default.SteamCookies, tradeOfferId, partnerId);
+            Post.AcceptTrade(SteamCookies, tradeOfferId, partnerId);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using ItemChecker.MVVM.ViewModel;
+using ItemChecker.Properties;
 using ItemChecker.Support;
 using System.Reflection;
 using System.Windows;
@@ -27,25 +28,16 @@ namespace ItemChecker.MVVM.View
         {
             if (!ordersGrid.Items.IsEmpty)
             {
-                if (e.Key == Key.Back)
-                {
-                    HomeViewModel viewModel = (HomeViewModel)DataContext;
-                    if (viewModel.CancelOrderCommand.CanExecute(null))
-                        viewModel.CancelOrderCommand.Execute(viewModel.SelectedOrderItem);
-                }
-                if (e.Key == Key.F)
-                {
-                    MainViewModel viewModel = (MainViewModel)DataContext;
-                    if (viewModel.AddFavoriteCommand.CanExecute(null))
-                        viewModel.AddFavoriteCommand.Execute(((HomeViewModel)DataContext).SelectedOrderItem);
-                }
+                HomeViewModel viewModel = (HomeViewModel)DataContext;
+                if (e.Key == Key.Back && viewModel.CancelOrderCommand.CanExecute(null))
+                    viewModel.CancelOrderCommand.Execute(viewModel.SelectedOrderItem);
             }
         }
         private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (!ordersGrid.Items.IsEmpty)
+            object item = ordersGrid.CurrentItem;
+            if (!ordersGrid.Items.IsEmpty && item != null)
             {
-                object item = ordersGrid.CurrentItem;
                 PropertyInfo info = item.GetType().GetProperty("ItemName");
                 string ItemName = (string)info.GetValue(item, null);
 
@@ -54,16 +46,10 @@ namespace ItemChecker.MVVM.View
                 int columnIndex = ordersGrid.CurrentColumn.DisplayIndex;
                 switch (columnIndex)
                 {
-                    case 2:
+                    case 1 or 2:
                         Edit.openUrl("https://steamcommunity.com/market/listings/730/" + market_has_name);
                         break;
-                    case 3:
-                        Edit.openUrl("https://steamcommunity.com/market/listings/730/" + market_has_name);
-                        break;
-                    case 4:
-                        Edit.openCsm(market_has_name);
-                        break;
-                    case 5:
+                    case 3 or 4:
                         Edit.openCsm(market_has_name);
                         break;
                     default:
@@ -89,10 +75,6 @@ namespace ItemChecker.MVVM.View
             HomeViewModel viewModel = (HomeViewModel)DataContext;
             if (viewModel.TimerCommand.CanExecute(null))
                 viewModel.TimerCommand.Execute(2);
-        }
-        private void FavItemTextBoxClear_Click(object sender, RoutedEventArgs e)
-        {
-            FavItemTextBox.Text = string.Empty;
         }
     }
 }

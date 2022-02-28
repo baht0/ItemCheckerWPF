@@ -12,7 +12,7 @@ namespace ItemChecker.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.10.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.0.3.0")]
     internal sealed partial class StartUpProperties : global::System.Configuration.ApplicationSettingsBase {
         
         private static StartUpProperties defaultInstance = ((StartUpProperties)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new StartUpProperties())));
@@ -37,13 +37,13 @@ namespace ItemChecker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool whatIsNew {
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool Remember {
             get {
-                return ((bool)(this["whatIsNew"]));
+                return ((bool)(this["Remember"]));
             }
             set {
-                this["whatIsNew"] = value;
+                this["Remember"] = value;
             }
         }
     }

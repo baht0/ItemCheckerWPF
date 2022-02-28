@@ -8,6 +8,7 @@ using System;
 using ItemChecker.Support;
 using MaterialDesignThemes.Wpf;
 using System.Threading.Tasks;
+using ItemChecker.MVVM.View;
 
 namespace ItemChecker.MVVM.ViewModel
 {
@@ -110,12 +111,12 @@ namespace ItemChecker.MVVM.ViewModel
                 });
             }
         }
-        //steam
+        //order
         public ICommand GetSteamApiCommand =>
             new RelayCommand((obj) =>
             {
                 Edit.openUrl("https://steamcommunity.com/dev/apikey");
-            }, (obj) => String.IsNullOrEmpty(SteamAccount.ApiKey));
+            });
         public ICommand CopyIdCommand =>
             new RelayCommand((obj) =>
             {
@@ -127,7 +128,7 @@ namespace ItemChecker.MVVM.ViewModel
                 MessageBoxResult result = MessageBox.Show("Are you sure you want to logout?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result == MessageBoxResult.No)
                     return;
-                SettingsProperties.Default.SteamCookies = null;
+                SettingsProperties.Default.SteamLoginSecure = string.Empty;
 
                 string profilesDir = BaseModel.AppPath + "Profile";
                 if (!Directory.Exists(profilesDir))
@@ -144,13 +145,18 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand WhatIsNewCommand => 
             new RelayCommand((obj) =>
             {
-
+                WhatsNewWindow window = new();
+                window.ShowDialog();
             });
         public ICommand UpdateCommand =>
             new RelayCommand((obj) =>
             {
                 if (DataProjectInfo.IsUpdate)
-                    ProjectInfoService.Update();
+                {
+                    MessageBoxResult result = MessageBox.Show($"Want to upgrade from {DataProjectInfo.CurrentVersion} to {DataProjectInfo.LatestVersion}?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    if (result == MessageBoxResult.Yes)
+                        ProjectInfoService.Update();
+                }
                 else
                 {
                     ProjectInfoService.CheckUpdate();
@@ -160,12 +166,14 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand CreateCurrentVersionCommand =>
             new RelayCommand((obj) =>
             {
+                BaseModel.IsWorking = true;
                 Task.Run(() => {
                     bool status = ProjectInfoService.CreateCurrentVersion();
                     string mess = status ? "Success" : "Something went wrong...";
                     Message.Enqueue(mess);
+                    BaseModel.IsWorking = false;
                 });
-            }, (obj) => SteamAccount.AccountName == "bahtiarov116");
+            }, (obj) => SteamAccount.AccountName == "bahtiarov116" & !BaseModel.IsWorking);
 
         public ICommand ApplyCommand =>
             new RelayCommand((obj) =>
@@ -176,14 +184,15 @@ namespace ItemChecker.MVVM.ViewModel
         void SaveConfig(Settings settings)
         {
             SettingsProperties.Default.CurrencyApiKey = settings.CurrencyApi;
-            SettingsProperties.Default.Currency = settings.Currency;
+            SettingsProperties.Default.CurrencyId = settings.CurrencyId;
             SettingsProperties.Default.Quit = settings.Quit;
             SettingsProperties.Default.SetHours = settings.SetHours;
             SettingsProperties.Default.TurnOn = settings.TurnOn;
             SettingsProperties.Default.TurnOff = settings.TurnOff;
 
-            SettingsProperties.Default.NotEnoughBalance = settings.NotEnoughBalance;
-            SettingsProperties.Default.CancelOrder = settings.CancelOrder;
+            SettingsProperties.Default.MinPrecent = settings.MinPrecent;
+            SettingsProperties.Default.ServiceId = settings.ServiceId;
+            SteamAccount.ApiKey = settings.SteamApiKey;
 
             FloatProperties.Default.maxFloatValue_FN = settings.FactoryNew;
             FloatProperties.Default.maxFloatValue_MW = settings.MinimalWear;

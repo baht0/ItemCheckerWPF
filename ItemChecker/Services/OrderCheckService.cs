@@ -7,80 +7,109 @@ using ItemChecker.Support;
 using System;
 using System.Linq;
 using System.Threading;
+using System.Collections.Generic;
 
 namespace ItemChecker.MVVM.Model
 {
     public class OrderCheckService : OrderService
     {
-        public Decimal SteamOrders()
+        #region prop
+        decimal stmPrice { get; set; } = 0;
+        decimal orderPrice { get; set; } = 0;
+        decimal servicePrice { get; set; } = 0;
+        decimal serviceGive { get; set; } = 0;
+        decimal precent { get; set; } = 0;
+        decimal difference { get; set; } = 0;
+        #endregion
+        public void SteamOrders()
         {
+            List<DataOrder> cancelList = new();
+            List<DataOrder> dataOrders = new();
             DataOrder.Orders.Clear();
-            string html = Get.Request(SettingsProperties.Default.SteamCookies, "https://steamcommunity.com/market/");
-            HtmlDocument htmlDoc = null;
+            string html = Get.Request(SteamCookies, "https://steamcommunity.com/market/");
+            HtmlDocument htmlDoc = new();
             Thread.Sleep(500);
-            htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(html);
 
             string table = htmlDoc.DocumentNode.SelectSingleNode("//div[@class='my_listing_section market_content_block market_home_listing_table']/h3/span[1]").InnerText.Trim();
             int index = table != "My listings awaiting confirmation" ? 1 : 2;
             HtmlNodeCollection items = htmlDoc.DocumentNode.SelectNodes("//div[@class='my_listing_section market_content_block market_home_listing_table'][" + index + "]/div[@class='market_listing_row market_recent_listing_row']");
-            if(items != null)
+            if (items != null)
                 foreach (HtmlNode item in items)
                 {
                     string name = item.SelectSingleNode(".//div[4]/span/a").InnerText.Trim();
                     string id = item.Attributes["id"].Value;
                     string price = item.SelectSingleNode(".//div[2]/span/span[@class='market_listing_price']").InnerText.Trim();
                     price = price[3..].Trim();
-                    CheckOrder(name, id, price);
+                    Tuple<DataOrder, bool> response = CheckOrder(name, id, price);
+                    if (response.Item2)
+                        cancelList.Add(response.Item1);
+                    else
+                        dataOrders.Add(response.Item1);
                 }
-            var availableAmount = SteamAccount.GetAvailableAmount();
-            if (availableAmount < (SteamAccount.Balance * 10 * 0.01m))
-            {
-                var min = DataOrder.Orders.Min(x => x.Precent);
-                CancelOrder(DataOrder.Orders.Where(x => x.Precent == min).FirstOrDefault());
-            }
-            return SteamAccount.GetAvailableAmount();
+            CancelOrders(cancelList);
+            foreach (DataOrder item in dataOrders)
+                if (!HomeProperties.Default.FavoriteList.Contains(item.ItemName) && HomeProperties.Default.FavoriteList.Count < 200)
+                {
+                    HomeProperties.Default.FavoriteList.Add(item.ItemName);
+                    HomeProperties.Default.Save();
+                }
+            DataOrder.Orders = dataOrders;
         }
-        void CheckOrder(string itemName, string order_id, string order_price)
+        Tuple<DataOrder, Boolean> CheckOrder(string itemName, string order_id, string order_price)
         {
-            order_id = order_id.Replace("mybuyorder_", "");
-            decimal my_order = Edit.GetPrice(order_price);
+            ItemBase item = ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == itemName);
+            JObject json = Get.ItemOrdersHistogram(item.SteamInfo.Id);
 
-            string type = "Normal";
-            if (itemName.Contains("Souvenir"))
-                type = "Souvenir";
-            if (itemName.Contains("StatTrak"))
-                type = "Stattrak";
-            if (itemName.Contains("★ "))
-                type = "KnifeGlove";
-            if (itemName.Contains("★ StatTrak"))
-                type = "KnifeGloveStattrak";
+            orderPrice = Edit.GetPrice(order_price);
+            string sell_order = json["lowest_sell_order"].ToString();
+            stmPrice = !String.IsNullOrEmpty(sell_order) ? Convert.ToDecimal(sell_order) / 100 : 0;
 
-            ItemBase itemBase = ItemBase.SkinsBase.Where(x => x.ItemName == itemName).First();
-            JObject json = Get.ItemOrdersHistogram(itemBase.SteamId);
-
-            var sell_order = json["lowest_sell_order"].ToString();
-            decimal stm_sell = 0;
-            if (!String.IsNullOrEmpty(sell_order))
-                stm_sell = Convert.ToDecimal(sell_order) / 100;
-            decimal csm_sell = itemBase.PriceCsm;
-            decimal csm_buy = Math.Round(itemBase.PriceCsm * Calculator.CommissionCsm, 2);
-
-            decimal my_order_usd = Math.Round(my_order / SettingsProperties.Default.CurrencyValue, 2);
-            decimal precent = Edit.Precent(my_order_usd, csm_buy);
-            decimal different = Edit.Difference(csm_buy, my_order_usd);
-
-            if (SettingsProperties.Default.Currency == 1)
+            SetService(item);
+            
+            var data = new DataOrder(item.Type, itemName, order_id.Replace("mybuyorder_", string.Empty), stmPrice, orderPrice, servicePrice, serviceGive, precent, difference);
+            return Tuple.Create(data, CheckConditions(data, orderPrice));
+        }
+        void SetService(ItemBase itemBase)
+        {
+            int serviceId = SettingsProperties.Default.ServiceId;
+            switch (serviceId)
             {
-                csm_buy = Edit.ConverterToRub(csm_buy, SettingsProperties.Default.CurrencyValue);
-                csm_sell = Edit.ConverterToRub(csm_sell, SettingsProperties.Default.CurrencyValue);
-                different = Edit.ConverterToRub(different, SettingsProperties.Default.CurrencyValue);
+                case 0:
+                    servicePrice = 0;
+                    serviceGive = 0;
+                    precent = -100;
+                    difference = 0;
+                    break;
+                case 1:
+                    servicePrice = stmPrice;
+                    serviceGive = Math.Round(stmPrice * Calculator.CommissionSteam, 2);
+                    precent = Edit.Precent(orderPrice, serviceGive);
+                    difference = Edit.Difference(serviceGive, orderPrice);
+                    break;
+                case 2:
+                    servicePrice = itemBase.CsmInfo.Price;
+                    serviceGive = Math.Round(itemBase.CsmInfo.Price * Calculator.CommissionCsm, 2);
+                    break;
+                case 3:
+                    servicePrice = itemBase.LfmInfo.Price;
+                    serviceGive = Math.Round(itemBase.LfmInfo.Price * Calculator.CommissionLf, 2);
+                    break;
             }
+            decimal currencyValue = SettingsProperties.Default.CurrencyValue;
+            if (serviceId > 1)
+            {
+                decimal my_order_usd = Math.Round(orderPrice / currencyValue, 2);
+                precent = Edit.Precent(my_order_usd, serviceGive);
+                difference = Edit.Difference(serviceGive, my_order_usd);
 
-            DataOrder.Orders.Add(new DataOrder(type, itemName, order_id, stm_sell, my_order, csm_sell, csm_buy, precent, different));
-            bool cancel = CheckConditions(DataOrder.Orders.Last(), my_order);
-            if (cancel)
-                CancelOrder(DataOrder.Orders.Last());
+                if (SettingsProperties.Default.CurrencyId == 1)
+                {
+                    servicePrice = Edit.ConverterToRub(servicePrice, currencyValue);
+                    serviceGive = Edit.ConverterToRub(serviceGive, currencyValue);
+                    difference = Edit.ConverterToRub(difference, currencyValue);
+                }
+            }
         }
     }
 }

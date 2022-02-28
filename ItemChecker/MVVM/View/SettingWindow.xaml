@@ -78,7 +78,7 @@
                                            Text="Currency:" VerticalAlignment="Center"/>
                                 <ComboBox Grid.Row="1" Grid.Column="1" VerticalAlignment="Center"
                                           ItemsSource="{Binding CurrencyList}" ToolTip="Displaying prices in tables"
-                                          SelectedIndex="{Binding Currency}"/>
+                                          SelectedIndex="{Binding CurrencyId}"/>
                                 <CheckBox Grid.Row="2" Grid.Column="0" VerticalAlignment="Center"
                                           Content="Quit Driver"
                                           ToolTip="Destroy the browser after work"
@@ -109,78 +109,72 @@
                         </GroupBox>
                     </Grid>
                 </TabItem>
-                <TabItem Header="Steam" Height="67.5">
+                <TabItem Header="Order" Height="67.5">
                     <Grid Margin="3">
                         <Grid.RowDefinitions>
                             <RowDefinition/>
-                            <RowDefinition/>
+                            <RowDefinition Height="170"/>
                         </Grid.RowDefinitions>
-                        <GroupBox Header="Steam" Grid.Row="0"
+                        <GroupBox Header="Order" Grid.Row="0"
                                   Style="{DynamicResource None}">
                             <Grid Margin="5">
                                 <Grid.RowDefinitions>
-                                    <RowDefinition/>
                                     <RowDefinition/>
                                     <RowDefinition/>
                                 </Grid.RowDefinitions>
-                                <Grid Grid.Row="0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="100"/>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition Width="30"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Steam API Key:" Height="15"/>
-                                    <TextBox Grid.Column="1" VerticalAlignment="Center" Text="{Binding SteamApiKey, UpdateSourceTrigger=PropertyChanged}"/>
-                                    <Button Grid.Column="2" Height="25" ToolTip="Get API Key"
-                                Style="{StaticResource MaterialDesignToolForegroundButton}" 
-                                Command="{Binding DataContext.GetSteamApiCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
-                                        <materialDesign:PackIcon Kind="OpenInNew"/>
-                                    </Button>
-                                </Grid>
-                                <CheckBox Grid.Row="1" Content="Not enough balance" ToolTip="Cancel order if balance isn't enough"
-                            HorizontalAlignment="Left" IsChecked="{Binding NotEnoughBalance}"/>
-                                <Grid Grid.Row="2">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="130"/>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition Width="30"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Cancel order less than:" Height="15"/>
-                                    <TextBox Grid.Column="1" VerticalAlignment="Center" Text="{Binding CancelOrder}" PreviewTextInput="Number_PreviewTextInput"/>
-                                    <TextBlock Grid.Column="2" Text="%" Height="15" VerticalAlignment="Center"/>
-                                </Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="30"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Min. precent:" VerticalAlignment="Center"/>
+                                <TextBox Grid.Column="1" VerticalAlignment="Center" ToolTip="Cancel order less than"
+                                             Text="{Binding MinPrecent}" PreviewTextInput="Number_PreviewTextInput"/>
+                                <TextBlock Grid.Column="2" Text="%" Height="15" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Row="1" Text="ToService:" VerticalAlignment="Center"/>
+                                <ComboBox x:Name="nn12" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center"
+                                          ItemsSource="{Binding ServicesList}"
+                                          SelectedIndex="{Binding ServiceId}"/>
                             </Grid>
                         </GroupBox>
-                        <GroupBox Header="Information" Grid.Row="1"
+                        <GroupBox Header="Steam Information" Grid.Row="1"
                                   Style="{DynamicResource None}">
                             <Grid Margin="5">
                                 <Grid.RowDefinitions>
+                                    <RowDefinition/>
                                     <RowDefinition/>
                                     <RowDefinition/>
                                     <RowDefinition/>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="70"/>
+                                    <ColumnDefinition Width="55"/>
                                     <ColumnDefinition/>
                                     <ColumnDefinition Width="30"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Account:" Height="15"/>
-                                <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{Binding AccountName}"/>
-                                <Button Grid.Column="2" Height="25" ToolTip="Logout"
+                                <TextBlock Text="API Key:" Height="15"/>
+                                <TextBox Grid.Column="1" VerticalAlignment="Center" Text="{Binding SteamApiKey, UpdateSourceTrigger=PropertyChanged}"/>
+                                <Button Grid.Column="2" Height="25" ToolTip="Get API Key"
+                                Style="{StaticResource MaterialDesignToolForegroundButton}" 
+                                Command="{Binding DataContext.GetSteamApiCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
+                                    <materialDesign:PackIcon Kind="OpenInNew"/>
+                                </Button>
+                                <TextBlock Grid.Row="1" Text="Account:" Height="15"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Text="{Binding AccountName}"/>
+                                <Button Grid.Row="1" Grid.Column="2" Height="25" ToolTip="Logout"
                                             Style="{StaticResource MaterialDesignToolForegroundButton}" 
                                             Command="{Binding DataContext.LogoutCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
                                     <materialDesign:PackIcon Kind="Logout"/>
                                 </Button>
-                                <TextBlock Grid.Row="1" Text="ID64:" Height="15"/>
-                                <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Text="{Binding SteamId}"/>
-                                <Button Grid.Row="1" Grid.Column="2" Height="25" ToolTip="Copy ID"
+                                <TextBlock Grid.Row="2" Text="ID64:" Height="15"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Text="{Binding SteamId}"/>
+                                <Button Grid.Row="2" Grid.Column="2" Height="25" ToolTip="Copy ID"
                                             Style="{StaticResource MaterialDesignToolForegroundButton}" 
                                             Command="{Binding DataContext.CopyIdCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
                                     <materialDesign:PackIcon Kind="ContentCopy"/>
                                 </Button>
-                                <TextBlock Grid.Row="2" Text="Market:" Height="15"/>
-                                <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Text="{Binding SteamMarket}"/>
-                                <Button Grid.Row="2" Grid.Column="2" Height="25" ToolTip="Open FAQ"
+                                <TextBlock Grid.Row="3" Text="Market:" Height="15"/>
+                                <TextBlock Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" Text="{Binding SteamMarket}"/>
+                                <Button Grid.Row="3" Grid.Column="2" Height="25" ToolTip="Open FAQ"
                                             Style="{StaticResource MaterialDesignToolForegroundButton}" 
                                             Command="{Binding DataContext.OpenMarketCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
                                     <materialDesign:PackIcon Kind="OpenInNew"/>
@@ -289,7 +283,7 @@
                             </Button>
                             <Button Grid.Row="8" Grid.Column="2" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
                                 Command="{Binding DataContext.CreateCurrentVersionCommand, RelativeSource={RelativeSource AncestorType=Window}}">
-                                <materialDesign:PackIcon Kind="File"/>
+                                <materialDesign:PackIcon Kind="Upload"/>
                             </Button>
                         </Grid>
                     </GroupBox>

@@ -61,6 +61,18 @@ namespace ItemChecker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public int Reserve {
+            get {
+                return ((int)(this["Reserve"]));
+            }
+            set {
+                this["Reserve"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         public global::System.Collections.Generic.List<System.String> CsmList {
             get {
                 return ((global::System.Collections.Generic.List<System.String>)(this["CsmList"]));
@@ -149,6 +161,18 @@ namespace ItemChecker.Properties {
             }
             set {
                 this["FavoriteList"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool Unwanted {
+            get {
+                return ((bool)(this["Unwanted"]));
+            }
+            set {
+                this["Unwanted"] = value;
             }
         }
     }

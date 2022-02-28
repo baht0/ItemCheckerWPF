@@ -2,14 +2,17 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ItemChecker.Properties" GeneratedClassName="SettingsProperties">
   <Profiles />
   <Settings>
+	  <Setting Name="SteamLoginSecure" Type="System.String" Scope="User">
+		  <Value Profile="(Default)" />
+	  </Setting>
+    <Setting Name="CurrencyValue" Type="System.Decimal" Scope="User">
+      <Value Profile="(Default)">72</Value>
+    </Setting>
     <Setting Name="CurrencyApiKey" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="Currency" Type="System.Int32" Scope="User">
+    <Setting Name="CurrencyId" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
-    </Setting>
-    <Setting Name="CurrencyValue" Type="System.Decimal" Scope="User">
-      <Value Profile="(Default)">72</Value>
     </Setting>
     <Setting Name="Quit" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
@@ -23,14 +26,11 @@
     <Setting Name="TurnOff" Type="System.DateTime" Scope="User">
       <Value Profile="(Default)">01/01/0001 07:30:00</Value>
     </Setting>
-    <Setting Name="NotEnoughBalance" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
-    <Setting Name="CancelOrder" Type="System.Int32" Scope="User">
+    <Setting Name="MinPrecent" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">20</Value>
     </Setting>
-    <Setting Name="SteamCookies" Type="System.Net.CookieContainer" Scope="User">
-      <Value Profile="(Default)"></Value>
+    <Setting Name="ServiceId" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">2</Value>
     </Setting>
   </Settings>
 </SettingsFile>

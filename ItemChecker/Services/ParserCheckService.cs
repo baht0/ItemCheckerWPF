@@ -5,12 +5,14 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web;
 
 namespace ItemChecker.MVVM.Model
 {
     public class ParserCheckService : ParserService
     {
-        string _itemType { get; set; } = "Normal";
+        #region prop
+        string _itemType { get; set; } = String.Empty;
         string _itemName { get; set; } = String.Empty;
         decimal _price1 { get; set; } = 0;
         decimal _price2 { get; set; } = 0;
@@ -20,54 +22,40 @@ namespace ItemChecker.MVVM.Model
         decimal _difference { get; set; } = 0;
         string _status { get; set; } = "Tradable";
         bool _have { get; set; } = false;
-
-        public DataParser Check(string itemName)
+        #endregion
+        #region check
+        public DataParser Check(string itemName, int serOneId, int serTwoId)
         {
             _itemName = itemName;
-            ItemType();
+            _itemType = ItemBase.SkinsBase.FirstOrDefault( x=> x.ItemName == itemName).Type;
 
             JObject json = new();
             if (ParserProperties.Default.ServiceOne == 0 | ParserProperties.Default.ServiceTwo == 0 | ParserProperties.Default.ServiceOne == 1 | ParserProperties.Default.ServiceTwo == 1)
             {
-                ItemBase Item = ItemBase.SkinsBase.Where(x => x.ItemName == itemName).First();
-                json = Get.ItemOrdersHistogram(Item.SteamId);
+                ItemBase Item = ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == itemName);
+                json = Item != null ? Get.ItemOrdersHistogram(Item.SteamInfo.Id) : null;
             }
 
-            ServiceOne(json);
-            ServiceTwo(json);
-            Calculate();
+            ServiceOne(json, serOneId);
+            ServiceTwo(json, serTwoId);
+            Calculate(serOneId);
 
             return new DataParser(_itemType, _itemName, _price1, _price2, _price3, _price4, _precent, _difference, _status, _have);
         }
-        void ServiceOne(JObject json)
+        void ServiceOne(JObject json, int serOneId)
         {
-            switch (ParserProperties.Default.ServiceOne)
+            switch (serOneId)
             {
-                case 0: //st
+                case 0 or 1:
                     {
+                        if (json == null)
+                            break;
                         DataSteamMarket steamItem = MarketItems(json);
                         DataSteamMarket.MarketItems.Add(steamItem);
 
                         _price1 = steamItem.LowestSellOrder;
                         _price2 = steamItem.HighestBuyOrder;
-                        if (SettingsProperties.Default.Currency == 0)
-                        {
-                            _price1 = Edit.ConverterToUsd(_price1, SettingsProperties.Default.CurrencyValue);
-                            _price2 = Edit.ConverterToUsd(_price2, SettingsProperties.Default.CurrencyValue);
-                        }
-                        if (DataOrder.Orders.Any(n => n.ItemName == _itemName))
-                            _status = "Ordered";
-                        _have = _price1 != 0;
-                        break;
-                    }
-                case 1: //sta
-                    {
-                        DataSteamMarket steamItem = MarketItems(json);
-                        DataSteamMarket.MarketItems.Add(steamItem);
-
-                        _price1 = steamItem.LowestSellOrder;
-                        _price2 = steamItem.HighestBuyOrder;
-                        if (SettingsProperties.Default.Currency == 0)
+                        if (SettingsProperties.Default.CurrencyId == 0)
                         {
                             _price1 = Edit.ConverterToUsd(_price1, SettingsProperties.Default.CurrencyValue);
                             _price2 = Edit.ConverterToUsd(_price2, SettingsProperties.Default.CurrencyValue);
@@ -81,7 +69,7 @@ namespace ItemChecker.MVVM.Model
                     {
                         _price1 = DataInventoryCsm.Inventory.Where(x => x.ItemName == _itemName).Select(x => x.Price).DefaultIfEmpty().Min();
                         _price2 = Math.Round(_price1 * Calculator.CommissionCsm, 2);
-                        if (SettingsProperties.Default.Currency == 1)
+                        if (SettingsProperties.Default.CurrencyId == 1)
                         {
                             _price1 = Edit.ConverterToRub(_price1, SettingsProperties.Default.CurrencyValue);
                             _price2 = Edit.ConverterToRub(_price2, SettingsProperties.Default.CurrencyValue);
@@ -91,9 +79,9 @@ namespace ItemChecker.MVVM.Model
                     }
                 case 3:
                     {
-                        _price1 = DataInventoryLf.Inventory.Where(x => x.ItemName == _itemName).Select(x => x.DefaultPrice).FirstOrDefault();
+                        _price1 = ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == _itemName).LfmInfo.Price;
                         _price2 = Math.Round(_price1 * Calculator.CommissionLf, 2);
-                        if (SettingsProperties.Default.Currency == 1)
+                        if (SettingsProperties.Default.CurrencyId == 1)
                         {
                             _price1 = Edit.ConverterToRub(_price1, SettingsProperties.Default.CurrencyValue);
                             _price2 = Edit.ConverterToRub(_price2, SettingsProperties.Default.CurrencyValue);
@@ -103,32 +91,20 @@ namespace ItemChecker.MVVM.Model
                     }
             }
         }
-        void ServiceTwo(JObject json)
+        void ServiceTwo(JObject json, int serTwoId)
         {
-            switch (ParserProperties.Default.ServiceTwo)
+            switch (serTwoId)
             {
-                case 0: //sta
+                case 0 or 1: //st
                     {
+                        if (json == null)
+                            break;
                         DataSteamMarket steamItem = MarketItems(json);
                         DataSteamMarket.MarketItems.Add(steamItem);
 
                         _price3 = steamItem.LowestSellOrder;
                         _price4 = Math.Round(steamItem.HighestBuyOrder * Calculator.CommissionSteam, 2);
-                        if (SettingsProperties.Default.Currency == 0)
-                        {
-                            _price3 = Edit.ConverterToUsd(_price3, SettingsProperties.Default.CurrencyValue);
-                            _price4 = Edit.ConverterToUsd(_price4, SettingsProperties.Default.CurrencyValue);
-                        }
-                        break;
-                    }
-                case 1: //sta
-                    {
-                        DataSteamMarket steamItem = MarketItems(json);
-                        DataSteamMarket.MarketItems.Add(steamItem);
-
-                        _price3 = steamItem.LowestSellOrder;
-                        _price4 = Math.Round(steamItem.HighestBuyOrder * Calculator.CommissionSteam, 2);
-                        if (SettingsProperties.Default.Currency == 0)
+                        if (SettingsProperties.Default.CurrencyId == 0)
                         {
                             _price3 = Edit.ConverterToUsd(_price3, SettingsProperties.Default.CurrencyValue);
                             _price4 = Edit.ConverterToUsd(_price4, SettingsProperties.Default.CurrencyValue);
@@ -138,55 +114,44 @@ namespace ItemChecker.MVVM.Model
                 case 2:
                     {
                         ItemBase Item = ItemBase.SkinsBase.Where(x => x.ItemName == _itemName).FirstOrDefault();
-                        _price3 = Item.PriceCsm;
+                        _price3 = Item.CsmInfo.Price;
                         _price4 = Math.Round(_price3 * Calculator.CommissionCsm, 2);
-                        if (SettingsProperties.Default.Currency == 1)
+                        if (SettingsProperties.Default.CurrencyId == 1)
                         {
                             _price3 = Edit.ConverterToRub(_price3, SettingsProperties.Default.CurrencyValue);
                             _price4 = Edit.ConverterToRub(_price4, SettingsProperties.Default.CurrencyValue);
                         }
 
-                        if (ItemBase.Unavailable.Any(x => x.ItemName == _itemName))
+                        if (ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == _itemName).CsmInfo.Unavailable)
                             _status = "Unavailable";
-                        else if (ItemBase.Overstock.Any(x => x.ItemName == _itemName))
+                        else if (ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == _itemName).CsmInfo.Overstock)
                             _status = "Overstock";
                         break;
                     }
                 case 3:
                     {
-                        if (!DataInventoryLf.Inventory.Any(x => x.ItemName == _itemName))
+                        Lfm LfItem = ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == _itemName).LfmInfo;
+                        if (LfItem.Overstock)
+                            _status = "Overstock";
+                        else if (LfItem.Unavailable)
                         {
-                            _status = "Unknown";
+                            _status = "Unavailable";
                             break;
                         }
-                        DataInventoryLf LfItem = DataInventoryLf.Inventory.Where(x => x.ItemName == _itemName).FirstOrDefault();
-                        _price3 = LfItem.DefaultPrice;
+                        _price3 = LfItem.Price;
                         _price4 = Math.Round(_price3 * Calculator.CommissionLf, 2);
-                        if (SettingsProperties.Default.Currency == 1)
+                        if (SettingsProperties.Default.CurrencyId == 1)
                         {
                             _price3 = Edit.ConverterToRub(_price3, SettingsProperties.Default.CurrencyValue);
                             _price4 = Edit.ConverterToRub(_price4, SettingsProperties.Default.CurrencyValue);
                         }
-                        if (LfItem.IsOverstock)
-                            _status = "Overstock";
                         break;
                     }
             }
         }
-        void ItemType()
+        void Calculate(int serOneId)
         {
-            if (_itemName.Contains("Souvenir"))
-                _itemType = "Souvenir";
-            if (_itemName.Contains("StatTrak"))
-                _itemType = "Stattrak";
-            if (_itemName.Contains("★ "))
-                _itemType = "KnifeGlove";
-            if (_itemName.Contains("★ StatTrak"))
-                _itemType = "KnifeGloveStattrak";
-        }
-        void Calculate()
-        {
-            if (ParserProperties.Default.ServiceOne == 1) //sta -> (any)
+            if (serOneId == 0) //sta -> (any)
             {
                 _precent = Edit.Precent(_price2, _price4);
                 _difference = Edit.Difference(_price4, _price2);
@@ -196,29 +161,11 @@ namespace ItemChecker.MVVM.Model
                 _precent = Edit.Precent(_price1, _price4);
                 _difference = Edit.Difference(_price4, _price1);
             }
-            switch (SettingsProperties.Default.Currency)
-            {
-                case 0:
-                    {
-                        ParserStatistics.DataCurrency = "USD";
-                        break;
-                    }
-                case 1:
-                    {
-                        ParserStatistics.DataCurrency = "RUB";
-                        break;
-                    }
-            }
         }
         DataSteamMarket MarketItems(JObject json)
         {
-            decimal high = 0;
-            decimal low = 0;
-            if (!String.IsNullOrEmpty(json["highest_buy_order"].ToString()))
-                high = Convert.ToDecimal(json["highest_buy_order"]) / 100;
-            if (!String.IsNullOrEmpty(json["lowest_sell_order"].ToString()))
-                low = Convert.ToDecimal(json["lowest_sell_order"]) / 100;
-
+            decimal high = !String.IsNullOrEmpty(json["highest_buy_order"].ToString()) ? Convert.ToDecimal(json["highest_buy_order"]) / 100 : 0;
+            decimal low = !String.IsNullOrEmpty(json["lowest_sell_order"].ToString()) ? Convert.ToDecimal(json["lowest_sell_order"]) / 100 : 0;
             return new DataSteamMarket()
             {
                 ItemName = _itemName,
@@ -226,6 +173,27 @@ namespace ItemChecker.MVVM.Model
                 LowestSellOrder = low,
             };
         }
+        public List<PriceHistory> PriceHistory(string itemName)
+        {
+            string json = Get.Request(SteamCookies, "https://steamcommunity.com/market/pricehistory/?country=RU&currency=5&appid=730&market_hash_name=" + HttpUtility.UrlEncode(itemName));
+            JArray sales = JArray.Parse(JObject.Parse(json)["prices"].ToString());
+            List<PriceHistory> history = new();
+            foreach (var sale in sales.Reverse())
+            {
+                DateTime date = DateTime.Parse(sale[0].ToString()[..11]);
+                decimal price = Decimal.Parse(sale[1].ToString());
+                int count = Convert.ToInt32(sale[2]);
+
+                history.Add(new PriceHistory()
+                {
+                    Date = date,
+                    Price = price,
+                    Count = count,
+                });
+            }
+            return history;
+        }
+        #endregion
 
         //List
         public List<string> SelectFile()
@@ -239,54 +207,60 @@ namespace ItemChecker.MVVM.Model
         public static List<string> ApplyConfig(ParserConfig config)
         {
             List<string> list = new();
-
             foreach (string item in ParserProperties.Default.CheckList)
             {
                 //Dopplers
-                if (config.OnlyDopplers & !item.Contains("Doppler"))
+                if (config.OnlyDopplers && !item.Contains("Doppler"))
                     continue;
-                if (!config.Dopplers & item.Contains("Doppler"))
+                if (!config.Dopplers && item.Contains("Doppler"))
                     continue;
                 //Unavailable
-                if (config.ServiceTwo == 2 & ItemBase.Unavailable.Any(x => x.ItemName == item))
+                if (config.ServiceTwo == 2 && ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item).CsmInfo.Unavailable)
                     continue;
-                if (config.ServiceTwo == 3 & !DataInventoryLf.Inventory.Any(x => x.ItemName == item))
+                if (config.ServiceTwo == 3 && ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item).LfmInfo.Unavailable)
                     continue;
                 //Overstock
                 if (!config.Overstock)
                 {
-                    if (config.ServiceTwo == 2 & ItemBase.Overstock.Any(x => x.ItemName == item))
+                    if (config.ServiceTwo == 2 && ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item).CsmInfo.Overstock)
                         continue;
-                    else if (config.ServiceTwo == 3 & DataInventoryLf.Inventory.Where(x => x.ItemName == item).Select(x => x.IsOverstock).FirstOrDefault())
+                    else if (config.ServiceTwo == 3 && ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item).LfmInfo.Overstock)
                         continue;
                 }
-                if (!config.Ordered & config.ServiceOne == 1 & DataOrder.Orders.Any(x => x.ItemName == item))
+                if (!config.Ordered && config.ServiceOne == 0 && DataOrder.Orders.Any(x => x.ItemName == item))
                     continue;
                 //Price
                 if (config.MinPrice != 0)
                 {
-                    if (config.ServiceOne == 2 & DataInventoryCsm.Inventory.Where(x => x.ItemName == item).Select(x => x.Price).DefaultIfEmpty().Min() < config.MinPrice)
+                    if (config.ServiceOne < 2 && ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item).SteamInfo.Price < config.MinPrice)
                         continue;
-                    else if (config.ServiceOne == 3 & DataInventoryLf.Inventory.Where(x => x.ItemName == item).Select(x => x.DefaultPrice).FirstOrDefault() < config.MinPrice)
+                    else if (config.ServiceOne == 2 && DataInventoryCsm.Inventory.Where(x => x.ItemName == item).Select(x => x.Price).DefaultIfEmpty().Min() < config.MinPrice)
+                        continue;
+                    else if (config.ServiceOne == 3 && ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item).LfmInfo.Price < config.MinPrice)
                         continue;
                 }
                 if (config.MaxPrice != 0)
                 {
-                    if (config.ServiceOne == 2 & DataInventoryCsm.Inventory.Where(x => x.ItemName == item).Select(x => x.Price).DefaultIfEmpty().Min() > config.MaxPrice)
+                    if (config.ServiceOne < 2 && ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item).SteamInfo.Price > config.MaxPrice)
                         continue;
-                    else if (config.ServiceOne == 3 & DataInventoryLf.Inventory.Where(x => x.ItemName == item).Select(x => x.DefaultPrice).FirstOrDefault() > config.MaxPrice)
+                    else if (config.ServiceOne == 2 && DataInventoryCsm.Inventory.Where(x => x.ItemName == item).Select(x => x.Price).DefaultIfEmpty().Min() > config.MaxPrice)
+                        continue;
+                    else if (config.ServiceOne == 3 && ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item).LfmInfo.Price > config.MaxPrice)
                         continue;
                 }
                 //add
-                if (config.Souvenir & item.Contains("Souvenir"))
+                string type = ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item).Type;
+                if (config.Normal && type == "Weapon" && !item.Contains("Souvenir") && !item.Contains("StatTrak™"))
                     list.Add(item);
-                else if (config.Stattrak & item.Contains("StatTrak™"))
+                else if (config.Souvenir && type == "Weapon" && item.Contains("Souvenir"))
                     list.Add(item);
-                else if (config.KnifeGlove & item.Contains("★ "))
+                else if (config.Stattrak && type == "Weapon" && item.Contains("StatTrak™"))
                     list.Add(item);
-                else if (config.KnifeGloveStattrak & item.Contains("★ StatTrak™"))
+                else if (config.KnifeGlove && (type == "Knife" | type == "Gloves"))
                     list.Add(item);
-                else if (!config.Souvenir & !config.Stattrak & !config.KnifeGlove & !config.KnifeGloveStattrak)
+                else if (config.KnifeGloveStattrak && (type == "Knife" | type == "Gloves") && item.Contains("StatTrak™"))
+                    list.Add(item);
+                else if (!config.Normal && !config.Souvenir && !config.Stattrak && !config.KnifeGlove && !config.KnifeGloveStattrak)
                     list.Add(item);
             }
             return list;

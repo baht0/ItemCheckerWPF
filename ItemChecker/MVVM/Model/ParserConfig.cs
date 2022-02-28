@@ -6,6 +6,9 @@ namespace ItemChecker.MVVM.Model
 {
     public class ParserConfig : BaseModel
     {
+        public decimal MinPrice { get; set; } = ParserProperties.Default.MinPrice;
+        public decimal MaxPrice { get; set; } = ParserProperties.Default.MaxPrice;
+        public bool Normal { get; set; } = ParserProperties.Default.Normal;
         public bool Souvenir { get; set; } = ParserProperties.Default.Souvenir;
         public bool Stattrak { get; set; } = ParserProperties.Default.Stattrak;
         public bool KnifeGlove { get; set; } = ParserProperties.Default.KnifeGlove;
@@ -14,13 +17,11 @@ namespace ItemChecker.MVVM.Model
         public bool Ordered { get; set; } = ParserProperties.Default.Ordered;
         public bool Dopplers { get; set; } = ParserProperties.Default.Dopplers;
         public bool OnlyDopplers { get; set; } = ParserProperties.Default.OnlyDopplers;
-        public decimal MinPrice { get; set; } = ParserProperties.Default.MinPrice;
-        public decimal MaxPrice { get; set; } = ParserProperties.Default.MaxPrice;
 
         public ObservableCollection<string> Services { get; set; } = new()
         {
-            "SteamMarket",
             "SteamMarket(A)",
+            "SteamMarket",
             "Cs.Money",
             "Loot.Farm"
         };

@@ -9,7 +9,7 @@ namespace ItemChecker.MVVM.Model
     public class Calculator : ObservableObject
     {
         public static decimal CommissionSteam { get; set; } = 0.869565m;
-        public static decimal CommissionCsm { get; set; } = 0.95m;
+        public static decimal CommissionCsm { get; set; } = 0.93m;
         public static decimal CommissionLf { get; set; } = 0.95m;
 
         //config

@@ -1,12 +1,11 @@
 ﻿using ItemChecker.MVVM.Model;
 using ItemChecker.Net;
 using ItemChecker.Properties;
-using ItemChecker.Support;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Linq;
-using System.Net;
 using System.Threading;
+using System.Web;
 
 namespace ItemChecker.Services
 {
@@ -14,7 +13,7 @@ namespace ItemChecker.Services
     {
         public void checkInventory()
         {
-            var json = Get.Request(SettingsProperties.Default.SteamCookies, "http://steamcommunity.com/my/inventory/json/730/2");
+            var json = Get.Request(SteamCookies, "http://steamcommunity.com/my/inventory/json/730/2");
             JObject rgInventory = (JObject)JObject.Parse(json)["rgInventory"];
             JObject rgDescriptions = (JObject)JObject.Parse(json)["rgDescriptions"];
 
@@ -57,7 +56,7 @@ namespace ItemChecker.Services
         {
             int sell_price = (int)((item.Price * 100 - 0.01m) * Calculator.CommissionSteam);
 
-            Post.SellItem(SettingsProperties.Default.SteamCookies, SteamAccount.User, item.AssetId, sell_price);
+            Post.SellItem(SteamCookies, SteamAccount.User, item.AssetId, sell_price);
         }
         Decimal checkPrice(string name)
         {
@@ -68,7 +67,7 @@ namespace ItemChecker.Services
             {
                 try
                 {
-                    Tuple<Decimal, Decimal> prices = Get.PriceOverview(Edit.MarketHashName(name));
+                    Tuple<Decimal, Decimal> prices = Get.PriceOverview(HttpUtility.UrlEncode(name));
                     lowest_price = prices.Item1;
                     median_price = prices.Item2;
                     check = false;

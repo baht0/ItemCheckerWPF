@@ -20,16 +20,19 @@ namespace ItemChecker.MVVM.Model
             if (filterConfig.Normal | filterConfig.Stattrak | filterConfig.Souvenir | filterConfig.KnifeGlove | filterConfig.KnifeGloveStattrak)
             {
                 category = false;
-                if (filterConfig.Normal)
-                    category = item.ItemType.Contains("Normal");
-                if (filterConfig.Stattrak & !category)
-                    category = item.ItemType.Contains("Souvenir");
-                if (filterConfig.Souvenir & !category)
-                    category = item.ItemType.Contains("Stattrak");
-                if (filterConfig.KnifeGlove & !category)
-                    category = item.ItemType.Contains("KnifeGlove");
-                if (filterConfig.KnifeGloveStattrak & !category)
-                    category = item.ItemType.Contains("KnifeGloveStattrak");
+                if (item.ItemType == "Weapon" | item.ItemType == "Knife" | item.ItemType == "Gloves")
+                {
+                    if (filterConfig.Normal)
+                        category = !item.ItemName.Contains("Souvenir") & !item.ItemName.Contains("StatTrak™") & !item.ItemName.Contains("★");
+                    if (filterConfig.Stattrak & !category)
+                        category = item.ItemName.Contains("StatTrak™");
+                    if (filterConfig.Souvenir & !category)
+                        category = item.ItemName.Contains("Souvenir");
+                    if (filterConfig.KnifeGlove & !category)
+                        category = item.ItemName.Contains("★");
+                    if (filterConfig.KnifeGloveStattrak & !category)
+                        category = item.ItemName.Contains("★ StatTrak™");
+                }
             }
             //status
             bool status = true;
@@ -70,43 +73,57 @@ namespace ItemChecker.MVVM.Model
                 if (filterConfig.FactoryNew & !exterior)
                     exterior = item.ItemName.Contains("Factory New");
             }
+            //Quality
+            bool quality = true;
+            if (filterConfig.Industrial | filterConfig.MilSpec | filterConfig.Restricted | filterConfig.Classified | filterConfig.Covert | filterConfig.Contraband)
+            {
+                quality = false;
+                if (filterConfig.Industrial)
+                    quality = ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item.ItemName).Quality == "Industrial Grade";
+                if (filterConfig.MilSpec & !quality)
+                    quality = ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item.ItemName).Quality == "Mil-Spec";
+                if (filterConfig.Restricted & !quality)
+                    quality = ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item.ItemName).Quality == "Restricted";
+                if (filterConfig.Classified & !quality)
+                    quality = ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item.ItemName).Quality == "Classified";
+                if (filterConfig.Covert & !quality)
+                    quality = ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item.ItemName).Quality == "Covert";
+                if (filterConfig.Contraband & !quality)
+                    quality = ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item.ItemName).Quality == "Contraband";
+            }
             //types
             bool types = true;
-            if (filterConfig.Weapon | filterConfig.Knife | filterConfig.Gloves | filterConfig.Sticker | filterConfig.Patch | filterConfig.Pin | filterConfig.Key | filterConfig.Pass | filterConfig.MusicKit | filterConfig.Graffiti | filterConfig.Case | filterConfig.Package)
+            if (filterConfig.Weapon | filterConfig.Knife | filterConfig.Gloves | filterConfig.Sticker | filterConfig.Patch | filterConfig.Collectible | filterConfig.Key | filterConfig.Pass | filterConfig.MusicKit | filterConfig.Graffiti | filterConfig.Case | filterConfig.Package)
             {
                 types = false;
                 if (filterConfig.Weapon)
-                    types = !item.ItemName.Contains("Sticker ") &
-                        !item.ItemName.Contains("Patch ") &
-                        !item.ItemName.Contains(" Pin") &
-                        !item.ItemName.Contains(" Key") &
-                        !item.ItemName.Contains(" Pass") &
-                        !item.ItemName.Contains("Music Kit") &
-                        !item.ItemName.Contains("Sealed Graffiti") &
-                        !item.ItemName.Contains("Case") &
-                        !item.ItemName.Contains(" Package");
+                    types = item.ItemType == "Weapon";
                 if (filterConfig.Knife & !types)
-                    types = item.ItemName.Contains("Knife");
+                    types = item.ItemType == "Knife";
                 if (filterConfig.Gloves & !types)
-                    types = item.ItemName.Contains("Gloves |") | item.ItemName.Contains("★ Hand");
+                    types = item.ItemType == "Gloves";
+                if (filterConfig.Agent & !types)
+                    types = item.ItemType == "Agent";
+                if (filterConfig.Capsule & !types)
+                    types = item.ItemType.Contains("Capsule");
                 if (filterConfig.Sticker & !types)
-                    types = item.ItemName.Contains("Sticker ");
+                    types = item.ItemType == "Sticker";
                 if (filterConfig.Patch & !types)
-                    types = item.ItemName.Contains("Patch ");
-                if (filterConfig.Pin & !types)
-                    types = item.ItemName.Contains(" Pin");
+                    types = item.ItemType == "Patch";
+                if (filterConfig.Collectible & !types)
+                    types = item.ItemType == "Collectable";
                 if (filterConfig.Key & !types)
-                    types = item.ItemName.Contains(" Key");
+                    types = item.ItemType == "Key";
                 if (filterConfig.Pass & !types)
-                    types = item.ItemName.Contains(" Pass");
+                    types = item.ItemType == "Pass";
                 if (filterConfig.MusicKit & !types)
-                    types = item.ItemName.Contains("Music Kit");
+                    types = item.ItemType == "Music Kit";
                 if (filterConfig.Graffiti & !types)
-                    types = item.ItemName.Contains("Sealed Graffiti");
+                    types = item.ItemType == "Graffiti";
                 if (filterConfig.Case & !types)
-                    types = item.ItemName.Contains("Case");
+                    types = item.ItemType == "Skin Case";
                 if (filterConfig.Package & !types)
-                    types = item.ItemName.Contains(" Package");
+                    types = item.ItemType.Contains("Package");
             }
             //Prices
             bool prices = true;
@@ -142,7 +159,7 @@ namespace ItemChecker.MVVM.Model
                     other = item.Have;
             }
 
-            bool isShow = category & status & exterior & types & prices & other;
+            bool isShow = category & status & exterior & quality & types & prices & other;
             return isShow;
         }
         //CSV
@@ -151,7 +168,9 @@ namespace ItemChecker.MVVM.Model
             dynamic source = parserGrid;
             if (collectionView.Cast<DataParser>().Count() != parserGrid.Count)
             {
-                MessageBoxResult result = MessageBox.Show($"Export with filter applied?\n\nClick \"No\" to export the entire list.", "Question", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+                MessageBoxResult result = MessageBoxResult.Cancel;
+                Application.Current.Dispatcher.Invoke(() => { result = MessageBox.Show($"Export with filter applied?\n\nClick \"No\" to export the entire list.", "Question", MessageBoxButton.YesNoCancel, MessageBoxImage.Question); });
+                
                 if (result == MessageBoxResult.Cancel)
                     return;
                 else if (result == MessageBoxResult.Yes)

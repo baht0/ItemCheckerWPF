@@ -11,11 +11,10 @@ namespace ItemChecker.MVVM.Model
         private List<DataInventoryCsm> _inventoryCsm = new();
         private DataInventoryCsm _itemCsm = new();
         private bool _csm = false;
-        private DataInventoryLf _itemLf = new();
+        private Lfm _itemLf = new();
         private bool _lf = false;
         private DataSteamMarket _itemSt = new();
         private bool _st = false;
-
 
         //info
         public int InfoItemCurrent
@@ -79,7 +78,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        public DataInventoryLf ItemLf
+        public Lfm ItemLf
         {
             get
             {

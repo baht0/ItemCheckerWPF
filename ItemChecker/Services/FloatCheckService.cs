@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Media;
+using System.Web;
 using System.Windows;
 
 namespace ItemChecker.Services
@@ -14,14 +15,13 @@ namespace ItemChecker.Services
     public class FloatCheckService : BaseService
     {
         DataFloat floatData = new();
-        int purchasesMade = 0;
-        public Int32 checkFloat(string item)
+        public Int32 checkFloat(string itemName)
         {
-            string market_hash_name = Edit.MarketHashName(item);
-            getPrice(market_hash_name);
+            int purchasesMade = 0;
+            string market_hash_name = HttpUtility.UrlEncode(itemName);
+            getPrice(market_hash_name, itemName);
 
-            string url_request = @"https://steamcommunity.com/market/listings/730/" + market_hash_name + "/render?start=0&count=50&currency=5&language=english&format=json";
-            var json = Get.Request(url_request);
+            var json = Get.Request("https://steamcommunity.com/market/listings/730/" + market_hash_name + "/render?start=0&count=50&currency=5&language=english&format=json");
 
             JObject obj = JObject.Parse(json);
             var attributes = obj["listinginfo"].ToList<JToken>();
@@ -50,14 +50,14 @@ namespace ItemChecker.Services
                     link = link.Replace("%listingid%", listing_id);
                     link = link.Replace("%assetid%", ass_id);
 
-                    if (item.Contains("Factory New")) floatData.MaxFloat = FloatProperties.Default.maxFloatValue_FN;
-                    else if (item.Contains("Minimal Wear")) floatData.MaxFloat = FloatProperties.Default.maxFloatValue_MW;
-                    else if (item.Contains("Field-Tested")) floatData.MaxFloat = FloatProperties.Default.maxFloatValue_FT;
-                    else if (item.Contains("Well-Worn")) floatData.MaxFloat = FloatProperties.Default.maxFloatValue_WW;
-                    else if (item.Contains("Battle-Scarred")) floatData.MaxFloat = FloatProperties.Default.maxFloatValue_BS;
+                    if (itemName.Contains("Factory New")) floatData.MaxFloat = FloatProperties.Default.maxFloatValue_FN;
+                    else if (itemName.Contains("Minimal Wear")) floatData.MaxFloat = FloatProperties.Default.maxFloatValue_MW;
+                    else if (itemName.Contains("Field-Tested")) floatData.MaxFloat = FloatProperties.Default.maxFloatValue_FT;
+                    else if (itemName.Contains("Well-Worn")) floatData.MaxFloat = FloatProperties.Default.maxFloatValue_WW;
+                    else if (itemName.Contains("Battle-Scarred")) floatData.MaxFloat = FloatProperties.Default.maxFloatValue_BS;
 
                     if (getFloatValue(link) < floatData.MaxFloat)
-                        buyItem(item, price, listing_id, fee, subtotal, total);
+                        purchasesMade += buyItem(itemName, price, listing_id, fee, subtotal, total);
                 }
                 catch
                 {
@@ -66,30 +66,19 @@ namespace ItemChecker.Services
                 if (BaseModel.token.IsCancellationRequested)
                     break;
             }
-
             return purchasesMade;
         }
 
-        void getPrice(string market_hash_name)
+        void getPrice(string market_hash_name, string itemName)
         {
             try
             {
                 var prices = Get.PriceOverview(market_hash_name);
                 floatData.LowestPrice = prices.Item1;
                 floatData.MedianPrice = prices.Item2;
-
-                //Tuple<String, Boolean> response = Tuple.Create(string.Empty, false);
-                //do
-                //{
-                //    response = Get.MrinkaRequest(market_hash_name);
-                //    if (!response.Item2)
-                //    {
-                //        Thread.Sleep(30000);
-                //    }
-                //}
-                //while (!response.Item2);
-                //floatData.CsmPrice = Convert.ToDecimal(JObject.Parse(response.Item1)["csm"]["sell"].ToString());
-                //floatData.CsmPrice = Math.Round(floatData.CsmPrice * SettingsProperties.Default.CurrencyValue, 2);
+                var item = ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == itemName);
+                if (item != null)
+                    floatData.CsmPrice = Math.Round(item.CsmInfo.Price * SettingsProperties.Default.CurrencyValue, 2);
 
                 switch (HomeProperties.Default.Compare)
                 {
@@ -124,21 +113,19 @@ namespace ItemChecker.Services
             }
 
         }
-        void buyItem(string item, decimal price, string listing_id, decimal fee, decimal subtotal, decimal total)
+        Int32 buyItem(string itemName, decimal price, string listing_id, decimal fee, decimal subtotal, decimal total)
         {
-            //Browser.Navigate().GoToUrl("https://steamcommunity.com/market/");
+            string message = $"Found item:\n{itemName}\n{floatData.LowestPrice}₽ (Lowest price) | {floatData.MedianPrice}₽ (Median price)\n\nFloat: {floatData.FloatValue}\nPrice ST: {price}₽ ({Math.Round(floatData.LowestPrice - price, 2)}₽)\nPrice CSM: {floatData.CsmPrice}₽ ({Math.Round(floatData.CsmPrice - price, 2)}₽)\n\nClick YES if you want to buy the item";
 
-            string message = $"Found item:\n{item}\n{floatData.LowestPrice}₽ (Lowest price) | {floatData.MedianPrice}₽ (Median price)\n\nFloat: {floatData.FloatValue}\nPrice ST: {price}₽ ({Math.Round(floatData.LowestPrice - price, 2)}₽)\nPrice CSM: {floatData.CsmPrice}₽ ({Math.Round(floatData.CsmPrice - price, 2)}₽)\n\nClick YES if you want to buy the item";
             SystemSounds.Asterisk.Play();
-
-            MessageBoxResult result = MessageBox.Show(message, "Buy item",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Question);
+            MessageBoxResult result = MessageBox.Show(message, "Buy item", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
             {
-                //BaseModel.Browser.ExecuteJavaScript(Post.BuyListing(listing_id, fee, subtotal, total, Account.SessionId));
-                purchasesMade++;
+                string market_hash_name = HttpUtility.UrlEncode(itemName);
+                Post.BuyListing(SteamCookies, market_hash_name, listing_id, fee, subtotal, total);
+                return 1;
             }
+            return 0;
         }
 
         public List<string> SelectFile()

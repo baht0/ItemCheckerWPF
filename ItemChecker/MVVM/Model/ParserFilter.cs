@@ -23,24 +23,28 @@
         public bool FieldTested { get; set; }
         public bool MinimalWear { get; set; }
         public bool FactoryNew { get; set; }
-        //exterior
+        //type
         public bool Weapon { get; set; }
         public bool Knife { get; set; }
         public bool Gloves { get; set; }
         public bool Sticker { get; set; }
+        public bool Agent { get; set; }
+        public bool Capsule { get; set; }
         public bool Patch { get; set; }
-        public bool Pin { get; set; }
+        public bool Collectible { get; set; }
         public bool Key { get; set; }
         public bool Pass { get; set; }
         public bool MusicKit { get; set; }
         public bool Graffiti { get; set; }
         public bool Case { get; set; }
         public bool Package { get; set; }
-        //reversion
-        public bool Category { get; set; }
-        public bool Status { get; set; }
-        public bool Exterior { get; set; }
-        public bool Types { get; set; }
+        //Quality
+        public bool Industrial { get; set; }
+        public bool MilSpec { get; set; }
+        public bool Restricted { get; set; }
+        public bool Classified { get; set; }
+        public bool Covert { get; set; }
+        public bool Contraband { get; set; }
         //price
         public bool Price1 { get; set; }
         public bool Price2 { get; set; }

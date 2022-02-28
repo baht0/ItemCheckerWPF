@@ -10,17 +10,19 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Net;
-using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
+using System.Web;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 
 namespace ItemChecker.MVVM.ViewModel
 {
-    public class ParserViewModel : MainViewModel
+    public class ParserViewModel : ObservableObject
     {
+        #region field and property
+        Timer TimerView = new(500);
         private ObservableCollection<DataParser> _parserGrid = new();
         private ICollectionView _parserGridView;
         private DataParser _selectedParserItem;
@@ -32,7 +34,7 @@ namespace ItemChecker.MVVM.ViewModel
         private ParserConfig _parserConfig = new();
         private ParserInfo _parserInfo = new();
         private int _manualCount = ParserProperties.Default.CheckList != null ? ParserProperties.Default.CheckList.Count : 0;
-        private ParserQueue _parserQueue = new();
+        private QueueInfo _queueInfo = new();
 
         public ObservableCollection<DataParser> ParserGrid
         {
@@ -75,9 +77,10 @@ namespace ItemChecker.MVVM.ViewModel
                     ParserInfo.ItemSt = new();
                     DataSteamMarket data = DataSteamMarket.MarketItems.Where(x => x.ItemName == value.ItemName).FirstOrDefault();
                     Task.Run(() => {
-                        if (!data.PriceHistory.Any())
+                        if (data != null && !data.PriceHistory.Any())
                         {
-                            var history = PriceHistory(value.ItemName);
+                            ParserCheckService checkService = new();
+                            var history = checkService.PriceHistory(value.ItemName);
                             data.PriceHistory = history;
                             int days = (int)(DateTime.Now - history.FirstOrDefault().Date).TotalDays;
                             data.LastSale = Tuple.Create(history.FirstOrDefault().Date, days, history.FirstOrDefault().Price);
@@ -95,12 +98,13 @@ namespace ItemChecker.MVVM.ViewModel
                 }
                 else if (ParserInfo.CSM)
                 {
-                    ParserInfo.InventoryCsm = DataInventoryCsm.Inventory.Where(x => x.ItemName == value.ItemName).Reverse().ToList();
-                    ParserInfo.InfoItemCount = ParserInfo.InventoryCsm.Count-1;
+                    List<DataInventoryCsm> datas = DataInventoryCsm.Inventory.Where(x => x.ItemName == value.ItemName).Reverse().ToList();
+                    ParserInfo.InventoryCsm = datas;
+                    ParserInfo.InfoItemCount = ParserInfo.InventoryCsm.Count - 1;
                     ParserInfo.InfoItemCurrent = 0;
                 }
                 else if (ParserInfo.LF)
-                    ParserInfo.ItemLf = DataInventoryLf.Inventory.Where(x => x.ItemName == value.ItemName).FirstOrDefault();
+                    ParserInfo.ItemLf = ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == value.ItemName).LfmInfo;
             }
         }
         public ParserStatistics ParserStatistics
@@ -180,21 +184,40 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        public ParserQueue ParserQueue
+        public QueueInfo QueueInfo
         {
-            get { return _parserQueue; }
+            get { return _queueInfo; }
             set
             {
-                _parserQueue = value;
+                _queueInfo = value;
                 OnPropertyChanged();
             }
         }
+        #endregion 
 
         public ParserViewModel()
         {
             ParserProperties.Default.CheckList = ParserProperties.Default.CheckList ?? (new());
-        }
 
+            TimerView.Elapsed += UpdateView;
+            TimerView.Enabled = true;
+        }
+        void UpdateView(Object sender, ElapsedEventArgs e)
+        {
+            try
+            {
+                decimal availableAmount = SteamAccount.GetAvailableAmount();
+                decimal total = SteamAccount.Balance * 10;
+                QueueInfo.TotalAllowed = total;
+                QueueInfo.AvailableAmount = availableAmount;
+                QueueInfo.Remaining = availableAmount - QueueInfo.OrderAmout;
+                QueueInfo.AvailableAmountPrecent = Math.Round(availableAmount / total * 100, 1);
+            }
+            catch (Exception ex)
+            {
+                BaseService.errorLog(ex);
+            }
+        }
         //filter
         public ICommand ClearSearchCommand =>
             new RelayCommand((obj) =>
@@ -226,24 +249,18 @@ namespace ItemChecker.MVVM.ViewModel
             {                
                 Task.Run(() =>
                 {
-                    int i = Convert.ToInt32(obj);
                     List<string> response = new();
-                    switch (i)
+                    switch (Convert.ToInt32(obj))
                     {
-                        case -1:
-                            if (ParserProperties.Default.CheckList != null)
-                                ParserProperties.Default.CheckList.Clear();
-                            break;
                         case 0:
+                            response = ItemBase.SkinsBase.Select(x => x.ItemName).ToList();
+                            break;
+                        case 1:
                             ParserCheckService file = new();
                             response = file.SelectFile();
                             break;
-                        case 1:
-                            response = ItemBase.SkinsBase.Select(x => x.ItemName).ToList();
-                            break;
                         case 2:
-                            ItemBaseService.LoadBotsInventoryLf();
-                            response = DataInventoryLf.Inventory.Select(x => x.ItemName).ToList();
+                            response = ItemBase.SkinsBase.Where(x => x.LfmInfo.Price != 0).Select(x => x.ItemName).ToList();
                             break;
                         case 3:
                             if (HomeProperties.Default.FavoriteList != null)
@@ -295,7 +312,7 @@ namespace ItemChecker.MVVM.ViewModel
                 if (checkList.Any())
                     StartCheck(checkList);
                 else
-                    MessageBox.Show("Nothing found. Adjust the parameters.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    Application.Current.Dispatcher.Invoke(() => { MessageBox.Show("Nothing found. Adjust the parameters.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning); });
 
                 ParserGridView = CollectionViewSource.GetDefaultView(ParserGrid);
                 ParserStatistics.Currency = ParserStatistics.DataCurrency;
@@ -314,6 +331,15 @@ namespace ItemChecker.MVVM.ViewModel
         }
         void DataGrid(string mode, int serviceOne, int serviceTwo)
         {
+            switch (SettingsProperties.Default.CurrencyId)
+            {
+                case 0:
+                    ParserStatistics.DataCurrency = "USD";
+                    break;
+                case 1:
+                    ParserStatistics.DataCurrency = "RUB";
+                    break;
+            }
             if (ParserGrid.Any())
             {
                 FilterConfig = new();
@@ -323,21 +349,22 @@ namespace ItemChecker.MVVM.ViewModel
                 ParserGridView = CollectionViewSource.GetDefaultView(ParserGrid);
             }
             ParserStatistics.Mode = mode;
+            ItemBaseService baseService = new();
             switch (serviceOne)
             {
                 case 0:
-                    ParserStatistics.Service1 = "SteamMarket";
-                    ParserStatistics.Price1 = "Sale(ST)";
-                    ParserStatistics.Price2 = "BuyOrder";
-                    ParserInfo.ST = false;
-                    ParserInfo.CSM = false;
-                    ParserInfo.LF = false;
-                    break;
-                case 1:
                     ParserStatistics.Service1 = "SteamMarket(A)";
                     ParserStatistics.Price1 = "Sale(ST)";
                     ParserStatistics.Price2 = "BuyOrder";
                     ParserInfo.ST = true;
+                    ParserInfo.CSM = false;
+                    ParserInfo.LF = false;
+                    break;
+                case 1:
+                    ParserStatistics.Service1 = "SteamMarket";
+                    ParserStatistics.Price1 = "Sale(ST)";
+                    ParserStatistics.Price2 = "BuyOrder";
+                    ParserInfo.ST = false;
                     ParserInfo.CSM = false;
                     ParserInfo.LF = false;
                     break;
@@ -348,7 +375,7 @@ namespace ItemChecker.MVVM.ViewModel
                     ParserInfo.ST = false;
                     ParserInfo.CSM = true;
                     ParserInfo.LF = false;
-                    ItemBaseService.LoadBotsInventoryCsm();
+                    baseService.LoadBotsInventoryCsm();
                     break;
                 case 3:
                     ParserStatistics.Service1 = "Loot.Farm";
@@ -357,18 +384,18 @@ namespace ItemChecker.MVVM.ViewModel
                     ParserInfo.ST = false;
                     ParserInfo.CSM = false;
                     ParserInfo.LF = true;
-                    ItemBaseService.LoadBotsInventoryLf();
+                    baseService.UpdateLfmInfo();
                     break;
             }
             switch (serviceTwo)
             {
                 case 0:
-                    ParserStatistics.Service2 = "SteamMarket";
+                    ParserStatistics.Service2 = "SteamMarket(A)";
                     ParserStatistics.Price3 = "Sale(ST)";
                     ParserStatistics.Price4 = "BuyOrder";
                     break;
                 case 1:
-                    ParserStatistics.Service2 = "SteamMarket(A)";
+                    ParserStatistics.Service2 = "SteamMarket";
                     ParserStatistics.Price3 = "Sale(ST)";
                     ParserStatistics.Price4 = "BuyOrder";
                     break;
@@ -376,13 +403,12 @@ namespace ItemChecker.MVVM.ViewModel
                     ParserStatistics.Service2 = "Cs.Money";
                     ParserStatistics.Price3 = "Trade(CSM)";
                     ParserStatistics.Price4 = "Give(CSM)";
-                    ItemBaseService.LoadBotsInventoryCsm();
                     break;
                 case 3:
                     ParserStatistics.Service2 = "Loot.Farm";
                     ParserStatistics.Price3 = "Trade(LF)";
                     ParserStatistics.Price4 = "Give(LF)";
-                    ItemBaseService.LoadBotsInventoryLf();
+                    baseService.UpdateLfmInfo();
                     break;
             }
         }
@@ -391,6 +417,10 @@ namespace ItemChecker.MVVM.ViewModel
             ParserProperties.Default.ServiceOne = parser.ServiceOne;
             ParserProperties.Default.ServiceTwo = parser.ServiceTwo;
 
+            ParserProperties.Default.MinPrice = parser.MinPrice;
+            ParserProperties.Default.MaxPrice = parser.MaxPrice;
+
+            ParserProperties.Default.Normal = parser.Normal;
             ParserProperties.Default.Souvenir = parser.Souvenir;
             ParserProperties.Default.Stattrak = parser.Stattrak;
             ParserProperties.Default.KnifeGlove = parser.KnifeGlove;
@@ -407,21 +437,30 @@ namespace ItemChecker.MVVM.ViewModel
         {
             if (ParserConfig.token.IsCancellationRequested)
                 return;
-            TimeLeftAsync(checkList.Count, DateTime.Now);
+
+            DateTime now = DateTime.Now;
+            ParserConfig.Timer.Elapsed += (sender, e) => timerTick(checkList.Count, now);
+            ParserConfig.Timer.Enabled = true;
+
+            ParserCheckService checkService = new();
             List<DataParser> checkedList = new();
             foreach (string itemName in checkList)
             {
                 try
                 {
-                    ParserCheckService checkService = new();
-                    DataParser data = checkService.Check(itemName);
+                    DataParser data = checkService.Check(itemName, ParserProperties.Default.ServiceOne, ParserProperties.Default.ServiceTwo);
                     checkedList.Add(data);
                 }
-                catch (WebException exp)
+                catch (Exception exp)
                 {
-                    var response = exp.Response as HttpWebResponse;
-                    if (response.StatusCode == HttpStatusCode.TooManyRequests)
-                        MessageBox.Show("Warning", "(429) Too Many Requests", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    ParserConfig.cts.Cancel();
+                    if (!exp.Message.Contains("429"))
+                    {
+                        BaseService.errorLog(exp);
+                        BaseService.errorMessage(exp);
+                    }
+                    else
+                        Application.Current.Dispatcher.Invoke(() => { MessageBox.Show(exp.Message, "Parser stoped!", MessageBoxButton.OK, MessageBoxImage.Warning); });
                 }
                 finally
                 {
@@ -431,29 +470,26 @@ namespace ItemChecker.MVVM.ViewModel
                     break;
             }
             ParserGrid = new ObservableCollection<DataParser>(checkedList);
+            ParserConfig.Timer.Enabled = false;
+            ParserConfig.Timer.Elapsed -= (sender, e) => timerTick(checkList.Count, now);
         }
-        void TimeLeftAsync(int itemCount, DateTime timeStart)
+        void timerTick(int itemCount, DateTime timeStart)
         {
-            Task.Run(() => {
-                while (ParserStatistics.CurrentProgress <= itemCount)
-                {
-                    if (ParserConfig.token.IsCancellationRequested)
-                        break;
-                    ParserStatistics.Timer = Edit.calcTimeLeft(timeStart, itemCount, ParserStatistics.CurrentProgress);
-                    Thread.Sleep(500);
-                }
-            });
+            if (ParserConfig.token.IsCancellationRequested)
+                ParserConfig.Timer.Enabled = false;
+            ParserStatistics.Timer = Edit.calcTimeLeft(timeStart, itemCount, ParserStatistics.CurrentProgress);
         }
 
         public ICommand UpdateInventoryCommand =>
             new RelayCommand((obj) =>
             {
                 BaseModel.IsWorking = true;
+                ItemBaseService baseService = new();
                 Task.Run(() => {
                     if (ParserStatistics.Service1 == "Cs.Money")
-                        ItemBaseService.LoadBotsInventoryCsm();
+                        baseService.LoadBotsInventoryCsm();
                     else if (ParserStatistics.Service1 == "Loot.Farm")
-                        ItemBaseService.LoadBotsInventoryLf();
+                        baseService.UpdateLfmInfo();
                     BaseModel.IsWorking = false;
                 });
             }, (obj) => ParserGrid.Any() & !BaseModel.IsWorking & !BaseModel.IsParsing);
@@ -462,42 +498,50 @@ namespace ItemChecker.MVVM.ViewModel
             new RelayCommand((obj) =>
             {
                 DataParser item = obj as DataParser;
-                int count = ParserQueue.Items.Count;
+                int count = QueueInfo.Items.Count;
 
-                ParserQueue.Items = ParserQueue.AddQueue(ParserQueue.Items, item.ItemName, item.Price2);
-                ParserQueue.OrderAmout = ParserQueue.Items.Select(x => x.OrderPrice).Sum();
+                QueueInfo.Items = Queue.AddQueue(QueueInfo.Items, item);
+                QueueInfo.OrderAmout = QueueInfo.Items.Select(x => x.OrderPrice).Sum();
 
-                if (count < ParserQueue.Items.Count)
-                    Message.Enqueue("Success. Item added to Queue");
+                if (count < QueueInfo.Items.Count)
+                    Main.Message.Enqueue($"Success, added to Queue.\n{item.ItemName}");
 
-            }, (obj) => ParserQueue.Items.Select(x => x.OrderPrice).Sum() < SteamAccount.GetAvailableAmount() & ParserConfig.ServiceOne == 1);
+            }, (obj) => QueueInfo.Items.Select(x => x.OrderPrice).Sum() < SteamAccount.GetAvailableAmount() && ParserConfig.ServiceOne == 0);
         public ICommand RemoveQueueCommand =>
             new RelayCommand((obj) =>
             {
-                DataQueue item = obj as DataQueue;
+                QueueData item = obj as QueueData;
 
-                ParserQueue.Items.Remove(item);
-                ParserQueue.OrderAmout = ParserQueue.Items.Select(x => x.OrderPrice).Sum();
+                QueueInfo.Items.Remove(item);
+                QueueInfo.OrderAmout = QueueInfo.Items.Select(x => x.OrderPrice).Sum();
 
-            }, (obj) => ParserQueue.Items.Any() & ParserQueue.SelectedQueue != null);
+            }, (obj) => QueueInfo.Items.Any() & QueueInfo.SelectedQueue != null);
         public ICommand ClearQueueCommand =>
             new RelayCommand((obj) =>
             {
-                ParserQueue.Items = new();
-                ParserQueue.OrderAmout = 0;
-            }, (obj) => ParserQueue.Items.Any());
+                MessageBoxResult result = MessageBox.Show(
+                    "Are you sure you want to clear the list?",
+                    "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
+                {
+                    QueueInfo.Items = new();
+                    QueueInfo.OrderAmout = 0;
+                }
+            }, (obj) => QueueInfo.Items.Any());
         public ICommand PlaceOrderCommand =>
             new RelayCommand((obj) =>
             {
                 BaseModel.IsWorking = true;
                 Task.Run(() => {
-                    ParserQueue.MaxProgress = ParserQueue.Items.Count;
-                    ParserQueue.CurrentProgress = 0;
-                    foreach (var item in ParserQueue.Items)
+                    QueueInfo.MaxProgress = QueueInfo.Items.Count;
+                    QueueInfo.CurrentProgress = 0;
+                    foreach (var item in QueueInfo.Items)
                     {
                         try
                         {
-                            ParserQueue.PlaceOrder(item.ItemName);
+                            Queue.PlaceOrder(item.ItemName);
+                            if (!HomeProperties.Default.FavoriteList.Contains(item.ItemName) && HomeProperties.Default.FavoriteList.Count < 200)
+                                HomeProperties.Default.FavoriteList.Add(item.ItemName);
                         }
                         catch (Exception exp)
                         {
@@ -506,15 +550,15 @@ namespace ItemChecker.MVVM.ViewModel
                         }
                         finally
                         {
-                            ParserQueue.CurrentProgress++;
+                            QueueInfo.CurrentProgress++;
+                            HomeProperties.Default.Save();
                         }
                     }
-                    ParserQueue.Items = new();
-                    ParserQueue.OrderAmout = 0;
-                    MainInfo.AvailableAmount = SteamAccount.GetAvailableAmount();
+                    QueueInfo.Items = new();
+                    QueueInfo.OrderAmout = 0;
                     BaseModel.IsWorking = false;
                 });
-            }, (obj) => ParserQueue.Items.Any() & !BaseModel.IsWorking);
+            }, (obj) => QueueInfo.Items.Any() & !BaseModel.IsWorking);
         //file
         public ICommand ExportCsvCommand =>
             new RelayCommand((obj) =>
@@ -532,6 +576,7 @@ namespace ItemChecker.MVVM.ViewModel
                 {
                     BaseModel.IsParsing = true;
                     ParserService list = new();
+                    ItemBaseService baseService = new();
                     ObservableCollection<DataParser> response = list.ImportCsv();
                     if (response.Any())
                     {
@@ -542,8 +587,8 @@ namespace ItemChecker.MVVM.ViewModel
 
                         if (ParserProperties.Default.ServiceOne != 0)
                         {
-                            ItemBaseService.LoadBotsInventoryCsm();
-                            ItemBaseService.LoadBotsInventoryLf();
+                            baseService.LoadBotsInventoryCsm();
+                            baseService.UpdateLfmInfo();
                         }
                         ParserStatistics.Currency = ParserStatistics.DataCurrency;
                     }
@@ -558,26 +603,34 @@ namespace ItemChecker.MVVM.ViewModel
                     list.ExportTxt(ParserGridView, ParserStatistics.Price1, ParserStatistics.Mode);
                 });
             }, (obj) => ParserGrid.Any() & !BaseModel.IsParsing);
-
-        List<PriceHistory> PriceHistory(string itemName)
-        {
-            string json = Get.Request(SettingsProperties.Default.SteamCookies, "https://steamcommunity.com/market/pricehistory/?country=RU&currency=5&appid=730&market_hash_name=" + Edit.MarketHashName(itemName));
-            JArray sales = JArray.Parse(JObject.Parse(json)["prices"].ToString());
-            List<PriceHistory> history = new();
-            foreach (var sale in sales.Reverse())
+        //favorite
+        public ICommand AddFavoriteCommand =>
+            new RelayCommand((obj) =>
             {
-                DateTime date = DateTime.Parse(sale[0].ToString()[..11]);
-                decimal price = Decimal.Parse(sale[1].ToString());
-                int count = Convert.ToInt32(sale[2]);
-
-                history.Add(new PriceHistory()
+                string itemName = (string)obj;
+                if (!HomeProperties.Default.FavoriteList.Contains(itemName) && HomeProperties.Default.FavoriteList.Count < 200 && !String.IsNullOrEmpty(itemName))
                 {
-                    Date = date,
-                    Price = price,
-                    Count = count,
-                });
-            }
-            return history;
-        }
+                    HomeProperties.Default.FavoriteList.Add(itemName);
+                    HomeProperties.Default.Save();
+                    Main.Message.Enqueue($"Success, added to Favorites\n{itemName}");
+                }
+                else if (HomeProperties.Default.FavoriteList.Count > 200)
+                    Main.Message.Enqueue("Limit. The maximum is only 200!");
+                else if (HomeProperties.Default.FavoriteList.Contains(itemName))
+                    Main.Message.Enqueue("The item is already on the list.");
+                else if (String.IsNullOrEmpty(itemName))
+                    Main.Message.Enqueue("Oops, something went wrong.");
+            });
+        public ICommand RemoveFavoriteCommand =>
+            new RelayCommand((obj) =>
+            {
+                string itemName = (string)obj;
+                if (!String.IsNullOrEmpty(itemName))
+                {
+                    HomeProperties.Default.FavoriteList.Remove(itemName);
+                    HomeProperties.Default.Save();
+                    Main.Message.Enqueue($"{itemName}\nRemoved from list.");
+                }
+            }, (obj) => HomeProperties.Default.FavoriteList.Any());        
     }
 }

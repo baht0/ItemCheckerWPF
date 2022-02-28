@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-
-namespace ItemChecker.MVVM.Model
+﻿namespace ItemChecker.MVVM.Model
 {
     public class DataParser
     {

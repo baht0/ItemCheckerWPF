@@ -3,10 +3,9 @@ using ItemChecker.MVVM.Model;
 using ItemChecker.Properties;
 using ItemChecker.Services;
 using ItemChecker.Support;
-using MaterialDesignThemes.Wpf;
 using System;
-using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Windows.Input;
 
@@ -14,22 +13,15 @@ namespace ItemChecker.MVVM.ViewModel
 {
     public class MainViewModel : ObservableObject
     {
-        delegate void ThemeDeleg();
-        event ThemeDeleg OnThemeDeleg;
-        SnackbarMessageQueue _message = new();
-        Main _mainInfo;        
-        private ObservableCollection<string> _favoriteList = HomeProperties.Default.FavoriteList ?? (new());
+        #region prop
+        Timer TimerInfo = new(TimeSpan.FromMinutes(15).TotalMilliseconds);
+        Timer TimerWindow = new(500);
 
-        public SnackbarMessageQueue Message
-        {
-            get { return _message; }
-            set
-            {
-                _message = value;
-                OnPropertyChanged();
-            }
-        }
-        public Main MainInfo
+        private MainInfo _mainInfo = new();
+        private Calculator _calculator = new();
+        private DataNotification _notification = new();
+
+        public MainInfo MainInfo
         {
             get { return _mainInfo; }
             set
@@ -38,25 +30,35 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        public ObservableCollection<string> FavoriteList
+        public Calculator Calculator
         {
-            get
-            {
-                return _favoriteList;
-            }
+            get { return _calculator; }
             set
             {
-                _favoriteList = value;
+                _calculator = value;
                 OnPropertyChanged();
             }
-        } //favorite
+        }
+        public DataNotification Notification
+        {
+            get { return _notification; }
+            set
+            {
+                value.IsRead = true;
+                _notification = value;
+                OnPropertyChanged();
+            }
+        }
+        #endregion
 
         public MainViewModel()
         {
-            if (DataProjectInfo.IsUpdate)
-                Message.Enqueue("Update available!");
+            TimerInfo.Elapsed += UpdateInformation;
+            TimerWindow.Elapsed += UpdateWindow;
+            TimerInfo.Enabled = true;
+            TimerWindow.Enabled = true;
+            
             HomeProperties.Default.FavoriteList = HomeProperties.Default.FavoriteList ?? (new());
-            UpdateInformation();
         }
         public ICommand OpenFolderCommand =>
             new RelayCommand((obj) =>
@@ -72,49 +74,85 @@ namespace ItemChecker.MVVM.ViewModel
                 }).Wait(5000);
                 Application.Current.Shutdown();
             });
-        //favorite
-        public ICommand AddFavoriteCommand =>
+
+        //calculator
+        public ICommand ChangeCommand =>
             new RelayCommand((obj) =>
             {
-                string itemName = string.Empty;
-                if (obj is DataOrder)
-                {
-                    var item = obj as DataOrder;
-                    itemName = item.ItemName;
-                }
-                else if (obj is DataParser)
-                {
-                    var item = obj as DataParser;
-                    itemName = item.ItemName;
-                }
-                else if (obj is string)
-                {
-                    itemName = (string)obj;
-                    if (string.IsNullOrEmpty(itemName))
-                        return;
-                }
-                if (!HomeProperties.Default.FavoriteList.Contains(itemName))
-                {
-                    HomeProperties.Default.FavoriteList.Add(itemName);
-                    HomeProperties.Default.Save();
-                    FavoriteList = HomeProperties.Default.FavoriteList;
-                    Message.Enqueue("Success. Item added to Favorites");
-                }
+                Calculator config = (Calculator)obj;
+                Calculator calculator = new();
+                calculator.Service = config.Service;
+                calculator.Price1 = config.Price1;
+                calculator.Price2 = config.Price2;
+                calculator.Precent = config.Precent;
+                calculator.Difference = config.Difference;
+                calculator.Result = config.Result;
+
+                calculator.Currency1 = config.Currency2;
+                calculator.Currency2 = config.Currency1;
+                calculator.Value = config.Converted;
+                calculator.Converted = config.Value;
+                Calculator = calculator;
             });
-        void UpdateInformation()
+        void UpdateInformation(Object sender, ElapsedEventArgs e)
         {
-            Task.Run(() => {
-                while (true)
+            try
+            {
+                BaseService.StatusSteam();
+                if (BaseModel.StatusCommunity != "normal")
                 {
-                    MainInfo = new();
-                    if (SettingsProperties.Default.SetHours)
+                    Main.Notifications.Add(new()
                     {
-                        App app = (App)Application.Current;
-                        Application.Current.Dispatcher.Invoke(() => { app.AutoChangeTheme(); });                        
-                    }
-                    System.Threading.Thread.Sleep(1500);
+                        Title = "Steam Status",
+                        Message = "There are problems with Steam servers. The program may not work correctly!"
+                    });
                 }
-            });
+                BaseService.GetCurrency();
+                if (!BaseModel.IsParsing && !BaseModel.IsWorking)
+                {
+                    ItemBaseService get = new();
+                    get.CreateItemsBase();
+                }
+                SteamAccount.GetSteamBalance();
+                if (SteamAccount.BalanceStartUp > SteamAccount.Balance)
+                {
+                    Main.Notifications.Add(new()
+                    {
+                        Title = "Balance",
+                        Message = $"Your balance has decreased\n-{SteamAccount.BalanceStartUp - SteamAccount.Balance}."
+                    });
+                    SteamAccount.BalanceStartUp = SteamAccount.Balance;
+                }
+                else if (SteamAccount.BalanceStartUp < SteamAccount.Balance)
+                {
+                    Main.Notifications.Add(new()
+                    {
+                        Title = "Balance",
+                        Message = $"Your balance has increased\n+{SteamAccount.Balance - SteamAccount.BalanceStartUp}."
+                    });
+                    SteamAccount.BalanceStartUp = SteamAccount.Balance;
+                }
+            }
+            catch (Exception ex)
+            {
+                BaseService.errorLog(ex);
+            }
+        }
+        void UpdateWindow(Object sender, ElapsedEventArgs e)
+        {
+            try
+            {
+                MainInfo = new();
+                if (SettingsProperties.Default.SetHours)
+                {
+                    App app = (App)Application.Current;
+                    app.AutoChangeTheme();
+                }
+            }
+            catch (Exception ex)
+            {
+                BaseService.errorLog(ex);
+            }
         }
     }
 }

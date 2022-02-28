@@ -28,53 +28,36 @@ namespace ItemChecker.MVVM.View
         {
             if (!parserGrid.Items.IsEmpty)
             {
-                if (e.Key == Key.Insert)
-                {
-                    ParserViewModel viewModel = (ParserViewModel)DataContext;
-                    if (viewModel.AddQueueCommand.CanExecute(null))
-                        viewModel.AddQueueCommand.Execute(viewModel.SelectedParserItem);
-                }
-                if (e.Key == Key.F)
-                {
-                    MainViewModel viewModel = (MainViewModel)DataContext;
-                    if (viewModel.AddFavoriteCommand.CanExecute(null))
-                        viewModel.AddFavoriteCommand.Execute(((ParserViewModel)DataContext).SelectedParserItem);
-                }
+                ParserViewModel viewModel = (ParserViewModel)DataContext;
+                if (e.Key == Key.Insert && viewModel.AddQueueCommand.CanExecute(null))
+                    viewModel.AddQueueCommand.Execute(viewModel.SelectedParserItem);
+                else if (e.Key == Key.F && Keyboard.IsKeyDown(Key.LeftCtrl) && viewModel.RemoveFavoriteCommand.CanExecute(null))
+                    viewModel.RemoveFavoriteCommand.Execute(((ParserViewModel)DataContext).SelectedParserItem.ItemName);
+                else if (e.Key == Key.F && viewModel.AddFavoriteCommand.CanExecute(null))
+                    viewModel.AddFavoriteCommand.Execute(((ParserViewModel)DataContext).SelectedParserItem.ItemName);
             }
         }
         private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (!parserGrid.Items.IsEmpty)
+            object item = parserGrid.CurrentItem;
+            if (!parserGrid.Items.IsEmpty && item != null)
             {
-                ParserViewModel viewModel = (ParserViewModel)DataContext;
-                object item = parserGrid.CurrentItem;
                 PropertyInfo info = item.GetType().GetProperty("ItemName");
                 string ItemName = (string)info.GetValue(item, null);
                 ItemName = Edit.removeDoppler(ItemName);
-
                 string market_has_name = Edit.MarketHashName(ItemName);
+
+                ParserViewModel viewModel = (ParserViewModel)DataContext;
                 int columnIndex = parserGrid.CurrentColumn.DisplayIndex;
                 switch (columnIndex)
                 {
-                    case 2:
+                    case 1 or 2:
                         if (viewModel.ParserStatistics.Service1 == "SteamMarket" | viewModel.ParserStatistics.Service1 == "SteamMarket(A)")
                             Edit.openUrl("https://steamcommunity.com/market/listings/730/" + market_has_name);
                         else if (viewModel.ParserStatistics.Service1 == "Cs.Money")
                             Edit.openCsm(market_has_name);
                         break;
-                    case 3:
-                        if (viewModel.ParserStatistics.Service1 == "SteamMarket" | viewModel.ParserStatistics.Service1 == "SteamMarket(A)")
-                            Edit.openUrl("https://steamcommunity.com/market/listings/730/" + market_has_name);
-                        else if (viewModel.ParserStatistics.Service1 == "Cs.Money")
-                            Edit.openCsm(market_has_name);
-                        break;
-                    case 4:
-                        if (viewModel.ParserStatistics.Service2 == "SteamMarket" | viewModel.ParserStatistics.Service2 == "SteamMarket(A)")
-                            Edit.openUrl("https://steamcommunity.com/market/listings/730/" + market_has_name);
-                        else if (viewModel.ParserStatistics.Service2 == "Cs.Money")
-                            Edit.openCsm(market_has_name);
-                        break;
-                    case 5:
+                    case 3 or 4:
                         if (viewModel.ParserStatistics.Service2 == "SteamMarket" | viewModel.ParserStatistics.Service2 == "SteamMarket(A)")
                             Edit.openUrl("https://steamcommunity.com/market/listings/730/" + market_has_name);
                         else if (viewModel.ParserStatistics.Service2 == "Cs.Money")

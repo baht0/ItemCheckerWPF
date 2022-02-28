@@ -14,21 +14,14 @@ namespace ItemChecker.Services
 {
     public class BaseService : BaseModel
     {
-        public static void GetBase()
+        public static void GetCurrency()
         {
-            if (BaseModel.token.IsCancellationRequested)
-                return;
             decimal course = Get.Course(SettingsProperties.Default.CurrencyApiKey);
             if (course != 0)
             {
                 SettingsProperties.Default.CurrencyValue = course;
                 SettingsProperties.Default.Save();
             }
-
-            ItemBaseService get = new();
-            get.Overstock();
-            get.Unavailable();
-            get.ItemsBase();
         }
         public static void StatusSteam()
         {
@@ -36,8 +29,8 @@ namespace ItemChecker.Services
             {
                 if (String.IsNullOrEmpty(SteamAccount.ApiKey))
                     return;
-                string json = Get.GameServersStatus(SteamAccount.ApiKey);
-                StatusCommunity = JObject.Parse(json)["result"]["services"]["SteamCommunity"].ToString();
+                JObject res = Get.GameServersStatus(SteamAccount.ApiKey);
+                StatusCommunity = res["result"]["services"]["SteamCommunity"].ToString();
             }
             catch
             {
@@ -92,7 +85,7 @@ namespace ItemChecker.Services
         }
         public static void errorMessage(Exception exp)
         {
-            MessageBox.Show("Something went wrong :(", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            Application.Current.Dispatcher.Invoke(() => { MessageBox.Show("Something went wrong :(", "Error", MessageBoxButton.OK, MessageBoxImage.Error); });
         }
 
         protected List<string> OpenFileDialog(string filter)

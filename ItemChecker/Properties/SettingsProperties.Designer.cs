@@ -26,24 +26,12 @@ namespace ItemChecker.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string CurrencyApiKey {
+        public string SteamLoginSecure {
             get {
-                return ((string)(this["CurrencyApiKey"]));
+                return ((string)(this["SteamLoginSecure"]));
             }
             set {
-                this["CurrencyApiKey"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int Currency {
-            get {
-                return ((int)(this["Currency"]));
-            }
-            set {
-                this["Currency"] = value;
+                this["SteamLoginSecure"] = value;
             }
         }
         
@@ -56,6 +44,30 @@ namespace ItemChecker.Properties {
             }
             set {
                 this["CurrencyValue"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string CurrencyApiKey {
+            get {
+                return ((string)(this["CurrencyApiKey"]));
+            }
+            set {
+                this["CurrencyApiKey"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int CurrencyId {
+            get {
+                return ((int)(this["CurrencyId"]));
+            }
+            set {
+                this["CurrencyId"] = value;
             }
         }
         
@@ -109,36 +121,25 @@ namespace ItemChecker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool NotEnoughBalance {
-            get {
-                return ((bool)(this["NotEnoughBalance"]));
-            }
-            set {
-                this["NotEnoughBalance"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("20")]
-        public int CancelOrder {
+        public int MinPrecent {
             get {
-                return ((int)(this["CancelOrder"]));
+                return ((int)(this["MinPrecent"]));
             }
             set {
-                this["CancelOrder"] = value;
+                this["MinPrecent"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Net.CookieContainer SteamCookies {
+        [global::System.Configuration.DefaultSettingValueAttribute("2")]
+        public int ServiceId {
             get {
-                return ((global::System.Net.CookieContainer)(this["SteamCookies"]));
+                return ((int)(this["ServiceId"]));
             }
             set {
-                this["SteamCookies"] = value;
+                this["ServiceId"] = value;
             }
         }
     }

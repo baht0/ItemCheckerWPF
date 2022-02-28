@@ -5,14 +5,36 @@ namespace ItemChecker.MVVM.Model
     public class ItemBase
     {
         public string ItemName { get; set; }
-        public int SteamId { get; set; }
-        public int CsmId { get; set; }
-        public decimal PriceSteam { get; set; }
-        public decimal PriceCsm { get; set; }
-        public int OverstockDifference { get; set; }
+        public string Type { get; set; }
+        public string Quality { get; set; }
+        public Steam SteamInfo { get; set; }
+        public Csm CsmInfo { get; set; }
+        public Lfm LfmInfo { get; set; }
 
-        public static List<ItemBase> Overstock { get; set; } = new();
-        public static List<ItemBase> Unavailable { get; set; } = new();
         public static List<ItemBase> SkinsBase { get; set; } = new();
+    }
+    public class Steam
+    {
+        public int Id { get; set; }
+        public decimal Price { get; set; }
+    }
+    public class Csm
+    {
+        public int Id { get; set; }
+        public decimal Price { get; set; }
+        public int OverstockDifference { get; set; }
+        public bool Overstock { get; set; }
+        public bool Unavailable { get; set; }
+    }
+    public class Lfm
+    {
+        public decimal Price { get; set; }
+        public int Have { get; set; }
+        public int Limit { get; set; }
+        public int Reservable { get; set; }
+        public int Tradable { get; set; }
+        public int SteamPriceRate { get; set; }
+        public bool Overstock { get; set; }
+        public bool Unavailable { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using ItemChecker.MVVM.ViewModel;
+using ItemChecker.Support;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -55,15 +56,50 @@ namespace ItemChecker.MVVM.View
                 contextMenu.IsOpen = true;
             }
         }
-        private void Calc_Click(object sender, RoutedEventArgs e)
+        private void Calculator_Click(object sender, RoutedEventArgs e)
         {
-            CalculatorWindow calculator = new();
-            calculator.Show();
+            PopupCalculator.IsOpen = true;
         }
-        private void Set_Click(object sender, RoutedEventArgs e)
+        private void Notification_Click(object sender, RoutedEventArgs e)
+        {
+            PopupNotification.IsOpen = true;
+        }
+        private void Settings_Click(object sender, RoutedEventArgs e)
         {
             SettingWindow setting = new();
             setting.ShowDialog();
+        }
+
+        private void CSM_MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            Edit.openUrl("https://cs.money/");
+        }
+        private void oldCSM_MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            Edit.openUrl("https://old.cs.money/");
+        }
+        private void Inventory_MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            Edit.openUrl("https://steamcommunity.com/my/inventory/");
+        }
+        private void SteamMarket_MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            Edit.openUrl("https://steamcommunity.com/market/");
+        }
+
+        private void InputDecimal(object sender, TextCompositionEventArgs e)
+        {
+            decimal result;
+            e.Handled = !decimal.TryParse(e.Text, out result);
+        }
+        private void TextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                ValueTxt.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+                price1.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+                price2.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+            }
         }
     }
 }

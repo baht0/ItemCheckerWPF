@@ -31,9 +31,9 @@ namespace UpdateBase
             JObject csm_base = JObject.Parse(json);
 
             json = Post.DropboxRead("SkinsBase.json");
-            JArray items = JArray.Parse(json);
+            JArray myBase = JArray.Parse(json);
             JArray jArray = new();
-            foreach (JObject item in items)
+            foreach (JObject item in myBase)
             {
                 string name = item["Name"].ToString();
                 int steamId = Convert.ToInt32(item["SteamId"]);

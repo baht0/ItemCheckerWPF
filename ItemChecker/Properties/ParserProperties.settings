@@ -9,7 +9,16 @@
       <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="ServiceTwo" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">1</Value>
+      <Value Profile="(Default)">2</Value>
+    </Setting>
+    <Setting Name="MinPrice" Type="System.Decimal" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="MaxPrice" Type="System.Decimal" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="Normal" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="Souvenir" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
@@ -34,12 +43,6 @@
     </Setting>
     <Setting Name="OnlyDopplers" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
-    </Setting>
-    <Setting Name="MinPrice" Type="System.Decimal" Scope="User">
-      <Value Profile="(Default)">0</Value>
-    </Setting>
-    <Setting Name="MaxPrice" Type="System.Decimal" Scope="User">
-      <Value Profile="(Default)">0</Value>
     </Setting>
   </Settings>
 </SettingsFile>
