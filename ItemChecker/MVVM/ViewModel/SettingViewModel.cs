@@ -133,6 +133,7 @@ namespace ItemChecker.MVVM.ViewModel
                 {
                     ProjectInfoService.CheckUpdate();
                     About.IsUpdate = DataProjectInfo.IsUpdate ? "Download" : "Reload";
+                    About.LatestVersion = DataProjectInfo.LatestVersion;
                 }
             });
         public ICommand CreateCurrentVersionCommand =>
