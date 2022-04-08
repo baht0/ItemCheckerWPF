@@ -112,18 +112,18 @@ namespace ItemChecker.MVVM.ViewModel
         {
             try
             {
+                if (BaseModel.token.IsCancellationRequested)
+                    return;
+                StartUp.Progress = Tuple.Create(1, "Check Update...");
+                ProjectInfoService.AppUpdate();
+
                 if (String.IsNullOrEmpty(SettingsProperties.Default.CurrencyApiKey))
                 {
-                    StartUp.Progress = Tuple.Create(1, "Initial settings...");
+                    StartUp.Progress = Tuple.Create(2, "Initial settings...");
                     IsFirst = true;
                 }
                 while (IsFirst)
                     Thread.Sleep(500);
-
-                if (BaseModel.token.IsCancellationRequested)
-                    return;
-                StartUp.Progress = Tuple.Create(2, "Check Update...");
-                ProjectInfoService.AppUpdate();
 
                 if (BaseModel.token.IsCancellationRequested)
                     return;
