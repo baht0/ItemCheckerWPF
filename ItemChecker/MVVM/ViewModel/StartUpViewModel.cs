@@ -9,8 +9,9 @@ using System.Globalization;
 using ItemChecker.Services;
 using System.Diagnostics;
 using System.Linq;
-using MaterialDesignThemes.Wpf;
 using System.Threading;
+using ItemChecker.Properties;
+using ItemChecker.Support;
 
 namespace ItemChecker.MVVM.ViewModel
 {
@@ -18,20 +19,20 @@ namespace ItemChecker.MVVM.ViewModel
     {
         #region prop
         IView _view;
-        string _version = DataProjectInfo.CurrentVersion;
+        StartUp _startUp = new();
         bool _isLogin = false;
-        string _status;
-        SnackbarMessageQueue _mess = new();
+        bool _isFirst = false;
         private SteamLogin _login = new();
+        private Settings _settings = new();
 
         Task startTask { get; set; }
         public bool LoginSuccessful { get; set; }
-        public string Version
+        public StartUp StartUp
         {
-            get { return _version; }
+            get { return _startUp; }
             set
             {
-                _version = value;
+                _startUp = value;
                 OnPropertyChanged();
             }
         }
@@ -44,21 +45,12 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        public string Status
+        public bool IsFirst
         {
-            get { return _status; }
+            get { return _isFirst; }
             set
             {
-                _status = value;
-                OnPropertyChanged();
-            }
-        }
-        public SnackbarMessageQueue Message
-        {
-            get { return _mess; }
-            set
-            {
-                _mess = value;
+                _isFirst = value;
                 OnPropertyChanged();
             }
         }
@@ -68,6 +60,15 @@ namespace ItemChecker.MVVM.ViewModel
             set
             {
                 _login = value;
+                OnPropertyChanged();
+            }
+        }
+        public Settings Settings
+        {
+            get { return _settings; }
+            set
+            {
+                _settings = value;
                 OnPropertyChanged();
             }
         }
@@ -85,62 +86,74 @@ namespace ItemChecker.MVVM.ViewModel
                 Title = "Welcome!",
                 Message = "The program has been launched!"
             });
-            startTask = Task.Run(() => Starting());
+            startTask = Task.Run(() => StartTask());
         }
         public ICommand ExitCommand =>
             new RelayCommand((obj) =>
             {
                 Task.Run(() => {
                     BaseModel.cts.Cancel();
-                    Status = "Exit...";
-                    startTask.Wait(4000);
+                    StartUp.Progress = Tuple.Create(6, "Exit...");
+                    IsFirst = false;
+                    IsLogin = false;
+                    if (startTask != null)
+                        startTask.Wait(4000);
                     if (BaseModel.Browser != null)
                         BaseService.BrowserExit();
 
                     Application.Current.Dispatcher.Invoke(() => { Application.Current.Shutdown(); });
-                });                
+                });
             });
         void Hide()
         {
             _view.Close();
         }
-        void Starting()
+        void StartTask()
         {
             try
             {
-                Status = "Check Update...";
+                if (String.IsNullOrEmpty(SettingsProperties.Default.CurrencyApiKey))
+                {
+                    StartUp.Progress = Tuple.Create(1, "Initial settings...");
+                    IsFirst = true;
+                }
+                while (IsFirst)
+                    Thread.Sleep(500);
+
+                if (BaseModel.token.IsCancellationRequested)
+                    return;
+                StartUp.Progress = Tuple.Create(2, "Check Update...");
                 ProjectInfoService.AppUpdate();
 
-                Status = "Signing In...";
-                Task.Run(() => {
-                    while (true)
-                        if (!BaseModel.LoginSteam.IsLoggedIn)
-                        {
-                            IsLogin = true;
-                            Status = "Please, Sign In...";
-                            Thread.Sleep(500);
-                        }
-                });
-                bool isLogin = false;
-                do
+                if (BaseModel.token.IsCancellationRequested)
+                    return;
+                StartUp.Progress = Tuple.Create(3, "Signing In...");
+                KillProccess();
+                IsLogin = BaseModel.IsLogIn();
+                StartUp.Progress = IsLogin ? Tuple.Create(3, "Please, Signing In...") : Tuple.Create(4, "Preparation...");
+                while (IsLogin)
                 {
                     if (BaseModel.token.IsCancellationRequested)
                         break;
-                    Proccess();
-                    isLogin = BaseModel.GetCookies();
-                } while (!isLogin);
+                    IsLogin = BaseModel.Steam();
+                    StartUp.Progress = IsLogin ? Tuple.Create(3, "Failed to login...") : Tuple.Create(4, "Preparation...");
+                    Login.Code2AF = string.Empty;
+                }
 
-                Status = "Preparation...";
+                if (BaseModel.token.IsCancellationRequested)
+                    return;
                 ItemBaseService get = new();
                 get.CreateItemsBase();
                 BaseService.GetCurrency();
 
-                Status = "Steam Account...";
+                if (BaseModel.token.IsCancellationRequested)
+                    return;
+                StartUp.Progress = Tuple.Create(5, "Get Account...");
                 SteamAccount.GetSteamAccount();
 
                 if (BaseModel.token.IsCancellationRequested)
                     return;
-                Status = "My Orders...";
+                StartUp.Progress = Tuple.Create(6, "Check MyOrders...");
                 OrderCheckService order = new();
                 order.SteamOrders();
 
@@ -155,7 +168,7 @@ namespace ItemChecker.MVVM.ViewModel
                 BaseService.errorMessage(exp);
             }
         }
-        void Proccess()
+        void KillProccess()
         {
             if (Process.GetProcessesByName(Path.GetFileNameWithoutExtension(System.Reflection.Assembly.GetEntryAssembly().Location)).Count() > 1)
             {
@@ -166,6 +179,7 @@ namespace ItemChecker.MVVM.ViewModel
                     MessageBoxImage.Error);
                 Process.GetCurrentProcess().Kill();
             }
+            BaseModel.Browser = null;
             //foreach (Process proc in Process.GetProcessesByName("chrome")) proc.Kill();
             foreach (Process proc in Process.GetProcessesByName("chromedriver")) proc.Kill();
             foreach (Process proc in Process.GetProcessesByName("conhost"))
@@ -189,9 +203,40 @@ namespace ItemChecker.MVVM.ViewModel
                 {
                     BaseModel.LoginSteam = Login;
                     BaseModel.LoginSteam.IsLoggedIn = true;
-                    Status = "Continue Signing In...";
+                    StartUp.Progress = Tuple.Create(3, "Signing In...");
                     IsLogin = false;
                 }
-            }, (obj) => !BaseModel.LoginSteam.IsLoggedIn & !String.IsNullOrEmpty(Login.Login) & Login.Code2AF.Length == 5);
+            }, (obj) => !BaseModel.LoginSteam.IsLoggedIn && !String.IsNullOrEmpty(Login.Login) && Login.Code2AF.Length == 5);
+        public ICommand ContinueCommand =>
+            new RelayCommand((obj) =>
+            {
+                Settings settings = obj as Settings;
+
+                if (Net.Get.Currency(settings.CurrencyApi) != 0)
+                {
+                    SettingsProperties.Default.CurrencyApiKey = settings.CurrencyApi;
+                    SettingsProperties.Default.CurrencyId = settings.CurrencyId;
+                    SettingsProperties.Default.ServiceId = settings.ServiceId;
+                    SettingsProperties.Default.Save();
+                    IsFirst = false;
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "The \"CurrencyApi\" you provided is not working!", "Error",
+                        MessageBoxButton.OK, MessageBoxImage.Stop);
+                }
+            }, (obj) => !String.IsNullOrEmpty(Settings.CurrencyApi));
+        public ICommand GetCurrencyApiCommand
+        {
+            get
+            {
+                return new RelayCommand((obj) =>
+                {
+                    Edit.openUrl("https://free.currencyconverterapi.com/free-api-key");
+                    Edit.openUrl("https://openexchangerates.org/signup/free");
+                });
+            }
+        }
     }
 }

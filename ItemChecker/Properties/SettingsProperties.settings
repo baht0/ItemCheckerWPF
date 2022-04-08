@@ -2,9 +2,9 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ItemChecker.Properties" GeneratedClassName="SettingsProperties">
   <Profiles />
   <Settings>
-	  <Setting Name="SteamLoginSecure" Type="System.String" Scope="User">
-		  <Value Profile="(Default)" />
-	  </Setting>
+    <Setting Name="SteamLoginSecure" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
     <Setting Name="CurrencyValue" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)">72</Value>
     </Setting>
@@ -17,6 +17,9 @@
     <Setting Name="Quit" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
+	  <Setting Name="Theme" Type="System.String" Scope="User">
+		  <Value Profile="(Default)">Light</Value>
+	  </Setting>
     <Setting Name="SetHours" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>

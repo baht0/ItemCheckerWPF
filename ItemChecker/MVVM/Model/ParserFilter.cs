@@ -15,7 +15,6 @@
         public bool Ordered { get; set; }
         public bool Overstock { get; set; }
         public bool Unavailable { get; set; }
-        public bool Unknown { get; set; }
         //exterior
         public bool NotPainted { get; set; }
         public bool BattleScarred { get; set; }
@@ -38,6 +37,7 @@
         public bool Graffiti { get; set; }
         public bool Case { get; set; }
         public bool Package { get; set; }
+        public bool PatchPack { get; set; }
         //Quality
         public bool Industrial { get; set; }
         public bool MilSpec { get; set; }

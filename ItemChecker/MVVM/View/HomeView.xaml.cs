@@ -40,7 +40,7 @@ namespace ItemChecker.MVVM.View
             {
                 PropertyInfo info = item.GetType().GetProperty("ItemName");
                 string ItemName = (string)info.GetValue(item, null);
-
+                ItemName = ItemName.Replace("(Holo/Foil)", "(Holo-Foil)");
                 string market_has_name = Edit.MarketHashName(ItemName);
 
                 int columnIndex = ordersGrid.CurrentColumn.DisplayIndex;

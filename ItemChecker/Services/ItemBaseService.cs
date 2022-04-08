@@ -121,7 +121,7 @@ namespace ItemChecker.Services
                 lfm_items.Add(new LfmBase()
                 {
                     ItemName = item["name"].ToString(),
-                    Price = price,
+                    Price = price / 100,
                     Have = have,
                     Limit = max,
                     Reservable = Convert.ToInt32(item["res"]),
@@ -190,18 +190,26 @@ namespace ItemChecker.Services
             List<LfmBase> lfmBases = GetLfmBases();
             foreach (LfmBase lfmItem in lfmBases)
             {
-                Lfm item = ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == lfmItem.ItemName).LfmInfo;
-                item = new Lfm()
+                try
                 {
-                    Price = lfmItem.Price,
-                    Have = lfmItem.Have,
-                    Limit = lfmItem.Limit,
-                    Reservable = lfmItem.Reservable,
-                    Tradable = lfmItem.Tradable,
-                    SteamPriceRate = lfmItem.SteamPriceRate,
-                    Overstock = lfmItem.Overstock,
-                    Unavailable = lfmItem.Unavailable,
-                };
+                    string itemName = lfmItem.ItemName.Replace("(Holo-Foil)", "(Holo/Foil)");
+                    itemName = itemName.Replace("  ", " ");
+                    ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == itemName).LfmInfo = new Lfm()
+                    {
+                        Price = lfmItem.Price,
+                        Have = lfmItem.Have,
+                        Limit = lfmItem.Limit,
+                        Reservable = lfmItem.Reservable,
+                        Tradable = lfmItem.Tradable,
+                        SteamPriceRate = lfmItem.SteamPriceRate,
+                        Overstock = lfmItem.Overstock,
+                        Unavailable = lfmItem.Unavailable,
+                    };
+                }
+                catch
+                {
+                    continue;
+                }
             }
         }
         public void LoadBotsInventoryCsm()
@@ -233,6 +241,7 @@ namespace ItemChecker.Services
                     ItemName = name,
                     StackSize = count,
                     Id = id,
+                    DefaultPrice = defPrice,
                     Price = price,
                     Sticker = sticker,
                     NameTag = nameTag,

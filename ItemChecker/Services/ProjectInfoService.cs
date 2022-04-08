@@ -15,8 +15,6 @@ namespace ItemChecker.MVVM.Model
     {
         public static void AppUpdate()
         {
-            if (BaseModel.token.IsCancellationRequested)
-                return;
             if (StartUpProperties.Default.completionUpdate)
             {
                 if (Directory.Exists(BaseModel.AppPath + "\\update\\ItemChecker"))

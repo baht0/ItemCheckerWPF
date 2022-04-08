@@ -1,10 +1,8 @@
 ﻿using ItemChecker.Core;
 using ItemChecker.MVVM.Model;
-using ItemChecker.Net;
 using ItemChecker.Properties;
 using ItemChecker.Services;
 using ItemChecker.Support;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,7 +10,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
-using System.Web;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -33,7 +30,7 @@ namespace ItemChecker.MVVM.ViewModel
         //panel
         private ParserConfig _parserConfig = new();
         private ParserInfo _parserInfo = new();
-        private int _manualCount = ParserProperties.Default.CheckList != null ? ParserProperties.Default.CheckList.Count : 0;
+        private int _manualCount = 0;
         private QueueInfo _queueInfo = new();
 
         public ObservableCollection<DataParser> ParserGrid
@@ -100,11 +97,17 @@ namespace ItemChecker.MVVM.ViewModel
                 {
                     List<DataInventoryCsm> datas = DataInventoryCsm.Inventory.Where(x => x.ItemName == value.ItemName).Reverse().ToList();
                     ParserInfo.InventoryCsm = datas;
+                    ParserInfo.ItemCsmComparePrice = value.Price2;
+                    if (ParserStatistics.DataCurrency == "RUB")
+                        ParserInfo.ItemCsmComparePrice = Edit.ConverterToUsd(value.Price1, SettingsProperties.Default.CurrencyValue);
                     ParserInfo.InfoItemCount = ParserInfo.InventoryCsm.Count - 1;
                     ParserInfo.InfoItemCurrent = 0;
                 }
                 else if (ParserInfo.LF)
+                {
                     ParserInfo.ItemLf = ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == value.ItemName).LfmInfo;
+                    ParserInfo.ItemNameLfm = value.ItemName;
+                }
             }
         }
         public ParserStatistics ParserStatistics
@@ -197,7 +200,9 @@ namespace ItemChecker.MVVM.ViewModel
 
         public ParserViewModel()
         {
-            ParserProperties.Default.CheckList = ParserProperties.Default.CheckList ?? (new());
+            ParserProperties.Default.CheckList = ParserProperties.Default.CheckList ?? ItemBase.SkinsBase.Select(x => x.ItemName).ToList();
+            ParserProperties.Default.Save();
+            ManualCount = ParserProperties.Default.CheckList.Count;
 
             TimerView.Elapsed += UpdateView;
             TimerView.Enabled = true;

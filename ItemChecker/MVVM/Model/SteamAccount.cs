@@ -22,8 +22,6 @@ namespace ItemChecker.MVVM.Model
 
         public static void GetSteamAccount()
         {
-            if (BaseModel.token.IsCancellationRequested)
-                return;
             Cookie steamLoginSecure = SteamCookies.GetAllCookies().FirstOrDefault(x => x.Name == "steamLoginSecure");
             Id64 = steamLoginSecure.Value[..17];
             string html = Get.Request(SteamCookies, "https://steamcommunity.com/market/");
@@ -36,7 +34,7 @@ namespace ItemChecker.MVVM.Model
 
             var nodes = htmlDoc.DocumentNode.Descendants().Where(n => n.Attributes.Any(a => a.Value.Contains("market_headertip_container market_headertip_container_warning")));
             GetSteamApiKey();
-            BaseService.StatusSteam();
+            BaseModel.StatusCommunity = BaseService.StatusSteam();
         }
         public static void GetSteamBalance()
         {

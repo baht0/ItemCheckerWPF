@@ -94,11 +94,12 @@ namespace ItemChecker.MVVM.ViewModel
                 calculator.Converted = config.Value;
                 Calculator = calculator;
             });
+
         void UpdateInformation(Object sender, ElapsedEventArgs e)
         {
             try
             {
-                BaseService.StatusSteam();
+                BaseModel.StatusCommunity = BaseService.StatusSteam();
                 if (BaseModel.StatusCommunity != "normal")
                 {
                     Main.Notifications.Add(new()

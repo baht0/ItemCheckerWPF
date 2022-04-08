@@ -175,13 +175,11 @@
                                     <RowDefinition/>
                                     <RowDefinition/>
                                     <RowDefinition/>
-                                    <RowDefinition/>
                                 </Grid.RowDefinitions>
                                 <CheckBox Grid.Row="0" Content="Tradable" IsChecked="{Binding Tradable}"/>
                                 <CheckBox Grid.Row="1" Content="Ordered" IsChecked="{Binding Ordered}"/>
                                 <CheckBox Grid.Row="2" Content="Overstock" IsChecked="{Binding Overstock}"/>
                                 <CheckBox Grid.Row="3" Content="Unavailable" IsChecked="{Binding Unavailable}"/>
-                                <CheckBox Grid.Row="4" Content="Unknown" IsChecked="{Binding Unknown}"/>
                             </Grid>
                         </GroupBox>
                         <GroupBox Header="Exterior:" Grid.Row="1" Grid.Column="0"
@@ -254,6 +252,7 @@
                                 <CheckBox Grid.Row="0" Grid.Column="2" Content="Case" IsChecked="{Binding Case}"/>
                                 <CheckBox Grid.Row="1" Grid.Column="2" Content="Capsule" IsChecked="{Binding Capsule}"/>
                                 <CheckBox Grid.Row="2" Grid.Column="2" Content="Package" IsChecked="{Binding Package}"/>
+                                <CheckBox Grid.Row="3" Grid.Column="2" Content="Patch Pack" IsChecked="{Binding PatchPack}"/>
                             </Grid>
                         </GroupBox>
                         <GroupBox Header="Prices:" Grid.Row="3" Grid.ColumnSpan="2"
@@ -606,17 +605,20 @@
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="50"/>
                                 <RowDefinition Height="25"/>
+                                <RowDefinition Height="25"/>
                                 <RowDefinition Height="45"/>
                                 <RowDefinition Height="250"/>
                             </Grid.RowDefinitions>
                             <TextBlock Grid.Row="0" VerticalAlignment="Center" TextWrapping="Wrap"
                                            Text="{Binding ItemCsm.ItemName, StringFormat='Item: {0}'}"/>
                             <TextBlock Grid.Row="1" VerticalAlignment="Center"
-                                           Text="{Binding ItemCsm.Price, StringFormat='Default Price: {0}$'}"/>
-                            <Slider Grid.Row="2" Width="200" VerticalAlignment="Center"
+                                           Text="{Binding ItemCsm.DefaultPrice, StringFormat='Default Price: {0}$'}"/>
+                            <TextBlock Grid.Row="2" VerticalAlignment="Center"
+                                           Text="{Binding ItemCsmComparePrice, StringFormat='Compare Price: {0}$'}"/>
+                            <Slider Grid.Row="3" Width="200" VerticalAlignment="Center"
                                         Maximum="{Binding InfoItemCount}"
                                         Value="{Binding InfoItemCurrent}"/>
-                            <Border Grid.Row="3" Background="{DynamicResource ElementBackground}">
+                            <Border Grid.Row="4" Background="{DynamicResource ElementBackground}">
                                 <Grid Margin="10" DataContext="{Binding ItemCsm}">
                                     <Grid.RowDefinitions>
                                         <RowDefinition/>
@@ -649,15 +651,15 @@
                             </Border>
                         </Grid>
                         <!--LF-->
-                        <Grid Grid.Row="1" DataContext="{Binding ParserInfo.ItemLf}"
+                        <Grid Grid.Row="1"
                                   Visibility="{Binding DataContext.ParserInfo.LF, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="50"/>
                                 <RowDefinition Height="210"/>
                             </Grid.RowDefinitions>
                             <TextBlock Grid.Row="0" VerticalAlignment="Center" TextWrapping="Wrap"
-                                           Text="{Binding StringFormat=Item: {0}, Path=ItemName}"/>
-                            <Border Grid.Row="2" Background="{StaticResource ElementBackground}">
+                                           Text="{Binding ParserInfo.ItemNameLfm, StringFormat='Item: {0}'}"/>
+                            <Border Grid.Row="2" DataContext="{Binding ParserInfo.ItemLf}" Background="{StaticResource ElementBackground}">
                                 <Grid Margin="10" >
                                     <Grid.RowDefinitions>
                                         <RowDefinition/>
@@ -674,7 +676,7 @@
                                     <TextBlock Grid.Row="0" Text="Have:" VerticalAlignment="Center"/>
                                     <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Have}" VerticalAlignment="Center"/>
                                     <TextBlock Grid.Row="1" Text="Price:" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DefaultPrice}" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Price, StringFormat='{}{0}$'}" VerticalAlignment="Center"/>
                                     <TextBlock Grid.Row="2" Text="Tradable:" VerticalAlignment="Center"/>
                                     <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Tradable}" VerticalAlignment="Center"/>
                                     <TextBlock Grid.Row="3" Text="Reservable:" VerticalAlignment="Center"/>

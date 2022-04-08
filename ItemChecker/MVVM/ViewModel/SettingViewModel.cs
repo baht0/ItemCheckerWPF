@@ -15,12 +15,9 @@ namespace ItemChecker.MVVM.ViewModel
     public class SettingViewModel : ObservableObject
     {
         SnackbarMessageQueue _message = new();
-        private string _theme = BaseModel.Theme == "Light" ? "WeatherNight" : "WhiteBalanceSunny";
+        private string _theme = BaseModel.Theme == "Light" ? "WhiteBalanceSunny" : "WeatherNight";
         private Settings _settings = new();
-        //about
-        private string _currentVersion = DataProjectInfo.CurrentVersion;
-        private string _latestVersion = DataProjectInfo.LatestVersion;
-        private string _isUpdate = DataProjectInfo.IsUpdate ? "Download" : "Reload";
+        private SettingsAbout _about = new();
 
         public SnackbarMessageQueue Message
         {
@@ -55,40 +52,15 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        //about
-        public string CurrentVersion
+        public SettingsAbout About
         {
             get
             {
-                return _currentVersion;
+                return _about;
             }
             set
             {
-                _currentVersion = value;
-                OnPropertyChanged();
-            }
-        }
-        public string LatestVersion
-        {
-            get
-            {
-                return _latestVersion;
-            }
-            set
-            {
-                _latestVersion = value;
-                OnPropertyChanged();
-            }
-        }
-        public string IsUpdate
-        {
-            get
-            {
-                return _isUpdate;
-            }
-            set
-            {
-                _isUpdate = value;
+                _about = value;
                 OnPropertyChanged();
             }
         }
@@ -96,7 +68,7 @@ namespace ItemChecker.MVVM.ViewModel
         public SettingViewModel()
         {
             Task.Run(() => ProjectInfoService.CheckUpdate());
-            LatestVersion = DataProjectInfo.LatestVersion;
+            About.LatestVersion = DataProjectInfo.LatestVersion;
             if (DataProjectInfo.IsUpdate)
                 Message.Enqueue("Update available!");
         }
@@ -160,7 +132,7 @@ namespace ItemChecker.MVVM.ViewModel
                 else
                 {
                     ProjectInfoService.CheckUpdate();
-                    IsUpdate = DataProjectInfo.IsUpdate ? "Download" : "Reload";
+                    About.IsUpdate = DataProjectInfo.IsUpdate ? "Download" : "Reload";
                 }
             });
         public ICommand CreateCurrentVersionCommand =>
@@ -173,35 +145,56 @@ namespace ItemChecker.MVVM.ViewModel
                     Message.Enqueue(mess);
                     BaseModel.IsWorking = false;
                 });
-            }, (obj) => SteamAccount.AccountName == "bahtiarov116" & !BaseModel.IsWorking);
+            }, (obj) => About.Admin & !BaseModel.IsWorking);
 
         public ICommand ApplyCommand =>
             new RelayCommand((obj) =>
             {
                 Settings settings = obj as Settings;
-                SaveConfig(settings);
+
+                Task.Run(() => {
+                    if (Net.Get.Currency(settings.CurrencyApi) == 0)
+                    {
+                        MessageBox.Show(
+                            "The \"CurrencyApi\" you provided is not working!", "Error",
+                            MessageBoxButton.OK, MessageBoxImage.Stop);
+                    }
+                    string steamApi = Services.BaseService.StatusSteam();
+                    if (steamApi == "error")
+                    {
+                        MessageBox.Show(
+                            "The \"SteamApiKey\" you provided is not working!", "Error",
+                            MessageBoxButton.OK, MessageBoxImage.Stop);
+                    }
+                    else if (String.IsNullOrEmpty(steamApi))
+                        Main.Notifications.Add(new()
+                        {
+                            Title = "Steam Account",
+                            Message = "Failed to get your API Key!\nSome features will not be available to you."
+                        });
+                });
+
+                Theme = BaseModel.Theme == "Light" ? "WhiteBalanceSunny" : "WeatherNight";
+
+                SettingsProperties.Default.CurrencyApiKey = settings.CurrencyApi;
+                SettingsProperties.Default.CurrencyId = settings.CurrencyId;
+                SettingsProperties.Default.Quit = settings.Quit;
+                SettingsProperties.Default.SetHours = settings.SetHours;
+                SettingsProperties.Default.TurnOn = settings.TurnOn;
+                SettingsProperties.Default.TurnOff = settings.TurnOff;
+
+                SettingsProperties.Default.MinPrecent = settings.MinPrecent;
+                SettingsProperties.Default.ServiceId = settings.ServiceId;
+                SteamAccount.ApiKey = settings.SteamApiKey;
+
+                FloatProperties.Default.maxFloatValue_FN = settings.FactoryNew;
+                FloatProperties.Default.maxFloatValue_MW = settings.MinimalWear;
+                FloatProperties.Default.maxFloatValue_FT = settings.FieldTested;
+                FloatProperties.Default.maxFloatValue_WW = settings.WellWorn;
+                FloatProperties.Default.maxFloatValue_BS = settings.BattleScarred;
+
+                SettingsProperties.Default.Save();                
             }, (obj) => !BaseModel.IsParsing & !BaseModel.IsWorking & !BaseModel.IsBrowser);
-        void SaveConfig(Settings settings)
-        {
-            SettingsProperties.Default.CurrencyApiKey = settings.CurrencyApi;
-            SettingsProperties.Default.CurrencyId = settings.CurrencyId;
-            SettingsProperties.Default.Quit = settings.Quit;
-            SettingsProperties.Default.SetHours = settings.SetHours;
-            SettingsProperties.Default.TurnOn = settings.TurnOn;
-            SettingsProperties.Default.TurnOff = settings.TurnOff;
-
-            SettingsProperties.Default.MinPrecent = settings.MinPrecent;
-            SettingsProperties.Default.ServiceId = settings.ServiceId;
-            SteamAccount.ApiKey = settings.SteamApiKey;
-
-            FloatProperties.Default.maxFloatValue_FN = settings.FactoryNew;
-            FloatProperties.Default.maxFloatValue_MW = settings.MinimalWear;
-            FloatProperties.Default.maxFloatValue_FT = settings.FieldTested;
-            FloatProperties.Default.maxFloatValue_WW = settings.WellWorn;
-            FloatProperties.Default.maxFloatValue_BS = settings.BattleScarred;
-
-            SettingsProperties.Default.Save();
-        }
 
         public ICommand ThemeCommand =>
             new RelayCommand((obj) =>
@@ -209,16 +202,18 @@ namespace ItemChecker.MVVM.ViewModel
                 App app = (App)Application.Current;
                 if (BaseModel.Theme == "Light")
                 {
-                    Theme = "WhiteBalanceSunny";
+                    Theme = "WeatherNight";
                     app.ChangeTheme(new("/Themes/Dark.xaml", UriKind.RelativeOrAbsolute));
                     BaseModel.Theme = "Dark";
                 }
                 else if (BaseModel.Theme == "Dark")
                 {
-                    Theme = "WeatherNight";
+                    Theme = "WhiteBalanceSunny";
                     app.ChangeTheme(new("/Themes/Light.xaml", UriKind.RelativeOrAbsolute));
                     BaseModel.Theme = "Light";
                 }
+                SettingsProperties.Default.Theme = BaseModel.Theme;
+                SettingsProperties.Default.Save();
             });
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace ItemChecker.MVVM.Model
@@ -10,10 +9,14 @@ namespace ItemChecker.MVVM.Model
         private int _infoItemCount;
         private List<DataInventoryCsm> _inventoryCsm = new();
         private DataInventoryCsm _itemCsm = new();
+        private decimal _itemCsmComparePrice = 0;
         private bool _csm = false;
+
         private Lfm _itemLf = new();
         private bool _lf = false;
+
         private DataSteamMarket _itemSt = new();
+        private string _itemNameLfm = "Unknown";
         private bool _st = false;
 
         //info
@@ -66,6 +69,18 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        public decimal ItemCsmComparePrice
+        {
+            get
+            {
+                return _itemCsmComparePrice;
+            }
+            set
+            {
+                _itemCsmComparePrice = value;
+                OnPropertyChanged();
+            }
+        }
         public bool CSM
         {
             get
@@ -78,6 +93,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+
         public Lfm ItemLf
         {
             get
@@ -87,6 +103,18 @@ namespace ItemChecker.MVVM.Model
             set
             {
                 _itemLf = value;
+                OnPropertyChanged();
+            }
+        }
+        public string ItemNameLfm
+        {
+            get
+            {
+                return _itemNameLfm;
+            }
+            set
+            {
+                _itemNameLfm = value;
                 OnPropertyChanged();
             }
         }
@@ -102,6 +130,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+
         public DataSteamMarket ItemSt
         {
             get

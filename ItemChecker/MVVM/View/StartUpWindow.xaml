@@ -5,11 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ItemChecker.MVVM.View"
         xmlns:viewmodel="clr-namespace:ItemChecker.MVVM.ViewModel"
+        xmlns:customConverter="clr-namespace:ItemChecker.Converter"
         mc:Ignorable="d"
         x:Name="Window"
-        Title="ItemChecker" 
-        Height="476"
-        Width="360"      
+        Title="ItemChecker"
+        Width="500" Height="370"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         d:DataContext="{d:DesignInstance Type=viewmodel:StartUpViewModel}"
         Background="{DynamicResource Background}"
@@ -17,117 +17,204 @@
         TextElement.FontWeight="Normal"
         FontFamily="{materialDesign:MaterialDesignFont}"
         WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="NoResize">
+    <Window.Resources>
+        <ControlTemplate x:Key="ValidError"/>
+        <customConverter:BooleanReverseConverter x:Key="BooleanReverseConverter"/>
+    </Window.Resources>
     <Border BorderBrush="DimGray" BorderThickness="0.5">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="25"/>
-                <!--Title-->
                 <RowDefinition/>
-                <!--body-->
-                <RowDefinition Height="16"/>
-                <!--Footer-->
             </Grid.RowDefinitions>
-            <Rectangle MouseLeftButtonDown="Window_DragMove"
-                Grid.RowSpan="2"
-                Grid.ColumnSpan="2"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Top" 
-                Height="220" Width="360">
-                <Rectangle.Fill>
+            <!--background-->
+            <Path Grid.RowSpan="2" Width="500" Height="370" MouseLeftButtonDown="Window_DragMove">
+                <Path.Data>
+                    <PathGeometry>
+                        <PathFigure IsClosed="True" StartPoint="0,0">
+                            <LineSegment Point="500,0" />
+                            <LineSegment Point="500,70" />
+                            <BezierSegment Point1="450,130" Point2="400,80" Point3="350,160"/>
+                            <BezierSegment Point1="300,210" Point2="250,160" Point3="200,240"/>
+                            <BezierSegment Point1="150,290" Point2="100,240" Point3="50,320"/>
+                            <BezierSegment Point1="0,370" Point2="0,320" Point3="0,370"/>
+                        </PathFigure>
+                    </PathGeometry>
+                </Path.Data>
+                <Path.Fill>
                     <LinearGradientBrush>
                         <GradientStop Color="#FF80CAFF"/>
                         <GradientStop Color="#FF108CD3" Offset="1"/>
                         <GradientStop Color="#FF464646" Offset="10"/>
                     </LinearGradientBrush>
-                </Rectangle.Fill>
-            </Rectangle>            
+                </Path.Fill>
+            </Path>
             <!--Title-->
-            <Grid Grid.Row="0" Background="Transparent"
-                  MouseLeftButtonDown="Window_DragMove">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>                
-                <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Grid.Column="1">
-                    <Button Height="25" Style="{DynamicResource MaterialDesignFlatButton}"
+            <StackPanel Grid.Row="0" Height="25" HorizontalAlignment="Right" Orientation="Horizontal" Grid.Column="1">
+                <Button Height="25" Style="{DynamicResource MaterialDesignFlatButton}"
                         Click="Close_Click">
-                        <materialDesign:PackIcon Kind="Close" Foreground="White"/>
-                    </Button>
-                </StackPanel>
-            </Grid>
-            <!--Body-->
-            <Grid Grid.Row="1" IsEnabled="{Binding IsLogin}">
-                <Image Grid.Row="1" MouseLeftButtonDown="Window_DragMove"
-                   Source="../../Resources/logo-white.png"
-                   Width="80"
-                   Margin="0 10 0 0"
-                   VerticalAlignment="Top"/>
-                <Rectangle Width="250" Height="260"
-                           Fill="{StaticResource Background}" Margin="0 50 0 0" 
+                    <materialDesign:PackIcon Kind="Close" Foreground="White"/>
+                </Button>
+            </StackPanel>
+            <!--body-->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="220"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <!--Logo-->
+                <Grid Grid.Column="0" MouseLeftButtonDown="Window_DragMove">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="85"/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="90"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Image Grid.Column="0" Width="80"
+                           HorizontalAlignment="Center"
+                           Source="../../Resources/logo-white.png"/>
+                    <TextBlock Text="ItemChecker" Grid.Column="1" Foreground="White" HorizontalAlignment="Left"
+                               VerticalAlignment="top" FontSize="20" Margin="0 15 0 0"/>
+                    <!--Status-->
+                    <Border Grid.Column="1" VerticalAlignment="Bottom" Opacity="1.0" Margin="0 0 0 20">
+                        <TextBlock x:Name="PointsStatus" FontSize="14" Text="{Binding StartUp.Progress.Item2, NotifyOnTargetUpdated=True, Mode=OneWay}" Foreground="White">
+                            <TextBlock.Triggers>
+                                <EventTrigger RoutedEvent="Binding.TargetUpdated">
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="PointsStatus" To="1.0" Storyboard.TargetProperty="Opacity" Duration="0:0:0.5" />
+                                            <ThicknessAnimation Storyboard.TargetName="PointsStatus" From="0 -25 0 0" To="0 0 0 0" Storyboard.TargetProperty="Margin" Duration="0:0:0.5" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </TextBlock.Triggers>
+                        </TextBlock>
+                    </Border>
+                    
+                    <TextBlock Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                               Text="© 2018-2022 baht0" Grid.ColumnSpan="2" Margin="15 0 0 0"
+                               FontSize="11" Foreground="White"/>
+                    <TextBlock Grid.Row="2" Grid.Column="0" HorizontalAlignment="Left"
+                               Text="{Binding StartUp.Version, StringFormat='Version: {0}'}"
+                                Grid.ColumnSpan="2"  Margin="15 0 0 0"
+                               FontSize="10" Foreground="White"/>
+                </Grid>
+                <!--Login-->
+                <Grid Grid.Column="1" Visibility="{Binding IsLogin, Converter={StaticResource BooleanToVisibilityConverter}}"
+                      VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <Rectangle Width="235" Height="230"
+                           Fill="{StaticResource Background}"
                            RadiusX="12" RadiusY="12">
-                    <Rectangle.Effect>
-                        <DropShadowEffect Color="DarkGray" 
+                        <Rectangle.Effect>
+                            <DropShadowEffect Color="DarkGray" 
                                       Direction="360"
                                       BlurRadius="15"
                                       RenderingBias="Quality"
                                       ShadowDepth="1"/>
-                    </Rectangle.Effect>
-                </Rectangle>
-                <Grid Width="200" Height="200"
-                      Margin="10 40 10 10"
-                      DataContext="{Binding Login}">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="25"/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition Height="25"/>
-                        <RowDefinition Height="40"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.ColumnSpan="2" Text="ItemChecker" FontSize="15"
+                        </Rectangle.Effect>
+                    </Rectangle>
+                    <Grid Width="200" Height="170" Margin="0 -20 0 0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="40"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Steam" FontSize="15" 
+                               Grid.ColumnSpan="2" Grid.Row="0"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Top"/>
-                    <TextBlock Text="Account Name:" Grid.Row="1" VerticalAlignment="Center"/>
-                    <TextBox Grid.Row="1" Grid.Column="1" Height="25"
-                             Text="{Binding Login, UpdateSourceTrigger=PropertyChanged}"/>
-                    <TextBlock Text="Password:" Grid.Row="2" VerticalAlignment="Center"/>
-                    <PasswordBox x:Name="passTextbox" Grid.Row="2" Grid.Column="1" Height="25"/>
-                    <CheckBox Grid.Row="3" Grid.Column="1" IsChecked="{Binding Remember, UpdateSourceTrigger=PropertyChanged}">Remember me</CheckBox>
-                    <Separator Grid.Row="4" Grid.ColumnSpan="2"
+                        <TextBlock Text="Account Name:" Grid.Row="1" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" Height="25"
+                             Text="{Binding Login.Login, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock Text="Password:" Grid.Row="2" VerticalAlignment="Center"/>
+                        <PasswordBox x:Name="passTextbox" Grid.Row="2" Grid.Column="1" Height="25"/>
+                        <CheckBox Grid.Row="3" Grid.Column="1" IsChecked="{Binding Login.Remember, UpdateSourceTrigger=PropertyChanged}">Remember me</CheckBox>
+                        <Separator Grid.Row="4" Grid.ColumnSpan="2"
                                Width="200" VerticalAlignment="Top"/>
-                    <TextBlock Text="2AF Code:" Grid.Row="4" VerticalAlignment="Bottom"/>
-                    <TextBox Grid.Row="5" Grid.ColumnSpan="2"
+                        <TextBlock Text="2AF Code:" Grid.Row="4" VerticalAlignment="Bottom"/>
+                        <TextBox Grid.Row="5" Grid.ColumnSpan="2"
                              VerticalAlignment="Center"
                              MaxLength="5" FontSize="20"
-                             Margin="5" TextAlignment="Center"
+                             TextAlignment="Center"
                              CharacterCasing="Upper"
                              FontWeight="Bold"
                              FontFamily="Consolas"
                              KeyDown="TextBox_KeyDown"
-                             Text="{Binding Code2AF, UpdateSourceTrigger=PropertyChanged}"/>
+                             Text="{Binding Login.Code2AF, UpdateSourceTrigger=PropertyChanged}"/>
+                        <Button Content="Sign In" Grid.ColumnSpan="2" Grid.Row="5"
+                            Width="100" Margin="0 0 0 -55"
+                            HorizontalAlignment="Center"  VerticalAlignment="Bottom"
+                            Command="{Binding LoginCommand}"
+                            CommandParameter="{Binding ElementName=passTextbox}"/>
+                    </Grid>
                 </Grid>
-                <Button Content="Sign In"
-                        VerticalAlignment="Bottom" Margin="120 0 120 45"
-                        Command="{Binding LoginCommand}"
-                        CommandParameter="{Binding ElementName=passTextbox}"/>
+                <!--first STart-->
+                <Grid Grid.Column="1" Visibility="{Binding IsFirst, Converter={StaticResource BooleanToVisibilityConverter}}"
+                      VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <Rectangle Width="255" Height="180" Fill="{StaticResource Background}"
+                           RadiusX="12" RadiusY="12">
+                        <Rectangle.Effect>
+                            <DropShadowEffect Color="DarkGray" 
+                                      Direction="360" BlurRadius="15"
+                                      RenderingBias="Quality" ShadowDepth="1"/>
+                        </Rectangle.Effect>
+                    </Rectangle>
+                    <Grid Width="220" Height="140" Margin="0 -20 0 0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Initial settings" FontSize="15" 
+                               Grid.ColumnSpan="2" Grid.Row="0"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Top"/>
+                        <TextBlock Text="Currency API Key:" Grid.Row="1" VerticalAlignment="Center"/>
+                        <Button Grid.Row="1" Grid.Column="2" ToolTip="Open services in browser" HorizontalAlignment="Left"
+                                        Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
+                                        Command="{Binding GetCurrencyApiCommand}">
+                            <materialDesign:PackIcon Kind="OpenInNew"/>
+                        </Button>
+                        <TextBox Grid.Row="2" Grid.Column="0" Height="25" Grid.ColumnSpan="2"
+                                 ToolTip="API key of the currency server" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"
+                                 Text="{Binding Settings.CurrencyApi}"/>
+                        <TextBlock Text="Currency:" Grid.Row="3" VerticalAlignment="Center"/>
+                        <ComboBox Grid.Row="3" Grid.Column="1" Height="25" 
+                                  ItemsSource="{Binding Settings.CurrencyList}" ToolTip="Displaying prices in tables"
+                                  SelectedIndex="{Binding Settings.CurrencyId}"/>
+                        <TextBlock Text="Service:" Grid.Row="4" VerticalAlignment="Center"/>
+                        <ComboBox Grid.Row="4" Grid.Column="1" Height="25"
+                                  ItemsSource="{Binding Settings.ServicesList}"
+                                  SelectedIndex="{Binding Settings.ServiceId}"/>
+                        <Button Content="Continue" Grid.ColumnSpan="2" Grid.Row="5"
+                                Width="100" Margin="0 0 0 -45"
+                                HorizontalAlignment="Center"  VerticalAlignment="Bottom"
+                                Command="{Binding ContinueCommand}"
+                                CommandParameter="{Binding Settings}"/>
+                    </Grid>
+                </Grid>                
             </Grid>
-            <!--Footer-->
-            <Grid Grid.Row="3" Margin="10 0 10 0">
-                <TextBlock Grid.Row="3" 
-                   Text="{Binding Path=Version, StringFormat='Version: {0}'}"
-                   HorizontalAlignment="Left"
-                   VerticalAlignment="Center"
-                       FontSize="10" Foreground="#FF7E7E7E"/>
-                <TextBlock Grid.Row="3"
-                   Text="{Binding Path=Status}"
-                   HorizontalAlignment="Right"
-                   VerticalAlignment="Center"/>
-            </Grid>
-            <materialDesign:Snackbar Grid.Row="1" MessageQueue="{Binding Message}"/>
+            <materialDesign:Snackbar Grid.Row="1" MessageQueue="{Binding StartUp.Message}"/>
+            <ProgressBar Grid.Row="1" VerticalAlignment="Bottom"
+                         Style="{DynamicResource MaterialDesignLinearProgressBar}"
+                         Maximum="6"
+                         Value="{Binding StartUp.Progress.Item1, Mode=OneWay}"/>
         </Grid>
     </Border>
 </Window>

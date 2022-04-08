@@ -48,7 +48,7 @@
                     <Image Source="../../Resources/ico.png" Height="18" Margin="1"
                            MouseLeftButtonDown="Image_MouseDown">
                         <Image.ContextMenu>
-                            <ContextMenu Style="{StaticResource MaterialDesignContextMenu}">
+                            <ContextMenu Style="{StaticResource MaterialDesignContextMenu}" Background="{DynamicResource ElementBackground}">
                                 <MenuItem Header="Links">
                                     <MenuItem Header="CSM" Click="CSM_MenuItem_Click"/>
                                     <MenuItem Header="Old CSM" Click="oldCSM_MenuItem_Click"/>

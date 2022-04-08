@@ -70,7 +70,7 @@ namespace ItemChecker.Net
             return JObject.Parse(json);
         }
 
-        public static Decimal Course(string currency_api_key)
+        public static Decimal Currency(string currency_api_key)
         {
             try
             {

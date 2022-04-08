@@ -31,57 +31,6 @@ namespace ItemChecker.MVVM.Model
         public static SteamLogin LoginSteam { get; set; } = new();
         public static string StatusCommunity { get; set; } = string.Empty;
 
-        public static Boolean GetCookies()
-        {
-            try
-            {
-                System.Net.Cookie steamSessionId = Get.SteamSessionId();
-                string url = "https://steamcommunity.com/login/home/?goto=my/profile";
-                if (!String.IsNullOrEmpty(SettingsProperties.Default.SteamLoginSecure))
-                {
-                    SteamCookies.Add(steamSessionId);
-                    SteamCookies.Add(new System.Net.Cookie("steamLoginSecure", SettingsProperties.Default.SteamLoginSecure, "/", "steamcommunity.com"));
-                    string html = Get.Request(SteamCookies, url);
-                    HtmlDocument htmlDoc = new();
-                    htmlDoc.LoadHtml(html);
-                    string title = htmlDoc.DocumentNode.SelectSingleNode("html/head/title").InnerText;
-                    if (!title.Contains("Sign In"))
-                        return true;
-                }
-                if (Browser == null)
-                    OpenBrowser();
-                Browser.Navigate().GoToUrl(url);
-
-                while (!Browser.Url.Contains("id") & !Browser.Url.Contains("profiles"))
-                {
-                    LoginSteam.IsLoggedIn = false;
-                    Steam();
-                }
-                LoginSteam.IsLoggedIn = true;
-
-                ICookieJar cookies = Browser.Manage().Cookies;
-                string steamLoginSecure = cookies.GetCookieNamed("steamLoginSecure").Value.ToString();
-                SteamCookies = new();
-                SteamCookies.Add(steamSessionId);
-                SteamCookies.Add(new System.Net.Cookie("steamLoginSecure", steamLoginSecure, "/", "steamcommunity.com"));
-
-                if (StartUpProperties.Default.Remember)
-                {
-                    SettingsProperties.Default.SteamLoginSecure = steamLoginSecure;
-                    SettingsProperties.Default.Save();
-                }
-                if (SettingsProperties.Default.Quit)
-                {
-                    Browser.Quit();
-                    Browser = null;
-                }
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
         public static void OpenBrowser()
         {
             string profilesDir = AppPath + "profile";
@@ -111,32 +60,99 @@ namespace ItemChecker.MVVM.Model
             Browser.Manage().Window.Maximize();
             WebDriverWait = new WebDriverWait(Browser, TimeSpan.FromSeconds(10));
         }
-        static void Steam()
+
+        public static Boolean IsLogIn()
         {
-            IWebElement username = Browser.FindElement(By.XPath("//input[@name='username']"));
-            IWebElement password = Browser.FindElement(By.XPath("//input[@name='password']"));
+            bool isLogin = true;
+            string url = "https://steamcommunity.com/login/home/?goto=my/profile";
+            System.Net.Cookie steamSessionId = Get.SteamSessionId();
+            string steamLoginSecure = SettingsProperties.Default.SteamLoginSecure.Replace("\r\n", "").Trim();
+            if (!String.IsNullOrEmpty(steamLoginSecure))
+            {
+                SteamCookies.Add(steamSessionId);
+                SteamCookies.Add(new System.Net.Cookie("steamLoginSecure", steamLoginSecure, "/", "steamcommunity.com"));
+                string html = Get.Request(SteamCookies, url);
+                HtmlDocument htmlDoc = new();
+                htmlDoc.LoadHtml(html);
+                string title = htmlDoc.DocumentNode.SelectSingleNode("html/head/title").InnerText;
+                isLogin = title.Contains("Sign In");
+            }
+            if (isLogin)
+            {
+                if (Browser == null)
+                    OpenBrowser();
+                Browser.Navigate().GoToUrl(url);
+                isLogin = !Browser.Url.Contains("id") & !Browser.Url.Contains("profiles") ? true : GetCookies();
+            }
+            return isLogin;
+        }
+        public static Boolean GetCookies()
+        {
             try
             {
-                IWebElement remember = WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@name='remember_login']")));
-                remember.Click();
+                System.Net.Cookie steamSessionId = Get.SteamSessionId();
+                ICookieJar cookies = Browser.Manage().Cookies;
+                string steamLoginSecure = cookies.GetCookieNamed("steamLoginSecure").Value.ToString();
+                SteamCookies = new();
+                SteamCookies.Add(steamSessionId);
+                SteamCookies.Add(new System.Net.Cookie("steamLoginSecure", steamLoginSecure, "/", "steamcommunity.com"));
+
+                if (StartUpProperties.Default.Remember)
+                {
+                    SettingsProperties.Default.SteamLoginSecure = steamLoginSecure;
+                    SettingsProperties.Default.Save();
+                }
+                if (SettingsProperties.Default.Quit)
+                {
+                    Browser.Quit();
+                    Browser = null;
+                }
+                return false;
             }
-            catch { }
-            IWebElement signin = WebDriverWait.Until(e => e.FindElement(By.XPath("//button[@class='btn_blue_steamui btn_medium login_btn']")));
+            catch
+            {
+                return true;
+            }
+        }
+        public static Boolean Steam()
+        {
+            try
+            {
+                Browser.Navigate().GoToUrl("https://steamcommunity.com/login/home/?goto=my/profile");
 
-            while (!LoginSteam.IsLoggedIn)
-                Thread.Sleep(500);
-            username.SendKeys(LoginSteam.Login);
-            password.SendKeys(LoginSteam.Password);
-            signin.Click();
+                IWebElement username = WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@name='username']")));
+                IWebElement password = WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@name='password']")));
+                try
+                {
+                    IWebElement remember = WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@name='remember_login']")));
+                    remember.Click();
+                }
+                catch { }
+                IWebElement signin = WebDriverWait.Until(e => e.FindElement(By.XPath("//button[@class='btn_blue_steamui btn_medium login_btn']")));
 
-            Thread.Sleep(2000);
-            IWebElement code = WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@id='twofactorcode_entry']")));
-            code.SendKeys(LoginSteam.Code2AF);
-            code.SendKeys(Keys.Enter);
+                while (!LoginSteam.IsLoggedIn)
+                    Thread.Sleep(500);
+                username.SendKeys(LoginSteam.Login);
+                password.SendKeys(LoginSteam.Password);
+                signin.Click();
 
-            StartUpProperties.Default.Remember = LoginSteam.Remember;
-            StartUpProperties.Default.Save();
-            Thread.Sleep(4000);
+                Thread.Sleep(2000);
+                IWebElement code = WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@id='twofactorcode_entry']")));
+                code.SendKeys(LoginSteam.Code2AF);
+                code.SendKeys(Keys.Enter);
+
+                StartUpProperties.Default.Remember = LoginSteam.Remember;
+                StartUpProperties.Default.Save();
+                Thread.Sleep(4000);
+
+                LoginSteam.IsLoggedIn = false;
+                return !Browser.Url.Contains("id") & !Browser.Url.Contains("profiles") ? true : GetCookies();
+            }
+            catch
+            {
+                LoginSteam.IsLoggedIn = false;
+                return true;
+            }
         }        
     }
 }

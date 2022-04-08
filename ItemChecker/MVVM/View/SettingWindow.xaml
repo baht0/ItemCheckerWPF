@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ItemChecker.MVVM.View"
         xmlns:viewmodel="clr-namespace:ItemChecker.MVVM.ViewModel"
+        xmlns:customConverter="clr-namespace:ItemChecker.Converter"
         mc:Ignorable="d"
         Title="Setting" Height="330" Width="375"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
@@ -17,6 +18,8 @@
         WindowStyle="None" ResizeMode="NoResize">
     <Window.Resources>
         <ControlTemplate x:Key="ValidError"/>
+        <customConverter:ThemeToBooleanConverter x:Key="ThemeToBooleanConverter"/>
+        <customConverter:BooleanReverseConverter x:Key="BooleanReverseConverter"/>
     </Window.Resources>
     <Border BorderBrush="Gray" BorderThickness="0.5">
         <Grid Margin="10 0 10 10">
@@ -34,9 +37,9 @@
                 <TextBlock Text="Settings" VerticalAlignment="Center" />
                 <StackPanel Grid.Column="1" HorizontalAlignment="Right"
                         Orientation="Horizontal" Margin="0 0 -10 0">
-                    <Button Height="25" Command="{Binding ThemeCommand}"
+                    <Button Height="25" ToolTip="Help"
                             Style="{StaticResource MaterialDesignToolForegroundButton}">
-                        <materialDesign:PackIcon Kind="{Binding Theme}"/>
+                        <materialDesign:PackIcon Kind="HelpCircleOutline"/>
                     </Button>
                     <Button Height="25" Style="{StaticResource MaterialDesignFlatButton}"
                             Click="Button_Close">
@@ -68,7 +71,8 @@
                                 <TextBlock Grid.Row="0" Grid.Column="0"
                                            Text="Currency API Key:" Height="15"/>
                                 <TextBox Grid.Row="0" Grid.Column="1" ToolTip="API key of the currency server"
-                                         VerticalAlignment="Center" Text="{Binding CurrencyApi}"/>
+                                         VerticalAlignment="Center" Text="{Binding CurrencyApi}"
+                                          Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                                 <Button Grid.Row="0" Grid.Column="2" ToolTip="Open services in browser"
                                         Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
                                         Command="{Binding DataContext.GetCurrencyApiCommand, RelativeSource={RelativeSource AncestorType=Window}}">
@@ -101,6 +105,14 @@
                                           HorizontalAlignment="Left"
                                           IsChecked="{Binding SetHours}">
                                 </CheckBox>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <ToggleButton IsChecked="{Binding DataContext.Theme, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource ThemeToBooleanConverter}}" 
+                                                  Command="{Binding DataContext.ThemeCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                  Style="{StaticResource MaterialDesignSwitchToggleButton}"
+                                                  ToolTip="Switch Theme" IsEnabled="{Binding SetHours , Converter={StaticResource BooleanReverseConverter}}">
+                                        <materialDesign:PackIcon Kind="{Binding DataContext.Theme, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                    </ToggleButton>
+                                </StackPanel>
                                 <TextBlock Grid.Row="1" Text="Turn on:" Height="15"/>
                                 <materialDesign:TimePicker Grid.Row="1" Grid.Column="1" SelectedTime="{Binding TurnOn}"/>
                                 <TextBlock Grid.Row="2" Text="Turn off:" Height="15"/>
@@ -129,10 +141,11 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Min. precent:" VerticalAlignment="Center"/>
                                 <TextBox Grid.Column="1" VerticalAlignment="Center" ToolTip="Cancel order less than"
-                                             Text="{Binding MinPrecent}" PreviewTextInput="Number_PreviewTextInput"/>
+                                             Text="{Binding MinPrecent}" PreviewTextInput="Number_PreviewTextInput"
+                                          Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                                 <TextBlock Grid.Column="2" Text="%" Height="15" VerticalAlignment="Center"/>
                                 <TextBlock Grid.Row="1" Text="ToService:" VerticalAlignment="Center"/>
-                                <ComboBox x:Name="nn12" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center"
+                                <ComboBox Grid.Row="1" Grid.Column="1" VerticalAlignment="Center"
                                           ItemsSource="{Binding ServicesList}"
                                           SelectedIndex="{Binding ServiceId}"/>
                             </Grid>
@@ -152,7 +165,8 @@
                                     <ColumnDefinition Width="30"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="API Key:" Height="15"/>
-                                <TextBox Grid.Column="1" VerticalAlignment="Center" Text="{Binding SteamApiKey, UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBox Grid.Column="1" VerticalAlignment="Center" Text="{Binding SteamApiKey, UpdateSourceTrigger=PropertyChanged}"
+                                          Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                                 <Button Grid.Column="2" Height="25" ToolTip="Get API Key"
                                 Style="{StaticResource MaterialDesignToolForegroundButton}" 
                                 Command="{Binding DataContext.GetSteamApiCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
@@ -271,17 +285,18 @@
                             <TextBlock Grid.Row="3" Text="Latest version:" VerticalAlignment="Center"/>
                             <TextBlock Grid.Row="8" Text="© 2018-2022" VerticalAlignment="Center"/>
                             <TextBlock Grid.Row="1" Grid.Column="1" Text="baht0"  VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DataContext.CurrentVersion, RelativeSource={RelativeSource AncestorType=Window}}" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding DataContext.LatestVersion, RelativeSource={RelativeSource AncestorType=Window}}" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DataContext.About.CurrentVersion, RelativeSource={RelativeSource AncestorType=Window}}" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding DataContext.About.LatestVersion, RelativeSource={RelativeSource AncestorType=Window}}" VerticalAlignment="Center"/>
                             <Button Grid.Row="2" Grid.Column="2" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
                                 Command="{Binding DataContext.WhatIsNewCommand, RelativeSource={RelativeSource AncestorType=Window}}">
                                 <materialDesign:PackIcon Kind="InfoOutline"/>
                             </Button>
                             <Button Grid.Row="3" Grid.Column="2" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
                                 Command="{Binding DataContext.UpdateCommand, RelativeSource={RelativeSource AncestorType=Window}}">
-                                <materialDesign:PackIcon Kind="{Binding DataContext.IsUpdate, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                <materialDesign:PackIcon Kind="{Binding DataContext.About.IsUpdate, RelativeSource={RelativeSource AncestorType=Window}}"/>
                             </Button>
                             <Button Grid.Row="8" Grid.Column="2" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
+                                    Visibility="{Binding DataContext.About.Admin, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}"
                                 Command="{Binding DataContext.CreateCurrentVersionCommand, RelativeSource={RelativeSource AncestorType=Window}}">
                                 <materialDesign:PackIcon Kind="Upload"/>
                             </Button>
@@ -290,15 +305,16 @@
                 </TabItem>
             </TabControl>
             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Height="25" Style="{StaticResource MaterialDesignFlatButton}"
+                <Button Height="25" Width="70" Style="{StaticResource MaterialDesignFlatButton}"
                     Command="{Binding ApplyCommand}"
                     CommandParameter="{Binding Settings}"
                     Click="Button_Close">
-                    <TextBlock Text="Apply"/>
+                    <TextBlock Text="OK"/>
                 </Button>
-                <Button Height="25" Style="{StaticResource MaterialDesignFlatButton}"
-                        Click="Button_Close">
-                    <TextBlock Text="Cancel"/>
+                <Button Height="25" Width="70" Style="{StaticResource MaterialDesignFlatButton}"
+                    Command="{Binding ApplyCommand}"
+                    CommandParameter="{Binding Settings}">
+                    <TextBlock Text="Apply"/>
                 </Button>
             </StackPanel>
             <materialDesign:Snackbar Grid.Row="1" MessageQueue="{Binding Message}" />

@@ -16,25 +16,25 @@ namespace ItemChecker.Services
     {
         public static void GetCurrency()
         {
-            decimal course = Get.Course(SettingsProperties.Default.CurrencyApiKey);
+            decimal course = Get.Currency(SettingsProperties.Default.CurrencyApiKey);
             if (course != 0)
             {
                 SettingsProperties.Default.CurrencyValue = course;
                 SettingsProperties.Default.Save();
             }
         }
-        public static void StatusSteam()
+        public static String StatusSteam()
         {
             try
             {
                 if (String.IsNullOrEmpty(SteamAccount.ApiKey))
-                    return;
+                    return string.Empty;
                 JObject res = Get.GameServersStatus(SteamAccount.ApiKey);
-                StatusCommunity = res["result"]["services"]["SteamCommunity"].ToString();
+                return res["result"]["services"]["SteamCommunity"].ToString();
             }
             catch
             {
-                StatusCommunity = "error";
+                return "error";
             }
         }
 

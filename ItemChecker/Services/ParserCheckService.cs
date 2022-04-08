@@ -23,6 +23,7 @@ namespace ItemChecker.MVVM.Model
         string _status { get; set; } = "Tradable";
         bool _have { get; set; } = false;
         #endregion
+
         #region check
         public DataParser Check(string itemName, int serOneId, int serTwoId)
         {
@@ -62,7 +63,7 @@ namespace ItemChecker.MVVM.Model
                         }
                         if (DataOrder.Orders.Any(n => n.ItemName == _itemName))
                             _status = "Ordered";
-                        _have = _price1 != 0;
+                        _have = serOneId == 0 || _price1 != 0;
                         break;
                     }
                 case 2:
@@ -86,7 +87,7 @@ namespace ItemChecker.MVVM.Model
                             _price1 = Edit.ConverterToRub(_price1, SettingsProperties.Default.CurrencyValue);
                             _price2 = Edit.ConverterToRub(_price2, SettingsProperties.Default.CurrencyValue);
                         }
-                        _have = _price1 != 0;
+                        _have = ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == _itemName).LfmInfo.Have > 0;
                         break;
                     }
             }
@@ -209,6 +210,8 @@ namespace ItemChecker.MVVM.Model
             List<string> list = new();
             foreach (string item in ParserProperties.Default.CheckList)
             {
+                if (list.Any(x => x == item))
+                    continue;
                 //Dopplers
                 if (config.OnlyDopplers && !item.Contains("Doppler"))
                     continue;

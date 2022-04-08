@@ -65,6 +65,21 @@ namespace ItemChecker
         {
             if (SettingsProperties.Default.SetHours)
                 AutoChangeTheme();
+            else
+            {
+                switch (SettingsProperties.Default.Theme)
+                {
+                    case "Light":
+                        Model.BaseModel.Theme = "Light";
+                        ChangeTheme(new("/Themes/Light.xaml", UriKind.RelativeOrAbsolute));
+                        break;
+                    case "Dark":
+                        Model.BaseModel.Theme = "Dark";
+                        ChangeTheme(new("/Themes/Dark.xaml", UriKind.RelativeOrAbsolute));
+                        break;
+                }
+            }
+
 
             Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
             Window start = new StartWindow();

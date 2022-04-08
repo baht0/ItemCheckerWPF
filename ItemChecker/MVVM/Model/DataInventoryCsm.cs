@@ -8,6 +8,7 @@ namespace ItemChecker.MVVM.Model
         public string ItemName { get; set; } = "Unknown";
         public int StackSize { get; set; } = 0;
         public int Id { get; set; } = 0;
+        public decimal DefaultPrice { get; set; } = 0;
         public decimal Price { get; set; } = 0;
         public bool Sticker { get; set; } = false;
         public bool NameTag { get; set; } = false;

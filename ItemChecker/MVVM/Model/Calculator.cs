@@ -100,10 +100,10 @@ namespace ItemChecker.MVVM.Model
             set
             {
                 _value = value;
-                if (Currency1 == 1 & Currency2 == 0)
-                    Converted = Edit.ConverterToUsd(Value, SettingsProperties.Default.CurrencyValue);
-                if (Currency1 == 0 & Currency2 == 1)
-                    Converted = Edit.ConverterToRub(Value, SettingsProperties.Default.CurrencyValue);
+                if (Currency1 == 1 && Currency2 == 0)
+                    Converted = Edit.ConverterToUsd(value, SettingsProperties.Default.CurrencyValue);
+                if (Currency1 == 0 && Currency2 == 1)
+                    Converted = Edit.ConverterToRub(value, SettingsProperties.Default.CurrencyValue);
                 OnPropertyChanged();
             }
         }
