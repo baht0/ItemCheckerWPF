@@ -320,7 +320,6 @@ namespace ItemChecker.MVVM.ViewModel
                     Application.Current.Dispatcher.Invoke(() => { MessageBox.Show("Nothing found. Adjust the parameters.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning); });
 
                 ParserGridView = CollectionViewSource.GetDefaultView(ParserGrid);
-                ParserStatistics.Currency = ParserStatistics.DataCurrency;
             }
             catch (Exception exp)
             {
@@ -345,6 +344,7 @@ namespace ItemChecker.MVVM.ViewModel
                     ParserStatistics.DataCurrency = "RUB";
                     break;
             }
+            ParserStatistics.Currency = ParserStatistics.DataCurrency;
             if (ParserGrid.Any())
             {
                 FilterConfig = new();
@@ -590,7 +590,7 @@ namespace ItemChecker.MVVM.ViewModel
                         ParserGrid = response;
                         ParserGridView = CollectionViewSource.GetDefaultView(ParserGrid);
 
-                        if (ParserProperties.Default.ServiceOne != 0)
+                        if (ParserProperties.Default.ServiceOne > 1)
                         {
                             baseService.LoadBotsInventoryCsm();
                             baseService.UpdateLfmInfo();

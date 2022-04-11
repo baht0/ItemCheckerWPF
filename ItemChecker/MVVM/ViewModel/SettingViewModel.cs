@@ -142,9 +142,14 @@ namespace ItemChecker.MVVM.ViewModel
                 BaseModel.IsWorking = true;
                 Task.Run(() => {
                     bool status = ProjectInfoService.CreateCurrentVersion();
-                    string mess = status ? "Success" : "Something went wrong...";
+                    string mess = status ? "File upload was successful." : "Something went wrong...";
                     Message.Enqueue(mess);
                     BaseModel.IsWorking = false;
+                    Main.Notifications.Add(new()
+                    {
+                        Title = "Update",
+                        Message = mess
+                    });
                 });
             }, (obj) => About.Admin & !BaseModel.IsWorking);
 
@@ -200,6 +205,7 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand ThemeCommand =>
             new RelayCommand((obj) =>
             {
+                SettingsProperties.Default.SetHours = false;
                 App app = (App)Application.Current;
                 if (BaseModel.Theme == "Light")
                 {

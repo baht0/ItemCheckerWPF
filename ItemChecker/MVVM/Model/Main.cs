@@ -13,12 +13,12 @@ namespace ItemChecker.MVVM.Model
     public class MainInfo
     {
         public string User { get; set; } = SteamAccount.User;
-        public decimal Course { get; set; } = SettingsProperties.Default.CurrencyValue;
+        public decimal Currency { get; set; } = SettingsProperties.Default.CurrencyValue;
+        public string CurrencyString { get; set; } = SettingsProperties.Default.CurrencyId == 0 ? "USD ($)" : "RUB (₽)";
         public decimal Balance { get; set; } = SteamAccount.Balance;
         public decimal BalanceCsm { get; set; } = CsmAccount.BalanceCsm;
         public decimal BalanceUsd { get; set; } = SteamAccount.BalanceUsd;
         public decimal BalanceCsmUsd { get; set; } = CsmAccount.BalanceCsmUsd;
-        public string CurrencyString { get; set; } = SettingsProperties.Default.CurrencyId == 0 ? "USD ($)" : "RUB (₽)";
         public string StatusCommunity { get; set; } = BaseModel.StatusCommunity == "normal" ? "CheckCircle" : "CloseCircle";
 
         public SnackbarMessageQueue Message { get; set; } = Main.Message;

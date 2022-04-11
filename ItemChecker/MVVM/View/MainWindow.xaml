@@ -43,7 +43,7 @@
                     <ColumnDefinition Width="160"/>
                     <ColumnDefinition/>
                     <ColumnDefinition Width="170"/>
-                </Grid.ColumnDefinitions>                
+                </Grid.ColumnDefinitions>
                 <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Grid.Column="0">
                     <Image Source="../../Resources/ico.png" Height="18" Margin="1"
                            MouseLeftButtonDown="Image_MouseDown">
@@ -81,7 +81,7 @@
                     <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}" Click="Notification_Click">
                         <materialDesign:PackIcon Kind="{Binding MainInfo.IsNotification, Converter={StaticResource BooleanToNotificationIconConverter}}"/>
                     </Button>
-                    <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}" Click="Settings_Click">  
+                    <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}" Click="Settings_Click">
                         <materialDesign:PackIcon Kind="Settings"/>
                     </Button>
                     <Button Height="25" Style="{StaticResource MaterialDesignFlatButton}" Click="MinWin_Click">
@@ -89,7 +89,7 @@
                     </Button>
                     <Button Height="25" Style="{StaticResource MaterialDesignFlatButton}" Click="Close_Click">
                         <materialDesign:PackIcon Kind="Close"/>
-                    </Button>                    
+                    </Button>
                 </StackPanel>
                 <Popup x:Name="PopupCalculator" StaysOpen="False" Width="315" Height="240" Placement="Bottom" HorizontalOffset="973">
                     <Border BorderBrush="Gray" BorderThickness="0.5" Background="{DynamicResource ElementBackground}">
@@ -196,25 +196,30 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
+                    <ColumnDefinition Width="25"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0">
                     <TextBlock.Text>
-                        <MultiBinding StringFormat="User: {0} | Balance: {1}₽ / {2}$">
+                        <MultiBinding StringFormat="{}{0} | Balance: {1}₽ / {2}$">
                             <Binding Path="User"/>
                             <Binding Path="Balance" />
                             <Binding Path="BalanceUsd" />
                         </MultiBinding>
                     </TextBlock.Text>
                 </TextBlock>
-                <VirtualizingStackPanel Grid.Column="1" Orientation="Horizontal"
-                                        HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <TextBlock Text="{Binding CurrencyString, StringFormat='{}{0} | Steam Status:'}" Margin="0 0 2 0"/>
-                    <TextBlock >
+                <TextBlock Grid.Column="1" HorizontalAlignment="Right">
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="{}{0}₽ | {1}">
+                            <Binding Path="Currency" />
+                            <Binding Path="CurrencyString"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+                <TextBlock Grid.Column="2" ToolTip="Steam Status" HorizontalAlignment="Right">
                         <materialDesign:PackIcon Kind="{Binding StatusCommunity}"/>
-                    </TextBlock>
-                </VirtualizingStackPanel>
+                </TextBlock>
             </Grid>
-            <materialDesign:Snackbar x:Name="MyMessage" Grid.Row="1" MessageQueue="{Binding MainInfo.Message}"/>            
-        </Grid>        
+            <materialDesign:Snackbar x:Name="MyMessage" Grid.Row="1" MessageQueue="{Binding MainInfo.Message}"/>
+        </Grid>
     </Border>
 </Window>
