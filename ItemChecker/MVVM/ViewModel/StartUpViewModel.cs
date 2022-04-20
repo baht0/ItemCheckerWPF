@@ -115,7 +115,8 @@ namespace ItemChecker.MVVM.ViewModel
                 if (BaseModel.token.IsCancellationRequested)
                     return;
                 StartUp.Progress = Tuple.Create(1, "Check Update...");
-                ProjectInfoService.AppUpdate();
+                ProjectInfoService.AppCheck();
+                StartUp.IsUpdate = DataProjectInfo.IsUpdate;
 
                 if (String.IsNullOrEmpty(SettingsProperties.Default.CurrencyApiKey))
                 {
@@ -194,6 +195,16 @@ namespace ItemChecker.MVVM.ViewModel
                 }
             }
         }
+        public ICommand UpdateCommand =>
+            new RelayCommand((obj) =>
+            {
+                MessageBoxResult result = MessageBox.Show(
+                    $"Want to upgrade from {DataProjectInfo.CurrentVersion} to {DataProjectInfo.LatestVersion}?", "Question",
+                    MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
+                    ProjectInfoService.Update();
+
+            }, (obj) => DataProjectInfo.IsUpdate);
         public ICommand LoginCommand =>
             new RelayCommand((obj) =>
             {

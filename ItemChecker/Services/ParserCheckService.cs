@@ -68,7 +68,7 @@ namespace ItemChecker.MVVM.Model
                     }
                 case 2:
                     {
-                        _price1 = DataInventoryCsm.Inventory.Where(x => x.ItemName == _itemName).Select(x => x.Price).DefaultIfEmpty().Min();
+                        _price1 = DataInventoriesCsm.Items.Where(x => x.ItemName == _itemName).Select(x => x.Price).DefaultIfEmpty().Min();
                         _price2 = Math.Round(_price1 * Calculator.CommissionCsm, 2);
                         if (SettingsProperties.Default.CurrencyId == 1)
                         {
@@ -197,25 +197,15 @@ namespace ItemChecker.MVVM.Model
         #endregion
 
         //List
-        public List<string> SelectFile()
-        {
-            List<string> list = OpenFileDialog("txt");
-            if (list.Any())
-                list = clearPrices(list);
-
-            return list;
-        }
         public static List<string> ApplyConfig(ParserConfig config)
         {
             List<string> list = new();
-            foreach (string item in ParserProperties.Default.CheckList)
+            foreach (string item in config.CheckList)
             {
                 if (list.Any(x => x == item))
                     continue;
                 //Dopplers
                 if (config.OnlyDopplers && !item.Contains("Doppler"))
-                    continue;
-                if (!config.Dopplers && item.Contains("Doppler"))
                     continue;
                 //Unavailable
                 if (config.ServiceTwo == 2 && ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item).CsmInfo.Unavailable)
@@ -237,7 +227,7 @@ namespace ItemChecker.MVVM.Model
                 {
                     if (config.ServiceOne < 2 && ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item).SteamInfo.Price < config.MinPrice)
                         continue;
-                    else if (config.ServiceOne == 2 && DataInventoryCsm.Inventory.Where(x => x.ItemName == item).Select(x => x.Price).DefaultIfEmpty().Min() < config.MinPrice)
+                    else if (config.ServiceOne == 2 && DataInventoriesCsm.Items.Where(x => x.ItemName == item).Select(x => x.Price).DefaultIfEmpty().Min() < config.MinPrice)
                         continue;
                     else if (config.ServiceOne == 3 && ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item).LfmInfo.Price < config.MinPrice)
                         continue;
@@ -246,7 +236,7 @@ namespace ItemChecker.MVVM.Model
                 {
                     if (config.ServiceOne < 2 && ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item).SteamInfo.Price > config.MaxPrice)
                         continue;
-                    else if (config.ServiceOne == 2 && DataInventoryCsm.Inventory.Where(x => x.ItemName == item).Select(x => x.Price).DefaultIfEmpty().Min() > config.MaxPrice)
+                    else if (config.ServiceOne == 2 && DataInventoriesCsm.Items.Where(x => x.ItemName == item).Select(x => x.Price).DefaultIfEmpty().Min() > config.MaxPrice)
                         continue;
                     else if (config.ServiceOne == 3 && ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item).LfmInfo.Price > config.MaxPrice)
                         continue;

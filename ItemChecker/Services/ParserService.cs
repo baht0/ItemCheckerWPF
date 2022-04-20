@@ -13,6 +13,78 @@ namespace ItemChecker.MVVM.Model
 {
     public class ParserService : ItemBaseService
     {
+        #region CSV
+        public void ExportCsv(ObservableCollection<DataParser> parserGrid, ICollectionView collectionView, string mode)
+        {
+            dynamic source = parserGrid;
+            if (collectionView.Cast<DataParser>().Count() != parserGrid.Count)
+            {
+                MessageBoxResult result = MessageBoxResult.Cancel;
+                Application.Current.Dispatcher.Invoke(() => { result = MessageBox.Show($"Export with filter applied?\n\nClick \"No\" to export the entire list.", "Question", MessageBoxButton.YesNoCancel, MessageBoxImage.Question); });
+                
+                if (result == MessageBoxResult.Cancel)
+                    return;
+                else if (result == MessageBoxResult.Yes)
+                    source = collectionView;
+            }
+
+            string csv = $"{ParserStatistics.DataCurrency},{ParserProperties.Default.ServiceOne},{ParserProperties.Default.ServiceTwo}\r\n";
+            foreach (var item in source)
+            {
+                string itemName = item.ItemName;
+                if (itemName.Contains(","))
+                    itemName = itemName.Replace(",", ";");
+                csv += $"{item.ItemType},{itemName},{item.Price1},{item.Price2},{item.Price3},{item.Price4},{item.Precent},{item.Difference},{item.Status},{item.Have}\r\n";
+            }
+
+            //write
+            string path = DocumentPath + "extract";
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+            File.WriteAllText(path + $"Parser_{mode}_{ParserStatistics.DataCurrency}_{DateTime.Now:dd.MM.yyyy_hh.mm}.csv", Edit.replaceSymbols(csv));
+        }
+        public ObservableCollection<DataParser> ImportCsv()
+        {
+            List<string> list = OpenFileDialog("csv");
+            ObservableCollection<DataParser> datas = new();
+            if (!list.Any())
+                return datas;
+
+            foreach (string info in list)
+            {
+                string[] line = info.Split(',');
+                if (line.Length == 3)
+                {
+                    ParserStatistics.DataCurrency = line[0].ToString();
+                    ParserProperties.Default.ServiceOne = int.Parse(line[1]);
+                    ParserProperties.Default.ServiceTwo = int.Parse(line[2]);
+                    continue;
+                }
+
+                string itemName = line[1];
+                if (itemName.Contains(','))
+                    itemName = itemName.Replace(";", ",");
+
+                datas.Add(
+                    new DataParser(
+                        line[0],
+                        itemName,
+                        decimal.Parse(line[2]),
+                        decimal.Parse(line[3]),
+                        decimal.Parse(line[4]),
+                        decimal.Parse(line[5]),
+                        decimal.Parse(line[6]),
+                        decimal.Parse(line[7]),
+                        line[8],
+                        bool.Parse(line[9])
+                        )
+                    );
+            }
+
+            return datas;
+        }
+        #endregion
+
         public static bool ApplyFilter(ParserFilter filterConfig, DataParser item)
         {
             //category
@@ -160,108 +232,6 @@ namespace ItemChecker.MVVM.Model
 
             bool isShow = category && status && exterior && quality && types && prices && other;
             return isShow;
-        }
-        //CSV
-        public void ExportCsv(ObservableCollection<DataParser> parserGrid, ICollectionView collectionView, string mode)
-        {
-            dynamic source = parserGrid;
-            if (collectionView.Cast<DataParser>().Count() != parserGrid.Count)
-            {
-                MessageBoxResult result = MessageBoxResult.Cancel;
-                Application.Current.Dispatcher.Invoke(() => { result = MessageBox.Show($"Export with filter applied?\n\nClick \"No\" to export the entire list.", "Question", MessageBoxButton.YesNoCancel, MessageBoxImage.Question); });
-                
-                if (result == MessageBoxResult.Cancel)
-                    return;
-                else if (result == MessageBoxResult.Yes)
-                    source = collectionView;
-            }
-
-            string csv = $"{ParserStatistics.DataCurrency},{ParserProperties.Default.ServiceOne},{ParserProperties.Default.ServiceTwo}\r\n";
-            foreach (var item in source)
-            {
-                string itemName = item.ItemName;
-                if (itemName.Contains(","))
-                    itemName = itemName.Replace(",", ";");
-                csv += $"{item.ItemType},{itemName},{item.Price1},{item.Price2},{item.Price3},{item.Price4},{item.Precent},{item.Difference},{item.Status},{item.Have}\r\n";
-            }
-
-            //write
-            string path = $"{BaseModel.AppPath}\\extract";
-            if (!Directory.Exists(path))
-                Directory.CreateDirectory(path);
-            File.WriteAllText(path + $"\\Parser_{mode}_{ParserStatistics.DataCurrency}_{DateTime.Now:dd.MM.yyyy_hh.mm}.csv", Edit.replaceSymbols(csv));
-        }
-        public ObservableCollection<DataParser> ImportCsv()
-        {
-            List<string> list = OpenFileDialog("csv");
-            ObservableCollection<DataParser> datas = new();
-            if (!list.Any())
-                return datas;
-
-            foreach (string info in list)
-            {
-                string[] line = info.Split(',');
-                if (line.Length == 3)
-                {
-                    ParserStatistics.DataCurrency = line[0].ToString();
-                    ParserProperties.Default.ServiceOne = int.Parse(line[1]);
-                    ParserProperties.Default.ServiceTwo = int.Parse(line[2]);
-                    continue;
-                }
-
-                string itemName = line[1];
-                if (itemName.Contains(','))
-                    itemName = itemName.Replace(";", ",");
-
-                datas.Add(
-                    new DataParser(
-                        line[0],
-                        itemName,
-                        decimal.Parse(line[2]),
-                        decimal.Parse(line[3]),
-                        decimal.Parse(line[4]),
-                        decimal.Parse(line[5]),
-                        decimal.Parse(line[6]),
-                        decimal.Parse(line[7]),
-                        line[8],
-                        bool.Parse(line[9])
-                        )
-                    );
-            }
-
-            return datas;
-        }
-        public void ExportTxt(ICollectionView collectionView, string HeaderText, string mode)
-        {
-            MessageBoxResult result = MessageBox.Show($"Do need to add \"{HeaderText}\" to the list?", "Question", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
-            if (result == MessageBoxResult.Cancel)
-                return;
-
-            string txt = null;
-            if (result == MessageBoxResult.Yes)
-            {
-                if (ParserStatistics.DataCurrency == "RUB")
-                    MessageBox.Show("Attention, prices in \"RUB\" after conversion may not be accurate.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                foreach (DataParser item in collectionView)
-                {
-                    decimal price = item.Price1;
-                    if (ParserStatistics.DataCurrency == "RUB")
-                        price = Math.Round(item.Price1 / SettingsProperties.Default.CurrencyValue, 2);
-
-                    txt += $"{item.ItemName};{price}\r\n";
-                }
-            }
-
-            if (result == MessageBoxResult.No)
-            {
-                foreach (DataParser item in collectionView)
-                    txt += $"{item.ItemName}\r\n";
-            }
-            //write
-            string path = $"{BaseModel.AppPath}\\extract";
-            if (!Directory.Exists(path))
-                Directory.CreateDirectory(path);
-            File.WriteAllText(path + $"\\Parser_{mode}_{ParserStatistics.DataCurrency}_{result}_{DateTime.Now:dd.MM.yyyy_hh.mm}.txt", Edit.replaceSymbols(txt));
         }
     }
 }

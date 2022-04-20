@@ -74,5 +74,13 @@ namespace ItemChecker.MVVM.View
             if (e.Key == Key.Enter)
                 SearchTxt.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
         }
+
+        private void ComboBoxSer1_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (service1.SelectedIndex == 2)
+                csmGroup.IsEnabled = true;
+            else
+                csmGroup.IsEnabled = false;
+        }
     }
 }

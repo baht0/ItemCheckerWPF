@@ -1,5 +1,6 @@
 ﻿using ItemChecker.Net;
 using ItemChecker.Properties;
+using ItemChecker.MVVM.Model;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OpenQA.Selenium;
@@ -10,53 +11,89 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Web;
+using System.Windows;
+using ItemChecker.Support;
 
 namespace ItemChecker.Services
 {
     public class CsmCheckService : BaseService
     {
         static List<string> old_id = new();
-        int successfulTrades = 0;
+        int successfulTrades { get; set; } = 0;
 
-        public Int32 checkCsm(string checkItem)
+        public List<DataCsmCheck> CheckSteamPrice()
         {
-            string[] item_line = checkItem.Split(';');
-
-            string json = Get.InventoriesCsMoney(HttpUtility.UrlEncode(item_line[0]), HomeProperties.Default.UserItems);
-            if (!json.Contains("error"))
+            ParserCheckService checkService = new();
+            List<DataCsmCheck> list = new();
+            foreach (string itemName in HomeCsmCheck.List)
             {
-                JArray items = new();
-                JArray inventory = JArray.Parse(JObject.Parse(json)["items"].ToString());
-                foreach (JObject item in inventory)
+                if (HomeCsmCheck.token.IsCancellationRequested)
+                    break;
+                try
                 {
-                    if ((string)item["fullName"] != item_line[0])
-                        continue;
-                    if (checkItem.Contains(';'))
+                    DataParser data = checkService.Check(itemName, 2, 0);
+                    if (SettingsProperties.Default.CurrencyId == 0)
+                        data.Price4 = Edit.ConverterToUsd(data.Price4, SettingsProperties.Default.CurrencyValue);
+                    list.Add(new()
                     {
-                        decimal maxPrice = decimal.Parse(item_line[1]) + HomeProperties.Default.MaxDeviation;
-                        decimal price = Convert.ToDecimal(item["price"]);
-                        if (price > maxPrice)
-                            break;
-                    }
-                    if (item.ContainsKey("stackSize"))
+                        ItemName = itemName,
+                        StmPrice = data.Price4,
+                    });
+                }
+                catch (Exception exp)
+                {
+                    HomeCsmCheck.cts.Cancel();
+                    if (!exp.Message.Contains("429"))
                     {
-                        var response = Get.Request("https://inventories.cs.money/4.0/get_bot_stack/730/" + item["stackId"].ToString());
-                        JArray stack = JArray.Parse(response);
-                        foreach (JObject stack_item in stack)
-                            items.Add(getStackItems(item, stack_item));
+                        BaseService.errorLog(exp);
+                        BaseService.errorMessage(exp);
                     }
                     else
-                        items.Add(item);
+                        MessageBox.Show(exp.Message, "Parser stoped!", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
-                if (items.Any())
-                    addCart(items);
             }
+            return list;
+        }
+
+        public Int32 Check(string checkItem)
+        {
+            //string[] item_line = checkItem.Split(';');
+
+            //string json = Get.InventoriesCsMoney(HttpUtility.UrlEncode(item_line[0]));
+            //if (!json.Contains("error"))
+            //{
+            //    JArray items = new();
+            //    JArray inventory = JArray.Parse(JObject.Parse(json)["items"].ToString());
+            //    foreach (JObject item in inventory)
+            //    {
+            //        if ((string)item["fullName"] != item_line[0])
+            //            continue;
+            //        if (checkItem.Contains(';'))
+            //        {
+            //            decimal maxPrice = decimal.Parse(item_line[1]) + HomeProperties.Default.MinPrecent;
+            //            decimal price = Convert.ToDecimal(item["price"]);
+            //            if (price > maxPrice)
+            //                break;
+            //        }
+            //        if (item.ContainsKey("stackSize"))
+            //        {
+            //            var response = Get.Request("https://inventories.cs.money/4.0/get_bot_stack/730/" + item["stackId"].ToString());
+            //            JArray stack = JArray.Parse(response);
+            //            foreach (JObject stack_item in stack)
+            //                items.Add(getStackItems(item, stack_item));
+            //        }
+            //        else
+            //            items.Add(item);
+            //    }
+            //    if (items.Any())
+            //        addCart(items);
+            //}
 
             return successfulTrades;
         }
         Boolean addCart(JArray items)
         {
-            clearCart();
+            ClearCart();
             decimal sum = 0;
             foreach (JObject item in items)
             {
@@ -181,18 +218,11 @@ namespace ItemChecker.Services
 
             return JObject.Parse(json);
         }
-        public void clearCart()
+        public void ClearCart()
         {
             Browser.ExecuteJavaScript(Post.FetchRequest("application/json", "{\"type\":1}", "https://cs.money/clear_cart"));
             Thread.Sleep(1000);
             Browser.ExecuteJavaScript(Post.FetchRequest("application/json", "{\"type\":2}", "https://cs.money/clear_cart"));
-        }
-
-        public List<string> SelectFile()
-        {
-            List<string> list = OpenFileDialog("txt");
-
-            return list;
         }
     }
 }

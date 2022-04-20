@@ -6,10 +6,20 @@ namespace ItemChecker.MVVM.Model
 {
     public class StartUp : ObservableObject
     {
+        bool _isUpdate = DataProjectInfo.IsUpdate;
         string _version = DataProjectInfo.CurrentVersion;
         SnackbarMessageQueue _mess = new();
         Tuple<int, string> _progress = Tuple.Create(0, "Starting...");
 
+        public bool IsUpdate
+        {
+            get { return _isUpdate; }
+            set
+            {
+                _isUpdate = value;
+                OnPropertyChanged();
+            }
+        }
         public string Version
         {
             get { return _version; }

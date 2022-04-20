@@ -104,7 +104,7 @@ namespace ItemChecker.Support
         public static Decimal Precent(decimal a, decimal b) //from A to B
         {
             if (a != 0)
-                return Math.Round(((b - a) / a) * 100, 2);
+                return Math.Round((b - a) / a * 100, 2);
             else
                 return 0;
         }

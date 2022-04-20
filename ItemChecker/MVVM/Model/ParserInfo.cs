@@ -7,8 +7,8 @@ namespace ItemChecker.MVVM.Model
     {
         private int _infoItemCurrent;
         private int _infoItemCount;
-        private List<DataInventoryCsm> _inventoryCsm = new();
-        private DataInventoryCsm _itemCsm = new();
+        private List<DataInventoriesCsm> _inventoryCsm = new();
+        private DataInventoriesCsm _itemCsm = new();
         private decimal _itemCsmComparePrice = 0;
         private bool _csm = false;
 
@@ -45,7 +45,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        public List<DataInventoryCsm> InventoryCsm
+        public List<DataInventoriesCsm> InventoryCsm
         {
             get
             {
@@ -57,7 +57,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        public DataInventoryCsm ItemCsm
+        public DataInventoriesCsm ItemCsm
         {
             get
             {

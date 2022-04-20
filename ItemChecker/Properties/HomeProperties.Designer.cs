@@ -12,7 +12,7 @@ namespace ItemChecker.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.0.3.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.1.0.0")]
     internal sealed partial class HomeProperties : global::System.Configuration.ApplicationSettingsBase {
         
         private static HomeProperties defaultInstance = ((HomeProperties)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new HomeProperties())));
@@ -26,36 +26,36 @@ namespace ItemChecker.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("10")]
-        public int TimerPush {
+        public int TimePush {
             get {
-                return ((int)(this["TimerPush"]));
+                return ((int)(this["TimePush"]));
             }
             set {
-                this["TimerPush"] = value;
+                this["TimePush"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("10")]
-        public int TimerCsm {
+        public int TimeCsm {
             get {
-                return ((int)(this["TimerCsm"]));
+                return ((int)(this["TimeCsm"]));
             }
             set {
-                this["TimerCsm"] = value;
+                this["TimeCsm"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("10")]
-        public int TimerFloat {
+        public int TimeFloat {
             get {
-                return ((int)(this["TimerFloat"]));
+                return ((int)(this["TimeFloat"]));
             }
             set {
-                this["TimerFloat"] = value;
+                this["TimeFloat"] = value;
             }
         }
         
@@ -73,47 +73,13 @@ namespace ItemChecker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Generic.List<System.String> CsmList {
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int MinPrecent {
             get {
-                return ((global::System.Collections.Generic.List<System.String>)(this["CsmList"]));
+                return ((int)(this["MinPrecent"]));
             }
             set {
-                this["CsmList"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0.01")]
-        public decimal MaxDeviation {
-            get {
-                return ((decimal)(this["MaxDeviation"]));
-            }
-            set {
-                this["MaxDeviation"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool UserItems {
-            get {
-                return ((bool)(this["UserItems"]));
-            }
-            set {
-                this["UserItems"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Generic.List<System.String> FloatList {
-            get {
-                return ((global::System.Collections.Generic.List<System.String>)(this["FloatList"]));
-            }
-            set {
-                this["FloatList"] = value;
+                this["MinPrecent"] = value;
             }
         }
         
@@ -132,9 +98,9 @@ namespace ItemChecker.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("7")]
-        public decimal MaxPrecent {
+        public int MaxPrecent {
             get {
-                return ((decimal)(this["MaxPrecent"]));
+                return ((int)(this["MaxPrecent"]));
             }
             set {
                 this["MaxPrecent"] = value;
@@ -150,17 +116,6 @@ namespace ItemChecker.Properties {
             }
             set {
                 this["MaxPrice"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.ObjectModel.ObservableCollection<System.String> FavoriteList {
-            get {
-                return ((global::System.Collections.ObjectModel.ObservableCollection<System.String>)(this["FavoriteList"]));
-            }
-            set {
-                this["FavoriteList"] = value;
             }
         }
         

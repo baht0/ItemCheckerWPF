@@ -12,7 +12,7 @@ namespace ItemChecker.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.0.3.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.1.0.0")]
     internal sealed partial class ParserProperties : global::System.Configuration.ApplicationSettingsBase {
         
         private static ParserProperties defaultInstance = ((ParserProperties)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new ParserProperties())));
@@ -20,17 +20,6 @@ namespace ItemChecker.Properties {
         public static ParserProperties Default {
             get {
                 return defaultInstance;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Generic.List<System.String> CheckList {
-            get {
-                return ((global::System.Collections.Generic.List<System.String>)(this["CheckList"]));
-            }
-            set {
-                this["CheckList"] = value;
             }
         }
         
@@ -61,9 +50,9 @@ namespace ItemChecker.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public decimal MinPrice {
+        public int MinPrice {
             get {
-                return ((decimal)(this["MinPrice"]));
+                return ((int)(this["MinPrice"]));
             }
             set {
                 this["MinPrice"] = value;
@@ -73,9 +62,9 @@ namespace ItemChecker.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public decimal MaxPrice {
+        public int MaxPrice {
             get {
-                return ((decimal)(this["MaxPrice"]));
+                return ((int)(this["MaxPrice"]));
             }
             set {
                 this["MaxPrice"] = value;
@@ -169,12 +158,36 @@ namespace ItemChecker.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool Dopplers {
+        public bool WithoutLock {
             get {
-                return ((bool)(this["Dopplers"]));
+                return ((bool)(this["WithoutLock"]));
             }
             set {
-                this["Dopplers"] = value;
+                this["WithoutLock"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool RareItems {
+            get {
+                return ((bool)(this["RareItems"]));
+            }
+            set {
+                this["RareItems"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool UserItems {
+            get {
+                return ((bool)(this["UserItems"]));
+            }
+            set {
+                this["UserItems"] = value;
             }
         }
         

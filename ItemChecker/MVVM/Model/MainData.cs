@@ -1,11 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace ItemChecker.MVVM.Model
 {
+    public class DataNotification
+    {
+        public bool IsRead { get; set; } = false;
+        public string Title { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+        public DateTime Date { get; set; } = DateTime.Now;
+    }
     public class DataProjectInfo
     {
-        public static List<string> FilesList { get; set; } = new()
+        public static List<string> FilesList{ get; set; } = new()
         {
             "ItemChecker.exe",
             "ItemChecker.dll",

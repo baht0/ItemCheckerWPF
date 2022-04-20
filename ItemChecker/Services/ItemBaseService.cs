@@ -212,43 +212,48 @@ namespace ItemChecker.Services
                 }
             }
         }
-        public void LoadBotsInventoryCsm()
+
+        public void LoadInventoriesCsm(ParserConfig parserConfig)
         {
-            DataInventoryCsm.Inventory.Clear();
-            string json = Get.Request("https://old.cs.money/730/load_bots_inventory");
-            JArray array = JArray.Parse(json);
+            DataInventoriesCsm.Items.Clear();
+            int offset = 0;
+            string price = $"maxPrice={parserConfig.MaxPrice}&minPrice={parserConfig.MinPrice}&";
+            string user = parserConfig.UserItems ? string.Empty : "isMarket=false&";
 
-            foreach (JObject item in array)
+            string tradeLock = parserConfig.WithoutLock ? "hasTradeLock=false&" : "hasTradeLock=false&hasTradeLock=true&tradeLockDays=1&tradeLockDays=2&tradeLockDays=3&tradeLockDays=4&tradeLockDays=5&tradeLockDays=6&tradeLockDays=7&tradeLockDays=0&";
+            string rare = parserConfig.RareItems ? "hasRareFloat=true&hasRarePattern=true&hasRareStickers=true&" : "hasRareFloat=false&hasRarePattern=false&hasRareStickers=false&";
+            string onlyDopp = parserConfig.OnlyDopplers ? "phase=Phase%201&phase=Phase%202&phase=Phase%203&phase=Phase%204&phase=Emerald&phase=Sapphire&phase=Ruby&phase=Black%20Pearl&" : string.Empty;
+
+            while (true)
             {
-                int count = item["id"].Count();
-                int id = Convert.ToInt32(item["o"]);
-                decimal price = Convert.ToDecimal(item["p"]);
-                if (item.ContainsKey("cp"))
-                    price = Convert.ToDecimal(item["cp"]);
-                bool sticker = item.ContainsKey("s");
-                bool nameTag = item.ContainsKey("n");
-                bool user = item.ContainsKey("ui");
-                DateTime tradeLock = new();
-                if (item.ContainsKey("t"))
-                    tradeLock = Edit.ConvertFromUnixTimestamp(Convert.ToDouble(item["t"][0]));
-                bool rareItem = item.ContainsKey("ar");
-
-                string name = ItemBase.SkinsBase.FirstOrDefault(x => x.CsmInfo.Id == id) != null ? ItemBase.SkinsBase.FirstOrDefault(x => x.CsmInfo.Id == id).ItemName : string.Empty;
-                decimal defPrice = ItemBase.SkinsBase.FirstOrDefault(x => x.CsmInfo.Id == id) != null ? ItemBase.SkinsBase.FirstOrDefault(x => x.CsmInfo.Id == id).CsmInfo.Price : 0m;
-
-                DataInventoryCsm.Inventory.Add(new DataInventoryCsm()
+                string url = $"https://inventories.cs.money/5.0/load_bots_inventory/730?limit=60&offset={offset}&" + price + user + tradeLock + onlyDopp + rare + "&order=desc&priceWithBonus=40&sort=price&withStack=true";
+                JObject json = JObject.Parse(Get.Request(url));
+                if (!json.ContainsKey("error"))
                 {
-                    ItemName = name,
-                    StackSize = count,
-                    Id = id,
-                    DefaultPrice = defPrice,
-                    Price = price,
-                    Sticker = sticker,
-                    NameTag = nameTag,
-                    TradeLock = tradeLock,
-                    User = user,
-                    RareItem = rareItem
-                });
+                    JArray items = json["items"] as JArray;
+                    foreach (JObject item in items)
+                    {
+                        int id = Convert.ToInt32(item["nameId"]);
+                        int stack = item.ContainsKey("stackSize") ? Convert.ToInt32(item["stackSize"]) : 1;
+
+                        DataInventoriesCsm.Items.Add(new()
+                        {
+                            ItemName = item["fullName"].ToString(),
+                            NameId = id,
+                            StackSize = stack,
+                            Price = Convert.ToDecimal(item["price"]),
+                            DefaultPrice = ItemBase.SkinsBase.FirstOrDefault(x => x.CsmInfo.Id == id) != null ? ItemBase.SkinsBase.FirstOrDefault(x => x.CsmInfo.Id == id).CsmInfo.Price : 0m,
+                            Float = item["float"].Type != JTokenType.Null ? Convert.ToDecimal(item["float"]) : 0,
+                            Sticker = item["stickers"].Type != JTokenType.Null,
+                            RareItem = item["overpay"].Type != JTokenType.Null,
+                            User = item["userId"].Type != JTokenType.Null,
+                            TradeLock = item.ContainsKey("tradeLock") ? Edit.ConvertFromUnixTimestamp(Convert.ToDouble(item["tradeLock"])) : new(),
+                        });
+                    }
+                    offset += 60;
+                }
+                else
+                    break;
             }
         }
     }

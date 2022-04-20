@@ -28,8 +28,7 @@
                 <RowDefinition/>
                 <RowDefinition Height="25"/>
             </Grid.RowDefinitions>
-            <Grid Grid.Row="0" MouseLeftButtonDown="Window_DragMove"
-                  Background="Transparent">
+            <Grid Grid.Row="0" MouseLeftButtonDown="Window_DragMove" Background="Transparent">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition/>

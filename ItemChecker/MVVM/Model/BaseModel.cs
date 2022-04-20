@@ -16,6 +16,15 @@ namespace ItemChecker.MVVM.Model
     {
         //app
         public static string AppPath { get; set; } = AppDomain.CurrentDomain.BaseDirectory;
+        public static string DocumentPath{
+            get
+            {
+                string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\ItemChecker\\";
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+                return path;
+            }
+        }
         public static string Theme { get; set; } = "Light";
         //loading
         public static bool IsParsing { get; set; }
@@ -33,13 +42,10 @@ namespace ItemChecker.MVVM.Model
 
         public static void OpenBrowser()
         {
-            string profilesDir = AppPath + "profile";
+            string profilesDir = DocumentPath + "profile";
 
             if (!Directory.Exists(profilesDir))
                 Directory.CreateDirectory(profilesDir);
-
-            DirectoryInfo dirInfo = new(profilesDir);
-            dirInfo.Attributes = FileAttributes.Hidden;
 
             ChromeDriverService chromeDriverService = ChromeDriverService.CreateDefaultService();
             chromeDriverService.HideCommandPromptWindow = true;
@@ -86,34 +92,6 @@ namespace ItemChecker.MVVM.Model
             }
             return isLogin;
         }
-        public static Boolean GetCookies()
-        {
-            try
-            {
-                System.Net.Cookie steamSessionId = Get.SteamSessionId();
-                ICookieJar cookies = Browser.Manage().Cookies;
-                string steamLoginSecure = cookies.GetCookieNamed("steamLoginSecure").Value.ToString();
-                SteamCookies = new();
-                SteamCookies.Add(steamSessionId);
-                SteamCookies.Add(new System.Net.Cookie("steamLoginSecure", steamLoginSecure, "/", "steamcommunity.com"));
-
-                if (StartUpProperties.Default.Remember)
-                {
-                    SettingsProperties.Default.SteamLoginSecure = steamLoginSecure;
-                    SettingsProperties.Default.Save();
-                }
-                if (SettingsProperties.Default.Quit)
-                {
-                    Browser.Quit();
-                    Browser = null;
-                }
-                return false;
-            }
-            catch
-            {
-                return true;
-            }
-        }
         public static Boolean Steam()
         {
             try
@@ -153,6 +131,34 @@ namespace ItemChecker.MVVM.Model
                 LoginSteam.IsLoggedIn = false;
                 return true;
             }
-        }        
+        }
+        static Boolean GetCookies()
+        {
+            try
+            {
+                System.Net.Cookie steamSessionId = Get.SteamSessionId();
+                ICookieJar cookies = Browser.Manage().Cookies;
+                string steamLoginSecure = cookies.GetCookieNamed("steamLoginSecure").Value.ToString();
+                SteamCookies = new();
+                SteamCookies.Add(steamSessionId);
+                SteamCookies.Add(new System.Net.Cookie("steamLoginSecure", steamLoginSecure, "/", "steamcommunity.com"));
+
+                if (StartUpProperties.Default.Remember)
+                {
+                    SettingsProperties.Default.SteamLoginSecure = steamLoginSecure;
+                    SettingsProperties.Default.Save();
+                }
+                if (SettingsProperties.Default.Quit)
+                {
+                    Browser.Quit();
+                    Browser = null;
+                }
+                return false;
+            }
+            catch
+            {
+                return true;
+            }
+        }
     }
 }

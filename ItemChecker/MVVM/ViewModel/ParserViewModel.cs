@@ -95,7 +95,7 @@ namespace ItemChecker.MVVM.ViewModel
                 }
                 else if (ParserInfo.CSM)
                 {
-                    List<DataInventoryCsm> datas = DataInventoryCsm.Inventory.Where(x => x.ItemName == value.ItemName).Reverse().ToList();
+                    List<DataInventoriesCsm> datas = DataInventoriesCsm.Items.Where(x => x.ItemName == value.ItemName).Reverse().ToList();
                     ParserInfo.InventoryCsm = datas;
                     ParserInfo.ItemCsmComparePrice = value.Price2;
                     if (ParserStatistics.DataCurrency == "RUB")
@@ -200,9 +200,7 @@ namespace ItemChecker.MVVM.ViewModel
 
         public ParserViewModel()
         {
-            ParserProperties.Default.CheckList = ParserProperties.Default.CheckList ?? ItemBase.SkinsBase.Select(x => x.ItemName).ToList();
-            ParserProperties.Default.Save();
-            ManualCount = ParserProperties.Default.CheckList.Count;
+            ManualCount = ParserConfig.CheckList.Count;
 
             TimerView.Elapsed += UpdateView;
             TimerView.Enabled = true;
@@ -251,8 +249,8 @@ namespace ItemChecker.MVVM.ViewModel
         //check
         public ICommand AddListCommand =>
             new RelayCommand((obj) =>
-            {                
-                Task.Run(() =>
+            {
+                Task.Run((Action)(() =>
                 {
                     List<string> response = new();
                     switch (Convert.ToInt32(obj))
@@ -261,15 +259,13 @@ namespace ItemChecker.MVVM.ViewModel
                             response = ItemBase.SkinsBase.Select(x => x.ItemName).ToList();
                             break;
                         case 1:
-                            ParserCheckService file = new();
-                            response = file.SelectFile();
+                            response = BaseService.OpenFileDialog("txt");
                             break;
                         case 2:
                             response = ItemBase.SkinsBase.Where(x => x.LfmInfo.Price != 0).Select(x => x.ItemName).ToList();
                             break;
                         case 3:
-                            if (HomeProperties.Default.FavoriteList != null)
-                                response = HomeProperties.Default.FavoriteList.ToList();
+                            response = HomeFavorite.FavoriteList.ToList();
                             break;
                         case 4:
                             response = DataOrder.Orders.Select(x => x.ItemName).ToList();
@@ -277,11 +273,13 @@ namespace ItemChecker.MVVM.ViewModel
                     }
                     if (response.Any())
                     {
-                        ParserProperties.Default.CheckList = response;
-                        ParserProperties.Default.Save();
+                        ParserConfig.CheckList = response;
+                        ManualCount = ParserConfig.CheckList.Count;
+                        ParserService.SaveList("CheckList", response);
                     }
-                    ManualCount = ParserProperties.Default.CheckList.Count;
-                });
+                    else
+                        Main.Message.Enqueue((object)"It is not possible to add an empty list.");
+                }));
             }, (obj) => !BaseModel.IsParsing);
         public ICommand CheckCommand =>
             new RelayCommand((obj) =>
@@ -293,7 +291,7 @@ namespace ItemChecker.MVVM.ViewModel
                     PreparationCheck((ParserConfig)obj);
                 });
                 SaveConfig((ParserConfig)obj);
-            }, (obj) => !BaseModel.IsParsing & !ParserConfig.Timer.Enabled & ParserConfig.ServiceOne != ParserConfig.ServiceTwo & ParserProperties.Default.CheckList.Any());
+            }, (obj) => !BaseModel.IsParsing & !ParserConfig.Timer.Enabled & ParserConfig.ServiceOne != ParserConfig.ServiceTwo & /*ParserProperties.Default.CheckList.Any()*/ ParserConfig.CheckList.Any());
         public ICommand StopCommand =>
             new RelayCommand((obj) =>
             {
@@ -380,7 +378,7 @@ namespace ItemChecker.MVVM.ViewModel
                     ParserInfo.ST = false;
                     ParserInfo.CSM = true;
                     ParserInfo.LF = false;
-                    baseService.LoadBotsInventoryCsm();
+                    baseService.LoadInventoriesCsm(ParserConfig);
                     break;
                 case 3:
                     ParserStatistics.Service1 = "Loot.Farm";
@@ -433,7 +431,7 @@ namespace ItemChecker.MVVM.ViewModel
 
             ParserProperties.Default.Overstock = parser.Overstock;
             ParserProperties.Default.Ordered = parser.Ordered;
-            ParserProperties.Default.Dopplers = parser.Dopplers;
+            ParserProperties.Default.UserItems = parser.UserItems;
             ParserProperties.Default.OnlyDopplers = parser.OnlyDopplers;
 
             ParserProperties.Default.Save();
@@ -492,10 +490,11 @@ namespace ItemChecker.MVVM.ViewModel
                 ItemBaseService baseService = new();
                 Task.Run(() => {
                     if (ParserStatistics.Service1 == "Cs.Money")
-                        baseService.LoadBotsInventoryCsm();
+                        baseService.LoadInventoriesCsm(ParserConfig);
                     else if (ParserStatistics.Service1 == "Loot.Farm")
                         baseService.UpdateLfmInfo();
                     BaseModel.IsWorking = false;
+                    Main.Message.Enqueue((object)"Service inventory update completed.");
                 });
             }, (obj) => ParserGrid.Any() & !BaseModel.IsWorking & !BaseModel.IsParsing);
         //order
@@ -545,8 +544,8 @@ namespace ItemChecker.MVVM.ViewModel
                         try
                         {
                             Queue.PlaceOrder(item.ItemName);
-                            if (!HomeProperties.Default.FavoriteList.Contains(item.ItemName) && HomeProperties.Default.FavoriteList.Count < 200)
-                                HomeProperties.Default.FavoriteList.Add(item.ItemName);
+                            if (!HomeFavorite.FavoriteList.Contains(item.ItemName) && HomeFavorite.FavoriteList.Count < 200)
+                                HomeFavorite.FavoriteList.Add(item.ItemName);
                         }
                         catch (Exception exp)
                         {
@@ -556,7 +555,6 @@ namespace ItemChecker.MVVM.ViewModel
                         finally
                         {
                             QueueInfo.CurrentProgress++;
-                            HomeProperties.Default.Save();
                         }
                     }
                     QueueInfo.Items = new();
@@ -568,16 +566,16 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand ExportCsvCommand =>
             new RelayCommand((obj) =>
             {
-                Task.Run(() =>
-                {
+                Task.Run((Action)(() => {
                     ParserService list = new();
                     list.ExportCsv(ParserGrid, ParserGridView, ParserStatistics.Mode);
-                });
+                    Main.Message.Enqueue((object)"Export to CSV file done.");
+                }));
             }, (obj) => ParserGrid.Any() & !BaseModel.IsParsing);
         public ICommand ImportCsvCommand =>
             new RelayCommand((obj) =>
             {
-                Task.Run(() =>
+                Task.Run((Action)(() =>
                 {
                     BaseModel.IsParsing = true;
                     ParserService list = new();
@@ -592,37 +590,30 @@ namespace ItemChecker.MVVM.ViewModel
 
                         if (ParserProperties.Default.ServiceOne > 1)
                         {
-                            baseService.LoadBotsInventoryCsm();
+                            baseService.LoadInventoriesCsm(ParserConfig);
                             baseService.UpdateLfmInfo();
                         }
                         ParserStatistics.Currency = ParserStatistics.DataCurrency;
+                        Main.Message.Enqueue((object)"Import from CSV file done.");
                     }
                     BaseModel.IsParsing = false;
-                });
+                }));
             }, (obj) => !BaseModel.IsParsing);
-        public ICommand ExportTxtCommand =>
-            new RelayCommand((obj) =>
-            {
-                Task.Run(() => {
-                    ParserService list = new();
-                    list.ExportTxt(ParserGridView, ParserStatistics.Price1, ParserStatistics.Mode);
-                });
-            }, (obj) => ParserGrid.Any() & !BaseModel.IsParsing);
         //favorite
         public ICommand AddFavoriteCommand =>
             new RelayCommand((obj) =>
             {
                 string itemName = (string)obj;
-                if (!HomeProperties.Default.FavoriteList.Contains(itemName) && HomeProperties.Default.FavoriteList.Count < 200 && !String.IsNullOrEmpty(itemName))
+                if (!HomeFavorite.FavoriteList.Contains(itemName) && HomeFavorite.FavoriteList.Count < 200 && !String.IsNullOrEmpty(itemName))
                 {
-                    HomeProperties.Default.FavoriteList.Add(itemName);
-                    HomeProperties.Default.Save();
+                    HomeFavorite.FavoriteList.Add(itemName);
                     Main.Message.Enqueue($"Success, added to Favorites\n{itemName}");
+                    BaseService.SaveList("FavoriteList", HomeFavorite.FavoriteList.ToList());
                 }
-                else if (HomeProperties.Default.FavoriteList.Count > 200)
-                    Main.Message.Enqueue("Limit. The maximum is only 200!");
-                else if (HomeProperties.Default.FavoriteList.Contains(itemName))
+                else if (HomeFavorite.FavoriteList.Contains(itemName))
                     Main.Message.Enqueue("The item is already on the list.");
+                else if (HomeFavorite.FavoriteList.Count >= 200)
+                    Main.Message.Enqueue("Limit. The maximum is only 200!");
                 else if (String.IsNullOrEmpty(itemName))
                     Main.Message.Enqueue("Oops, something went wrong.");
             });
@@ -632,10 +623,10 @@ namespace ItemChecker.MVVM.ViewModel
                 string itemName = (string)obj;
                 if (!String.IsNullOrEmpty(itemName))
                 {
-                    HomeProperties.Default.FavoriteList.Remove(itemName);
-                    HomeProperties.Default.Save();
+                    HomeFavorite.FavoriteList.Remove(itemName);
                     Main.Message.Enqueue($"{itemName}\nRemoved from list.");
+                    BaseService.SaveList("FavoriteList", HomeFavorite.FavoriteList.ToList());
                 }
-            }, (obj) => HomeProperties.Default.FavoriteList.Any());        
+            }, (obj) => HomeFavorite.FavoriteList.Any());        
     }
 }

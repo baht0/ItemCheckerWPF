@@ -67,7 +67,6 @@ namespace ItemChecker.MVVM.ViewModel
 
         public SettingViewModel()
         {
-            Task.Run(() => ProjectInfoService.CheckUpdate());
             About.LatestVersion = DataProjectInfo.LatestVersion;
             if (DataProjectInfo.IsUpdate)
                 Message.Enqueue("Update available!");
@@ -172,7 +171,7 @@ namespace ItemChecker.MVVM.ViewModel
                             "The \"SteamApiKey\" you provided is not working!", "Error",
                             MessageBoxButton.OK, MessageBoxImage.Stop);
                     }
-                    else if (String.IsNullOrEmpty(steamApi))
+                    else if (string.IsNullOrEmpty(steamApi))
                         Main.Notifications.Add(new()
                         {
                             Title = "Steam Account",

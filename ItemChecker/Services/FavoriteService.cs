@@ -12,25 +12,36 @@ namespace ItemChecker.Services
 {
     public class FavoriteService : BaseService
     {
-        #region TXT
+        #region file
+        public static ObservableCollection<string> ReadFavoriteList()
+        {
+            try
+            {
+                string path = DocumentPath + "FavoriteList";
+                List<string> list = new();
+
+                if (File.Exists(path))
+                    list = File.ReadAllLines(path).ToList();
+                return new(list);
+            }
+            catch (Exception ex)
+            {
+                return new();
+            }
+        }
         public static void ExportTxt(ObservableCollection<string> FavoriteList)
         {
             string txt = string.Empty;
             foreach (string item in FavoriteList)
                 txt += $"{item}\r\n";
 
-            string path = $"{BaseModel.AppPath}\\extract";
+            string path = DocumentPath + "extract";
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
-            File.WriteAllText(path + $"\\Home_Favorite_{DateTime.Now:dd.MM.yyyy_hh.mm}.txt", Edit.replaceSymbols(txt));
+            File.WriteAllText(path + $"FavoriteList_{DateTime.Now:dd.MM.yyyy_hh.mm}.txt", Edit.replaceSymbols(txt));
         }
-        public ObservableCollection<string> ImportTxt()
-        {
-            List<string> items = OpenFileDialog("txt");
+        #endregion
 
-            return new ObservableCollection<string>(items);
-        }
-        #endregion TXT
         public Int32 PlaceOrderFav(decimal availableAmount)
         {
             ObservableCollection<QueueData> checkedList = Check();
@@ -39,7 +50,7 @@ namespace ItemChecker.Services
             decimal sum = 0m;
             foreach (var item in checkedList)
             {
-                if (HomeConfig.tokenPush.IsCancellationRequested)
+                if (HomePush.token.IsCancellationRequested)
                     break;
                 try
                 {
@@ -62,9 +73,9 @@ namespace ItemChecker.Services
             ParserCheckService checkService = new();
             ObservableCollection<QueueData> checkedList = new();
 
-            foreach (string itemName in HomeProperties.Default.FavoriteList)
+            foreach (string itemName in HomeFavorite.FavoriteList)
             {
-                if (HomeConfig.tokenPush.IsCancellationRequested)
+                if (HomePush.token.IsCancellationRequested)
                     break;
                 try
                 {
@@ -72,11 +83,11 @@ namespace ItemChecker.Services
                     if (data.Precent >= SettingsProperties.Default.MinPrecent + HomeProperties.Default.Reserve)
                         checkedList = Queue.AddQueue(checkedList, data);
                     else if (data.Precent < SettingsProperties.Default.MinPrecent && HomeProperties.Default.Unwanted)
-                        HomeProperties.Default.FavoriteList.Remove(itemName);
+                        HomeFavorite.FavoriteList.Remove(itemName);
                 }
                 catch (Exception exp)
                 {
-                    HomeConfig.ctsPush.Cancel();
+                    HomePush.cts.Cancel();
                     if (!exp.Message.Contains("429"))
                     {
                         BaseService.errorLog(exp);

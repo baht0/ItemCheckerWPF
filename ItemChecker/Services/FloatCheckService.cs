@@ -127,14 +127,5 @@ namespace ItemChecker.Services
             }
             return 0;
         }
-
-        public List<string> SelectFile()
-        {
-            List<string> list = OpenFileDialog("txt");
-            if (list.Any())
-                list = clearPrices(list);
-
-            return list;
-        }
     }
 }

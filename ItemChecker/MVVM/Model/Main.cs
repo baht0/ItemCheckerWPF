@@ -16,9 +16,9 @@ namespace ItemChecker.MVVM.Model
         public decimal Currency { get; set; } = SettingsProperties.Default.CurrencyValue;
         public string CurrencyString { get; set; } = SettingsProperties.Default.CurrencyId == 0 ? "USD ($)" : "RUB (₽)";
         public decimal Balance { get; set; } = SteamAccount.Balance;
-        public decimal BalanceCsm { get; set; } = CsmAccount.BalanceCsm;
+        public decimal BalanceCsm { get; set; } = CsmAccount.Balance;
         public decimal BalanceUsd { get; set; } = SteamAccount.BalanceUsd;
-        public decimal BalanceCsmUsd { get; set; } = CsmAccount.BalanceCsmUsd;
+        public decimal BalanceCsmUsd { get; set; } = CsmAccount.BalanceUsd;
         public string StatusCommunity { get; set; } = BaseModel.StatusCommunity == "normal" ? "CheckCircle" : "CloseCircle";
 
         public SnackbarMessageQueue Message { get; set; } = Main.Message;

@@ -51,6 +51,11 @@
             </Path>
             <!--Title-->
             <StackPanel Grid.Row="0" Height="25" HorizontalAlignment="Right" Orientation="Horizontal" Grid.Column="1">
+                <Button Height="25" Style="{DynamicResource MaterialDesignFlatButton}" ToolTip="Update"
+                        Visibility="{Binding StartUp.IsUpdate, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        Command="{Binding UpdateCommand}">
+                    <materialDesign:PackIcon Kind="Download" Foreground="White"/>
+                </Button>
                 <Button Height="25" Style="{DynamicResource MaterialDesignFlatButton}"
                         Click="Close_Click">
                     <materialDesign:PackIcon Kind="Close" Foreground="White"/>

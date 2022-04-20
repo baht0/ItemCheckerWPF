@@ -6,11 +6,15 @@
              xmlns:local="clr-namespace:ItemChecker.MVVM.View"
              mc:Ignorable="d"
              xmlns:viewmodel="clr-namespace:ItemChecker.MVVM.ViewModel"
+             xmlns:customConverter="clr-namespace:ItemChecker.Converter"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              d:DataContext="{d:DesignInstance Type=viewmodel:ParserViewModel}"
              FontFamily="{materialDesign:MaterialDesignFont}"
              d:DesignHeight="660" d:DesignWidth="1280">
     <UserControl.Resources>
+        <ControlTemplate x:Key="ValidError"/>
+        <customConverter:DateTimeConverter x:Key="DateTimeConverter"/>
+        <customConverter:BooleanToYesNoConverter x:Key="BooleanToYesNoConverter"/>
         <Storyboard x:Key="MenuOpen">
             <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(FrameworkElement.Width)" Storyboard.TargetName="FilterGrid">
                 <EasingDoubleKeyFrame KeyTime="0" Value="0"/>
@@ -23,7 +27,6 @@
                 <EasingDoubleKeyFrame KeyTime="0:0:0.1" Value="0"/>
             </DoubleAnimationUsingKeyFrames>
         </Storyboard>
-        <ControlTemplate x:Key="ValidError"/>
     </UserControl.Resources>
     <UserControl.Triggers>
         <EventTrigger RoutedEvent="ButtonBase.Click" SourceName="OpenFilter">
@@ -379,19 +382,15 @@
                             <RowDefinition Height="32"/>
                             <RowDefinition Height="32"/>
                         </Grid.RowDefinitions>
-                        <!--ChecList-->
+                        <!--config-->
                         <Grid Grid.Row="0">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="32"/>
                                 <RowDefinition Height="25"/>
                                 <RowDefinition Height="25"/>
                                 <RowDefinition Height="32"/>
-                                <RowDefinition Height="25"/>
-                                <RowDefinition Height="25"/>
-                                <RowDefinition Height="25"/>
-                                <RowDefinition Height="25"/>
-                                <RowDefinition Height="25"/>
-                                <RowDefinition Height="25"/>
+                                <RowDefinition Height="150"/>
+                                <RowDefinition Height="60"/>
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition/>
@@ -428,59 +427,87 @@
                             <TextBlock Grid.Row="3" Grid.ColumnSpan="2" VerticalAlignment="Center"
                                        Text="{Binding ParserStatistics.CountList, StringFormat='Generated list: {0}'}"/>
                             <Separator Grid.Row="3" Grid.ColumnSpan="2" VerticalAlignment="Bottom"/>
-                            <Grid Grid.Row="4" Grid.ColumnSpan="2" VerticalAlignment="Center">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition Width="10"/>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition Width="20"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Price:" VerticalAlignment="Center" ToolTip="Service 1"/>
-                                <TextBox Grid.Column="1" Text="{Binding ParserConfig.MinPrice}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
-                                <TextBlock Grid.Column="2" Text="-" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                <TextBox Grid.Column="3" Text="{Binding ParserConfig.MaxPrice}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
-                                <TextBlock Grid.Column="4" Text="$" VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                            </Grid>
-                            <CheckBox Grid.Row="5" Grid.Column="0" 
+                            <GroupBox Grid.Row="4" Grid.ColumnSpan="2" Style="{DynamicResource none}" BorderThickness="0">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="40"/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Price:" VerticalAlignment="Center" ToolTip="Service 1"/>
+                                    <VirtualizingStackPanel Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                        <TextBox Width="60" Height="23" Text="{Binding ParserConfig.MinPrice}" TextInput="NumberPlus_PreviewTextInput" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
+                                        <TextBlock Margin="8 0 8 0" Text="-" VerticalAlignment="Center"/>
+                                        <TextBox Width="60" Height="23" Text="{Binding ParserConfig.MaxPrice}" TextInput="NumberPlus_PreviewTextInput" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
+                                        <TextBlock Grid.Column="4" Text="$" VerticalAlignment="Center"/>
+                                    </VirtualizingStackPanel>
+                                    <CheckBox Grid.Row="1" Grid.Column="0"
                                               IsChecked="{Binding ParserConfig.Normal}" 
                                               Content="Normal"/>
-                            <CheckBox Grid.Row="6" Grid.Column="0" 
+                                    <CheckBox Grid.Row="2" Grid.Column="0" 
                                               IsChecked="{Binding ParserConfig.Souvenir}" 
                                               Content="Souvenir"/>
-                            <CheckBox Grid.Row="6" Grid.Column="1"
+                                    <CheckBox Grid.Row="2" Grid.Column="1"
                                               IsChecked="{Binding ParserConfig.Stattrak}"
                                               Content="StatTrak™"/>
-                            <CheckBox Grid.Row="7" Grid.Column="0"
+                                    <CheckBox Grid.Row="3" Grid.Column="0"
                                               IsChecked="{Binding ParserConfig.KnifeGlove}"
                                               Content="★"/>
-                            <CheckBox Grid.Row="7" Grid.Column="1"
+                                    <CheckBox Grid.Row="3" Grid.Column="1"
                                               IsChecked="{Binding ParserConfig.KnifeGloveStattrak}"
                                               Content="★ StatTrak™"/>
-                            <CheckBox Grid.Row="8" Grid.Column="0" VerticalAlignment="Bottom"
+                                    <CheckBox Grid.Row="4" Grid.Column="0"
                                               IsChecked="{Binding ParserConfig.Overstock}"
                                               Content="Overstock"
                                               ToolTip="Allow overstock items"/>
-                            <CheckBox Grid.Row="8" Grid.Column="1" VerticalAlignment="Bottom"
+                                    <CheckBox Grid.Row="4" Grid.Column="1"
                                               IsChecked="{Binding ParserConfig.Ordered}"
                                               Content="Ordered"
                                               ToolTip="Allow ordered items (STA)"/>
-                            <CheckBox Grid.Row="9" Grid.Column="0" VerticalAlignment="Bottom"
-                                              IsChecked="{Binding ParserConfig.Dopplers}"
-                                              Content="Dopplers"
-                                              ToolTip="Allow dopplers items"/>
-                            <CheckBox Grid.Row="9" Grid.Column="1" VerticalAlignment="Bottom"
+                                </Grid>
+                            </GroupBox>
+                            <GroupBox Grid.Row="5" Grid.ColumnSpan="2" Style="{DynamicResource none}" BorderThickness="0" x:Name="csmGroup">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <CheckBox Grid.Row="0" Grid.Column="0"
+                                              IsChecked="{Binding ParserConfig.WithoutLock}"
+                                              Content="WithoutLock"
+                                              ToolTip="Show only without trade lock items"/>
+                                    <CheckBox Grid.Row="0" Grid.Column="1"
+                                              IsChecked="{Binding ParserConfig.UserItems}"
+                                              Content="UserItems"
+                                              ToolTip="Allow users items"/>
+                                    <CheckBox Grid.Row="1" Grid.Column="0"
+                                              IsChecked="{Binding ParserConfig.RareItems}"
+                                              Content="RareItems"
+                                              ToolTip="Allow rare items"/>
+                                    <CheckBox Grid.Row="1" Grid.Column="1"
                                               IsChecked="{Binding ParserConfig.OnlyDopplers}"
                                               Content="OnlyDopplers"
-                                              ToolTip="Show only doppler items"/>                            
+                                              ToolTip="Show only doppler items"/>
+                                </Grid>
+                            </GroupBox>
                         </Grid>
                         <!--services-->
                         <VirtualizingStackPanel Grid.Row="1"
                                     Orientation="Horizontal"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Bottom">
-                            <ComboBox Width="105" Height="25"
-                                      ItemsSource="{Binding ParserConfig.Services}"
+                            <ComboBox Width="105" Height="25" SelectionChanged="ComboBoxSer1_SelectionChanged"
+                                      ItemsSource="{Binding ParserConfig.Services}" x:Name="service1"
                                       SelectedIndex="{Binding ParserConfig.ServiceOne}"/>
                             <TextBlock VerticalAlignment="Center" Margin="5"/>
                             <ComboBox Width="105" Height="25"
@@ -506,11 +533,6 @@
                             Style="{StaticResource MaterialDesignToolForegroundButton}"
                             Command="{Binding ImportCsvCommand}">
                                     <materialDesign:PackIcon Kind="Upload"/>
-                                </Button>
-                                <Button ToolTip="Export Items to *.txt"
-                            Style="{StaticResource MaterialDesignToolForegroundButton}"
-                            Command="{Binding ExportTxtCommand}">
-                                    <materialDesign:PackIcon Kind="FileDownload"/>
                                 </Button>
                             </VirtualizingStackPanel>
                             <VirtualizingStackPanel Orientation="Horizontal" HorizontalAlignment="Right"
@@ -638,15 +660,15 @@
                                     <TextBlock Grid.Row="1" Text="Price:" VerticalAlignment="Center"/>
                                     <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Price, StringFormat='{}{0}$'}" VerticalAlignment="Center"/>
                                     <TextBlock Grid.Row="2" Text="Stickers:" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Sticker}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="3" Text="NameTag:" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding NameTag}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="4" Text="User:" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding User}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="5" Text="TradeLock:" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding TradeLock, StringFormat='{}{0:dd MMM yyyy}'}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="6" Text="RareItem:" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding RareItem}" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Sticker, Converter={StaticResource BooleanToYesNoConverter}}" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="3" Text="Float:" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Float}" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="4" Text="UserItem:" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding User, Converter={StaticResource BooleanToYesNoConverter}}" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="5" Text="RareItem:" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding RareItem, Converter={StaticResource BooleanToYesNoConverter}}" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="6" Text="TradeLock:" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding TradeLock, Converter={StaticResource DateTimeConverter}}" VerticalAlignment="Center"/>
                                 </Grid>
                             </Border>
                         </Grid>

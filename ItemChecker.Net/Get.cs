@@ -32,18 +32,6 @@ namespace ItemChecker.Net
             using StreamReader stream = new(response.GetResponseStream(), Encoding.UTF8);
             return stream.ReadToEnd();
         }
-        //csm
-        public static String InventoriesCsMoney(string market_hash_name, bool userItems)
-        {
-            string isMarket = userItems ? "&isMarket=true" : string.Empty;
-            string stattrak = market_hash_name.Contains("StatTrak") ? "true" : "false";
-            string souvenir = market_hash_name.Contains("Souvenir") ? "true" : "false";
-            string rarity = market_hash_name.Contains("Sticker") & !market_hash_name.Contains("Holo") & !market_hash_name.Contains("Foil") & !market_hash_name.Contains("Gold") ? "&rarity=High%20Grade" : String.Empty;
-
-            string url = @"https://inventories.cs.money/5.0/load_bots_inventory/730?sort=price&order=asc&hasRareFloat=false&hasRarePattern=false&hasRareStickers=false&hasTradeLock=false&hasTradeLock=true" + isMarket + "&isSouvenir=" + souvenir + "&isStatTrak=" + stattrak + "&limit=60&name=" + market_hash_name + "&offset=0" + rarity + "&tradeLockDays=1&tradeLockDays=2&tradeLockDays=3&tradeLockDays=4&tradeLockDays=5&tradeLockDays=6&tradeLockDays=7&tradeLockDays=0";
-
-            return Request(url);
-        }
         //steam
         public static JObject GameServersStatus(string steam_api_key)
         {

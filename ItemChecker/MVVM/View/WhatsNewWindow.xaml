@@ -22,7 +22,7 @@
                 <RowDefinition/>
                 <RowDefinition Height="15"/>
             </Grid.RowDefinitions>
-            <Grid Grid.Row="0" MouseLeftButtonDown="Window_DragMove">
+            <Grid Grid.Row="0" Background="Transparent" MouseLeftButtonDown="Window_DragMove">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="What's New" VerticalAlignment="Center" />
                     <ComboBox x:Name="ListUpdates" Width="120" Margin="10 0 0 0" VerticalAlignment="Center" ItemsSource="{Binding ListUpdates}"

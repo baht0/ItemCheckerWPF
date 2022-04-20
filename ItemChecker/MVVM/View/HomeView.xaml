@@ -102,34 +102,34 @@
                                            Grid.ColumnSpan="2" PreviewMouseDown="TimerPush_PreviewMouseDown">
                                 <TextBlock.Text>
                                     <MultiBinding StringFormat="BuyOrder Pusher: {0} | {1}">
-                                        <Binding Path="HomeStatistics.CheckPush"/>
-                                        <Binding Path="HomeStatistics.TimerPush"/>
+                                        <Binding Path="HomePush.Check"/>
+                                        <Binding Path="HomePush.Status"/>
                                     </MultiBinding>
                                 </TextBlock.Text>
                             </TextBlock>
                             <ProgressBar Grid.ColumnSpan="2" VerticalAlignment="Bottom"
                                                  Height="3" Style="{StaticResource MaterialDesignLinearProgressBar}"
-                                                 Maximum="{Binding HomeStatistics.MaxProgressPush}"
-                                                 Value="{Binding HomeStatistics.ProgressPush}"/>
+                                                 Maximum="{Binding HomePush.MaxProgress}"
+                                                 Value="{Binding HomePush.Progress}"/>
                             <Button Grid.Column="1" HorizontalAlignment="Right"
                                             Style="{StaticResource MaterialDesignFlatButton}"
                                             Command="{Binding PushCommand}"
-                                            CommandParameter="{Binding HomeConfig}">
-                                <materialDesign:PackIcon Kind="{Binding HomeStatistics.PushService, Converter={StaticResource BooleanToPlayButtonConverter}}"/>
+                                            CommandParameter="{Binding HomePush}">
+                                <materialDesign:PackIcon Kind="{Binding HomePush.IsService, Converter={StaticResource BooleanToPlayButtonConverter}}"/>
                             </Button>
                             <TextBlock Grid.Row="1" Text="Reserve:" Height="15"/>
                             <VirtualizingStackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal"
                                             VerticalAlignment="Center" HorizontalAlignment="Left">
-                                <TextBox Width="70" Text="{Binding HomeConfig.Reserve}" PreviewTextInput="Number_PreviewTextInput" ToolTip="This value is added to the min. percent"/>
+                                <TextBox Width="70" Text="{Binding HomePush.Reserve}" PreviewTextInput="Number_PreviewTextInput" ToolTip="This value is added to the min. percent"/>
                                 <TextBlock Text="%" Margin="2 0 0 0" VerticalAlignment="Bottom"/>
                             </VirtualizingStackPanel>
                             <TextBlock Grid.Row="2" Text="Timer:" Height="15"/>
                             <VirtualizingStackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal"
                                             VerticalAlignment="Center" HorizontalAlignment="Left">
-                                <TextBox Width="70" Text="{Binding HomeConfig.PushTimer}" PreviewTextInput="Number_PreviewTextInput"/>
+                                <TextBox Width="70" Text="{Binding HomePush.Time}" PreviewTextInput="Number_PreviewTextInput"/>
                                 <TextBlock Text="Min." Margin="2 0 0 0" VerticalAlignment="Bottom"/>
                             </VirtualizingStackPanel>
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="{Binding HomeStatistics.Push, StringFormat='Push: {0}'}" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="{Binding HomePush.Push, StringFormat='Push: {0}'}" VerticalAlignment="Center"/>
                         </Grid>
                         <!--Cs.Money Check-->
                         <Grid Grid.Row="1">
@@ -147,38 +147,38 @@
                                            Grid.ColumnSpan="2" PreviewMouseDown="TimerCsm_PreviewMouseDown">
                                 <TextBlock.Text>
                                     <MultiBinding StringFormat="Cs.Money Check: {0} | {1}">
-                                        <Binding Path="HomeStatistics.CheckCsm"/>
-                                        <Binding Path="HomeStatistics.TimerCsm"/>
+                                        <Binding Path="HomeCsmCheck.Check"/>
+                                        <Binding Path="HomeCsmCheck.Status"/>
                                     </MultiBinding>
                                 </TextBlock.Text>
                             </TextBlock>
                             <Button Grid.Column="1" HorizontalAlignment="Right"
                                             Style="{StaticResource MaterialDesignFlatButton}"
                                             Command="{Binding CsmCommand}"
-                                            CommandParameter="{Binding HomeConfig}">
-                                <materialDesign:PackIcon Kind="{Binding HomeStatistics.CsmService, Converter={StaticResource BooleanToPlayButtonConverter}}"/>
+                                            CommandParameter="{Binding HomeCsmCheck}">
+                                <materialDesign:PackIcon Kind="{Binding HomeCsmCheck.IsService, Converter={StaticResource BooleanToPlayButtonConverter}}"/>
                             </Button>
                             <ProgressBar Grid.ColumnSpan="2" VerticalAlignment="Bottom"
                                                  Height="3" Style="{StaticResource MaterialDesignLinearProgressBar}"
-                                                 Maximum="{Binding HomeStatistics.MaxProgressCsm}"
-                                                 Value="{Binding HomeStatistics.ProgressCsm}"/>
-                            <TextBlock Grid.Row="1" Text="Max. Deviation:" Height="15"/>
+                                                 Maximum="{Binding HomeCsmCheck.MaxProgress}"
+                                                 Value="{Binding HomeCsmCheck.Progress}"/>
+                            <TextBlock Grid.Row="1" Text="Min. Precent:" Height="15"/>
                             <VirtualizingStackPanel Grid.Row="1" Grid.Column="1"
                                                             VerticalAlignment="Center"
                                                             HorizontalAlignment="Left"
                                                             Orientation="Horizontal">
-                                <TextBox Width="70" Text="{Binding HomeConfig.MaxDeviation}" 
-                                                 TextInput="Decimal_PreviewTextInput" ToolTip="How much more expensive an item can be"
+                                <TextBox Width="70" Text="{Binding HomeCsmCheck.MinPrecent}" 
+                                                 TextInput="Number_PreviewTextInput"
                                                  Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
-                                <TextBlock Text="$" Margin="2 0 0 0" VerticalAlignment="Bottom"/>
+                                <TextBlock Text="%" Margin="2 0 0 0" VerticalAlignment="Bottom"/>
                             </VirtualizingStackPanel>
                             <TextBlock Grid.Row="2" Text="Timer:" Height="15"/>
                             <VirtualizingStackPanel Grid.Row="2" Grid.Column="1"
                                                     VerticalAlignment="Center"
                                                     HorizontalAlignment="Left"
                                                     Orientation="Horizontal">
-                                <TextBox Width="70" Text="{Binding HomeConfig.CsmTimer}" PreviewTextInput="Number_PreviewTextInput"/>
-                                <TextBlock Text="Sec." Margin="2 0 0 0" VerticalAlignment="Bottom"/>
+                                <TextBox Width="70" Text="{Binding HomeCsmCheck.Time}" PreviewTextInput="Number_PreviewTextInput"/>
+                                <TextBlock Text="Min." Margin="2 0 0 0" VerticalAlignment="Bottom"/>
                             </VirtualizingStackPanel>
                             <VirtualizingStackPanel Grid.Row="3" Orientation="Horizontal"
                                                 VerticalAlignment="Center">
@@ -186,10 +186,10 @@
                                                     Command="{Binding AddCsmListCommand}">
                                     <materialDesign:PackIcon Kind="ViewList"/>
                                 </Button>
-                                <TextBlock Text="{Binding HomeStatistics.CsmListCount, StringFormat='({0})'}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding HomeCsmCheck.ListCount, StringFormat='({0})'}" VerticalAlignment="Center"/>
                             </VirtualizingStackPanel>
                             <TextBlock Grid.Row="3" Grid.Column="2" VerticalAlignment="Center"
-                                           Text="{Binding HomeStatistics.SuccessfulTrades, StringFormat='Successful Trades: {0}'}"/>
+                                           Text="{Binding HomeCsmCheck.SuccessfulTrades, StringFormat='Successful Trades: {0}'}"/>
                         </Grid>
                         <!--Float Check-->
                         <Grid Grid.Row="2">
@@ -208,32 +208,32 @@
                                            Grid.ColumnSpan="2" PreviewMouseDown="TimerFloat_PreviewMouseDown">
                                 <TextBlock.Text>
                                     <MultiBinding StringFormat="Float Check: {0} | {1}">
-                                        <Binding Path="HomeStatistics.CheckFloat"/>
-                                        <Binding Path="HomeStatistics.TimerFloat"/>
+                                        <Binding Path="HomeFloatCheck.Check"/>
+                                        <Binding Path="HomeFloatCheck.Status"/>
                                     </MultiBinding>
                                 </TextBlock.Text>
                             </TextBlock>
                             <Button Grid.Column="1" HorizontalAlignment="Right"
                                             Style="{StaticResource MaterialDesignFlatButton}"
                                             Command="{Binding FloatCommand}"
-                                            CommandParameter="{Binding HomeConfig}">
-                                <materialDesign:PackIcon Kind="{Binding HomeStatistics.FloatService, Converter={StaticResource BooleanToPlayButtonConverter}}"/>
+                                            CommandParameter="{Binding HomeFloatCheck}">
+                                <materialDesign:PackIcon Kind="{Binding HomeFloatCheck.IsService, Converter={StaticResource BooleanToPlayButtonConverter}}"/>
                             </Button>
                             <ProgressBar Grid.ColumnSpan="2" VerticalAlignment="Bottom"
                                                  Height="3" Style="{StaticResource MaterialDesignLinearProgressBar}"
-                                                 Maximum="{Binding HomeStatistics.MaxProgressFloat}"
-                                                 Value="{Binding HomeStatistics.ProgressFloat}"/>
+                                                 Maximum="{Binding HomeFloatCheck.MaxProgress}"
+                                                 Value="{Binding HomeFloatCheck.Progress}"/>
                             <TextBlock Grid.Row="1" Text="Compare Price:" Height="15"/>
                             <ComboBox Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left"
                                               Width="85" Height="25"
-                                              ItemsSource="{Binding HomeConfig.ComparePrices}"
-                                              SelectedIndex="{Binding HomeConfig.Compare}"/>
+                                              ItemsSource="{Binding HomeFloatCheck.ComparePrices}"
+                                              SelectedIndex="{Binding HomeFloatCheck.Compare}"/>
                             <TextBlock Grid.Row="2" Text="Max. Precent:" Height="15"/>
                             <VirtualizingStackPanel Grid.Row="2" Grid.Column="1"
                                                             VerticalAlignment="Center"
                                                             HorizontalAlignment="Left"
                                                             Orientation="Horizontal">
-                                <TextBox Width="70" Text="{Binding HomeConfig.MaxPrecent}" ToolTip="Acceptable item price from 'Compare Price'"
+                                <TextBox Width="70" Text="{Binding HomeFloatCheck.MaxPrecent}" ToolTip="Acceptable item price from 'Compare Price'"
                                                      PreviewTextInput="Number_PreviewTextInput"/>
                                 <TextBlock Text="%" Margin="2 0 0 0" VerticalAlignment="Bottom"/>
                             </VirtualizingStackPanel>
@@ -242,7 +242,7 @@
                                                             VerticalAlignment="Center"
                                                             HorizontalAlignment="Left"
                                                             Orientation="Horizontal">
-                                <TextBox Width="70" Text="{Binding HomeConfig.FloatTimer}" PreviewTextInput="Number_PreviewTextInput"/>
+                                <TextBox Width="70" Text="{Binding HomeFloatCheck.Time}" PreviewTextInput="Number_PreviewTextInput"/>
                                 <TextBlock Text="Min." Margin="2 0 0 0" VerticalAlignment="Bottom"/>
                             </VirtualizingStackPanel>
                             <VirtualizingStackPanel Grid.Row="4"
@@ -253,10 +253,10 @@
                                                     Command="{Binding AddFloatListCommand}">
                                     <materialDesign:PackIcon Kind="ViewList"/>
                                 </Button>
-                                <TextBlock Text="{Binding HomeStatistics.FloatListCount, StringFormat='({0})'}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding HomeFloatCheck.ListCount, StringFormat='({0})'}" VerticalAlignment="Center"/>
                             </VirtualizingStackPanel>
                             <TextBlock Grid.Row="4" Grid.Column="2" VerticalAlignment="Center"
-                                           Text="{Binding HomeStatistics.PurchasesMade, StringFormat='Purchases made: {0}'}"/>
+                                           Text="{Binding HomeFloatCheck.PurchasesMade, StringFormat='Purchases made: {0}'}"/>
                         </Grid>
                     </Grid>
                     <!--Tools-->
@@ -272,16 +272,16 @@
                                 <ColumnDefinition/>
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="{Binding HomeStatistics.WithdrawItems, StringFormat='Withdraw: {0}'}" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding HomeWithdraw.Count, StringFormat='Withdraw: {0}'}" VerticalAlignment="Center" FontWeight="Bold"/>
                             <Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right"
                                             Style="{StaticResource MaterialDesignFlatButton}"
                                             Command="{Binding WithdrawCommand}">
-                                <materialDesign:PackIcon Kind="{Binding HomeStatistics.WithdrawTool, Converter={StaticResource BooleanToPlayButtonConverter}}"/>
+                                <materialDesign:PackIcon Kind="{Binding HomeWithdraw.IsService, Converter={StaticResource BooleanToPlayButtonConverter}}"/>
                             </Button>
                             <ProgressBar Grid.ColumnSpan="2" VerticalAlignment="Bottom"
                                                  Height="3" Style="{StaticResource MaterialDesignLinearProgressBar}"
-                                                 Maximum="{Binding HomeStatistics.MaxProgressWithdraw}"
-                                                 Value="{Binding HomeStatistics.ProgressWithdraw}"/>
+                                                 Maximum="{Binding HomeWithdraw.MaxProgress}"
+                                                 Value="{Binding HomeWithdraw.Progress}"/>
                         </Grid>
                         <!--Trade Offers-->
                         <Grid Grid.Row="1">
@@ -289,16 +289,16 @@
                                 <ColumnDefinition/>
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="{Binding HomeStatistics.Trades, StringFormat='Trade Offers: {0}'}" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding HomeTrade.Count, StringFormat='Trade Offers: {0}'}" VerticalAlignment="Center" FontWeight="Bold"/>
                             <Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right"
                                             Style="{StaticResource MaterialDesignFlatButton}"
                                             Command="{Binding TradeOfferCommand}">
-                                <materialDesign:PackIcon Kind="{Binding HomeStatistics.TradeTool, Converter={StaticResource BooleanToPlayButtonConverter}}"/>
+                                <materialDesign:PackIcon Kind="{Binding HomeTrade.IsService, Converter={StaticResource BooleanToPlayButtonConverter}}"/>
                             </Button>
                             <ProgressBar Grid.ColumnSpan="2" VerticalAlignment="Bottom" Height="3"
                                          Style="{StaticResource MaterialDesignLinearProgressBar}"
-                                         Maximum="{Binding HomeStatistics.MaxProgressTrade}"
-                                         Value="{Binding HomeStatistics.ProgressTrade}"/>
+                                         Maximum="{Binding HomeTrade.MaxProgress}"
+                                         Value="{Binding HomeTrade.Progress}"/>
                         </Grid>
                         <!--Quick Sale-->
                         <Grid Grid.Row="2">
@@ -311,26 +311,26 @@
                                 <ColumnDefinition/>
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="{Binding HomeStatistics.SellItems, StringFormat='Quick Sale: {0}'}" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding HomeSell.Count, StringFormat='Quick Sale: {0}'}" VerticalAlignment="Center" FontWeight="Bold"/>
                             <Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right"
                                             Style="{StaticResource MaterialDesignFlatButton}"
                                             Command="{Binding QuickSellCommand}">
-                                <materialDesign:PackIcon Kind="{Binding HomeStatistics.SellTool, Converter={StaticResource BooleanToPlayButtonConverter}}"/>
+                                <materialDesign:PackIcon Kind="{Binding HomeSell.IsService, Converter={StaticResource BooleanToPlayButtonConverter}}"/>
                             </Button>
                             <ProgressBar Grid.ColumnSpan="2" VerticalAlignment="Bottom"
                                                  Height="3" Style="{StaticResource MaterialDesignLinearProgressBar}"
-                                                 Maximum="{Binding HomeStatistics.MaxProgressSell}"
-                                                 Value="{Binding HomeStatistics.ProgressSell}"/>
+                                                 Maximum="{Binding HomeSell.MaxProgress}"
+                                                 Value="{Binding HomeSell.Progress}"/>
                             <TextBlock Grid.Row="1" Text="Max. Price:" Height="15"/>
                             <VirtualizingStackPanel Grid.Row="1" Grid.Column="1"
                                                         VerticalAlignment="Center"
                                                         HorizontalAlignment="Left"
                                                         Orientation="Horizontal">
-                                <TextBox Width="70" Text="{Binding HomeConfig.MaxPrice}"
+                                <TextBox Width="70" Text="{Binding HomeSell.MaxPrice}"
                                                  PreviewTextInput="Number_PreviewTextInput" ToolTip="Allowable selling price"/>
                                 <TextBlock Text="₽" Margin="2 0 0 0" VerticalAlignment="Bottom"/>
                             </VirtualizingStackPanel>
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="{Binding HomeStatistics.Sum, StringFormat='Sum: {0}₽'}"  VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="{Binding HomeSell.Sum, StringFormat='Sum: {0}₽'}"  VerticalAlignment="Center"/>
                         </Grid>
                     </Grid>
                     <!--Favorite-->
@@ -356,7 +356,7 @@
                         <CheckBox Grid.Row="1" Grid.ColumnSpan="2"
                                   Content="Clean up unwanted items"
                                   ToolTip="Triggered during a push"
-                                  IsChecked="{Binding HomeConfig.Unwanted}"/>
+                                  IsChecked="{Binding HomePush.Unwanted}"/>
                         <ListBox Grid.Row="2" FontSize="11" Grid.ColumnSpan="2"
                                  Background="{DynamicResource ElementBackground}"
                                  ItemsSource="{Binding FavoriteList}"

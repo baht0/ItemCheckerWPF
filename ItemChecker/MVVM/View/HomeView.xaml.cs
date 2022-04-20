@@ -1,5 +1,4 @@
 ﻿using ItemChecker.MVVM.ViewModel;
-using ItemChecker.Properties;
 using ItemChecker.Support;
 using System.Reflection;
 using System.Windows;

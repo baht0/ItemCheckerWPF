@@ -66,34 +66,28 @@ namespace ItemChecker.Services
             }
         }
 
-        public static void Log(string text)
-        {
-            if (!File.Exists("Log.txt"))
-                File.WriteAllText("Log.txt", "v." + DataProjectInfo.CurrentVersion + " [" + DateTime.Now + "]\n" + text + "\n");
-            else
-                File.WriteAllText("Log.txt", string.Format("{0}{1}", "v." + DataProjectInfo.CurrentVersion + " [" + DateTime.Now + "]\n" + text + "\n", File.ReadAllText("Log.txt")));
-        }
         public static void errorLog(Exception exp)
         {
             string message = null;
             message += exp.Message + "\n";
             message += exp.StackTrace;
             if (!File.Exists("errorsLog.txt"))
-                File.WriteAllText("errorsLog.txt", "v." + DataProjectInfo.CurrentVersion + " [" + DateTime.Now + "]\n" + message + "\n");
+                File.WriteAllText(DocumentPath + "ErrorsLog.txt", "v." + DataProjectInfo.CurrentVersion + " [" + DateTime.Now + "]\n" + message + "\n");
             else
-                File.WriteAllText("errorsLog.txt", string.Format("{0}{1}", "v." + DataProjectInfo.CurrentVersion + " [" + DateTime.Now + "]\n" + message + "\n", File.ReadAllText("errorsLog.txt")));
+                File.WriteAllText(DocumentPath + "ErrorsLog.txt", string.Format("{0}{1}", "v." + DataProjectInfo.CurrentVersion + " [" + DateTime.Now + "]\n" + message + "\n", File.ReadAllText("ErrorsLog.txt")));
         }
         public static void errorMessage(Exception exp)
         {
             Application.Current.Dispatcher.Invoke(() => { MessageBox.Show("Something went wrong :(", "Error", MessageBoxButton.OK, MessageBoxImage.Error); });
         }
 
-        protected List<string> OpenFileDialog(string filter)
+        #region file
+        public static List<string> OpenFileDialog(string filter)
         {
             List<string> itemList = new();
             OpenFileDialog dialog = new()
             {
-                InitialDirectory = AppDomain.CurrentDomain.BaseDirectory,
+                InitialDirectory = DocumentPath,
                 RestoreDirectory = true,
                 Filter = $"ItemsList ({filter}) | *.{filter}"
             };
@@ -103,20 +97,31 @@ namespace ItemChecker.Services
 
             return itemList;
         }
-        protected List<string> clearPrices(List<string> itemList)
+        public static List<string> ReadList(string name)
         {
-            List<string> adjustedList = new();
-            foreach (string item in itemList)
+            try
             {
-                if (item.Contains(";"))
-                {
-                    int id = item.LastIndexOf(';');
-                    adjustedList.Add(item.Substring(0, id));
-                }
-                else
-                    adjustedList.Add(item);
+                string path = DocumentPath + name;
+                List<string> list = new();
+
+                if (File.Exists(path))
+                    list = File.ReadAllLines(path).ToList();
+                return list;
             }
-            return adjustedList;
+            catch (Exception ex)
+            {
+                errorLog(ex);
+                return new();
+            }
         }
+        public static void SaveList(string name, List<string> list)
+        {
+            string str = string.Empty;
+            foreach (string item in list)
+                str += item + "\r\n";
+
+            File.WriteAllText(DocumentPath + name, str);
+        }
+        #endregion
     }
 }

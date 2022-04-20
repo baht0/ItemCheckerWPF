@@ -2,41 +2,29 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ItemChecker.Properties" GeneratedClassName="HomeProperties">
   <Profiles />
   <Settings>
-    <Setting Name="TimerPush" Type="System.Int32" Scope="User">
+    <Setting Name="TimePush" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">10</Value>
     </Setting>
-    <Setting Name="TimerCsm" Type="System.Int32" Scope="User">
+    <Setting Name="TimeCsm" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">10</Value>
     </Setting>
-    <Setting Name="TimerFloat" Type="System.Int32" Scope="User">
+    <Setting Name="TimeFloat" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">10</Value>
     </Setting>
-	  <Setting Name="Reserve" Type="System.Int32" Scope="User">
-		  <Value Profile="(Default)">10</Value>
-	  </Setting>
-    <Setting Name="CsmList" Type="System.Collections.Generic.List&lt;System.String&gt;" Scope="User">
-      <Value Profile="(Default)" />
+    <Setting Name="Reserve" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">10</Value>
     </Setting>
-    <Setting Name="MaxDeviation" Type="System.Decimal" Scope="User">
-      <Value Profile="(Default)">0.01</Value>
-    </Setting>
-    <Setting Name="UserItems" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
-    <Setting Name="FloatList" Type="System.Collections.Generic.List&lt;System.String&gt;" Scope="User">
-      <Value Profile="(Default)" />
+    <Setting Name="MinPrecent" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="Compare" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="MaxPrecent" Type="System.Decimal" Scope="User">
+    <Setting Name="MaxPrecent" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">7</Value>
     </Setting>
     <Setting Name="MaxPrice" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">100</Value>
-    </Setting>
-    <Setting Name="FavoriteList" Type="System.Collections.ObjectModel.ObservableCollection&lt;System.String&gt;" Scope="User">
-      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="Unwanted" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>

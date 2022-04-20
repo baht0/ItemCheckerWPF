@@ -1,6 +1,5 @@
 ﻿using ItemChecker.MVVM.Model;
 using ItemChecker.Net;
-using ItemChecker.Properties;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Linq;

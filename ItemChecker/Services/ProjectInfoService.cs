@@ -13,7 +13,7 @@ namespace ItemChecker.MVVM.Model
 {
     public class ProjectInfoService : BaseService
     {
-        public static void AppUpdate()
+        public static void AppCheck()
         {
             if (StartUpProperties.Default.completionUpdate)
             {

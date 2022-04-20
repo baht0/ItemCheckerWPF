@@ -2,6 +2,7 @@
 using ItemChecker.MVVM.Model;
 using ItemChecker.Properties;
 using ItemChecker.Services;
+using ItemChecker.Support;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -19,14 +20,10 @@ namespace ItemChecker.MVVM.ViewModel
     {
         #region Properties
         System.Timers.Timer TimerView = new(500);
+
+        //DataGrid
         private ObservableCollection<DataOrder> _orderedGrid = new(DataOrder.Orders);
         private DataOrder _selectedOrderItem;
-        private HomeStatistics _homeStatistics = new();
-        private HomeConfig _homeConfig = new();
-        //favorite
-        private ObservableCollection<string> _favoriteList = HomeProperties.Default.FavoriteList ?? (new());
-        private string _selectedFavItem;
-
         public ObservableCollection<DataOrder> OrderedGrid
         {
             get
@@ -38,7 +35,7 @@ namespace ItemChecker.MVVM.ViewModel
                 _orderedGrid = value;
                 OnPropertyChanged();
             }
-        } //DataGrid
+        }
         public DataOrder SelectedOrderItem
         {
             get
@@ -51,31 +48,90 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        public HomeStatistics HomeStatistics
+
+        //services
+        private HomePush _homePush = new();
+        private HomeCsmCheck _homeCsmCheck = new();
+        private HomeFloatCheck _homeFloatCheck = new();
+        public HomePush HomePush
         {
             get
             {
-                return _homeStatistics;
+                return _homePush;
             }
             set
             {
-                _homeStatistics = value;
+                _homePush = value;
                 OnPropertyChanged();
             }
         }
-        public HomeConfig HomeConfig
+        public HomeCsmCheck HomeCsmCheck
         {
             get
             {
-                return _homeConfig;
+                return _homeCsmCheck;
             }
             set
             {
-                _homeConfig = value;
+                _homeCsmCheck = value;
+                OnPropertyChanged();
+            }
+        }
+        public HomeFloatCheck HomeFloatCheck
+        {
+            get
+            {
+                return _homeFloatCheck;
+            }
+            set
+            {
+                _homeFloatCheck = value;
+                OnPropertyChanged();
+            }
+        }
+        //tools
+        private HomeWithdraw _homeWithdraw = new();
+        private HomeTrade _homeTrade = new();
+        private HomeSell _homeSell = new();
+        public HomeWithdraw HomeWithdraw
+        {
+            get
+            {
+                return _homeWithdraw;
+            }
+            set
+            {
+                _homeWithdraw = value;
+                OnPropertyChanged();
+            }
+        }
+        public HomeTrade HomeTrade
+        {
+            get
+            {
+                return _homeTrade;
+            }
+            set
+            {
+                _homeTrade = value;
+                OnPropertyChanged();
+            }
+        }
+        public HomeSell HomeSell
+        {
+            get
+            {
+                return _homeSell;
+            }
+            set
+            {
+                _homeSell = value;
                 OnPropertyChanged();
             }
         }
         //favorite
+        private ObservableCollection<string> _favoriteList = HomeFavorite.FavoriteList;
+        private string _selectedFavItem;
         public ObservableCollection<string> FavoriteList
         {
             get { return _favoriteList; }
@@ -105,7 +161,7 @@ namespace ItemChecker.MVVM.ViewModel
         {
             try
             {
-                FavoriteList = HomeProperties.Default.FavoriteList;
+                FavoriteList = HomeFavorite.FavoriteList;
             }
             catch (Exception ex)
             {
@@ -126,6 +182,7 @@ namespace ItemChecker.MVVM.ViewModel
                             OrderedGrid = new ObservableCollection<DataOrder>(DataOrder.Orders);
                             BaseModel.IsWorking = false;
                         });
+                        Main.Message.Enqueue("MyOrders update is complete.");
                         break;
                     case 2:
                         MessageBoxResult result = MessageBox.Show(
@@ -141,6 +198,7 @@ namespace ItemChecker.MVVM.ViewModel
                                 SteamAccount.GetAvailableAmount();
                                 BaseModel.IsWorking = false;
                             });
+                        Main.Message.Enqueue("All MyOrders have been cancelled.");
                         break;
                 }
             }, (obj) => !BaseModel.IsWorking);
@@ -159,161 +217,161 @@ namespace ItemChecker.MVVM.ViewModel
                     Main.Message.Enqueue($"{item.ItemName}\nOrder has been canceled.");
                 }
             });
-        //services
+
+        #region services
         public ICommand AddCsmListCommand =>
             new RelayCommand((obj) =>
             {
                 Task.Run(() =>
                 {
-                    CsmCheckService list = new();
-                    List<string> response = list.SelectFile();
+                    List<string> response = BaseService.OpenFileDialog("txt");
                     if (response.Any())
                     {
-                        HomeStatistics.CsmListCount = response.Count;
-                        HomeProperties.Default.CsmList = response;
-                        HomeProperties.Default.Save();
+                        HomeCsmCheck.ListCount = response.Count;
+                        HomeCsmCheck.List = response;
+                        BaseService.SaveList("CsmList", HomeCsmCheck.List);
                     }
                 });
-            }, (obj) => !HomeStatistics.CsmService);
+            }, (obj) => !HomeCsmCheck.IsService);
         public ICommand AddFloatListCommand =>
             new RelayCommand((obj) =>
             {
                 Task.Run(() =>
                 {
-                    FloatCheckService list = new();
-                    List<string> response = list.SelectFile();
+                    List<string> response = BaseService.OpenFileDialog("txt");
                     if (response.Any())
                     {
-                        HomeStatistics.FloatListCount = response.Count;
-                        HomeProperties.Default.FloatList = response;
-                        HomeProperties.Default.Save();
+                        HomeFloatCheck.ListCount = response.Count;
+                        HomeFloatCheck.List = response;
+                        BaseService.SaveList("FloatList", HomeFloatCheck.List);
                     }
                 });
-            }, (obj) => !HomeStatistics.FloatService);
+            }, (obj) => !HomeFloatCheck.IsService);
         public ICommand PushCommand =>
             new RelayCommand((obj) =>
             {
-                if (!HomeStatistics.PushService)
+                if (!HomePush.IsService)
                 {
-                    HomeStatistics.PushService = true;
-                    HomeConfig config = obj as HomeConfig;
-                    HomeProperties.Default.TimerPush = config.PushTimer;
+                    HomePush.IsService = true;
+                    HomePush config = obj as HomePush;
+                    HomeProperties.Default.TimePush = config.Time;
                     HomeProperties.Default.Reserve = config.Reserve;
                     HomeProperties.Default.Unwanted = config.Unwanted;
                     HomeProperties.Default.Save();
 
-                    HomeConfig.TimerPush.Elapsed += timerPushTick;
-                    HomeConfig.TimerPushTick = config.PushTimer * 60;
-                    HomeConfig.TimerPush.Enabled = true;
+                    HomePush.Timer.Elapsed += timerPushTick;
+                    HomePush.TimerTick = config.Time * 60;
+                    HomePush.Timer.Enabled = true;
                 }
                 else
                 {
-                    HomeConfig.ctsPush.Cancel();
-                    HomeStatistics.TimerPush = "Off";
-                    HomeStatistics.PushService = false;
-                    HomeConfig.TimerPush.Enabled = false;
-                    HomeConfig.TimerPushTick = 0;
-                    HomeConfig.TimerPush.Elapsed -= timerPushTick;
+                    HomePush.cts.Cancel();
+                    HomePush.Status = "Off";
+                    HomePush.IsService = false;
+                    HomePush.Timer.Enabled = false;
+                    HomePush.TimerTick = 0;
+                    HomePush.Timer.Elapsed -= timerPushTick;
                 }
             }, (obj) => DataOrder.Orders.Any());
         public ICommand CsmCommand =>
             new RelayCommand((obj) =>
             {
-                if (!HomeStatistics.CsmService)
+                if (!HomeCsmCheck.IsService)
                 {
-                    HomeStatistics.CsmService = true;
-                    HomeConfig config = obj as HomeConfig;
-                    HomeProperties.Default.TimerCsm = config.CsmTimer;
-                    HomeProperties.Default.MaxDeviation = config.MaxDeviation;
-                    HomeProperties.Default.UserItems = config.UserItems;
+                    HomeCsmCheck.IsService = true;
+                    HomeCsmCheck config = obj as HomeCsmCheck;
+                    HomeProperties.Default.TimeCsm = config.Time;
+                    HomeProperties.Default.MinPrecent = config.MinPrecent;
                     HomeProperties.Default.Save();
 
-                    HomeConfig.TimerCsm.Elapsed += timerCsmTick;
-                    HomeConfig.TimerCsmTick = config.CsmTimer;
-                    HomeConfig.TimerCsm.Enabled = true;
+                    HomeCsmCheck.Timer.Elapsed += timerCsmTick;
+                    HomeCsmCheck.TimerTick = config.Time;
+                    HomeCsmCheck.Timer.Enabled = true;
                 }
                 else
                 {
-                    HomeConfig.ctsCsm.Cancel();
-                    HomeStatistics.TimerCsm = "Off";
-                    HomeStatistics.CsmService = false;
-                    HomeConfig.TimerCsm.Enabled = false;
-                    HomeConfig.TimerCsmTick = 0;
-                    HomeConfig.TimerCsm.Elapsed -= timerCsmTick;
+                    HomeCsmCheck.cts.Cancel();
+                    HomeCsmCheck.Status = "Off";
+                    HomeCsmCheck.IsService = false;
+                    HomeCsmCheck.Timer.Enabled = false;
+                    HomeCsmCheck.TimerTick = 0;
+                    HomeCsmCheck.Timer.Elapsed -= timerCsmTick;
                 }
-            }, (obj) => HomeProperties.Default.CsmList != null);
+            }, (obj) => HomeCsmCheck.List.Any());
         public ICommand FloatCommand => 
             new RelayCommand((obj) =>
             {
-                if (!HomeStatistics.FloatService)
+                if (!HomeFloatCheck.IsService)
                 {
-                    HomeStatistics.FloatService = true;
-                    HomeConfig config = obj as HomeConfig;
-                    HomeProperties.Default.TimerFloat = config.FloatTimer;
+                    HomeFloatCheck.IsService = true;
+                    HomeFloatCheck config = obj as HomeFloatCheck;
+                    HomeProperties.Default.TimeFloat = config.Time;
                     HomeProperties.Default.MaxPrecent = config.MaxPrecent;
                     HomeProperties.Default.Compare = config.Compare;
                     HomeProperties.Default.Save();
 
-                    HomeConfig.TimerFloat.Elapsed += timerFloatTick;
-                    HomeConfig.TimerFloatTick = config.FloatTimer * 60;
-                    HomeConfig.TimerFloat.Enabled = true;
+                    HomeFloatCheck.Timer.Elapsed += timerFloatTick;
+                    HomeFloatCheck.TimerTick = config.Time * 60;
+                    HomeFloatCheck.Timer.Enabled = true;
                 }
                 else
                 {
-                    HomeConfig.ctsFloat.Cancel();
-                    HomeStatistics.TimerFloat = "Off";
-                    HomeStatistics.FloatService = false;
-                    HomeConfig.TimerFloat.Enabled = false;
-                    HomeConfig.TimerFloatTick = 0;
-                    HomeConfig.TimerFloat.Elapsed -= timerFloatTick;
+                    HomeFloatCheck.cts.Cancel();
+                    HomeFloatCheck.Status = "Off";
+                    HomeFloatCheck.IsService = false;
+                    HomeFloatCheck.Timer.Enabled = false;
+                    HomeFloatCheck.TimerTick = 0;
+                    HomeFloatCheck.Timer.Elapsed -= timerFloatTick;
                 }
-            }, (obj) => HomeProperties.Default.FloatList != null);
+            }, (obj) => HomeFloatCheck.List.Any());
         void timerPushTick(Object sender, ElapsedEventArgs e)
         {
-            HomeConfig.TimerPushTick--;
-            TimeSpan timeSpan = TimeSpan.FromSeconds(HomeConfig.TimerPushTick);
-            HomeStatistics.TimerPush = timeSpan.ToString("mm':'ss");
-            if (HomeConfig.TimerPushTick <= 0)
+            HomePush.TimerTick--;
+            TimeSpan timeSpan = TimeSpan.FromSeconds(HomePush.TimerTick);
+            HomePush.Status = timeSpan.ToString("mm':'ss");
+            if (HomePush.TimerTick <= 0)
             {
-                HomeStatistics.TimerPush = "Preparation...";
-                HomeConfig.TimerPush.Enabled = false;
-                HomeStatistics.ProgressPush = 0;
+                HomePush.Status = "Preparation...";
+                HomePush.Timer.Enabled = false;
+                HomePush.Progress = 0;
 
-                HomeConfig.ctsPush = new();
-                HomeConfig.tokenPush = HomeConfig.ctsPush.Token;
+                HomePush.cts = new();
+                HomePush.token = HomePush.cts.Token;
                 OrderPush();
             }
         }
         void timerCsmTick(Object sender, ElapsedEventArgs e)
         {
-            HomeConfig.TimerCsmTick--;
-            TimeSpan timeSpan = TimeSpan.FromSeconds(HomeConfig.TimerCsmTick);
-            HomeStatistics.TimerCsm = timeSpan.ToString("mm':'ss");
-            if (HomeConfig.TimerCsmTick <= 0)
+            HomeCsmCheck.TimerTick--;
+            TimeSpan timeSpan = TimeSpan.FromSeconds(HomeCsmCheck.TimerTick);
+            HomeCsmCheck.Status = timeSpan.ToString("mm':'ss");
+            if (HomeCsmCheck.TimerTick <= 0)
             {
-                HomeStatistics.TimerCsm = "Preparation...";
-                HomeConfig.TimerCsm.Enabled = false;
-                HomeStatistics.ProgressCsm = 0;
+                HomeCsmCheck.Status = "Preparation...";
+                HomeCsmCheck.Timer.Enabled = false;
+                HomeCsmCheck.Progress = 0;
 
                 BaseModel.IsBrowser = true;
-                HomeConfig.ctsCsm = new();
-                HomeConfig.tokenCsm = HomeConfig.ctsCsm.Token;
+                HomeCsmCheck.cts = new();
+                HomeCsmCheck.token = HomeCsmCheck.cts.Token;
+                ItemBaseService baseService = new();
+                baseService.LoadInventoriesCsm(null);
                 CsmCheck();
             }
         }
         void timerFloatTick(Object sender, ElapsedEventArgs e)
         {
-            HomeConfig.TimerFloatTick--;
-            TimeSpan timeSpan = TimeSpan.FromSeconds(HomeConfig.TimerFloatTick);
-            HomeStatistics.TimerFloat = timeSpan.ToString("mm':'ss");
-            if (HomeConfig.TimerFloatTick <= 0)
+            HomeFloatCheck.TimerTick--;
+            TimeSpan timeSpan = TimeSpan.FromSeconds(HomeFloatCheck.TimerTick);
+            HomeFloatCheck.Status = timeSpan.ToString("mm':'ss");
+            if (HomeFloatCheck.TimerTick <= 0)
             {
-                HomeStatistics.TimerFloat = "Preparation...";
-                HomeConfig.TimerFloat.Enabled = false;
-                HomeStatistics.ProgressFloat = 0;
+                HomeFloatCheck.Status = "Preparation...";
+                HomeFloatCheck.Timer.Enabled = false;
+                HomeFloatCheck.Progress = 0;
 
-                HomeConfig.ctsFloat = new();
-                HomeConfig.tokenFloat = HomeConfig.ctsFloat.Token;
+                HomeFloatCheck.cts = new();
+                HomeFloatCheck.token = HomeFloatCheck.cts.Token;
                 FloatCheck();
             }
         }
@@ -326,13 +384,13 @@ namespace ItemChecker.MVVM.ViewModel
                 orderCheck.SteamOrders();
                 OrderPushService pushOrder = new();
 
-                HomeStatistics.TimerPush = "Pushing...";
-                HomeStatistics.MaxProgressPush = DataOrder.Orders.Count;
+                HomePush.Status = "Pushing...";
+                HomePush.MaxProgress = DataOrder.Orders.Count;
                 foreach (DataOrder order in DataOrder.Orders)
                 {
                     try
                     {
-                        HomeStatistics.Push += pushOrder.PushItems(order) ? 1 : 0;
+                        HomePush.Push += pushOrder.PushItems(order) ? 1 : 0;
                     }
                     catch (Exception exp)
                     {
@@ -340,14 +398,14 @@ namespace ItemChecker.MVVM.ViewModel
                     }
                     finally
                     {
-                        HomeStatistics.ProgressPush++;
+                        HomePush.Progress++;
                     }
-                    if (HomeConfig.tokenPush.IsCancellationRequested)
+                    if (HomePush.token.IsCancellationRequested)
                         break;
                 }
-                HomeStatistics.TimerPush = "Update...";
+                HomePush.Status = "Update...";
                 decimal availableAmount = SteamAccount.GetAvailableAmount();
-                if (HomeStatistics.CheckPush % 5 == 4 && availableAmount >= SteamAccount.Balance * 10 * 0.15m)
+                if (HomePush.Check % 5 == 4 && availableAmount >= SteamAccount.Balance * 10 * 0.15m)
                 {
                     FavoriteService favorite = new();
                     int count = favorite.PlaceOrderFav(availableAmount);
@@ -360,20 +418,20 @@ namespace ItemChecker.MVVM.ViewModel
                 }
                 orderCheck.SteamOrders();
                 OrderedGrid = new(DataOrder.Orders);
-                HomeStatistics.CheckPush++;
+                HomePush.Check++;
             }
             catch (Exception exp)
             {
-                HomeConfig.ctsPush.Cancel();
+                HomePush.cts.Cancel();
                 BaseService.errorLog(exp);
                 BaseService.errorMessage(exp);
             }
             finally
             {
-                if (!HomeConfig.tokenPush.IsCancellationRequested)
+                if (!HomePush.token.IsCancellationRequested)
                 {
-                    HomeConfig.TimerPushTick = HomeProperties.Default.TimerPush * 60;
-                    HomeConfig.TimerPush.Enabled = true;
+                    HomePush.TimerTick = HomeProperties.Default.TimePush * 60;
+                    HomePush.Timer.Enabled = true;
                 }
             }
         }
@@ -388,13 +446,29 @@ namespace ItemChecker.MVVM.ViewModel
                 while (!isLogin);
 
                 CsmCheckService csmCheck = new();
-                HomeStatistics.MaxProgressCsm = HomeProperties.Default.CsmList.Count;
-                HomeStatistics.TimerCsm = "Checking...";
-                foreach (string item in HomeProperties.Default.CsmList)
+                List<DataCsmCheck> checkedList = new();
+                if (HomeCsmCheck.Check == 0 || HomeCsmCheck.Check % 10 == 9)
+                {
+                    checkedList = csmCheck.CheckSteamPrice();
+                    Main.Notifications.Add(new()
+                    {
+                        Title = "Cs.Money Check",
+                        Message = "SteamMarket prices are checked and changed.",
+                    });
+                }
+                HomeCsmCheck.MaxProgress = HomeCsmCheck.List.Count;
+                HomeCsmCheck.Status = "Checking...";
+                foreach (DataCsmCheck item in checkedList)
                 {
                     try
                     {
-                        HomeStatistics.SuccessfulTrades += csmCheck.checkCsm(item);
+                        if (DataInventoriesCsm.Items.Any(x => x.ItemName == item.ItemName))
+                        {
+                            item.CsmPrice = DataInventoriesCsm.Items.Where(x => x.ItemName == item.ItemName).Select(x => x.Price).DefaultIfEmpty().Min();
+                            item.Precent = Edit.Precent(item.CsmPrice, item.StmPrice);
+                            if (item.Precent >= HomeCsmCheck.MinPrecent)
+                                HomeCsmCheck.SuccessfulTrades += csmCheck.Check(item.ItemName);
+                        }
                     }
                     catch (Exception exp)
                     {
@@ -403,13 +477,13 @@ namespace ItemChecker.MVVM.ViewModel
                     finally
                     {
                         csmCheck.getTransactions();
-                        HomeStatistics.ProgressCsm++;
+                        HomeCsmCheck.Progress++;
                     }
-                    if (HomeConfig.tokenCsm.IsCancellationRequested)
+                    if (HomeCsmCheck.token.IsCancellationRequested)
                         break;
                 }
-                HomeStatistics.CheckCsm++;
-                csmCheck.clearCart();
+                HomeCsmCheck.Check++;
+                csmCheck.ClearCart();
             }
             catch (Exception exp)
             {
@@ -418,10 +492,10 @@ namespace ItemChecker.MVVM.ViewModel
             }
             finally
             {
-                if (!HomeConfig.tokenCsm.IsCancellationRequested)
+                if (!HomeCsmCheck.token.IsCancellationRequested)
                 {
-                    HomeConfig.TimerCsmTick = HomeProperties.Default.TimerCsm;
-                    HomeConfig.TimerCsm.Enabled = true;
+                    HomeCsmCheck.TimerTick = HomeProperties.Default.TimeCsm;
+                    HomeCsmCheck.Timer.Enabled = true;
                 }
                 else
                 {
@@ -442,13 +516,13 @@ namespace ItemChecker.MVVM.ViewModel
                 BaseService.GetCurrency();
                 SteamAccount.GetSteamBalance();
 
-                HomeStatistics.MaxProgressFloat = HomeProperties.Default.FloatList.Count;
-                HomeStatistics.TimerFloat = "Checking...";
-                foreach (string item in HomeProperties.Default.FloatList)
+                HomeFloatCheck.MaxProgress = HomeFloatCheck.List.Count;
+                HomeFloatCheck.Status = "Checking...";
+                foreach (string item in HomeFloatCheck.List)
                 {
                     try
                     {
-                        HomeStatistics.PurchasesMade += floatCheck.checkFloat(item);
+                        HomeFloatCheck.PurchasesMade += floatCheck.checkFloat(item);
                     }
                     catch (Exception exp)
                     {
@@ -456,25 +530,25 @@ namespace ItemChecker.MVVM.ViewModel
                     }
                     finally
                     {
-                        HomeStatistics.ProgressFloat++;
+                        HomeFloatCheck.Progress++;
                     }
-                    if (HomeConfig.tokenFloat.IsCancellationRequested)
+                    if (HomeFloatCheck.token.IsCancellationRequested)
                         break;
                 }
-                HomeStatistics.CheckFloat++;
+                HomeFloatCheck.Check++;
             }
             catch (Exception exp)
             {
-                HomeConfig.ctsFloat.Cancel();
+                HomeFloatCheck.cts.Cancel();
                 BaseService.errorLog(exp);
                 BaseService.errorMessage(exp);
             }
             finally
             {
-                if (!HomeConfig.tokenFloat.IsCancellationRequested)
+                if (!HomeFloatCheck.token.IsCancellationRequested)
                 {
-                    HomeConfig.TimerFloatTick = HomeProperties.Default.TimerFloat * 60;
-                    HomeConfig.TimerFloat.Enabled = true;
+                    HomeFloatCheck.TimerTick = HomeProperties.Default.TimeFloat * 60;
+                    HomeFloatCheck.Timer.Enabled = true;
                 }
             }
         }
@@ -484,67 +558,69 @@ namespace ItemChecker.MVVM.ViewModel
             switch ((int)obj)
                 {
                     case 0:
-                        HomeConfig.TimerPushTick = 1;
+                        HomePush.TimerTick = 1;
                         break;
                     case 1:
-                        HomeConfig.TimerCsmTick = 1;
+                        HomeCsmCheck.TimerTick = 1;
                         break;
                     case 2:
-                        HomeConfig.TimerFloatTick = 1;
+                        HomeFloatCheck.TimerTick = 1;
                         break;
 
                 }
-            }, (obj) => HomeStatistics.PushService || HomeStatistics.CsmService || HomeStatistics.FloatService);
-        //tools
+            }, (obj) => HomePush.IsService | HomeCsmCheck.IsService | HomeFloatCheck.IsService);
+        #endregion
+
+        #region tools
         public ICommand TradeOfferCommand =>
             new RelayCommand((obj) =>
             {
-                if (!HomeStatistics.TradeTool)
+                if (!HomeTrade.IsService)
                 {
-                    HomeStatistics.TradeTool = true;
-                    HomeConfig.ctsTrade = new();
-                    HomeConfig.tokenTrade = HomeConfig.ctsTrade.Token;
+                    HomeTrade.IsService = true;
+                    HomeTrade.cts = new();
+                    HomeTrade.token = HomeTrade.cts.Token;
                     Task.Run(() => TradeOffer());
                 }
                 else
                 {
-                    HomeConfig.ctsTrade.Cancel();
-                    HomeStatistics.TradeTool = false;
+                    HomeTrade.cts.Cancel();
+                    HomeTrade.IsService = false;
                 }
             }, (obj) => !String.IsNullOrEmpty(SteamAccount.ApiKey));
         public ICommand QuickSellCommand =>
             new RelayCommand((obj) =>
             {
-                if (!HomeStatistics.SellTool)
+                if (!HomeSell.IsService)
                 {
-                    HomeStatistics.SellTool = true;
-                    HomeConfig.ctsSale = new();
-                    HomeConfig.tokenSale = HomeConfig.ctsSale.Token;
+                    HomeSell.IsService = true;
+                    HomeSell.cts = new();
+                    HomeSell.token = HomeSell.cts.Token;
                     HomeProperties.Default.MaxPrice = (int)obj;
                     HomeProperties.Default.Save();
                     Task.Run(() => QuickSell());
                 }
                 else
                 {
-                    HomeConfig.ctsSale.Cancel();
-                    HomeStatistics.SellTool = false;
+                    HomeSell.cts.Cancel();
+                    HomeSell.IsService = false;
                 }
             });
         public ICommand WithdrawCommand =>
             new RelayCommand((obj) =>
             {
-                if (!HomeStatistics.WithdrawTool)
+                if (!HomeWithdraw.IsService)
                 {
-                    HomeStatistics.WithdrawTool = true;
+                    HomeWithdraw.IsService = true;
                     BaseModel.IsBrowser = true;
-                    HomeConfig.ctsWithdraw = new();
-                    HomeConfig.tokenWithdraw = HomeConfig.ctsWithdraw.Token;
+                    HomeWithdraw.cts = new();
+                    HomeWithdraw.token = HomeWithdraw.cts.Token;
                     Task.Run(() => Withdraw());
                 }
                 else
                 {
-                    HomeConfig.ctsWithdraw.Cancel();
-                    HomeStatistics.WithdrawTool = false;
+                    HomeWithdraw.cts.Cancel();
+                    HomeWithdraw.IsService = false;
                 }
             }, (obj) => !BaseModel.IsBrowser);
         void TradeOffer()
@@ -554,9 +630,9 @@ namespace ItemChecker.MVVM.ViewModel
                 TradeOfferService tradeOffer = new();
                 do
                 {
-                    HomeStatistics.ProgressTrade = 0;
-                    HomeStatistics.MaxProgressTrade = DataTradeOffer.TradeOffers.Count;
-                    HomeStatistics.Trades += DataTradeOffer.TradeOffers.Count;
+                    HomeTrade.Progress = 0;
+                    HomeTrade.MaxProgress = DataTradeOffer.TradeOffers.Count;
+                    HomeTrade.Count += DataTradeOffer.TradeOffers.Count;
                     foreach (DataTradeOffer offer in DataTradeOffer.TradeOffers)
                     {
                         try
@@ -569,9 +645,9 @@ namespace ItemChecker.MVVM.ViewModel
                         }
                         finally
                         {
-                            HomeStatistics.ProgressTrade++;
+                            HomeTrade.Progress++;
                         }
-                        if (HomeConfig.tokenTrade.IsCancellationRequested)
+                        if (HomeTrade.token.IsCancellationRequested)
                             break;
                     }
                 }
@@ -579,9 +655,14 @@ namespace ItemChecker.MVVM.ViewModel
             }
             catch (Exception exp)
             {
-                HomeConfig.ctsTrade.Cancel();
+                HomeTrade.cts.Cancel();
                 BaseService.errorLog(exp);
                 BaseService.errorMessage(exp);
+            }
+            finally
+            {
+                HomeTrade.IsService = false;
+                Main.Message.Enqueue("Accept trades has finished.");
             }
         }
         void QuickSell()
@@ -591,10 +672,10 @@ namespace ItemChecker.MVVM.ViewModel
                 QuickSellService quickSell = new();
                 quickSell.checkInventory();
 
-                HomeStatistics.ProgressSell = 0;
-                HomeStatistics.MaxProgressSell = DataSell.SellItems.Count;
-                HomeStatistics.SellItems = DataSell.SellItems.Count;
-                HomeStatistics.Sum = DataSell.SellItems.Sum(s => s.Price);
+                HomeSell.Progress = 0;
+                HomeSell.MaxProgress = DataSell.SellItems.Count;
+                HomeSell.Count = DataSell.SellItems.Count;
+                HomeSell.Sum = DataSell.SellItems.Sum(s => s.Price);
                 foreach (DataSell item in DataSell.SellItems)
                 {
                     try
@@ -607,18 +688,23 @@ namespace ItemChecker.MVVM.ViewModel
                     }
                     finally
                     {
-                        HomeStatistics.ProgressSell++;
+                        HomeSell.Progress++;
                         Thread.Sleep(1500);
                     }
-                    if (HomeConfig.tokenSale.IsCancellationRequested)
+                    if (HomeSell.token.IsCancellationRequested)
                         break;
                 }
             }
             catch (Exception exp)
             {
-                HomeConfig.ctsSale.Cancel();
+                HomeSell.cts.Cancel();
                 BaseService.errorLog(exp);
                 BaseService.errorMessage(exp);
+            }
+            finally
+            {
+                HomeSell.IsService = false;
+                Main.Message.Enqueue("Quick sell items has finished.");
             }
         }
         void Withdraw()
@@ -634,14 +720,14 @@ namespace ItemChecker.MVVM.ViewModel
                 WithdrawService withdraw = new();
                 JArray inventory = withdraw.checkInventory();
                 JArray items = new();
-                if (inventory.Any() && !HomeConfig.tokenWithdraw.IsCancellationRequested)
+                if (inventory.Any() && !HomeWithdraw.token.IsCancellationRequested)
                     items = withdraw.getItems(inventory);
-                if (!items.Any() || HomeConfig.tokenWithdraw.IsCancellationRequested)
+                if (!items.Any() || HomeWithdraw.token.IsCancellationRequested)
                     return;
 
-                HomeStatistics.ProgressWithdraw = 0;
-                HomeStatistics.MaxProgressWithdraw = items.Count;
-                HomeStatistics.WithdrawItems = items.Count;
+                HomeWithdraw.Progress = 0;
+                HomeWithdraw.MaxProgress = items.Count;
+                HomeWithdraw.Count = items.Count;
                 foreach (JObject item in items)
                 {
                     try
@@ -655,28 +741,32 @@ namespace ItemChecker.MVVM.ViewModel
                     finally
                     {
                         Thread.Sleep(1500);
-                        HomeStatistics.ProgressWithdraw++;
+                        HomeWithdraw.Progress++;
                     }
-                    if (HomeConfig.tokenWithdraw.IsCancellationRequested)
+                    if (HomeWithdraw.token.IsCancellationRequested)
                         break;
                 }
             }
             catch (Exception exp)
             {
-                HomeConfig.ctsWithdraw.Cancel();
+                HomeWithdraw.cts.Cancel();
                 BaseService.errorLog(exp);
                 BaseService.errorMessage(exp);
             }
             finally
             {
-                BaseModel.IsBrowser = false;
                 if (SettingsProperties.Default.Quit)
                 {
                     BaseModel.Browser.Quit();
                     BaseModel.Browser = null;
                 }
+                BaseModel.IsBrowser = false;
+                HomeWithdraw.IsService = false;
+                Main.Message.Enqueue("Withdraw has finished.");
             }
         }
+        #endregion
+
         #region Favorite
         public ICommand ClearFavListCommand =>
             new RelayCommand((obj) =>
@@ -687,25 +777,24 @@ namespace ItemChecker.MVVM.ViewModel
                 if (result == MessageBoxResult.Yes)
                 {
                     Application.Current.Dispatcher.Invoke(() => {
-                        HomeProperties.Default.FavoriteList.Clear();
+                        HomeFavorite.FavoriteList.Clear();
                     });
-                    HomeProperties.Default.Save();
+                    BaseService.SaveList("FavoriteList", HomeFavorite.FavoriteList.ToList());
                 }
-            }, (obj) => HomeProperties.Default.FavoriteList.Any());
+            }, (obj) => HomeFavorite.FavoriteList.Any());
         public ICommand ExportFavCommand =>
             new RelayCommand((obj) =>
             {
-                FavoriteService.ExportTxt(HomeProperties.Default.FavoriteList);
-            }, (obj) => HomeProperties.Default.FavoriteList.Any());
+                FavoriteService.ExportTxt(HomeFavorite.FavoriteList);
+            }, (obj) => HomeFavorite.FavoriteList.Any());
         public ICommand ImportFavCommand =>
             new RelayCommand((obj) =>
             {
-                FavoriteService favorite = new();
-                var list = favorite.ImportTxt();
+                ObservableCollection<string> list = new(BaseService.OpenFileDialog("txt"));
                 if (list.Any() && list.Count <= 200)
                 {
-                    HomeProperties.Default.FavoriteList = list;
-                    HomeProperties.Default.Save();
+                    HomeFavorite.FavoriteList = list;
+                    BaseService.SaveList("FavoriteList", HomeFavorite.FavoriteList.ToList());
                 }
                 else if (list.Count > 200)
                     Main.Message.Enqueue("Limit. The maximum is only 200!");
@@ -716,11 +805,11 @@ namespace ItemChecker.MVVM.ViewModel
                 string itemName = (string)obj;
                 if (!String.IsNullOrEmpty(itemName))
                 {
-                    HomeProperties.Default.FavoriteList.Remove(itemName);
-                    HomeProperties.Default.Save();
+                    HomeFavorite.FavoriteList.Remove(itemName);
                     Main.Message.Enqueue($"{itemName}\nRemoved from list.");
+                    BaseService.SaveList("FavoriteList", HomeFavorite.FavoriteList.ToList());
                 }
-            }, (obj) => HomeProperties.Default.FavoriteList.Any() && !String.IsNullOrEmpty(SelectedFavItem));
+            }, (obj) => HomeFavorite.FavoriteList.Any() && !String.IsNullOrEmpty(SelectedFavItem));
         #endregion
     }
 }

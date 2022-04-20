@@ -57,13 +57,11 @@ namespace ItemChecker.MVVM.ViewModel
             TimerWindow.Elapsed += UpdateWindow;
             TimerInfo.Enabled = true;
             TimerWindow.Enabled = true;
-            
-            HomeProperties.Default.FavoriteList = HomeProperties.Default.FavoriteList ?? (new());
         }
         public ICommand OpenFolderCommand =>
             new RelayCommand((obj) =>
             {
-                Edit.openUrl(BaseModel.AppPath);
+                Edit.openUrl(BaseModel.DocumentPath);
             });
         public ICommand ExitCommand =>
             new RelayCommand((obj) =>
@@ -102,7 +100,7 @@ namespace ItemChecker.MVVM.ViewModel
                 BaseModel.StatusCommunity = BaseService.StatusSteam();
                 if (BaseModel.StatusCommunity != "normal")
                 {
-                    Main.Notifications.Add(new()
+                    MainInfo.Notifications.Add(new()
                     {
                         Title = "Steam Status",
                         Message = "There are problems with Steam servers. The program may not work correctly!"
@@ -117,7 +115,7 @@ namespace ItemChecker.MVVM.ViewModel
                 SteamAccount.GetSteamBalance();
                 if (SteamAccount.BalanceStartUp > SteamAccount.Balance)
                 {
-                    Main.Notifications.Add(new()
+                    MainInfo.Notifications.Add(new()
                     {
                         Title = "Balance",
                         Message = $"Your balance has decreased\n-{SteamAccount.BalanceStartUp - SteamAccount.Balance}."
@@ -126,7 +124,7 @@ namespace ItemChecker.MVVM.ViewModel
                 }
                 else if (SteamAccount.BalanceStartUp < SteamAccount.Balance)
                 {
-                    Main.Notifications.Add(new()
+                    MainInfo.Notifications.Add(new()
                     {
                         Title = "Balance",
                         Message = $"Your balance has increased\n+{SteamAccount.Balance - SteamAccount.BalanceStartUp}."

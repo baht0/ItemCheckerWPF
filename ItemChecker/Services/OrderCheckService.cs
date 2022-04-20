@@ -21,6 +21,7 @@ namespace ItemChecker.MVVM.Model
         decimal precent { get; set; } = 0;
         decimal difference { get; set; } = 0;
         #endregion
+
         public void SteamOrders()
         {
             List<DataOrder> cancelList = new();
@@ -49,10 +50,10 @@ namespace ItemChecker.MVVM.Model
                 }
             CancelOrders(cancelList);
             foreach (DataOrder item in dataOrders)
-                if (!HomeProperties.Default.FavoriteList.Contains(item.ItemName) && HomeProperties.Default.FavoriteList.Count < 200)
+                if (!HomeFavorite.FavoriteList.Contains(item.ItemName) && HomeFavorite.FavoriteList.Count < 200)
                 {
-                    HomeProperties.Default.FavoriteList.Add(item.ItemName);
-                    HomeProperties.Default.Save();
+                    HomeFavorite.FavoriteList.Add(item.ItemName);
+                    BaseService.SaveList("FavoriteList", HomeFavorite.FavoriteList.ToList());
                 }
             DataOrder.Orders = dataOrders;
         }
@@ -66,8 +67,19 @@ namespace ItemChecker.MVVM.Model
             stmPrice = !String.IsNullOrEmpty(sell_order) ? Convert.ToDecimal(sell_order) / 100 : 0;
 
             SetService(item);
-            
-            var data = new DataOrder(item.Type, itemName, order_id.Replace("mybuyorder_", string.Empty), stmPrice, orderPrice, servicePrice, serviceGive, precent, difference);
+
+            DataOrder data = new()
+            {
+                Type = item.Type,
+                ItemName = itemName,
+                OrderId = order_id.Replace("mybuyorder_", string.Empty),
+                StmPrice = stmPrice,
+                OrderPrice = orderPrice,
+                ServicePrice = servicePrice,
+                ServiceGive = serviceGive,
+                Precent = precent,
+                Difference = difference
+            };
             return Tuple.Create(data, CheckConditions(data, orderPrice));
         }
         void SetService(ItemBase itemBase)
