@@ -24,7 +24,7 @@ namespace ItemChecker.MVVM.Model
             "ItemChecker.Updater.dll",
             "ItemChecker.Updater.runtimeconfig.json",
             "icon.ico",
-            "chromedriver.exe",
+            "msedgedriver.exe",
             "WebDriver.dll",
             "WebDriver.Support.dll",
             "Newtonsoft.Json.dll",
