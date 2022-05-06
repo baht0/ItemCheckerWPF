@@ -5,8 +5,11 @@
     <Setting Name="SteamLoginSecure" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="CurrencyValue" Type="System.Decimal" Scope="User">
-      <Value Profile="(Default)">72</Value>
+    <Setting Name="RUB" Type="System.Decimal" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="CNY" Type="System.Decimal" Scope="User">
+      <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="CurrencyApiKey" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -17,9 +20,9 @@
     <Setting Name="Quit" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-	  <Setting Name="Theme" Type="System.String" Scope="User">
-		  <Value Profile="(Default)">Light</Value>
-	  </Setting>
+    <Setting Name="Theme" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Light</Value>
+    </Setting>
     <Setting Name="SetHours" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>

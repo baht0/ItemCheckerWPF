@@ -13,7 +13,7 @@ namespace ItemChecker.MVVM.Model
     public class MainInfo
     {
         public string User { get; set; } = SteamAccount.User;
-        public decimal Currency { get; set; } = SettingsProperties.Default.CurrencyValue;
+        public decimal Currency { get; set; } = SettingsProperties.Default.RUB;
         public string CurrencyString { get; set; } = SettingsProperties.Default.CurrencyId == 0 ? "USD ($)" : "RUB (₽)";
         public decimal Balance { get; set; } = SteamAccount.Balance;
         public decimal BalanceCsm { get; set; } = CsmAccount.Balance;

@@ -78,7 +78,7 @@ namespace ItemChecker.Services
                 floatData.MedianPrice = prices.Item2;
                 var item = ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == itemName);
                 if (item != null)
-                    floatData.CsmPrice = Math.Round(item.CsmInfo.Price * SettingsProperties.Default.CurrencyValue, 2);
+                    floatData.CsmPrice = Math.Round(item.CsmInfo.Price * SettingsProperties.Default.RUB, 2);
 
                 switch (HomeProperties.Default.Compare)
                 {

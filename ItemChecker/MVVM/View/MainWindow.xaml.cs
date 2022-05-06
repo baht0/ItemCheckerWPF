@@ -74,10 +74,6 @@ namespace ItemChecker.MVVM.View
         {
             Edit.openUrl("https://cs.money/");
         }
-        private void oldCSM_MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            Edit.openUrl("https://old.cs.money/");
-        }
         private void Inventory_MenuItem_Click(object sender, RoutedEventArgs e)
         {
             Edit.openUrl("https://steamcommunity.com/my/inventory/");

@@ -38,7 +38,7 @@ namespace ItemChecker.MVVM.Model
             HtmlDocument htmlDoc = new();
             htmlDoc.LoadHtml(html);
             Balance = Edit.GetPrice(htmlDoc.DocumentNode.SelectSingleNode("//a[@id='header_wallet_balance']").InnerText);
-            BalanceUsd = Math.Round(Balance / SettingsProperties.Default.CurrencyValue, 2);
+            BalanceUsd = Math.Round(Balance / SettingsProperties.Default.RUB, 2);
             User = htmlDoc.DocumentNode.SelectSingleNode("//span[@id='account_pulldown']").InnerText.Trim();
             AccountName = htmlDoc.DocumentNode.SelectSingleNode("//span[@class='persona online']").InnerText.Trim();
 
@@ -52,7 +52,7 @@ namespace ItemChecker.MVVM.Model
             var htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(html);
             Balance = Edit.GetPrice(htmlDoc.DocumentNode.SelectSingleNode("//a[@id='header_wallet_balance']").InnerText);
-            BalanceUsd = Math.Round(Balance / SettingsProperties.Default.CurrencyValue, 2);
+            BalanceUsd = Math.Round(Balance / SettingsProperties.Default.RUB, 2);
             BalanceStartUp = Balance;
         }
         static void GetSteamApiKey()
@@ -126,7 +126,7 @@ namespace ItemChecker.MVVM.Model
                 Browser.Navigate().GoToUrl("https://cs.money/personal-info/");
                 IWebElement balance = WebDriverWait.Until(e => e.FindElement(By.XPath("//span[@class='styles_price__1m7op TradeBalance_balance__2Hxq3']/span")));
                 BalanceUsd = Edit.GetPrice(balance.GetAttribute("textContent"));
-                Balance = Math.Round(BalanceUsd * SettingsProperties.Default.CurrencyValue, 2);
+                Balance = Math.Round(BalanceUsd * SettingsProperties.Default.RUB, 2);
             }
             catch (Exception exp)
             {

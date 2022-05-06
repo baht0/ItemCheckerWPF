@@ -174,20 +174,20 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 switch (Convert.ToInt32(obj))
                 {
-                    case 1:
+                    case 0:
                         BaseModel.IsWorking = true;
                         Task.Run(() => {
                             OrderCheckService orderCheck = new();
-                            orderCheck.SteamOrders();
+                            orderCheck.SteamOrders(true);
                             OrderedGrid = new ObservableCollection<DataOrder>(DataOrder.Orders);
                             BaseModel.IsWorking = false;
+                            Main.Message.Enqueue("MyOrders update is complete.");
                         });
-                        Main.Message.Enqueue("MyOrders update is complete.");
                         break;
-                    case 2:
+                    case 1:
                         MessageBoxResult result = MessageBox.Show(
-                            "Do you really want to cancel all your orders?", 
-                            "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                            "Do you really want to cancel all your orders?", "Question",
+                            MessageBoxButton.YesNo, MessageBoxImage.Question);
                         if (result == MessageBoxResult.Yes)
                             Task.Run(() => {
                                 BaseModel.IsWorking = true;
@@ -197,8 +197,8 @@ namespace ItemChecker.MVVM.ViewModel
                                 OrderedGrid = new ObservableCollection<DataOrder>(DataOrder.Orders);
                                 SteamAccount.GetAvailableAmount();
                                 BaseModel.IsWorking = false;
+                                Main.Message.Enqueue("All MyOrders have been cancelled.");
                             });
-                        Main.Message.Enqueue("All MyOrders have been cancelled.");
                         break;
                 }
             }, (obj) => !BaseModel.IsWorking);
@@ -380,8 +380,10 @@ namespace ItemChecker.MVVM.ViewModel
             try
             {
                 SteamAccount.GetSteamBalance();
+
                 OrderCheckService orderCheck = new();
-                orderCheck.SteamOrders();
+                bool isUpdateService = HomePush.Check % 10 == 0;
+                orderCheck.SteamOrders(isUpdateService);
                 OrderPushService pushOrder = new();
 
                 HomePush.Status = "Pushing...";
@@ -416,7 +418,7 @@ namespace ItemChecker.MVVM.ViewModel
                             Message = $"{count} orders were placed in the last push.",
                         });
                 }
-                orderCheck.SteamOrders();
+                orderCheck.SteamOrders(false);
                 OrderedGrid = new(DataOrder.Orders);
                 HomePush.Check++;
             }

@@ -156,7 +156,7 @@ namespace ItemChecker.MVVM.ViewModel
                     return;
                 StartUp.Progress = Tuple.Create(6, "Check MyOrders...");
                 OrderCheckService order = new();
-                order.SteamOrders();
+                order.SteamOrders(true);
 
                 if (BaseModel.token.IsCancellationRequested)
                     return;
@@ -223,7 +223,7 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 Settings settings = obj as Settings;
 
-                if (Net.Get.Currency(settings.CurrencyApi) != 0)
+                if (Net.Get.Currency(settings.CurrencyApi, "RUB") != 0)
                 {
                     SettingsProperties.Default.CurrencyApiKey = settings.CurrencyApi;
                     SettingsProperties.Default.CurrencyId = settings.CurrencyId;

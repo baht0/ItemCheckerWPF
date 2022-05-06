@@ -5,6 +5,7 @@ namespace ItemChecker.MVVM.Model
 {
     public class DataInventoriesCsm
     {
+        public DateTime Updated { get; set; } = DateTime.MinValue;
         public string ItemName { get; set; } = "Unknown";
         public int NameId { get; set; } = 0;
         public int StackSize { get; set; } = 0;

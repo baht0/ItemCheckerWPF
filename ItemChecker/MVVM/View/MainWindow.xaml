@@ -51,7 +51,6 @@
                             <ContextMenu Style="{StaticResource MaterialDesignContextMenu}" Background="{DynamicResource ElementBackground}">
                                 <MenuItem Header="Links">
                                     <MenuItem Header="CSM" Click="CSM_MenuItem_Click"/>
-                                    <MenuItem Header="Old CSM" Click="oldCSM_MenuItem_Click"/>
                                     <Separator/>
                                     <MenuItem Header="Inventory" Click="Inventory_MenuItem_Click"/>
                                     <MenuItem Header="SteamMarket" Click="SteamMarket_MenuItem_Click"/>

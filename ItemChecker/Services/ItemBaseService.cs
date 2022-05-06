@@ -1,34 +1,15 @@
 ﻿using ItemChecker.MVVM.Model;
 using ItemChecker.Net;
+using ItemChecker.Properties;
 using ItemChecker.Support;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 
 namespace ItemChecker.Services
 {
-    internal class CsmBase
-    {
-        public int Id { get; set; }
-        public string ItemName { get; set; }
-        public decimal Price { get; set; }
-        public bool Overstock { get; set; }
-        public int OverstockDifference { get; set; }
-        public bool Unavailable { get; set; }
-    }
-    internal class LfmBase
-    {
-        public string ItemName { get; set; } = "Unknown";
-        public decimal Price { get; set; }
-        public int Have { get; set; }
-        public int Limit { get; set; }
-        public int Reservable { get; set; }
-        public int Tradable { get; set; }
-        public int SteamPriceRate { get; set; }
-        public bool Overstock { get; set; }
-        public bool Unavailable { get; set; }
-    }
     public class ItemBaseService : BaseService
     {
         #region private meth
@@ -58,81 +39,6 @@ namespace ItemChecker.Services
 
             return prices;
         }
-        //csm
-        List<Tuple<string, int>> GetOverstock()
-        {
-            List<Tuple<string, int>> overstock = new();
-            JArray array = JArray.Parse(Get.Request("https://cs.money/list_overstock?appId=730"));
-
-            foreach (JObject item in array)
-            {
-                string name = Edit.replaceSymbols(item["market_hash_name"].ToString());
-                int overstockDifference = Convert.ToInt32(item["overstock_difference"]);
-
-                overstock.Add(Tuple.Create(name, overstockDifference));
-            }
-            return overstock;
-        }
-        List<string> GetUnavailable()
-        {
-            List<string> unavailable = new();
-            JArray array = JArray.Parse(Get.Request("https://cs.money/list_unavailable?appId=730"));
-
-            foreach (JObject item in array)
-            {
-                string name = Edit.replaceSymbols(item["market_hash_name"].ToString());
-
-                unavailable.Add(name);
-            }
-            return unavailable;
-        }
-        List<CsmBase> GetCsmBases()
-        {
-            List<Tuple<string, int>> overstock = GetOverstock();
-            List<string> unavailable = GetUnavailable();
-
-            JObject csm_base = JObject.Parse(Get.Request("https://csm.auction/api/skins_base"));
-            List<CsmBase> csm_items = new();
-            foreach (var item in csm_base)
-            {
-                string name = Convert.ToString(item.Value["m"]);
-                csm_items.Add(new CsmBase()
-                {
-                    Id = Convert.ToInt32(item.Key),
-                    ItemName = name,
-                    Price = Convert.ToDecimal(item.Value["a"]),
-                    OverstockDifference = overstock.FirstOrDefault(x => x.Item1 == name) != null ? overstock.FirstOrDefault(x => x.Item1 == name).Item2 : 0,
-                    Overstock = overstock.FirstOrDefault(x => x.Item1 == name) != null,
-                    Unavailable = unavailable.Contains(name),
-                });
-            }
-            return csm_items;
-        }
-        //lfm
-        List<LfmBase> GetLfmBases()
-        {
-            JArray lfm_base = JArray.Parse(Get.Request("https://loot.farm/fullprice.json"));
-            List<LfmBase> lfm_items = new();
-            foreach (JToken item in lfm_base)
-            {
-                decimal price = Convert.ToDecimal(item["price"]);
-                int have = Convert.ToInt32(item["have"]);
-                int max = Convert.ToInt32(item["max"]);
-                lfm_items.Add(new LfmBase()
-                {
-                    ItemName = item["name"].ToString(),
-                    Price = price / 100,
-                    Have = have,
-                    Limit = max,
-                    Reservable = Convert.ToInt32(item["res"]),
-                    Tradable = Convert.ToInt32(item["tr"]),
-                    SteamPriceRate = Convert.ToInt32(item["rate"]),
-                    Overstock = have >= max,
-                    Unavailable = price <= 0,
-                });
-            }
-            return lfm_items;
-        }
         #endregion
 
         public void CreateItemsBase()
@@ -141,19 +47,15 @@ namespace ItemChecker.Services
             JArray skinsBase = JArray.Parse(Post.DropboxRead("steamBase.json"));
 
             List<Tuple<string, decimal>> stPrices = GetSteamPrice();
-            List<CsmBase> csmBases = GetCsmBases();
-            List<LfmBase> lfmBases = GetLfmBases();
             foreach (JObject item in skinsBase)
             {
-                string name = item["itemName"].ToString();
+                string itemName = item["itemName"].ToString();
                 int steamId = Convert.ToInt32(item["steamId"]);
 
-                decimal stPrice = stPrices.FirstOrDefault(x => x.Item1 == name) != null ? stPrices.FirstOrDefault(x => x.Item1 == name).Item2 : 0;
-                CsmBase csmItem = csmBases.FirstOrDefault(x => x.ItemName == name);
-                LfmBase lfmItem = lfmBases.FirstOrDefault(x => x.ItemName == name);
+                decimal stPrice = stPrices.FirstOrDefault(x => x.Item1 == itemName) != null ? stPrices.FirstOrDefault(x => x.Item1 == itemName).Item2 : 0;
                 SkinsBase.Add(new ItemBase()
                 {
-                    ItemName = name,
+                    ItemName = itemName,
                     Type = item["type"].ToString(),
                     Quality = item["quality"].ToString(),
 
@@ -161,25 +63,6 @@ namespace ItemChecker.Services
                     {
                         Id = steamId,
                         Price = stPrice,
-                    },
-                    CsmInfo = new()
-                    {
-                        Id = csmItem != null ? csmItem.Id : 0,
-                        Price = csmItem != null ? csmItem.Price : 0,
-                        OverstockDifference = csmItem != null ? csmItem.OverstockDifference : 0,
-                        Overstock = csmItem != null ? csmItem.Overstock : false,
-                        Unavailable = csmItem != null ? csmItem.Unavailable : false,
-                    },
-                    LfmInfo = new()
-                    {
-                        Price = lfmItem != null ? lfmItem.Price : 0,
-                        Have = lfmItem != null ? lfmItem.Have : 0,
-                        Limit = lfmItem != null ? lfmItem.Limit : 0,
-                        Reservable = lfmItem != null ? lfmItem.Reservable : 0,
-                        Tradable = lfmItem != null ? lfmItem.Tradable : 0,
-                        SteamPriceRate = lfmItem != null ? lfmItem.SteamPriceRate : 0,
-                        Overstock = lfmItem != null ? lfmItem.Overstock : false,
-                        Unavailable = lfmItem != null ? lfmItem.Unavailable : false,
                     }
                 });
             }
@@ -187,24 +70,90 @@ namespace ItemChecker.Services
         }
         public void UpdateLfmInfo()
         {
-            List<LfmBase> lfmBases = GetLfmBases();
-            foreach (LfmBase lfmItem in lfmBases)
+            if (ItemBase.SkinsBase.LastOrDefault().LfmInfo.Updated.AddMinutes(20) > DateTime.Now)
+                return;
+            JArray array = JArray.Parse(Get.Request("https://loot.farm/fullprice.json"));
+            foreach (JToken item in array)
+            {
+                string itemName = item["name"].ToString().Replace("(Holo-Foil)", "(Holo/Foil)").Replace("  ", " ");
+                decimal price = Convert.ToDecimal(item["price"]);
+                int have = Convert.ToInt32(item["have"]);
+                int max = Convert.ToInt32(item["max"]);
+
+                if (ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == itemName) != null)
+                {
+                    ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == itemName).LfmInfo = new()
+                    {
+                        Updated = DateTime.Now,
+                        Price = price / 100,
+                        Have = have,
+                        Limit = max,
+                        Reservable = Convert.ToInt32(item["res"]),
+                        Tradable = Convert.ToInt32(item["tr"]),
+                        SteamPriceRate = Convert.ToInt32(item["rate"]),
+                        Overstock = have >= max,
+                        Unavailable = price <= 0,
+                    };
+                }
+            }
+        }
+        public void UpdateCsmInfo()
+        {
+            if (ItemBase.SkinsBase.LastOrDefault().CsmInfo.Updated.AddMinutes(20) > DateTime.Now)
+                return;
+            JObject json = JObject.Parse(Get.Request("https://csm.auction/api/skins_base"));
+            JArray unavailable = JArray.Parse(Get.Request("https://cs.money/list_unavailable?appId=730"));
+            JArray overstock = JArray.Parse(Get.Request("https://cs.money/list_overstock?appId=730"));
+            foreach (var item in json)
+            {
+                string itemName = Convert.ToString(item.Value["m"]);
+                JToken overItem = overstock.FirstOrDefault(x => x["market_hash_name"].ToString() == itemName);
+                if (ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == itemName) != null)
+                {
+                    ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == itemName).CsmInfo = new()
+                    {
+                        Updated = DateTime.Now,
+                        Id = Convert.ToInt32(item.Key),
+                        Price = Convert.ToDecimal(item.Value["a"]),
+                        OverstockDifference = overItem != null ? (Int32)overItem["overstock_difference"] : 0,
+                        Overstock = overItem != null,
+                        Unavailable = unavailable.FirstOrDefault(x => x["market_hash_name"].ToString() == itemName) != null,
+                    };
+                }
+            }
+        }
+        public void UpdateBuffInfo(int min, int max)
+        {
+            if (ItemBase.SkinsBase.LastOrDefault().BuffInfo.Updated.AddMinutes(20) > DateTime.Now)
+                return;
+            CookieContainer container = new();
+            container.Add(new Cookie("session", "1-8dBJa34rRl2kEpVaEdb3yJUBQ8sIimUszE1okDikHmWD2036357433", "/", "buff.163.com"));
+            int pages = int.MaxValue;
+            for (int i = 1; i <= pages; i++)
             {
                 try
                 {
-                    string itemName = lfmItem.ItemName.Replace("(Holo-Foil)", "(Holo/Foil)");
-                    itemName = itemName.Replace("  ", " ");
-                    ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == itemName).LfmInfo = new Lfm()
+                    string url = "https://buff.163.com/api/market/goods/buying?game=csgo&page_num=" + i + "&min_price=" + min + "&max_price=" + max + "&sort_by=price.asc&page_size=80";
+                    JObject json = JObject.Parse(Get.Request(container, url));
+
+                    pages = Convert.ToInt32(json["data"]["total_page"]);
+                    JArray items = json["data"]["items"] as JArray;
+                    foreach (JObject item in items)
                     {
-                        Price = lfmItem.Price,
-                        Have = lfmItem.Have,
-                        Limit = lfmItem.Limit,
-                        Reservable = lfmItem.Reservable,
-                        Tradable = lfmItem.Tradable,
-                        SteamPriceRate = lfmItem.SteamPriceRate,
-                        Overstock = lfmItem.Overstock,
-                        Unavailable = lfmItem.Unavailable,
-                    };
+                        string itemName = item["market_hash_name"].ToString();
+                        if (ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == itemName) != null)
+                        {
+                            ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == itemName).BuffInfo = new()
+                            {
+                                Updated = DateTime.Now,
+                                Id = Convert.ToInt32(item["id"]),
+                                Price = Edit.ConverterToUsd(Convert.ToDecimal(item["sell_min_price"]), SettingsProperties.Default.CNY),
+                                BuyOrder = Edit.ConverterToUsd(Convert.ToDecimal(item["buy_max_price"]), SettingsProperties.Default.CNY),
+                                Count = Convert.ToInt32(item["sell_num"]),
+                                OrderCount = Convert.ToInt32(item["buy_num"])
+                            };
+                        }
+                    }
                 }
                 catch
                 {
@@ -215,6 +164,8 @@ namespace ItemChecker.Services
 
         public void LoadInventoriesCsm(ParserConfig parserConfig)
         {
+            if (DataInventoriesCsm.Items.LastOrDefault().Updated.AddMinutes(20) > DateTime.Now)
+                return;
             DataInventoriesCsm.Items.Clear();
             int offset = 0;
             string price = $"maxPrice={parserConfig.MaxPrice}&minPrice={parserConfig.MinPrice}&";
@@ -238,6 +189,7 @@ namespace ItemChecker.Services
 
                         DataInventoriesCsm.Items.Add(new()
                         {
+                            Updated = DateTime.Now,
                             ItemName = item["fullName"].ToString(),
                             NameId = id,
                             StackSize = stack,

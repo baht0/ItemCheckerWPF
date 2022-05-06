@@ -37,13 +37,25 @@ namespace ItemChecker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("72")]
-        public decimal CurrencyValue {
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public decimal RUB {
             get {
-                return ((decimal)(this["CurrencyValue"]));
+                return ((decimal)(this["RUB"]));
             }
             set {
-                this["CurrencyValue"] = value;
+                this["RUB"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public decimal CNY {
+            get {
+                return ((decimal)(this["CNY"]));
+            }
+            set {
+                this["CNY"] = value;
             }
         }
         

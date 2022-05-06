@@ -681,7 +681,7 @@
                             </Grid.RowDefinitions>
                             <TextBlock Grid.Row="0" VerticalAlignment="Center" TextWrapping="Wrap"
                                            Text="{Binding ParserInfo.ItemNameLfm, StringFormat='Item: {0}'}"/>
-                            <Border Grid.Row="2" DataContext="{Binding ParserInfo.ItemLf}" Background="{StaticResource ElementBackground}">
+                            <Border Grid.Row="2" DataContext="{Binding ParserInfo.ItemLf}" Background="{DynamicResource ElementBackground}">
                                 <Grid Margin="10" >
                                     <Grid.RowDefinitions>
                                         <RowDefinition/>
@@ -707,6 +707,38 @@
                                     <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Limit}" VerticalAlignment="Center"/>
                                     <TextBlock Grid.Row="5" Text="Steam price rate:" VerticalAlignment="Center"/>
                                     <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding SteamPriceRate}" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                        <!--BF-->
+                        <Grid Grid.Row="1"
+                                  Visibility="{Binding DataContext.ParserInfo.BF, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="50"/>
+                                <RowDefinition Height="210"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" VerticalAlignment="Center" TextWrapping="Wrap"
+                                           Text="{Binding ParserInfo.ItemNameBf, StringFormat='Item: {0}'}"/>
+                            <Border Grid.Row="2" DataContext="{Binding ParserInfo.ItemBf}" Background="{DynamicResource ElementBackground}">
+                                <Grid Margin="10" >
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Row="0" Text="Price:" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Price, StringFormat='{}{0}$'}" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="1" Text="Sell:" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Count}" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="2" Text="BuyOrder:" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding BuyOrder, StringFormat='{}{0}$'}" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="3" Text="OrderCount:" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding OrderCount}" VerticalAlignment="Center"/>
                                 </Grid>
                             </Border>
                         </Grid>

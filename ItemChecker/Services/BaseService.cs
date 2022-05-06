@@ -16,12 +16,12 @@ namespace ItemChecker.Services
     {
         public static void GetCurrency()
         {
-            decimal course = Get.Currency(SettingsProperties.Default.CurrencyApiKey);
-            if (course != 0)
-            {
-                SettingsProperties.Default.CurrencyValue = course;
-                SettingsProperties.Default.Save();
-            }
+            decimal rub = Get.Currency(SettingsProperties.Default.CurrencyApiKey, "RUB");
+            SettingsProperties.Default.RUB = rub != 0 ? rub : SettingsProperties.Default.RUB;
+            decimal cny = Get.Currency(SettingsProperties.Default.CurrencyApiKey, "CNY");
+            SettingsProperties.Default.CNY = cny != 0 ? cny : SettingsProperties.Default.CNY;
+
+            SettingsProperties.Default.Save();
         }
         public static String StatusSteam()
         {

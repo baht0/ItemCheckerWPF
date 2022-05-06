@@ -158,7 +158,7 @@ namespace ItemChecker.MVVM.ViewModel
                 Settings settings = obj as Settings;
 
                 Task.Run(() => {
-                    if (Net.Get.Currency(settings.CurrencyApi) == 0)
+                    if (Net.Get.Currency(settings.CurrencyApi, "RUB") == 0)
                     {
                         MessageBox.Show(
                             "The \"CurrencyApi\" you provided is not working!", "Error",

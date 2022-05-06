@@ -4,6 +4,7 @@ using ItemChecker.Net;
 using ItemChecker.Properties;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Support.UI;
 using System;
 using System.IO;
@@ -47,9 +48,9 @@ namespace ItemChecker.MVVM.Model
             if (!Directory.Exists(profilesDir))
                 Directory.CreateDirectory(profilesDir);
 
-            ChromeDriverService chromeDriverService = ChromeDriverService.CreateDefaultService();
-            chromeDriverService.HideCommandPromptWindow = true;
-            ChromeOptions option = new();
+            EdgeDriverService edgeDriverService = EdgeDriverService.CreateDefaultService();
+            edgeDriverService.HideCommandPromptWindow = true;
+            EdgeOptions option = new();
             option.AddArguments(
                 "--headless",
                 "--disable-gpu",
@@ -62,7 +63,7 @@ namespace ItemChecker.MVVM.Model
             option.AddArguments($"--user-data-dir={profilesDir}", "profile-directory=Default");
             option.Proxy = null;
 
-            Browser = new ChromeDriver(chromeDriverService, option, TimeSpan.FromSeconds(30));
+            Browser = new EdgeDriver(edgeDriverService, option, TimeSpan.FromSeconds(30));
             Browser.Manage().Window.Maximize();
             WebDriverWait = new WebDriverWait(Browser, TimeSpan.FromSeconds(10));
         }

@@ -22,20 +22,35 @@ namespace ItemChecker.MVVM.Model
         decimal difference { get; set; } = 0;
         #endregion
 
-        public void SteamOrders()
+        public void SteamOrders(bool isUpdateService)
         {
-            List<DataOrder> cancelList = new();
             List<DataOrder> dataOrders = new();
-            DataOrder.Orders.Clear();
-            string html = Get.Request(SteamCookies, "https://steamcommunity.com/market/");
+
             HtmlDocument htmlDoc = new();
             Thread.Sleep(500);
-            htmlDoc.LoadHtml(html);
-
-            string table = htmlDoc.DocumentNode.SelectSingleNode("//div[@class='my_listing_section market_content_block market_home_listing_table']/h3/span[1]").InnerText.Trim();
-            int index = table != "My listings awaiting confirmation" ? 1 : 2;
+            htmlDoc.LoadHtml(Get.Request(SteamCookies, "https://steamcommunity.com/market/"));
+            int index = htmlDoc.DocumentNode.SelectSingleNode("//div[@class='my_listing_section market_content_block market_home_listing_table']/h3/span[1]").InnerText.Trim() != "My listings awaiting confirmation" ? 1 : 2;
             HtmlNodeCollection items = htmlDoc.DocumentNode.SelectNodes("//div[@class='my_listing_section market_content_block market_home_listing_table'][" + index + "]/div[@class='market_listing_row market_recent_listing_row']");
             if (items != null)
+            {
+                if (isUpdateService)
+                {
+                    ItemBaseService baseService = new();
+                    switch (SettingsProperties.Default.ServiceId)
+                    {
+                        case 2:
+                            baseService.UpdateCsmInfo();
+                            break;
+                        case 3:
+                            baseService.UpdateLfmInfo();
+                            break;
+                        case 4:
+                            baseService.UpdateBuffInfo(0, int.MaxValue);
+                            break;
+                    }
+                }
+
+                List<DataOrder> cancelList = new();
                 foreach (HtmlNode item in items)
                 {
                     string name = item.SelectSingleNode(".//div[4]/span/a").InnerText.Trim();
@@ -48,13 +63,14 @@ namespace ItemChecker.MVVM.Model
                     else
                         dataOrders.Add(response.Item1);
                 }
-            CancelOrders(cancelList);
-            foreach (DataOrder item in dataOrders)
-                if (!HomeFavorite.FavoriteList.Contains(item.ItemName) && HomeFavorite.FavoriteList.Count < 200)
-                {
-                    HomeFavorite.FavoriteList.Add(item.ItemName);
-                    BaseService.SaveList("FavoriteList", HomeFavorite.FavoriteList.ToList());
-                }
+                CancelOrders(cancelList);
+                foreach (DataOrder item in dataOrders)
+                    if (!HomeFavorite.FavoriteList.Contains(item.ItemName) && HomeFavorite.FavoriteList.Count < 200)
+                    {
+                        HomeFavorite.FavoriteList.Add(item.ItemName);
+                        BaseService.SaveList("FavoriteList", HomeFavorite.FavoriteList.ToList());
+                    }
+            }
             DataOrder.Orders = dataOrders;
         }
         Tuple<DataOrder, Boolean> CheckOrder(string itemName, string order_id, string order_price)
@@ -107,8 +123,12 @@ namespace ItemChecker.MVVM.Model
                     servicePrice = itemBase.LfmInfo.Price;
                     serviceGive = Math.Round(itemBase.LfmInfo.Price * Calculator.CommissionLf, 2);
                     break;
+                case 4:
+                    servicePrice = itemBase.BuffInfo.BuyOrder;
+                    serviceGive = Math.Round(itemBase.BuffInfo.BuyOrder * Calculator.CommissionBuff, 2);
+                    break;
             }
-            decimal currencyValue = SettingsProperties.Default.CurrencyValue;
+            decimal currencyValue = SettingsProperties.Default.RUB;
             if (serviceId > 1)
             {
                 decimal my_order_usd = Math.Round(orderPrice / currencyValue, 2);

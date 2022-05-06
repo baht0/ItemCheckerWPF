@@ -5,6 +5,37 @@ namespace ItemChecker.MVVM.Model
 {
     public class ParserInfo : BaseModel
     {
+        #region STEAM
+        private DataSteamMarket _itemSt = new();
+        private bool _st = false;
+
+        public DataSteamMarket ItemSt
+        {
+            get
+            {
+                return _itemSt;
+            }
+            set
+            {
+                _itemSt = value;
+                OnPropertyChanged();
+            }
+        }
+        public bool ST
+        {
+            get
+            {
+                return _st;
+            }
+            set
+            {
+                _st = value;
+                OnPropertyChanged();
+            }
+        }
+        #endregion
+
+        #region CSM
         private int _infoItemCurrent;
         private int _infoItemCount;
         private List<DataInventoriesCsm> _inventoryCsm = new();
@@ -12,14 +43,6 @@ namespace ItemChecker.MVVM.Model
         private decimal _itemCsmComparePrice = 0;
         private bool _csm = false;
 
-        private Lfm _itemLf = new();
-        private bool _lf = false;
-
-        private DataSteamMarket _itemSt = new();
-        private string _itemNameLfm = "Unknown";
-        private bool _st = false;
-
-        //info
         public int InfoItemCurrent
         {
             get
@@ -93,6 +116,12 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        #endregion
+
+        #region LF
+        private Lfm _itemLf = new();
+        private string _itemNameLfm = "Unknown";
+        private bool _lf = false;
 
         public Lfm ItemLf
         {
@@ -130,30 +159,49 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        #endregion
 
-        public DataSteamMarket ItemSt
+        #region BUFF
+        private Buff _itemBf = new();
+        private string _itemNameBf = "Unknown";
+        private bool _bf = false;
+
+        public Buff ItemBf
         {
             get
             {
-                return _itemSt;
+                return _itemBf;
             }
             set
             {
-                _itemSt = value;
+                _itemBf = value;
                 OnPropertyChanged();
             }
         }
-        public bool ST
+        public string ItemNameBf
         {
             get
             {
-                return _st;
+                return _itemNameBf;
             }
             set
             {
-                _st = value;
+                _itemNameBf = value;
                 OnPropertyChanged();
             }
         }
+        public bool BF
+        {
+            get
+            {
+                return _bf;
+            }
+            set
+            {
+                _bf = value;
+                OnPropertyChanged();
+            }
+        }
+        #endregion
     }
 }

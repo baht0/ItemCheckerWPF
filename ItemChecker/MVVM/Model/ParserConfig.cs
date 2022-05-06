@@ -27,7 +27,8 @@ namespace ItemChecker.MVVM.Model
             "SteamMarket(A)",
             "SteamMarket",
             "Cs.Money",
-            "Loot.Farm"
+            "Loot.Farm",
+            "Buff163"
         };
         public int ServiceOne { get; set; } = ParserProperties.Default.ServiceOne;
         public int ServiceTwo { get; set; } = ParserProperties.Default.ServiceTwo;

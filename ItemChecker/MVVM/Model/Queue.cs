@@ -17,7 +17,7 @@ namespace ItemChecker.MVVM.Model
             string itemName = Edit.removeDoppler(item.ItemName);
             decimal price = item.Price2;
             if (ParserStatistics.DataCurrency == "USD")
-                price = Math.Round(price * SettingsProperties.Default.CurrencyValue, 2);
+                price = Math.Round(price * SettingsProperties.Default.RUB, 2);
 
             if (items.Any(n => n.ItemName == itemName) ||
                 items.Select(x => x.OrderPrice).Sum() + price > SteamAccount.GetAvailableAmount() ||

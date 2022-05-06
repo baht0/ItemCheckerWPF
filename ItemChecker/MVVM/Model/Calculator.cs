@@ -11,6 +11,7 @@ namespace ItemChecker.MVVM.Model
         public static decimal CommissionSteam { get; set; } = 0.869565m;
         public static decimal CommissionCsm { get; set; } = 0.93m;
         public static decimal CommissionLf { get; set; } = 0.95m;
+        public static decimal CommissionBuff { get; set; } = 0.975m;
 
         //config
         public ObservableCollection<string> Services { get; set; } = new()
@@ -84,7 +85,7 @@ namespace ItemChecker.MVVM.Model
         public int Currency2 { get; set; } = 1;
 
         private decimal _value = 1;
-        private decimal _converted = SettingsProperties.Default.CurrencyValue;
+        private decimal _converted = SettingsProperties.Default.RUB;
         public decimal Converted
         {
             get { return _converted; }
@@ -101,9 +102,9 @@ namespace ItemChecker.MVVM.Model
             {
                 _value = value;
                 if (Currency1 == 1 && Currency2 == 0)
-                    Converted = Edit.ConverterToUsd(value, SettingsProperties.Default.CurrencyValue);
+                    Converted = Edit.ConverterToUsd(value, SettingsProperties.Default.RUB);
                 if (Currency1 == 0 && Currency2 == 1)
-                    Converted = Edit.ConverterToRub(value, SettingsProperties.Default.CurrencyValue);
+                    Converted = Edit.ConverterToRub(value, SettingsProperties.Default.RUB);
                 OnPropertyChanged();
             }
         }

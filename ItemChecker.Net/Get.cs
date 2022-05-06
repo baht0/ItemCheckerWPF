@@ -58,23 +58,23 @@ namespace ItemChecker.Net
             return JObject.Parse(json);
         }
 
-        public static Decimal Currency(string currency_api_key)
+        public static Decimal Currency(string currency_api_key, string currency)
         {
             try
             {
                 if (currency_api_key.Length == 20)
                 {
-                    string url = @"https://free.currconv.com/api/v7/convert?q=USD_RUB&compact=ultra&apiKey=" + currency_api_key;
+                    string url = @"https://free.currconv.com/api/v7/convert?q=USD_" + currency + "&compact=ultra&apiKey=" + currency_api_key;
                     var json = Get.Request(url);
 
-                    return Math.Round(Convert.ToDecimal(JObject.Parse(json)["USD_RUB"].ToString()), 2);
+                    return Math.Round(Convert.ToDecimal(JObject.Parse(json)[$"USD_{currency}"].ToString()), 2);
                 }
                 else
                 {
                     string url = @"https://openexchangerates.org/api/latest.json?app_id=" + currency_api_key;
                     var json = Get.Request(url);
 
-                    return Math.Round(Convert.ToDecimal(JObject.Parse(json)["rates"]["RUB"].ToString()), 2);
+                    return Math.Round(Convert.ToDecimal(JObject.Parse(json)["rates"][currency].ToString()), 2);
                 }
             }
             catch

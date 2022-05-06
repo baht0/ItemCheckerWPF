@@ -99,7 +99,7 @@ namespace ItemChecker.MVVM.ViewModel
                     ParserInfo.InventoryCsm = datas;
                     ParserInfo.ItemCsmComparePrice = value.Price2;
                     if (ParserStatistics.DataCurrency == "RUB")
-                        ParserInfo.ItemCsmComparePrice = Edit.ConverterToUsd(value.Price1, SettingsProperties.Default.CurrencyValue);
+                        ParserInfo.ItemCsmComparePrice = Edit.ConverterToUsd(value.Price1, SettingsProperties.Default.RUB);
                     ParserInfo.InfoItemCount = ParserInfo.InventoryCsm.Count - 1;
                     ParserInfo.InfoItemCurrent = 0;
                 }
@@ -107,6 +107,11 @@ namespace ItemChecker.MVVM.ViewModel
                 {
                     ParserInfo.ItemLf = ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == value.ItemName).LfmInfo;
                     ParserInfo.ItemNameLfm = value.ItemName;
+                }
+                else if (ParserInfo.BF)
+                {
+                    ParserInfo.ItemBf = ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == value.ItemName).BuffInfo;
+                    ParserInfo.ItemNameBf = value.ItemName;
                 }
             }
         }
@@ -362,6 +367,7 @@ namespace ItemChecker.MVVM.ViewModel
                     ParserInfo.ST = true;
                     ParserInfo.CSM = false;
                     ParserInfo.LF = false;
+                    ParserInfo.BF = false;
                     break;
                 case 1:
                     ParserStatistics.Service1 = "SteamMarket";
@@ -370,6 +376,7 @@ namespace ItemChecker.MVVM.ViewModel
                     ParserInfo.ST = false;
                     ParserInfo.CSM = false;
                     ParserInfo.LF = false;
+                    ParserInfo.BF = false;
                     break;
                 case 2:
                     ParserStatistics.Service1 = "Cs.Money";
@@ -378,6 +385,7 @@ namespace ItemChecker.MVVM.ViewModel
                     ParserInfo.ST = false;
                     ParserInfo.CSM = true;
                     ParserInfo.LF = false;
+                    ParserInfo.BF = false;
                     baseService.LoadInventoriesCsm(ParserConfig);
                     break;
                 case 3:
@@ -387,7 +395,18 @@ namespace ItemChecker.MVVM.ViewModel
                     ParserInfo.ST = false;
                     ParserInfo.CSM = false;
                     ParserInfo.LF = true;
+                    ParserInfo.BF = false;
                     baseService.UpdateLfmInfo();
+                    break;
+                case 4:
+                    ParserStatistics.Service1 = "Buf163";
+                    ParserStatistics.Price1 = "Sale(BF)";
+                    ParserStatistics.Price2 = "BuyOrder";
+                    ParserInfo.ST = false;
+                    ParserInfo.CSM = false;
+                    ParserInfo.LF = false;
+                    ParserInfo.BF = true;
+                    baseService.UpdateBuffInfo(ParserConfig.MinPrice, ParserConfig.MaxPrice);
                     break;
             }
             switch (serviceTwo)
@@ -412,6 +431,12 @@ namespace ItemChecker.MVVM.ViewModel
                     ParserStatistics.Price3 = "Trade(LF)";
                     ParserStatistics.Price4 = "Give(LF)";
                     baseService.UpdateLfmInfo();
+                    break;
+                case 4:
+                    ParserStatistics.Service2 = "Buf163";
+                    ParserStatistics.Price3 = "Sale(BF)";
+                    ParserStatistics.Price4 = "BuyOrder";
+                    baseService.UpdateBuffInfo(ParserConfig.MinPrice, ParserConfig.MaxPrice);
                     break;
             }
         }

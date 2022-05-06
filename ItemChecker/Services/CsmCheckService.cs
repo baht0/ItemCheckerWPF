@@ -33,7 +33,7 @@ namespace ItemChecker.Services
                 {
                     DataParser data = checkService.Check(itemName, 2, 0);
                     if (SettingsProperties.Default.CurrencyId == 0)
-                        data.Price4 = Edit.ConverterToUsd(data.Price4, SettingsProperties.Default.CurrencyValue);
+                        data.Price4 = Edit.ConverterToUsd(data.Price4, SettingsProperties.Default.RUB);
                     list.Add(new()
                     {
                         ItemName = itemName,

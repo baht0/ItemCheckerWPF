@@ -25,7 +25,8 @@ namespace ItemChecker.MVVM.Model
             "SteamMarket(A)",
             "SteamMarket",
             "Cs.Money",
-            "Loot.Farm"
+            "Loot.Farm",
+            "Buff163"
         };
         public int ServiceId { get; set; } = SettingsProperties.Default.ServiceId;
         public int MinPrecent { get; set; } = SettingsProperties.Default.MinPrecent;

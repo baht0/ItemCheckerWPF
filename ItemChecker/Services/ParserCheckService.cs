@@ -58,8 +58,8 @@ namespace ItemChecker.MVVM.Model
                         _price2 = steamItem.HighestBuyOrder;
                         if (SettingsProperties.Default.CurrencyId == 0)
                         {
-                            _price1 = Edit.ConverterToUsd(_price1, SettingsProperties.Default.CurrencyValue);
-                            _price2 = Edit.ConverterToUsd(_price2, SettingsProperties.Default.CurrencyValue);
+                            _price1 = Edit.ConverterToUsd(_price1, SettingsProperties.Default.RUB);
+                            _price2 = Edit.ConverterToUsd(_price2, SettingsProperties.Default.RUB);
                         }
                         if (DataOrder.Orders.Any(n => n.ItemName == _itemName))
                             _status = "Ordered";
@@ -72,8 +72,8 @@ namespace ItemChecker.MVVM.Model
                         _price2 = Math.Round(_price1 * Calculator.CommissionCsm, 2);
                         if (SettingsProperties.Default.CurrencyId == 1)
                         {
-                            _price1 = Edit.ConverterToRub(_price1, SettingsProperties.Default.CurrencyValue);
-                            _price2 = Edit.ConverterToRub(_price2, SettingsProperties.Default.CurrencyValue);
+                            _price1 = Edit.ConverterToRub(_price1, SettingsProperties.Default.RUB);
+                            _price2 = Edit.ConverterToRub(_price2, SettingsProperties.Default.RUB);
                         }
                         _have = _price1 != 0;
                         break;
@@ -84,10 +84,22 @@ namespace ItemChecker.MVVM.Model
                         _price2 = Math.Round(_price1 * Calculator.CommissionLf, 2);
                         if (SettingsProperties.Default.CurrencyId == 1)
                         {
-                            _price1 = Edit.ConverterToRub(_price1, SettingsProperties.Default.CurrencyValue);
-                            _price2 = Edit.ConverterToRub(_price2, SettingsProperties.Default.CurrencyValue);
+                            _price1 = Edit.ConverterToRub(_price1, SettingsProperties.Default.RUB);
+                            _price2 = Edit.ConverterToRub(_price2, SettingsProperties.Default.RUB);
                         }
                         _have = ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == _itemName).LfmInfo.Have > 0;
+                        break;
+                    }
+                case 4:
+                    {
+                        _price1 = ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == _itemName).BuffInfo.Price;
+                        _price2 = Math.Round(_price1 * Calculator.CommissionBuff, 2);
+                        if (SettingsProperties.Default.CurrencyId == 1)
+                        {
+                            _price1 = Edit.ConverterToRub(_price1, SettingsProperties.Default.RUB);
+                            _price2 = Edit.ConverterToRub(_price2, SettingsProperties.Default.RUB);
+                        }
+                        _have = _price1 > 0;
                         break;
                     }
             }
@@ -107,8 +119,8 @@ namespace ItemChecker.MVVM.Model
                         _price4 = Math.Round(steamItem.HighestBuyOrder * Calculator.CommissionSteam, 2);
                         if (SettingsProperties.Default.CurrencyId == 0)
                         {
-                            _price3 = Edit.ConverterToUsd(_price3, SettingsProperties.Default.CurrencyValue);
-                            _price4 = Edit.ConverterToUsd(_price4, SettingsProperties.Default.CurrencyValue);
+                            _price3 = Edit.ConverterToUsd(_price3, SettingsProperties.Default.RUB);
+                            _price4 = Edit.ConverterToUsd(_price4, SettingsProperties.Default.RUB);
                         }
                         break;
                     }
@@ -119,8 +131,8 @@ namespace ItemChecker.MVVM.Model
                         _price4 = Math.Round(_price3 * Calculator.CommissionCsm, 2);
                         if (SettingsProperties.Default.CurrencyId == 1)
                         {
-                            _price3 = Edit.ConverterToRub(_price3, SettingsProperties.Default.CurrencyValue);
-                            _price4 = Edit.ConverterToRub(_price4, SettingsProperties.Default.CurrencyValue);
+                            _price3 = Edit.ConverterToRub(_price3, SettingsProperties.Default.RUB);
+                            _price4 = Edit.ConverterToRub(_price4, SettingsProperties.Default.RUB);
                         }
 
                         if (ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == _itemName).CsmInfo.Unavailable)
@@ -143,8 +155,19 @@ namespace ItemChecker.MVVM.Model
                         _price4 = Math.Round(_price3 * Calculator.CommissionLf, 2);
                         if (SettingsProperties.Default.CurrencyId == 1)
                         {
-                            _price3 = Edit.ConverterToRub(_price3, SettingsProperties.Default.CurrencyValue);
-                            _price4 = Edit.ConverterToRub(_price4, SettingsProperties.Default.CurrencyValue);
+                            _price3 = Edit.ConverterToRub(_price3, SettingsProperties.Default.RUB);
+                            _price4 = Edit.ConverterToRub(_price4, SettingsProperties.Default.RUB);
+                        }
+                        break;
+                    }
+                case 4:
+                    {
+                        _price3 = ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == _itemName).BuffInfo.BuyOrder;
+                        _price4 = Math.Round(_price3 * Calculator.CommissionBuff, 2);
+                        if (SettingsProperties.Default.CurrencyId == 1)
+                        {
+                            _price3 = Edit.ConverterToRub(_price3, SettingsProperties.Default.RUB);
+                            _price4 = Edit.ConverterToRub(_price4, SettingsProperties.Default.RUB);
                         }
                         break;
                     }
@@ -196,7 +219,7 @@ namespace ItemChecker.MVVM.Model
         }
         #endregion
 
-        //List
+        //List, 
         public static List<string> ApplyConfig(ParserConfig config)
         {
             List<string> list = new();
@@ -231,6 +254,8 @@ namespace ItemChecker.MVVM.Model
                         continue;
                     else if (config.ServiceOne == 3 && ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item).LfmInfo.Price < config.MinPrice)
                         continue;
+                    else if (config.ServiceOne == 4 && ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item).BuffInfo.Price < config.MinPrice)
+                        continue;
                 }
                 if (config.MaxPrice != 0)
                 {
@@ -239,6 +264,8 @@ namespace ItemChecker.MVVM.Model
                     else if (config.ServiceOne == 2 && DataInventoriesCsm.Items.Where(x => x.ItemName == item).Select(x => x.Price).DefaultIfEmpty().Min() > config.MaxPrice)
                         continue;
                     else if (config.ServiceOne == 3 && ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item).LfmInfo.Price > config.MaxPrice)
+                        continue;
+                    else if (config.ServiceOne == 4 && ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item).BuffInfo.Price > config.MaxPrice)
                         continue;
                 }
                 //add

@@ -40,7 +40,7 @@ namespace UpdateBase
                 };
 
                 Console.WriteLine($"Program started: {DateTime.Now}");
-                Console.WriteLine($"Check Command:\n0. Skins (weapon, knife, gloves);\n1. Weapons;\n2. Knifes;\n3. Gloves;\n4. Stickers;\n5. Containers;\n6. Agents;\n7. Patch;\n8. Music Kits;\n9. Collectable Pins;\n10. Graffitis;\n11. SET SteamId.");
+                Console.WriteLine($"Check Command:\n0. CheckAll;\n1. Weapons;\n2. Knifes;\n3. Gloves;\n4. Stickers;\n5. Containers;\n6. Agents;\n7. Patch;\n8. Music Kits;\n9. Collectable Pins;\n10. Graffitis;\n11. SET SteamId.");
 
                 int com = -1;
                 while (com < 0)
@@ -50,9 +50,7 @@ namespace UpdateBase
                     switch (com)
                     {
                         case 0:
-                            Check(weapons, "Weapon");
-                            Check(knifes, "Knife");
-                            Check(new List<string>() { "gloves" }, "Gloves");
+                            CheckAll(weapons, knifes);
                             break;
                         case 1:
                             Check(weapons, "Weapon");
@@ -140,7 +138,7 @@ namespace UpdateBase
                         new JProperty("type", item.Type),
                         new JProperty("quality", item.Quality)));
                 }
-                File.WriteAllText($"_newItemsBase.txt", jArray.ToString());
+                File.WriteAllText($"_newItems.txt", jArray.ToString());
                 Console.ReadKey();
             }
         }
@@ -186,13 +184,15 @@ namespace UpdateBase
                             url = "https://csgostash.com/graffiti?name=&rarity_legendary=1&rarity_mythical=1&rarity_rare=1&rarity_common=1&graffiti_type=any&container=any&sort=name&order=desc&page=" + i;
                             break;
                     }
-                    
+
+                    bool row = type == "Souvenir Package";
+                    int rowId = row ? 6 : 5;
                     string html = Get.Request(url);
                     HtmlDocument htmlDoc = new();
                     htmlDoc.LoadHtml(html);
-                    HtmlNodeCollection skins = htmlDoc.DocumentNode.SelectNodes("//div[@class='container main-content']/div[@class='row'][4]/div[@class='col-lg-4 col-md-6 col-widen text-center']");
+                    HtmlNodeCollection skins = htmlDoc.DocumentNode.SelectNodes("//div[@class='container main-content']/div[@class='row'][" + rowId + "]/div[@class='col-lg-4 col-md-6 col-widen text-center']");
                     
-                    pages = CountPages(htmlDoc);                    
+                    pages = CountPages(htmlDoc, row);                    
                     foreach (HtmlNode skin in skins)
                     {
                         switch (type)
@@ -237,6 +237,23 @@ namespace UpdateBase
             Console.WriteLine($"'{type}' [{NewItemsBase.Count}] done...");
         }
 
+        static void CheckAll(List<string> weapons, List<string> knifes)
+        {
+            Check(weapons, "Weapon");
+            Check(knifes, "Knife");
+            Check(new List<string>() { "gloves" }, "Gloves");
+            Check(new List<string>() { "sticker" }, "Sticker", "regular");
+            Check(new List<string>() { "container" }, "Skin Case");
+            Check(new List<string>() { "container" }, "Souvenir Package");
+            Check(new List<string>() { "container" }, "Sticker Capsule");
+            Check(new List<string>() { "container" }, "Autograph Capsule");
+            Check(new List<string>() { "container" }, "Gift Package");
+            Check(new List<string>() { "agents" }, "Agent");
+            Check(new List<string>() { "patchs" }, "Patch");
+            Check(new List<string>() { "music kit" }, "Music Kit");
+            Check(new List<string>() { "collectable" }, "Collectable");
+            Check(new List<string>() { "graffiti" }, "Graffiti");
+        }
         static void CheckWeapon(HtmlDocument htmlDoc, HtmlNode skin, string item)
         {
             HtmlNodeCollection exteriors = htmlDoc.DocumentNode.SelectNodes("//table[@class='table table-hover table-bordered table-condensed price-details-table']/tbody/tr");
@@ -424,11 +441,12 @@ namespace UpdateBase
 
             return string.Empty;
         }
-        static Int32 CountPages(HtmlDocument htmlDoc)
+        static Int32 CountPages(HtmlDocument htmlDoc, bool row)
         {
             try
             {
-                var page = htmlDoc.DocumentNode.SelectNodes("//div[@class='container main-content']/div[@class='row'][2]/div/ul/li");
+                int rowId = row ? 4 : 3;
+                var page = htmlDoc.DocumentNode.SelectNodes("//div[@class='container main-content']/div[@class='row'][" + rowId + "]/div/ul/li");
                 page.Remove(page.LastOrDefault());
 
                 return Int32.Parse(page.LastOrDefault().InnerText);
