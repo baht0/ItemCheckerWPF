@@ -20,7 +20,7 @@ namespace ItemChecker.Updater
                     return;
                 do
                     Thread.Sleep(1000);
-                while (Process.GetProcessesByName("chromedriver").Any() | Process.GetProcessesByName("ItemChecker").Any());
+                while (Process.GetProcessesByName("msedgedriver").Any() | Process.GetProcessesByName("ItemChecker").Any());
 
                 Console.WriteLine("Startup: success");
 
