@@ -50,12 +50,12 @@
                         <Image.ContextMenu>
                             <ContextMenu Style="{StaticResource MaterialDesignContextMenu}" Background="{DynamicResource ElementBackground}">
                                 <MenuItem Header="Links">
+                                    <MenuItem Header="SteamMarket" Click="SteamMarket_MenuItem_Click"/>
+                                    <MenuItem Header="Inventory" Click="Inventory_MenuItem_Click"/>
+                                    <Separator/>
                                     <MenuItem Header="Cs.Money" Click="CSM_MenuItem_Click"/>
                                     <MenuItem Header="Loot.Farm" Click="Lf_MenuItem_Click"/>
                                     <MenuItem Header="Buff163" Click="Buff_MenuItem_Click"/>
-                                    <Separator/>
-                                    <MenuItem Header="Inventory" Click="Inventory_MenuItem_Click"/>
-                                    <MenuItem Header="SteamMarket" Click="SteamMarket_MenuItem_Click"/>
                                 </MenuItem>
                                 <MenuItem Header="OpenFolder" Command="{Binding OpenFolderCommand}"/>
                                 <MenuItem Header="Exit" Command="{Binding ExitCommand}"/>

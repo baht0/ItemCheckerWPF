@@ -233,30 +233,39 @@ namespace ItemChecker.MVVM.Model
     {
         public static CookieContainer Cookies { get; set; } = new();
 
-        public static Boolean GetCookies()
+        public static Boolean IsLogIn()
         {
-            try
-            {
-                string session = SettingsProperties.Default.SessionBuff;
-                Cookies.Add(new System.Net.Cookie("session", session, "/", "buff.163.com"));
-                string html = Get.Request(SteamAccount.Cookies, "https://buff.163.com/api/market/goods?game=csgo&page_num=2&use_suggestion=0&trigger=undefined_trigger&page_size=80");
+            string session = SettingsProperties.Default.SessionBuff;
+            Cookies.Add(new System.Net.Cookie("session", session, "/", "buff.163.com"));
+            string html = Get.Request(SteamAccount.Cookies, "https://buff.163.com/api/market/goods?game=csgo&page_num=2&use_suggestion=0&trigger=undefined_trigger&page_size=80");
 
-                if (html.Contains("Login Required"))
+            if (html.Contains("Login Required"))
+            {
+                if (BaseModel.Browser == null)
+                    BaseService.OpenBrowser();
+
+                BaseModel.Browser.Navigate().GoToUrl("https://buff.163.com/user-center/asset/recharge/");
+                if (BaseModel.Browser.Title == "Login")
                 {
-                    if (BaseModel.Browser == null)
-                        BaseService.OpenBrowser();
                     BaseModel.Browser.Navigate().GoToUrl("https://buff.163.com/account/login/steam?back_url=/market/csgo");
 
                     IWebElement signins = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@class='btn_green_white_innerfade']")));
                     signins.Click();
                     Thread.Sleep(500);
-
-                    session = BaseModel.Browser.Manage().Cookies.GetCookieNamed("session").Value.ToString();
-                    Cookies = new();
-                    Cookies.Add(new System.Net.Cookie("session", session, "/", "buff.163.com"));
-                    SettingsProperties.Default.SessionBuff = session;
-                    SettingsProperties.Default.Save();
                 }
+                return GetCookies();
+            }
+            return true;
+        }
+        static Boolean GetCookies()
+        {
+            try
+            {
+                string session = BaseModel.Browser.Manage().Cookies.GetCookieNamed("session").Value.ToString();
+                Cookies = new();
+                Cookies.Add(new System.Net.Cookie("session", session, "/", "buff.163.com"));
+                SettingsProperties.Default.SessionBuff = session;
+                SettingsProperties.Default.Save();
                 if (SettingsProperties.Default.Quit)
                 {
                     BaseModel.Browser.Quit();

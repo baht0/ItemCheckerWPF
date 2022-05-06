@@ -126,7 +126,7 @@ namespace ItemChecker.Services
             if (ItemBase.SkinsBase.LastOrDefault().BuffInfo.Updated.AddMinutes(20) > DateTime.Now)
                 return;
 
-            while (!BuffAccount.GetCookies())
+            while (!BuffAccount.IsLogIn())
                 System.Threading.Thread.Sleep(200);
 
             int pages = int.MaxValue;
