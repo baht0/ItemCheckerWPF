@@ -130,13 +130,13 @@ namespace ItemChecker.MVVM.ViewModel
                     return;
                 StartUp.Progress = Tuple.Create(3, "Signing In...");
                 KillProccess();
-                IsLogin = BaseModel.IsLogIn();
+                IsLogin = SteamAccount.IsLogIn();
                 StartUp.Progress = IsLogin ? Tuple.Create(3, "Please, Signing In...") : Tuple.Create(4, "Preparation...");
                 while (IsLogin)
                 {
                     if (BaseModel.token.IsCancellationRequested)
                         break;
-                    IsLogin = BaseModel.Steam();
+                    IsLogin = SteamAccount.Steam();
                     StartUp.Progress = IsLogin ? Tuple.Create(3, "Failed to login...") : Tuple.Create(4, "Preparation...");
                     Login.Code2AF = string.Empty;
                 }

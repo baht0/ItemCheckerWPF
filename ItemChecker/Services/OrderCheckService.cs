@@ -28,7 +28,7 @@ namespace ItemChecker.MVVM.Model
 
             HtmlDocument htmlDoc = new();
             Thread.Sleep(500);
-            htmlDoc.LoadHtml(Get.Request(SteamCookies, "https://steamcommunity.com/market/"));
+            htmlDoc.LoadHtml(Get.Request(SteamAccount.Cookies, "https://steamcommunity.com/market/"));
             int index = htmlDoc.DocumentNode.SelectSingleNode("//div[@class='my_listing_section market_content_block market_home_listing_table']/h3/span[1]").InnerText.Trim() != "My listings awaiting confirmation" ? 1 : 2;
             HtmlNodeCollection items = htmlDoc.DocumentNode.SelectNodes("//div[@class='my_listing_section market_content_block market_home_listing_table'][" + index + "]/div[@class='market_listing_row market_recent_listing_row']");
             if (items != null)

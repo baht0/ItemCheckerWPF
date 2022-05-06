@@ -442,9 +442,9 @@ namespace ItemChecker.MVVM.ViewModel
             try
             {
                 if (BaseModel.Browser == null)
-                    BaseModel.OpenBrowser();
+                    BaseService.OpenBrowser();
                 bool isLogin = false;
-                do isLogin = CsmAccount.LoginCsm();
+                do isLogin = CsmAccount.Login();
                 while (!isLogin);
 
                 CsmCheckService csmCheck = new();
@@ -714,9 +714,9 @@ namespace ItemChecker.MVVM.ViewModel
             try
             {
                 if (BaseModel.Browser == null)
-                    BaseModel.OpenBrowser();
+                    BaseService.OpenBrowser();
                 bool isLogin = false;
-                do isLogin = CsmAccount.LoginCsm();
+                do isLogin = CsmAccount.Login();
                 while (!isLogin);
                 
                 WithdrawService withdraw = new();

@@ -5,6 +5,9 @@
     <Setting Name="SteamLoginSecure" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="SessionBuff" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
     <Setting Name="RUB" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>

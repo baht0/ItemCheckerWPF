@@ -39,7 +39,7 @@ namespace ItemChecker.Services
         public void acceptTrade(string tradeOfferId, string partnerId)
         {
             Thread.Sleep(1000);
-            Post.AcceptTrade(SteamCookies, tradeOfferId, partnerId);
+            Post.AcceptTrade(SteamAccount.Cookies, tradeOfferId, partnerId);
         }
     }
 }

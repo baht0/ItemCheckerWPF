@@ -199,7 +199,7 @@ namespace ItemChecker.MVVM.Model
         }
         public List<PriceHistory> PriceHistory(string itemName)
         {
-            string json = Get.Request(SteamCookies, "https://steamcommunity.com/market/pricehistory/?country=RU&currency=5&appid=730&market_hash_name=" + HttpUtility.UrlEncode(itemName));
+            string json = Get.Request(SteamAccount.Cookies, "https://steamcommunity.com/market/pricehistory/?country=RU&currency=5&appid=730&market_hash_name=" + HttpUtility.UrlEncode(itemName));
             JArray sales = JArray.Parse(JObject.Parse(json)["prices"].ToString());
             List<PriceHistory> history = new();
             foreach (var sale in sales.Reverse())

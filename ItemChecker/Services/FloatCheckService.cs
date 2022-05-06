@@ -122,7 +122,7 @@ namespace ItemChecker.Services
             if (result == MessageBoxResult.Yes)
             {
                 string market_hash_name = HttpUtility.UrlEncode(itemName);
-                Post.BuyListing(SteamCookies, market_hash_name, listing_id, fee, subtotal, total);
+                Post.BuyListing(SteamAccount.Cookies, market_hash_name, listing_id, fee, subtotal, total);
                 return 1;
             }
             return 0;

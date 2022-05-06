@@ -3,6 +3,8 @@ using ItemChecker.Net;
 using ItemChecker.Properties;
 using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
+using OpenQA.Selenium.Edge;
+using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -38,6 +40,32 @@ namespace ItemChecker.Services
             }
         }
 
+        public static void OpenBrowser()
+        {
+            string profilesDir = DocumentPath + "profile";
+
+            if (!Directory.Exists(profilesDir))
+                Directory.CreateDirectory(profilesDir);
+
+            EdgeDriverService edgeDriverService = EdgeDriverService.CreateDefaultService();
+            edgeDriverService.HideCommandPromptWindow = true;
+            EdgeOptions option = new();
+            option.AddArguments(
+                "--headless",
+                "--disable-gpu",
+                "no-sandbox",
+                "--window-size=1920,2160",
+                "--disable-extensions",
+                "--disable-blink-features=AutomationControlled",
+                "ignore-certificate-errors");
+
+            option.AddArguments($"--user-data-dir={profilesDir}", "profile-directory=Default");
+            option.Proxy = null;
+
+            Browser = new EdgeDriver(edgeDriverService, option, TimeSpan.FromSeconds(30));
+            Browser.Manage().Window.Maximize();
+            WebDriverWait = new WebDriverWait(Browser, TimeSpan.FromSeconds(10));
+        }
         public static void BrowserExit()
         {
             try

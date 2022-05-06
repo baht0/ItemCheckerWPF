@@ -37,7 +37,7 @@ namespace ItemChecker.MVVM.Model
             decimal highest_buy_order = Convert.ToDecimal(json["highest_buy_order"]) / 100;
 
             if (SteamAccount.Balance > highest_buy_order)
-                Post.CreateBuyOrder(SteamCookies, market_hash_name, highest_buy_order);
+                Post.CreateBuyOrder(SteamAccount.Cookies, market_hash_name, highest_buy_order);
         }
     }
     public class QueueInfo : ObservableObject

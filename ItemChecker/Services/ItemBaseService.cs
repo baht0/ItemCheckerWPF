@@ -6,7 +6,6 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 
 namespace ItemChecker.Services
 {
@@ -126,15 +125,17 @@ namespace ItemChecker.Services
         {
             if (ItemBase.SkinsBase.LastOrDefault().BuffInfo.Updated.AddMinutes(20) > DateTime.Now)
                 return;
-            CookieContainer container = new();
-            container.Add(new Cookie("session", "1-8dBJa34rRl2kEpVaEdb3yJUBQ8sIimUszE1okDikHmWD2036357433", "/", "buff.163.com"));
+
+            while (!BuffAccount.GetCookies())
+                System.Threading.Thread.Sleep(200);
+
             int pages = int.MaxValue;
             for (int i = 1; i <= pages; i++)
             {
                 try
                 {
                     string url = "https://buff.163.com/api/market/goods/buying?game=csgo&page_num=" + i + "&min_price=" + min + "&max_price=" + max + "&sort_by=price.asc&page_size=80";
-                    JObject json = JObject.Parse(Get.Request(container, url));
+                    JObject json = JObject.Parse(Get.Request(BuffAccount.Cookies, url));
 
                     pages = Convert.ToInt32(json["data"]["total_page"]);
                     JArray items = json["data"]["items"] as JArray;

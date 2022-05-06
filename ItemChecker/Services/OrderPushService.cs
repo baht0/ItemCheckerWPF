@@ -19,9 +19,9 @@ namespace ItemChecker.Services
 
             if (highest_buy_order > order.OrderPrice & SteamAccount.Balance >= highest_buy_order & (highest_buy_order - order.OrderPrice) <= SteamAccount.GetAvailableAmount())
             {
-                Post.CancelBuyOrder(SteamCookies, market_hash_name, order.OrderId);
+                Post.CancelBuyOrder(SteamAccount.Cookies, market_hash_name, order.OrderId);
                 Thread.Sleep(1500);
-                Post.CreateBuyOrder(SteamCookies, market_hash_name, highest_buy_order);
+                Post.CreateBuyOrder(SteamAccount.Cookies, market_hash_name, highest_buy_order);
                 Thread.Sleep(1500);
                 return true;
             }

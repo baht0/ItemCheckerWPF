@@ -13,7 +13,7 @@ namespace ItemChecker.Services
     {
         public void checkInventory()
         {
-            var json = Get.Request(SteamCookies, "http://steamcommunity.com/my/inventory/json/730/2");
+            var json = Get.Request(SteamAccount.Cookies, "http://steamcommunity.com/my/inventory/json/730/2");
             JObject rgInventory = (JObject)JObject.Parse(json)["rgInventory"];
             JObject rgDescriptions = (JObject)JObject.Parse(json)["rgDescriptions"];
 
@@ -56,7 +56,7 @@ namespace ItemChecker.Services
         {
             int sell_price = (int)((item.Price * 100 - 0.01m) * Calculator.CommissionSteam);
 
-            Post.SellItem(SteamCookies, SteamAccount.User, item.AssetId, sell_price);
+            Post.SellItem(SteamAccount.Cookies, SteamAccount.User, item.AssetId, sell_price);
         }
         Decimal checkPrice(string name)
         {

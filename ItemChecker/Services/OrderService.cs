@@ -36,7 +36,7 @@ namespace ItemChecker.Services
         {
             string market_hash_name = HttpUtility.UrlEncode(order.ItemName);
 
-            Post.CancelBuyOrder(SteamCookies, market_hash_name, order.OrderId);
+            Post.CancelBuyOrder(SteamAccount.Cookies, market_hash_name, order.OrderId);
             DataOrder.Orders.Remove(order);
         }
         protected Boolean CheckConditions(DataOrder order, decimal orderPrice)
