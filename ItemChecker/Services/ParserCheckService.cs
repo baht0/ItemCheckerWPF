@@ -72,8 +72,8 @@ namespace ItemChecker.MVVM.Model
                         _price2 = Math.Round(_price1 * Calculator.CommissionCsm, 2);
                         if (SettingsProperties.Default.CurrencyId == 1)
                         {
-                            _price1 = Edit.ConverterToRub(_price1, SettingsProperties.Default.RUB);
-                            _price2 = Edit.ConverterToRub(_price2, SettingsProperties.Default.RUB);
+                            _price1 = Edit.ConverterFromUsd(_price1, SettingsProperties.Default.RUB);
+                            _price2 = Edit.ConverterFromUsd(_price2, SettingsProperties.Default.RUB);
                         }
                         _have = _price1 != 0;
                         break;
@@ -84,8 +84,8 @@ namespace ItemChecker.MVVM.Model
                         _price2 = Math.Round(_price1 * Calculator.CommissionLf, 2);
                         if (SettingsProperties.Default.CurrencyId == 1)
                         {
-                            _price1 = Edit.ConverterToRub(_price1, SettingsProperties.Default.RUB);
-                            _price2 = Edit.ConverterToRub(_price2, SettingsProperties.Default.RUB);
+                            _price1 = Edit.ConverterFromUsd(_price1, SettingsProperties.Default.RUB);
+                            _price2 = Edit.ConverterFromUsd(_price2, SettingsProperties.Default.RUB);
                         }
                         _have = ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == _itemName).LfmInfo.Have > 0;
                         break;
@@ -96,8 +96,8 @@ namespace ItemChecker.MVVM.Model
                         _price2 = Math.Round(_price1 * Calculator.CommissionBuff, 2);
                         if (SettingsProperties.Default.CurrencyId == 1)
                         {
-                            _price1 = Edit.ConverterToRub(_price1, SettingsProperties.Default.RUB);
-                            _price2 = Edit.ConverterToRub(_price2, SettingsProperties.Default.RUB);
+                            _price1 = Edit.ConverterFromUsd(_price1, SettingsProperties.Default.RUB);
+                            _price2 = Edit.ConverterFromUsd(_price2, SettingsProperties.Default.RUB);
                         }
                         _have = _price1 > 0;
                         break;
@@ -131,8 +131,8 @@ namespace ItemChecker.MVVM.Model
                         _price4 = Math.Round(_price3 * Calculator.CommissionCsm, 2);
                         if (SettingsProperties.Default.CurrencyId == 1)
                         {
-                            _price3 = Edit.ConverterToRub(_price3, SettingsProperties.Default.RUB);
-                            _price4 = Edit.ConverterToRub(_price4, SettingsProperties.Default.RUB);
+                            _price3 = Edit.ConverterFromUsd(_price3, SettingsProperties.Default.RUB);
+                            _price4 = Edit.ConverterFromUsd(_price4, SettingsProperties.Default.RUB);
                         }
 
                         if (ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == _itemName).CsmInfo.Unavailable)
@@ -155,8 +155,8 @@ namespace ItemChecker.MVVM.Model
                         _price4 = Math.Round(_price3 * Calculator.CommissionLf, 2);
                         if (SettingsProperties.Default.CurrencyId == 1)
                         {
-                            _price3 = Edit.ConverterToRub(_price3, SettingsProperties.Default.RUB);
-                            _price4 = Edit.ConverterToRub(_price4, SettingsProperties.Default.RUB);
+                            _price3 = Edit.ConverterFromUsd(_price3, SettingsProperties.Default.RUB);
+                            _price4 = Edit.ConverterFromUsd(_price4, SettingsProperties.Default.RUB);
                         }
                         break;
                     }
@@ -166,8 +166,8 @@ namespace ItemChecker.MVVM.Model
                         _price4 = Math.Round(_price3 * Calculator.CommissionBuff, 2);
                         if (SettingsProperties.Default.CurrencyId == 1)
                         {
-                            _price3 = Edit.ConverterToRub(_price3, SettingsProperties.Default.RUB);
-                            _price4 = Edit.ConverterToRub(_price4, SettingsProperties.Default.RUB);
+                            _price3 = Edit.ConverterFromUsd(_price3, SettingsProperties.Default.RUB);
+                            _price4 = Edit.ConverterFromUsd(_price4, SettingsProperties.Default.RUB);
                         }
                         break;
                     }

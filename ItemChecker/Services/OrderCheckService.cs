@@ -137,9 +137,9 @@ namespace ItemChecker.MVVM.Model
 
                 if (SettingsProperties.Default.CurrencyId == 1)
                 {
-                    servicePrice = Edit.ConverterToRub(servicePrice, currencyValue);
-                    serviceGive = Edit.ConverterToRub(serviceGive, currencyValue);
-                    difference = Edit.ConverterToRub(difference, currencyValue);
+                    servicePrice = Edit.ConverterFromUsd(servicePrice, currencyValue);
+                    serviceGive = Edit.ConverterFromUsd(serviceGive, currencyValue);
+                    difference = Edit.ConverterFromUsd(difference, currencyValue);
                 }
             }
         }

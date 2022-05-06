@@ -18,7 +18,8 @@ namespace ItemChecker.MVVM.Model
         {
             "SteamMarket",
             "Cs.Money",
-            "Loot.Farm"
+            "Loot.Farm",
+            "Buff163"
         };
         public int Service { get; set; }
 
@@ -54,7 +55,6 @@ namespace ItemChecker.MVVM.Model
             {
                 _result = value;
                 OnPropertyChanged();
-                //Compare(false, true);
             }
         }
         public decimal Precent
@@ -79,7 +79,8 @@ namespace ItemChecker.MVVM.Model
         public ObservableCollection<string> CurrencyList { get; set; } = new()
         {
             "USD ($)",
-            "RUB (₽)"
+            "RUB (₽)",
+            "CNY (¥)"
         };
         public int Currency1 { get; set; } = 0;
         public int Currency2 { get; set; } = 1;
@@ -101,10 +102,28 @@ namespace ItemChecker.MVVM.Model
             set
             {
                 _value = value;
-                if (Currency1 == 1 && Currency2 == 0)
-                    Converted = Edit.ConverterToUsd(value, SettingsProperties.Default.RUB);
-                if (Currency1 == 0 && Currency2 == 1)
-                    Converted = Edit.ConverterToRub(value, SettingsProperties.Default.RUB);
+                decimal dol = value;
+                switch (Currency1) //any -> dol
+                {
+                    case 1:
+                        dol = Edit.ConverterToUsd(value, SettingsProperties.Default.RUB);
+                        break;
+                    case 2:
+                        dol = Edit.ConverterToUsd(value, SettingsProperties.Default.CNY);
+                        break;
+                }
+                switch (Currency2)//dol -> any
+                {
+                    case 0:
+                        Converted = dol;
+                        break;
+                    case 1:
+                        Converted = Edit.ConverterFromUsd(dol, SettingsProperties.Default.RUB);
+                        break;
+                    case 2:
+                        Converted = Edit.ConverterFromUsd(dol, SettingsProperties.Default.CNY);
+                        break;
+                }
                 OnPropertyChanged();
             }
         }
@@ -122,6 +141,9 @@ namespace ItemChecker.MVVM.Model
                     break;
                 case 2:
                     commission = CommissionLf;
+                    break;
+                case 3:
+                    commission = CommissionBuff;
                     break;
             }
 

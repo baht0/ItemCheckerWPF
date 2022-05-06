@@ -93,7 +93,8 @@ namespace ItemChecker.Support
             str = str.Replace("â˜…", "★");
             return str;
         }
-        public static Decimal ConverterToRub(decimal value, decimal currency)
+
+        public static Decimal ConverterFromUsd(decimal value, decimal currency)
         {
             return Math.Round(value * currency, 2);
         }
