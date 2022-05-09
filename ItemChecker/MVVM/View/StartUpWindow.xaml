@@ -140,10 +140,10 @@
                                VerticalAlignment="Top"/>
                         <TextBlock Text="Account Name:" Grid.Row="1" VerticalAlignment="Center"/>
                         <TextBox Grid.Row="1" Grid.Column="1" Height="25"
-                             Text="{Binding Login.Login, UpdateSourceTrigger=PropertyChanged}"/>
+                             Text="{Binding SignUp.Login, UpdateSourceTrigger=PropertyChanged}"/>
                         <TextBlock Text="Password:" Grid.Row="2" VerticalAlignment="Center"/>
                         <PasswordBox x:Name="passTextbox" Grid.Row="2" Grid.Column="1" Height="25"/>
-                        <CheckBox Grid.Row="3" Grid.Column="1" IsChecked="{Binding Login.Remember, UpdateSourceTrigger=PropertyChanged}">Remember me</CheckBox>
+                        <CheckBox Grid.Row="3" Grid.Column="1" IsChecked="{Binding SignUp.Remember, UpdateSourceTrigger=PropertyChanged}">Remember me</CheckBox>
                         <Separator Grid.Row="4" Grid.ColumnSpan="2"
                                Width="200" VerticalAlignment="Top"/>
                         <TextBlock Text="2AF Code:" Grid.Row="4" VerticalAlignment="Bottom"/>
@@ -155,7 +155,7 @@
                              FontWeight="Bold"
                              FontFamily="Consolas"
                              KeyDown="TextBox_KeyDown"
-                             Text="{Binding Login.Code2AF, UpdateSourceTrigger=PropertyChanged}"/>
+                             Text="{Binding SignUp.Code2AF, UpdateSourceTrigger=PropertyChanged}"/>
                         <Button Content="Sign In" Grid.ColumnSpan="2" Grid.Row="5"
                             Width="100" Margin="0 0 0 -55"
                             HorizontalAlignment="Center"  VerticalAlignment="Bottom"

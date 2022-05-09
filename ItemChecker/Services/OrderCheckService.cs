@@ -45,7 +45,7 @@ namespace ItemChecker.MVVM.Model
                             baseService.UpdateLfmInfo();
                             break;
                         case 4:
-                            baseService.UpdateBuffInfo(0, int.MaxValue);
+                            baseService.UpdateBuffInfo(false, 0, int.MaxValue);
                             break;
                     }
                 }

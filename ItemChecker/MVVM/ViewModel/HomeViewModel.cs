@@ -51,7 +51,6 @@ namespace ItemChecker.MVVM.ViewModel
 
         //services
         private HomePush _homePush = new();
-        private HomeCsmCheck _homeCsmCheck = new();
         private HomeFloatCheck _homeFloatCheck = new();
         public HomePush HomePush
         {
@@ -62,18 +61,6 @@ namespace ItemChecker.MVVM.ViewModel
             set
             {
                 _homePush = value;
-                OnPropertyChanged();
-            }
-        }
-        public HomeCsmCheck HomeCsmCheck
-        {
-            get
-            {
-                return _homeCsmCheck;
-            }
-            set
-            {
-                _homeCsmCheck = value;
                 OnPropertyChanged();
             }
         }
@@ -219,20 +206,6 @@ namespace ItemChecker.MVVM.ViewModel
             });
 
         #region services
-        public ICommand AddCsmListCommand =>
-            new RelayCommand((obj) =>
-            {
-                Task.Run(() =>
-                {
-                    List<string> response = BaseService.OpenFileDialog("txt");
-                    if (response.Any())
-                    {
-                        HomeCsmCheck.ListCount = response.Count;
-                        HomeCsmCheck.List = response;
-                        BaseService.SaveList("CsmList", HomeCsmCheck.List);
-                    }
-                });
-            }, (obj) => !HomeCsmCheck.IsService);
         public ICommand AddFloatListCommand =>
             new RelayCommand((obj) =>
             {
@@ -273,31 +246,6 @@ namespace ItemChecker.MVVM.ViewModel
                     HomePush.Timer.Elapsed -= timerPushTick;
                 }
             }, (obj) => DataOrder.Orders.Any());
-        public ICommand CsmCommand =>
-            new RelayCommand((obj) =>
-            {
-                if (!HomeCsmCheck.IsService)
-                {
-                    HomeCsmCheck.IsService = true;
-                    HomeCsmCheck config = obj as HomeCsmCheck;
-                    HomeProperties.Default.TimeCsm = config.Time;
-                    HomeProperties.Default.MinPrecent = config.MinPrecent;
-                    HomeProperties.Default.Save();
-
-                    HomeCsmCheck.Timer.Elapsed += timerCsmTick;
-                    HomeCsmCheck.TimerTick = config.Time;
-                    HomeCsmCheck.Timer.Enabled = true;
-                }
-                else
-                {
-                    HomeCsmCheck.cts.Cancel();
-                    HomeCsmCheck.Status = "Off";
-                    HomeCsmCheck.IsService = false;
-                    HomeCsmCheck.Timer.Enabled = false;
-                    HomeCsmCheck.TimerTick = 0;
-                    HomeCsmCheck.Timer.Elapsed -= timerCsmTick;
-                }
-            }, (obj) => HomeCsmCheck.List.Any());
         public ICommand FloatCommand => 
             new RelayCommand((obj) =>
             {
@@ -338,25 +286,6 @@ namespace ItemChecker.MVVM.ViewModel
                 HomePush.cts = new();
                 HomePush.token = HomePush.cts.Token;
                 OrderPush();
-            }
-        }
-        void timerCsmTick(Object sender, ElapsedEventArgs e)
-        {
-            HomeCsmCheck.TimerTick--;
-            TimeSpan timeSpan = TimeSpan.FromSeconds(HomeCsmCheck.TimerTick);
-            HomeCsmCheck.Status = timeSpan.ToString("mm':'ss");
-            if (HomeCsmCheck.TimerTick <= 0)
-            {
-                HomeCsmCheck.Status = "Preparation...";
-                HomeCsmCheck.Timer.Enabled = false;
-                HomeCsmCheck.Progress = 0;
-
-                BaseModel.IsBrowser = true;
-                HomeCsmCheck.cts = new();
-                HomeCsmCheck.token = HomeCsmCheck.cts.Token;
-                ItemBaseService baseService = new();
-                baseService.LoadInventoriesCsm(null);
-                CsmCheck();
             }
         }
         void timerFloatTick(Object sender, ElapsedEventArgs e)
@@ -437,79 +366,6 @@ namespace ItemChecker.MVVM.ViewModel
                 }
             }
         }
-        void CsmCheck()
-        {
-            try
-            {
-                if (BaseModel.Browser == null)
-                    BaseService.OpenBrowser();
-                bool isLogin = false;
-                do isLogin = CsmAccount.Login();
-                while (!isLogin);
-
-                CsmCheckService csmCheck = new();
-                List<DataCsmCheck> checkedList = new();
-                if (HomeCsmCheck.Check == 0 || HomeCsmCheck.Check % 10 == 9)
-                {
-                    checkedList = csmCheck.CheckSteamPrice();
-                    Main.Notifications.Add(new()
-                    {
-                        Title = "Cs.Money Check",
-                        Message = "SteamMarket prices are checked and changed.",
-                    });
-                }
-                HomeCsmCheck.MaxProgress = HomeCsmCheck.List.Count;
-                HomeCsmCheck.Status = "Checking...";
-                foreach (DataCsmCheck item in checkedList)
-                {
-                    try
-                    {
-                        if (DataInventoriesCsm.Items.Any(x => x.ItemName == item.ItemName))
-                        {
-                            item.CsmPrice = DataInventoriesCsm.Items.Where(x => x.ItemName == item.ItemName).Select(x => x.Price).DefaultIfEmpty().Min();
-                            item.Precent = Edit.Precent(item.CsmPrice, item.StmPrice);
-                            if (item.Precent >= HomeCsmCheck.MinPrecent)
-                                HomeCsmCheck.SuccessfulTrades += csmCheck.Check(item.ItemName);
-                        }
-                    }
-                    catch (Exception exp)
-                    {
-                        BaseService.errorLog(exp);
-                    }
-                    finally
-                    {
-                        csmCheck.getTransactions();
-                        HomeCsmCheck.Progress++;
-                    }
-                    if (HomeCsmCheck.token.IsCancellationRequested)
-                        break;
-                }
-                HomeCsmCheck.Check++;
-                csmCheck.ClearCart();
-            }
-            catch (Exception exp)
-            {
-                BaseService.errorLog(exp);
-                BaseService.errorMessage(exp);
-            }
-            finally
-            {
-                if (!HomeCsmCheck.token.IsCancellationRequested)
-                {
-                    HomeCsmCheck.TimerTick = HomeProperties.Default.TimeCsm;
-                    HomeCsmCheck.Timer.Enabled = true;
-                }
-                else
-                {
-                    BaseModel.IsBrowser = false;
-                    if (SettingsProperties.Default.Quit)
-                    {
-                        BaseModel.Browser.Quit();
-                        BaseModel.Browser = null;
-                    }
-                }
-            }
-        }
         void FloatCheck()
         {
             try
@@ -563,14 +419,11 @@ namespace ItemChecker.MVVM.ViewModel
                         HomePush.TimerTick = 1;
                         break;
                     case 1:
-                        HomeCsmCheck.TimerTick = 1;
-                        break;
-                    case 2:
                         HomeFloatCheck.TimerTick = 1;
                         break;
 
                 }
-            }, (obj) => HomePush.IsService | HomeCsmCheck.IsService | HomeFloatCheck.IsService);
+            }, (obj) => HomePush.IsService | HomeFloatCheck.IsService);
         #endregion
 
         #region tools
@@ -720,10 +573,10 @@ namespace ItemChecker.MVVM.ViewModel
                 while (!isLogin);
                 
                 WithdrawService withdraw = new();
-                JArray inventory = withdraw.checkInventory();
+                JArray inventory = withdraw.CheckInventory();
                 JArray items = new();
                 if (inventory.Any() && !HomeWithdraw.token.IsCancellationRequested)
-                    items = withdraw.getItems(inventory);
+                    items = withdraw.GetItems(inventory);
                 if (!items.Any() || HomeWithdraw.token.IsCancellationRequested)
                     return;
 
@@ -734,7 +587,7 @@ namespace ItemChecker.MVVM.ViewModel
                 {
                     try
                     {
-                        withdraw.withdrawItems(item);
+                        withdraw.WithdrawItems(item);
                     }
                     catch (Exception exp)
                     {

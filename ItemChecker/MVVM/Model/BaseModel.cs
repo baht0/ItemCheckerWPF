@@ -1,14 +1,8 @@
-﻿using HtmlAgilityPack;
-using ItemChecker.Core;
-using ItemChecker.Net;
-using ItemChecker.Properties;
+﻿using ItemChecker.Core;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Support.UI;
 using System;
 using System.IO;
-using System.Net;
 using System.Threading;
 
 namespace ItemChecker.MVVM.Model
@@ -37,7 +31,6 @@ namespace ItemChecker.MVVM.Model
         public static IWebDriver Browser { get; set; }
         public static WebDriverWait WebDriverWait { get; set; }
         //steam
-        public static SteamLogin LoginSteam { get; set; } = new();
         public static string StatusCommunity { get; set; } = string.Empty;
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Globalization;
-using System.Text;
 using System.Web;
 
 namespace ItemChecker.Support
@@ -38,7 +37,7 @@ namespace ItemChecker.Support
 
             return name;
         }
-        public static void openUrl(string url)
+        public static void OpenUrl(string url)
         {
             var psi = new ProcessStartInfo(url)
             {
@@ -47,7 +46,7 @@ namespace ItemChecker.Support
             };
             Process.Start(psi);
         }
-        public static void openCsm(string market_hash_name)
+        public static void OpenCsm(string market_hash_name)
         {
             string stattrak = "false";
             string souvenir = "false";
@@ -58,7 +57,7 @@ namespace ItemChecker.Support
 
             string url = "https://cs.money/csgo/trade/?search=" + market_hash_name + "&sort=price&order=asc&hasRareFloat=false&hasRareStickers=false&hasRarePattern=false&hasTradeLock=false&hasTradeLock=true&isStatTrak=" + stattrak + "&isSouvenir=" + souvenir;
 
-            openUrl(url);
+            OpenUrl(url);
         }
 
         //remove

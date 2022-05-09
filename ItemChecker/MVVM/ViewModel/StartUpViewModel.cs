@@ -22,7 +22,7 @@ namespace ItemChecker.MVVM.ViewModel
         StartUp _startUp = new();
         bool _isLogin = false;
         bool _isFirst = false;
-        private SteamLogin _login = new();
+        private SteamSignUp _signUp = new();
         private Settings _settings = new();
 
         Task startTask { get; set; }
@@ -54,12 +54,12 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        public SteamLogin Login
+        public SteamSignUp SignUp
         {
-            get { return _login; }
+            get { return _signUp; }
             set
             {
-                _login = value;
+                _signUp = value;
                 OnPropertyChanged();
             }
         }
@@ -117,6 +117,8 @@ namespace ItemChecker.MVVM.ViewModel
                 StartUp.Progress = Tuple.Create(1, "Check Update...");
                 ProjectInfoService.AppCheck();
                 StartUp.IsUpdate = DataProjectInfo.IsUpdate;
+                if (DataProjectInfo.IsUpdate)
+                    StartUp.Message.Enqueue($"Update {DataProjectInfo.LatestVersion} is available.");
 
                 if (String.IsNullOrEmpty(SettingsProperties.Default.CurrencyApiKey))
                 {
@@ -136,9 +138,9 @@ namespace ItemChecker.MVVM.ViewModel
                 {
                     if (BaseModel.token.IsCancellationRequested)
                         break;
-                    IsLogin = SteamAccount.Steam();
+                    IsLogin = SteamAccount.Login();
                     StartUp.Progress = IsLogin ? Tuple.Create(3, "Failed to login...") : Tuple.Create(4, "Preparation...");
-                    Login.Code2AF = string.Empty;
+                    SignUp.Code2AF = string.Empty;
                 }
 
                 if (BaseModel.token.IsCancellationRequested)
@@ -209,15 +211,15 @@ namespace ItemChecker.MVVM.ViewModel
             new RelayCommand((obj) =>
             {
                 var propertyInfo = obj.GetType().GetProperty("Password");
-                Login.Password = (string)propertyInfo.GetValue(obj, null);
-                if (!String.IsNullOrEmpty(Login.Password))
+                SignUp.Password = (string)propertyInfo.GetValue(obj, null);
+                if (!String.IsNullOrEmpty(SignUp.Password))
                 {
-                    BaseModel.LoginSteam = Login;
-                    BaseModel.LoginSteam.IsLoggedIn = true;
+                    SteamSignUp.SignUp = SignUp;
+                    SteamSignUp.SignUp.IsLoggedIn = true;
                     StartUp.Progress = Tuple.Create(3, "Signing In...");
                     IsLogin = false;
                 }
-            }, (obj) => !BaseModel.LoginSteam.IsLoggedIn && !String.IsNullOrEmpty(Login.Login) && Login.Code2AF.Length == 5);
+            }, (obj) => !SteamSignUp.SignUp.IsLoggedIn && !String.IsNullOrEmpty(SignUp.Login) && SignUp.Code2AF.Length == 5);
         public ICommand ContinueCommand =>
             new RelayCommand((obj) =>
             {
@@ -244,8 +246,8 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 return new RelayCommand((obj) =>
                 {
-                    Edit.openUrl("https://free.currencyconverterapi.com/free-api-key");
-                    Edit.openUrl("https://openexchangerates.org/signup/free");
+                    Edit.OpenUrl("https://free.currencyconverterapi.com/free-api-key");
+                    Edit.OpenUrl("https://openexchangerates.org/signup/free");
                 });
             }
         }

@@ -226,6 +226,35 @@ namespace ItemChecker.MVVM.ViewModel
                 BaseService.errorLog(ex);
             }
         }
+        public ICommand OpenItemOutCommand =>
+            new RelayCommand((obj) =>
+            {
+                DataParser item = SelectedParserItem;
+                string itemName = Edit.removeDoppler(item.ItemName).Replace("(Holo/Foil)", "(Holo-Foil)");
+                string market_hash_name = Edit.MarketHashName(itemName);
+                switch ((Int32)obj)
+                {
+                    case 1 or 2:
+                        if (ParserStatistics.Service1 == "SteamMarket" | ParserStatistics.Service1 == "SteamMarket(A)")
+                            Edit.OpenUrl("https://steamcommunity.com/market/listings/730/" + market_hash_name);
+                        else if (ParserStatistics.Service1 == "Cs.Money")
+                            Edit.OpenCsm(market_hash_name);
+                        else if (ParserStatistics.Service1 == "Buf163")
+                            Edit.OpenUrl("https://buff.163.com/goods/" + ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item.ItemName).BuffInfo.Id);
+                        break;
+                    case 3 or 4:
+                        if (ParserStatistics.Service2 == "SteamMarket" | ParserStatistics.Service2 == "SteamMarket(A)")
+                            Edit.OpenUrl("https://steamcommunity.com/market/listings/730/" + market_hash_name);
+                        else if (ParserStatistics.Service2 == "Cs.Money")
+                            Edit.OpenCsm(market_hash_name);
+                        else if (ParserStatistics.Service2 == "Buf163")
+                            Edit.OpenUrl("https://buff.163.com/goods/" + ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item.ItemName).BuffInfo.Id);
+                        break;
+                    default:
+                        Clipboard.SetText(itemName);
+                        break;
+                }
+            });
         //filter
         public ICommand ClearSearchCommand =>
             new RelayCommand((obj) =>
@@ -373,7 +402,7 @@ namespace ItemChecker.MVVM.ViewModel
                     ParserStatistics.Service1 = "SteamMarket";
                     ParserStatistics.Price1 = "Sale(ST)";
                     ParserStatistics.Price2 = "BuyOrder";
-                    ParserInfo.ST = false;
+                    ParserInfo.ST = true;
                     ParserInfo.CSM = false;
                     ParserInfo.LF = false;
                     ParserInfo.BF = false;
@@ -406,7 +435,7 @@ namespace ItemChecker.MVVM.ViewModel
                     ParserInfo.CSM = false;
                     ParserInfo.LF = false;
                     ParserInfo.BF = true;
-                    baseService.UpdateBuffInfo(ParserConfig.MinPrice, ParserConfig.MaxPrice);
+                    baseService.UpdateBuffInfo(false, ParserConfig.MinPrice, ParserConfig.MaxPrice);
                     break;
             }
             switch (serviceTwo)
@@ -425,6 +454,7 @@ namespace ItemChecker.MVVM.ViewModel
                     ParserStatistics.Service2 = "Cs.Money";
                     ParserStatistics.Price3 = "Trade(CSM)";
                     ParserStatistics.Price4 = "Give(CSM)";
+                    baseService.UpdateCsmInfo();
                     break;
                 case 3:
                     ParserStatistics.Service2 = "Loot.Farm";
@@ -436,7 +466,7 @@ namespace ItemChecker.MVVM.ViewModel
                     ParserStatistics.Service2 = "Buf163";
                     ParserStatistics.Price3 = "Sale(BF)";
                     ParserStatistics.Price4 = "BuyOrder";
-                    baseService.UpdateBuffInfo(ParserConfig.MinPrice, ParserConfig.MaxPrice);
+                    baseService.UpdateBuffInfo(true, ParserConfig.MinPrice, ParserConfig.MaxPrice);
                     break;
             }
         }

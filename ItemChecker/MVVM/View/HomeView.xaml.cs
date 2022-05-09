@@ -46,10 +46,10 @@ namespace ItemChecker.MVVM.View
                 switch (columnIndex)
                 {
                     case 1 or 2:
-                        Edit.openUrl("https://steamcommunity.com/market/listings/730/" + market_has_name);
+                        Edit.OpenUrl("https://steamcommunity.com/market/listings/730/" + market_has_name);
                         break;
                     case 3 or 4:
-                        Edit.openCsm(market_has_name);
+                        Edit.OpenCsm(market_has_name);
                         break;
                     default:
                         Clipboard.SetText(ItemName);
@@ -63,17 +63,11 @@ namespace ItemChecker.MVVM.View
             if (viewModel.TimerCommand.CanExecute(null))
                 viewModel.TimerCommand.Execute(0);
         }
-        private void TimerCsm_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            HomeViewModel viewModel = (HomeViewModel)DataContext;
-            if (viewModel.TimerCommand.CanExecute(null))
-                viewModel.TimerCommand.Execute(1);
-        }
         private void TimerFloat_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             HomeViewModel viewModel = (HomeViewModel)DataContext;
             if (viewModel.TimerCommand.CanExecute(null))
-                viewModel.TimerCommand.Execute(2);
+                viewModel.TimerCommand.Execute(1);
         }
     }
 }

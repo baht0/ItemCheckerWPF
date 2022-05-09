@@ -90,101 +90,6 @@ namespace ItemChecker.MVVM.Model
             }
         }
     }
-    public class HomeCsmCheck : ObservableObject
-    {
-        public static System.Timers.Timer Timer { get; set; } = new(1000);
-        public static int TimerTick { get; set; }
-        public static CancellationTokenSource cts { get; set; } = new();
-        public static CancellationToken token { get; set; } = cts.Token;
-
-        public int Time { get; set; } = HomeProperties.Default.TimeCsm;
-        public static List<string> List { get; set; } = BaseService.ReadList("CsmList");
-        public int MinPrecent { get; set; } = HomeProperties.Default.MinPrecent;
-
-        private bool _isService;
-        private int _ListCount = List.Count;
-        private int _check = 0;
-        private int _successfulTrades = 0;
-        private int _progress = 0;
-        private int _maxProgress = 0;
-        private string _status = "Off";
-
-        public bool IsService
-        {
-            get
-            {
-                return _isService;
-            }
-            set
-            {
-                _isService = value;
-                OnPropertyChanged();
-            }
-        }
-        public int ListCount
-        {
-            get
-            {
-                return _ListCount;
-            }
-            set
-            {
-                _ListCount = value;
-                OnPropertyChanged();
-            }
-        }
-        public int Check
-        {
-            get
-            {
-                return _check;
-            }
-            set
-            {
-                _check = value;
-                OnPropertyChanged();
-            }
-        }
-        public int SuccessfulTrades
-        {
-            get
-            {
-                return _successfulTrades;
-            }
-            set
-            {
-                _successfulTrades = value;
-                OnPropertyChanged();
-            }
-        }
-        public int Progress
-        {
-            get { return _progress; }
-            set
-            {
-                _progress = value;
-                OnPropertyChanged();
-            }
-        }
-        public int MaxProgress
-        {
-            get { return _maxProgress; }
-            set
-            {
-                _maxProgress = value;
-                OnPropertyChanged();
-            }
-        }
-        public string Status
-        {
-            get { return _status; }
-            set
-            {
-                _status = value;
-                OnPropertyChanged();
-            }
-        }
-    }
     public class HomeFloatCheck : ObservableObject
     {
         public static System.Timers.Timer Timer { get; set; } = new(1000);
@@ -192,7 +97,7 @@ namespace ItemChecker.MVVM.Model
         public static CancellationTokenSource cts { get; set; } = new();
         public static CancellationToken token { get; set; } = cts.Token;
 
-        public int Time { get; set; } = HomeProperties.Default.TimeCsm;
+        public int Time { get; set; } = HomeProperties.Default.TimeFloat;
         public static List<string> List { get; set; } = BaseService.ReadList("FloatList");
         public int MaxPrecent { get; set; } = HomeProperties.Default.MaxPrecent;
         public int Compare { get; set; } = HomeProperties.Default.Compare;

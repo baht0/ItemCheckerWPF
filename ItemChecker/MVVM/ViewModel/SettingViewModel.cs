@@ -77,8 +77,8 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 return new RelayCommand((obj) =>
                 {
-                    Edit.openUrl("https://free.currencyconverterapi.com/free-api-key");
-                    Edit.openUrl("https://openexchangerates.org/signup/free");
+                    Edit.OpenUrl("https://free.currencyconverterapi.com/free-api-key");
+                    Edit.OpenUrl("https://openexchangerates.org/signup/free");
                 });
             }
         }
@@ -86,7 +86,7 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand GetSteamApiCommand =>
             new RelayCommand((obj) =>
             {
-                Edit.openUrl("https://steamcommunity.com/dev/apikey");
+                Edit.OpenUrl("https://steamcommunity.com/dev/apikey");
             });
         public ICommand CopyIdCommand =>
             new RelayCommand((obj) =>
@@ -110,7 +110,7 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand OpenMarketCommand =>
             new RelayCommand((obj) =>
             {
-                Edit.openUrl("https://help.steampowered.com/en/faqs/view/71D3-35C2-AD96-AA3A");
+                Edit.OpenUrl("https://help.steampowered.com/en/faqs/view/71D3-35C2-AD96-AA3A");
             }, (obj) => SteamAccount.SteamMarket == "Disabled");
         //about
         public ICommand WhatIsNewCommand => 

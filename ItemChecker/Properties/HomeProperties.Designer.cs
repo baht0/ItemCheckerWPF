@@ -38,18 +38,6 @@ namespace ItemChecker.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("10")]
-        public int TimeCsm {
-            get {
-                return ((int)(this["TimeCsm"]));
-            }
-            set {
-                this["TimeCsm"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("10")]
         public int TimeFloat {
             get {
                 return ((int)(this["TimeFloat"]));
@@ -68,18 +56,6 @@ namespace ItemChecker.Properties {
             }
             set {
                 this["Reserve"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int MinPrecent {
-            get {
-                return ((int)(this["MinPrecent"]));
-            }
-            set {
-                this["MinPrecent"] = value;
             }
         }
         

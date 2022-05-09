@@ -10,49 +10,49 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Web;
 using System.Windows;
 using ItemChecker.Support;
 
 namespace ItemChecker.Services
 {
-    public class CsmCheckService : BaseService
+    public class _CsmCheckService : BaseService
     {
         static List<string> old_id = new();
         int successfulTrades { get; set; } = 0;
 
         public List<DataCsmCheck> CheckSteamPrice()
         {
-            ParserCheckService checkService = new();
-            List<DataCsmCheck> list = new();
-            foreach (string itemName in HomeCsmCheck.List)
-            {
-                if (HomeCsmCheck.token.IsCancellationRequested)
-                    break;
-                try
-                {
-                    DataParser data = checkService.Check(itemName, 2, 0);
-                    if (SettingsProperties.Default.CurrencyId == 0)
-                        data.Price4 = Edit.ConverterToUsd(data.Price4, SettingsProperties.Default.RUB);
-                    list.Add(new()
-                    {
-                        ItemName = itemName,
-                        StmPrice = data.Price4,
-                    });
-                }
-                catch (Exception exp)
-                {
-                    HomeCsmCheck.cts.Cancel();
-                    if (!exp.Message.Contains("429"))
-                    {
-                        BaseService.errorLog(exp);
-                        BaseService.errorMessage(exp);
-                    }
-                    else
-                        MessageBox.Show(exp.Message, "Parser stoped!", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-            }
-            return list;
+            //ParserCheckService checkService = new();
+            //List<DataCsmCheck> list = new();
+            //foreach (string itemName in HomeCsmCheck.List)
+            //{
+            //    if (HomeCsmCheck.token.IsCancellationRequested)
+            //        break;
+            //    try
+            //    {
+            //        DataParser data = checkService.Check(itemName, 2, 0);
+            //        if (SettingsProperties.Default.CurrencyId == 0)
+            //            data.Price4 = Edit.ConverterToUsd(data.Price4, SettingsProperties.Default.RUB);
+            //        list.Add(new()
+            //        {
+            //            ItemName = itemName,
+            //            StmPrice = data.Price4,
+            //        });
+            //    }
+            //    catch (Exception exp)
+            //    {
+            //        HomeCsmCheck.cts.Cancel();
+            //        if (!exp.Message.Contains("429"))
+            //        {
+            //            BaseService.errorLog(exp);
+            //            BaseService.errorMessage(exp);
+            //        }
+            //        else
+            //            MessageBox.Show(exp.Message, "Parser stoped!", MessageBoxButton.OK, MessageBoxImage.Warning);
+            //    }
+            //}
+            //return list;
+            return null;
         }
 
         public Int32 Check(string checkItem)

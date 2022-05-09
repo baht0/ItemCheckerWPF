@@ -61,7 +61,7 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand OpenFolderCommand =>
             new RelayCommand((obj) =>
             {
-                Edit.openUrl(BaseModel.DocumentPath);
+                Edit.OpenUrl(BaseModel.DocumentPath);
             });
         public ICommand ExitCommand =>
             new RelayCommand((obj) =>

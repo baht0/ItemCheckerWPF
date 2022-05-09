@@ -83,7 +83,6 @@
                     <Grid Visibility="{Binding IsChecked, ElementName=serviceTab, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="130"/>
-                            <RowDefinition Height="140"/>
                             <RowDefinition Height="160"/>
                         </Grid.RowDefinitions>
                         <!--BuyOrder Pusher-->
@@ -131,68 +130,8 @@
                             </VirtualizingStackPanel>
                             <TextBlock Grid.Row="3" Grid.Column="0" Text="{Binding HomePush.Push, StringFormat='Push: {0}'}" VerticalAlignment="Center"/>
                         </Grid>
-                        <!--Cs.Money Check-->
-                        <Grid Grid.Row="1">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="32"/>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="100"/>
-                                <ColumnDefinition/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock VerticalAlignment="Center" FontWeight="Bold"
-                                           Grid.ColumnSpan="2" PreviewMouseDown="TimerCsm_PreviewMouseDown">
-                                <TextBlock.Text>
-                                    <MultiBinding StringFormat="Cs.Money Check: {0} | {1}">
-                                        <Binding Path="HomeCsmCheck.Check"/>
-                                        <Binding Path="HomeCsmCheck.Status"/>
-                                    </MultiBinding>
-                                </TextBlock.Text>
-                            </TextBlock>
-                            <Button Grid.Column="1" HorizontalAlignment="Right"
-                                            Style="{StaticResource MaterialDesignFlatButton}"
-                                            Command="{Binding CsmCommand}"
-                                            CommandParameter="{Binding HomeCsmCheck}">
-                                <materialDesign:PackIcon Kind="{Binding HomeCsmCheck.IsService, Converter={StaticResource BooleanToPlayButtonConverter}}"/>
-                            </Button>
-                            <ProgressBar Grid.ColumnSpan="2" VerticalAlignment="Bottom"
-                                                 Height="3" Style="{StaticResource MaterialDesignLinearProgressBar}"
-                                                 Maximum="{Binding HomeCsmCheck.MaxProgress}"
-                                                 Value="{Binding HomeCsmCheck.Progress}"/>
-                            <TextBlock Grid.Row="1" Text="Min. Precent:" Height="15"/>
-                            <VirtualizingStackPanel Grid.Row="1" Grid.Column="1"
-                                                            VerticalAlignment="Center"
-                                                            HorizontalAlignment="Left"
-                                                            Orientation="Horizontal">
-                                <TextBox Width="70" Text="{Binding HomeCsmCheck.MinPrecent}" 
-                                                 TextInput="Number_PreviewTextInput"
-                                                 Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
-                                <TextBlock Text="%" Margin="2 0 0 0" VerticalAlignment="Bottom"/>
-                            </VirtualizingStackPanel>
-                            <TextBlock Grid.Row="2" Text="Timer:" Height="15"/>
-                            <VirtualizingStackPanel Grid.Row="2" Grid.Column="1"
-                                                    VerticalAlignment="Center"
-                                                    HorizontalAlignment="Left"
-                                                    Orientation="Horizontal">
-                                <TextBox Width="70" Text="{Binding HomeCsmCheck.Time}" PreviewTextInput="Number_PreviewTextInput"/>
-                                <TextBlock Text="Min." Margin="2 0 0 0" VerticalAlignment="Bottom"/>
-                            </VirtualizingStackPanel>
-                            <VirtualizingStackPanel Grid.Row="3" Orientation="Horizontal"
-                                                VerticalAlignment="Center">
-                                <Button HorizontalAlignment="Left" Style="{StaticResource MaterialDesignToolForegroundButton}" ToolTip="Add item list"
-                                                    Command="{Binding AddCsmListCommand}">
-                                    <materialDesign:PackIcon Kind="ViewList"/>
-                                </Button>
-                                <TextBlock Text="{Binding HomeCsmCheck.ListCount, StringFormat='({0})'}" VerticalAlignment="Center"/>
-                            </VirtualizingStackPanel>
-                            <TextBlock Grid.Row="3" Grid.Column="2" VerticalAlignment="Center"
-                                           Text="{Binding HomeCsmCheck.SuccessfulTrades, StringFormat='Successful Trades: {0}'}"/>
-                        </Grid>
                         <!--Float Check-->
-                        <Grid Grid.Row="2">
+                        <Grid Grid.Row="1">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="32"/>
                                 <RowDefinition/>
@@ -272,7 +211,7 @@
                                 <ColumnDefinition/>
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="{Binding HomeWithdraw.Count, StringFormat='Withdraw: {0}'}" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding HomeWithdraw.Count, StringFormat='Withdraw (CSM): {0}'}" VerticalAlignment="Center" FontWeight="Bold"/>
                             <Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right"
                                             Style="{StaticResource MaterialDesignFlatButton}"
                                             Command="{Binding WithdrawCommand}">

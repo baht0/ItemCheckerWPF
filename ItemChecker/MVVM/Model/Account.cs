@@ -12,13 +12,15 @@ using System.Threading;
 
 namespace ItemChecker.MVVM.Model
 {
-    public class SteamLogin
+    public class SteamSignUp
     {
         public bool IsLoggedIn { get; set; } = false;
         public string Login { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public bool Remember { get; set; } = false;
         public string Code2AF { get; set; } = string.Empty;
+
+        public static SteamSignUp SignUp { get; set; } = new();
     }
     public class SteamAccount : BaseModel
     {
@@ -57,7 +59,7 @@ namespace ItemChecker.MVVM.Model
             }
             return isLogin;
         }
-        public static Boolean Steam()
+        public static Boolean Login()
         {
             try
             {
@@ -73,27 +75,27 @@ namespace ItemChecker.MVVM.Model
                 catch { }
                 IWebElement signin = WebDriverWait.Until(e => e.FindElement(By.XPath("//button[@class='btn_blue_steamui btn_medium login_btn']")));
 
-                while (!LoginSteam.IsLoggedIn)
+                while (!SteamSignUp.SignUp.IsLoggedIn)
                     Thread.Sleep(500);
-                username.SendKeys(LoginSteam.Login);
-                password.SendKeys(LoginSteam.Password);
+                username.SendKeys(SteamSignUp.SignUp.Login);
+                password.SendKeys(SteamSignUp.SignUp.Password);
                 signin.Click();
 
                 Thread.Sleep(2000);
                 IWebElement code = WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@id='twofactorcode_entry']")));
-                code.SendKeys(LoginSteam.Code2AF);
+                code.SendKeys(SteamSignUp.SignUp.Code2AF);
                 code.SendKeys(Keys.Enter);
 
-                StartUpProperties.Default.Remember = LoginSteam.Remember;
+                StartUpProperties.Default.Remember = SteamSignUp.SignUp.Remember;
                 StartUpProperties.Default.Save();
                 Thread.Sleep(4000);
 
-                LoginSteam.IsLoggedIn = false;
+                SteamSignUp.SignUp.IsLoggedIn = false;
                 return !Browser.Url.Contains("id") & !Browser.Url.Contains("profiles") ? true : GetCookies();
             }
             catch
             {
-                LoginSteam.IsLoggedIn = false;
+                SteamSignUp.SignUp.IsLoggedIn = false;
                 return true;
             }
         }

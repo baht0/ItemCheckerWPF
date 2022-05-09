@@ -121,20 +121,24 @@ namespace ItemChecker.Services
                 }
             }
         }
-        public void UpdateBuffInfo(int min, int max)
+        public void UpdateBuffInfo(bool isBuyOrder, int min, int max)
         {
-            if (ItemBase.SkinsBase.LastOrDefault().BuffInfo.Updated.AddMinutes(20) > DateTime.Now)
+            if (ItemBase.SkinsBase.Select(x => x.BuffInfo.Updated).Min().AddMinutes(20) > DateTime.Now)
                 return;
 
             while (!BuffAccount.IsLogIn())
                 System.Threading.Thread.Sleep(200);
 
+            string tab = isBuyOrder ? "/buying" : string.Empty;
+            min = (int)Edit.ConverterFromUsd((decimal)min, SettingsProperties.Default.CNY);
+            max = (int)Edit.ConverterFromUsd((decimal)max, SettingsProperties.Default.CNY);
             int pages = int.MaxValue;
+            string last_item = string.Empty;
             for (int i = 1; i <= pages; i++)
             {
                 try
                 {
-                    string url = "https://buff.163.com/api/market/goods/buying?game=csgo&page_num=" + i + "&min_price=" + min + "&max_price=" + max + "&sort_by=price.asc&page_size=80";
+                    string url = "https://buff.163.com/api/market/goods" + tab + "?game=csgo&page_num=" + i + "&min_price=" + min + "&max_price=" + max + "&sort_by=price.asc&page_size=80";
                     JObject json = JObject.Parse(Get.Request(BuffAccount.Cookies, url));
 
                     pages = Convert.ToInt32(json["data"]["total_page"]);
@@ -142,7 +146,7 @@ namespace ItemChecker.Services
                     foreach (JObject item in items)
                     {
                         string itemName = item["market_hash_name"].ToString();
-                        if (ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == itemName) != null)
+                        if (ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == itemName) != null && itemName != last_item)
                         {
                             ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == itemName).BuffInfo = new()
                             {
@@ -154,6 +158,7 @@ namespace ItemChecker.Services
                                 OrderCount = Convert.ToInt32(item["buy_num"])
                             };
                         }
+                        last_item = itemName;
                     }
                 }
                 catch
@@ -165,7 +170,7 @@ namespace ItemChecker.Services
 
         public void LoadInventoriesCsm(ParserConfig parserConfig)
         {
-            if (DataInventoriesCsm.Items.LastOrDefault().Updated.AddMinutes(20) > DateTime.Now)
+            if (DataInventoriesCsm.Items.Any() && DataInventoriesCsm.Items.LastOrDefault().Updated.AddMinutes(20) > DateTime.Now)
                 return;
             DataInventoriesCsm.Items.Clear();
             int offset = 0;

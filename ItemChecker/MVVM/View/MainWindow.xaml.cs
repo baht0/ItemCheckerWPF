@@ -72,23 +72,23 @@ namespace ItemChecker.MVVM.View
 
         private void CSM_MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            Edit.openUrl("https://cs.money/");
+            Edit.OpenUrl("https://cs.money/");
         }
         private void Lf_MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            Edit.openUrl("https://loot.farm/");
+            Edit.OpenUrl("https://loot.farm/");
         }
         private void Buff_MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            Edit.openUrl("https://buff.163.com/");
+            Edit.OpenUrl("https://buff.163.com/");
         }
         private void Inventory_MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            Edit.openUrl("https://steamcommunity.com/my/inventory/");
+            Edit.OpenUrl("https://steamcommunity.com/my/inventory/");
         }
         private void SteamMarket_MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            Edit.openUrl("https://steamcommunity.com/market/");
+            Edit.OpenUrl("https://steamcommunity.com/market/");
         }
 
         private void InputDecimal(object sender, TextCompositionEventArgs e)

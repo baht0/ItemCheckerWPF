@@ -42,31 +42,10 @@ namespace ItemChecker.MVVM.View
             object item = parserGrid.CurrentItem;
             if (!parserGrid.Items.IsEmpty && item != null)
             {
-                PropertyInfo info = item.GetType().GetProperty("ItemName");
-                string ItemName = (string)info.GetValue(item, null);
-                ItemName = Edit.removeDoppler(ItemName).Replace("(Holo/Foil)", "(Holo-Foil)");
-                string market_has_name = Edit.MarketHashName(ItemName);
-
-                ParserViewModel viewModel = (ParserViewModel)DataContext;
                 int columnIndex = parserGrid.CurrentColumn.DisplayIndex;
-                switch (columnIndex)
-                {
-                    case 1 or 2:
-                        if (viewModel.ParserStatistics.Service1 == "SteamMarket" | viewModel.ParserStatistics.Service1 == "SteamMarket(A)")
-                            Edit.openUrl("https://steamcommunity.com/market/listings/730/" + market_has_name);
-                        else if (viewModel.ParserStatistics.Service1 == "Cs.Money")
-                            Edit.openCsm(market_has_name);
-                        break;
-                    case 3 or 4:
-                        if (viewModel.ParserStatistics.Service2 == "SteamMarket" | viewModel.ParserStatistics.Service2 == "SteamMarket(A)")
-                            Edit.openUrl("https://steamcommunity.com/market/listings/730/" + market_has_name);
-                        else if (viewModel.ParserStatistics.Service2 == "Cs.Money")
-                            Edit.openCsm(market_has_name);
-                        break;
-                    default:
-                        Clipboard.SetText(ItemName);
-                        break;
-                }
+                ParserViewModel viewModel = (ParserViewModel)DataContext;
+                if (viewModel.OpenItemOutCommand.CanExecute(null))
+                    viewModel.OpenItemOutCommand.Execute(columnIndex);
             }
         }
         private void TextBox_KeyDown(object sender, KeyEventArgs e)
