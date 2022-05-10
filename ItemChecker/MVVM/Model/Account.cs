@@ -1,4 +1,5 @@
 ﻿using HtmlAgilityPack;
+using ItemChecker.MVVM.ViewModel;
 using ItemChecker.Net;
 using ItemChecker.Properties;
 using ItemChecker.Services;
@@ -9,6 +10,7 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Threading;
+using System.Windows;
 
 namespace ItemChecker.MVVM.Model
 {
@@ -21,13 +23,21 @@ namespace ItemChecker.MVVM.Model
         public string Code2AF { get; set; } = string.Empty;
 
         public static SteamSignUp SignUp { get; set; } = new();
+
+        public static Boolean AllowUser(string login)
+        {
+            JArray users = JArray.Parse(Post.DropboxRead("Users.json"));
+            var user = users.FirstOrDefault(x => x["Login"].ToString() == login);
+
+            return user != null && Convert.ToBoolean(user["Status"]);
+        }
     }
     public class SteamAccount : BaseModel
     {
         public static CookieContainer Cookies { get; set; } = new();
         public static string Id64 { get; set; } = string.Empty;
         public static string AccountName { get; set; } = string.Empty;
-        public static string User { get; set; } = string.Empty;
+        public static string UserName { get; set; } = string.Empty;
         public static string SteamMarket { get; set; } = "Enabled";
         public static decimal Balance { get; set; } = 0.00m;
         public static decimal BalanceUsd { get; set; } = 0.00m;
@@ -136,8 +146,16 @@ namespace ItemChecker.MVVM.Model
             htmlDoc.LoadHtml(html);
             Balance = Edit.GetPrice(htmlDoc.DocumentNode.SelectSingleNode("//a[@id='header_wallet_balance']").InnerText);
             BalanceUsd = Math.Round(Balance / SettingsProperties.Default.RUB, 2);
-            User = htmlDoc.DocumentNode.SelectSingleNode("//span[@id='account_pulldown']").InnerText.Trim();
+            UserName = htmlDoc.DocumentNode.SelectSingleNode("//span[@id='account_pulldown']").InnerText.Trim();
             AccountName = htmlDoc.DocumentNode.SelectSingleNode("//span[@class='persona online']").InnerText.Trim();
+            if (!SteamSignUp.AllowUser(AccountName))
+            {
+                MessageBox.Show("User is not found.", "Opps...", MessageBoxButton.OK, MessageBoxImage.Information);
+                Application.Current.Dispatcher.Invoke(() => {
+                    if (Application.Current.MainWindow.DataContext is StartUpViewModel startVM)
+                        startVM.ExitCommand.Execute(null);
+                });
+            }
 
             var nodes = htmlDoc.DocumentNode.Descendants().Where(n => n.Attributes.Any(a => a.Value.Contains("market_headertip_container market_headertip_container_warning")));
             GetSteamApiKey();

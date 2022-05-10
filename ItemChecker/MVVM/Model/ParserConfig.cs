@@ -21,7 +21,6 @@ namespace ItemChecker.MVVM.Model
         public bool RareItems { get; set; } = ParserProperties.Default.RareItems;
         public bool UserItems { get; set; } = ParserProperties.Default.UserItems;
         public bool OnlyDopplers { get; set; } = ParserProperties.Default.OnlyDopplers;
-
         public ObservableCollection<string> Services { get; set; } = new()
         {
             "SteamMarket(A)",
@@ -32,6 +31,22 @@ namespace ItemChecker.MVVM.Model
         };
         public int ServiceOne { get; set; } = ParserProperties.Default.ServiceOne;
         public int ServiceTwo { get; set; } = ParserProperties.Default.ServiceTwo;
+
+
+        private bool _isParser;
+        public bool IsParser
+        {
+            get
+            {
+                return _isParser;
+            }
+            set
+            {
+                _isParser = value;
+                OnPropertyChanged();
+            }
+        }
+        public bool IsStoped { get; set; }
 
         public static System.Timers.Timer Timer { get; set; } = new(1000);
         public static int TimerTick { get; set; }

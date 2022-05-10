@@ -7,7 +7,6 @@ using Forms = System.Windows.Forms;
 using Model = ItemChecker.MVVM.Model;
 using ItemChecker.MVVM.ViewModel;
 using ItemChecker.MVVM.View;
-using ItemChecker.Support;
 using ItemChecker.Properties;
 
 namespace ItemChecker
@@ -113,9 +112,9 @@ namespace ItemChecker
             MessageBoxResult result = MessageBox.Show("Are you sure you want to close?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.No)
                 return;
-            if (MainWindow.DataContext is StartUpViewModel startVM)
+            else if (MainWindow.DataContext is StartUpViewModel startVM)
                 startVM.ExitCommand.Execute(null);
-            if (MainWindow.DataContext is MainViewModel mainVM)
+            else if (MainWindow.DataContext is MainViewModel mainVM)
                 mainVM.ExitCommand.Execute(null);
         }
     }

@@ -56,7 +56,7 @@ namespace ItemChecker.Services
         {
             int sell_price = (int)((item.Price * 100 - 0.01m) * Calculator.CommissionSteam);
 
-            Post.SellItem(SteamAccount.Cookies, SteamAccount.User, item.AssetId, sell_price);
+            Post.SellItem(SteamAccount.Cookies, SteamAccount.UserName, item.AssetId, sell_price);
         }
         Decimal checkPrice(string name)
         {

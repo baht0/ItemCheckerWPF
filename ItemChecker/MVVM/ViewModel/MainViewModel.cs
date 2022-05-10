@@ -107,11 +107,7 @@ namespace ItemChecker.MVVM.ViewModel
                     });
                 }
                 BaseService.GetCurrency();
-                if (!BaseModel.IsParsing && !BaseModel.IsWorking)
-                {
-                    ItemBaseService get = new();
-                    get.CreateItemsBase();
-                }
+
                 SteamAccount.GetSteamBalance();
                 if (SteamAccount.BalanceStartUp > SteamAccount.Balance)
                 {

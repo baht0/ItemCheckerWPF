@@ -22,7 +22,6 @@ namespace ItemChecker.MVVM.Model
         }
         public static string Theme { get; set; } = "Light";
         //loading
-        public static bool IsParsing { get; set; }
         public static bool IsWorking { get; set; }
         public static bool IsBrowser { get; set; }
         public static CancellationTokenSource cts { get; set; } = new();

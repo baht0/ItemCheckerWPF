@@ -199,7 +199,7 @@ namespace ItemChecker.MVVM.ViewModel
                 FloatProperties.Default.maxFloatValue_BS = settings.BattleScarred;
 
                 SettingsProperties.Default.Save();                
-            }, (obj) => !BaseModel.IsParsing & !BaseModel.IsWorking & !BaseModel.IsBrowser);
+            }, (obj) => !BaseModel.IsWorking & !BaseModel.IsBrowser);
 
         public ICommand ThemeCommand =>
             new RelayCommand((obj) =>

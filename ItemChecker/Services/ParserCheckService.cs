@@ -52,7 +52,14 @@ namespace ItemChecker.MVVM.Model
                         if (json == null)
                             break;
                         DataSteamMarket steamItem = MarketItems(json);
-                        DataSteamMarket.MarketItems.Add(steamItem);
+                        if (DataSteamMarket.MarketItems.FirstOrDefault(x => x.ItemName == steamItem.ItemName) != null)
+                        {
+                            int index = DataSteamMarket.MarketItems.FindIndex(x => x.ItemName == steamItem.ItemName);
+                            if (index != -1)
+                                DataSteamMarket.MarketItems[index] = steamItem;
+                        }
+                        else
+                            DataSteamMarket.MarketItems.Add(steamItem);
 
                         _price1 = steamItem.LowestSellOrder;
                         _price2 = steamItem.HighestBuyOrder;
@@ -113,7 +120,14 @@ namespace ItemChecker.MVVM.Model
                         if (json == null)
                             break;
                         DataSteamMarket steamItem = MarketItems(json);
-                        DataSteamMarket.MarketItems.Add(steamItem);
+                        if (DataSteamMarket.MarketItems.FirstOrDefault(x => x.ItemName == steamItem.ItemName) != null)
+                        {
+                            int index = DataSteamMarket.MarketItems.FindIndex(x => x.ItemName == steamItem.ItemName);
+                            if (index != -1)
+                                DataSteamMarket.MarketItems[index] = steamItem;
+                        }
+                        else
+                            DataSteamMarket.MarketItems.Add(steamItem);
 
                         _price3 = steamItem.LowestSellOrder;
                         _price4 = Math.Round(steamItem.HighestBuyOrder * Calculator.CommissionSteam, 2);

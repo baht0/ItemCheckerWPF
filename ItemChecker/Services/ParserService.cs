@@ -14,25 +14,13 @@ namespace ItemChecker.MVVM.Model
     public class ParserService : ItemBaseService
     {
         #region CSV
-        public void ExportCsv(ObservableCollection<DataParser> parserGrid, ICollectionView collectionView, string mode)
+        public void ExportCsv(ObservableCollection<DataParser> parserGrid, string mode)
         {
-            dynamic source = parserGrid;
-            if (collectionView.Cast<DataParser>().Count() != parserGrid.Count)
-            {
-                MessageBoxResult result = MessageBoxResult.Cancel;
-                Application.Current.Dispatcher.Invoke(() => { result = MessageBox.Show($"Export with filter applied?\n\nClick \"No\" to export the entire list.", "Question", MessageBoxButton.YesNoCancel, MessageBoxImage.Question); });
-                
-                if (result == MessageBoxResult.Cancel)
-                    return;
-                else if (result == MessageBoxResult.Yes)
-                    source = collectionView;
-            }
-
             string csv = $"{ParserStatistics.DataCurrency},{ParserProperties.Default.ServiceOne},{ParserProperties.Default.ServiceTwo}\r\n";
-            foreach (var item in source)
+            foreach (var item in parserGrid)
             {
                 string itemName = item.ItemName;
-                if (itemName.Contains(","))
+                if (itemName.Contains(','))
                     itemName = itemName.Replace(",", ";");
                 csv += $"{item.ItemType},{itemName},{item.Price1},{item.Price2},{item.Price3},{item.Price4},{item.Precent},{item.Difference},{item.Status},{item.Have}\r\n";
             }

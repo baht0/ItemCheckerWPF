@@ -67,9 +67,10 @@ namespace ItemChecker.Services
             }
             ItemBase.SkinsBase = SkinsBase;
         }
+
         public void UpdateLfmInfo()
         {
-            if (ItemBase.SkinsBase.LastOrDefault().LfmInfo.Updated.AddMinutes(20) > DateTime.Now)
+            if (ItemBase.SkinsBase.Select(x => x.LfmInfo.Updated).Max().AddMinutes(20) > DateTime.Now)
                 return;
             JArray array = JArray.Parse(Get.Request("https://loot.farm/fullprice.json"));
             foreach (JToken item in array)
@@ -98,7 +99,7 @@ namespace ItemChecker.Services
         }
         public void UpdateCsmInfo()
         {
-            if (ItemBase.SkinsBase.LastOrDefault().CsmInfo.Updated.AddMinutes(20) > DateTime.Now)
+            if (ItemBase.SkinsBase.Select(x => x.CsmInfo.Updated).Max().AddMinutes(20) > DateTime.Now)
                 return;
             JObject json = JObject.Parse(Get.Request("https://csm.auction/api/skins_base"));
             JArray unavailable = JArray.Parse(Get.Request("https://cs.money/list_unavailable?appId=730"));
@@ -123,7 +124,7 @@ namespace ItemChecker.Services
         }
         public void UpdateBuffInfo(bool isBuyOrder, int min, int max)
         {
-            if (ItemBase.SkinsBase.Select(x => x.BuffInfo.Updated).Min().AddMinutes(20) > DateTime.Now)
+            if (ItemBase.SkinsBase.Select(x => x.BuffInfo.Updated).Max().AddMinutes(20) > DateTime.Now)
                 return;
 
             while (!BuffAccount.IsLogIn())
@@ -170,7 +171,7 @@ namespace ItemChecker.Services
 
         public void LoadInventoriesCsm(ParserConfig parserConfig)
         {
-            if (DataInventoriesCsm.Items.Any() && DataInventoriesCsm.Items.LastOrDefault().Updated.AddMinutes(20) > DateTime.Now)
+            if (DataInventoriesCsm.Items.Any() && DataInventoriesCsm.Items.Select(x => x.Updated).Max().AddMinutes(20) > DateTime.Now)
                 return;
             DataInventoriesCsm.Items.Clear();
             int offset = 0;

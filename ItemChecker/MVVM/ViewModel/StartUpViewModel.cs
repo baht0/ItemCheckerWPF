@@ -127,32 +127,31 @@ namespace ItemChecker.MVVM.ViewModel
                 }
                 while (IsFirst)
                     Thread.Sleep(500);
+                BaseService.GetCurrency();
 
                 if (BaseModel.token.IsCancellationRequested)
                     return;
                 StartUp.Progress = Tuple.Create(3, "Signing In...");
                 KillProccess();
                 IsLogin = SteamAccount.IsLogIn();
-                StartUp.Progress = IsLogin ? Tuple.Create(3, "Please, Signing In...") : Tuple.Create(4, "Preparation...");
+                StartUp.Progress = IsLogin ? Tuple.Create(3, "Please, Signing In...") : Tuple.Create(4, "Get Account...");
                 while (IsLogin)
                 {
                     if (BaseModel.token.IsCancellationRequested)
                         break;
                     IsLogin = SteamAccount.Login();
-                    StartUp.Progress = IsLogin ? Tuple.Create(3, "Failed to login...") : Tuple.Create(4, "Preparation...");
+                    StartUp.Progress = IsLogin ? Tuple.Create(3, "Failed to login...") : Tuple.Create(4, "Get Account...");
                     SignUp.Code2AF = string.Empty;
                 }
-
                 if (BaseModel.token.IsCancellationRequested)
                     return;
-                ItemBaseService get = new();
-                get.CreateItemsBase();
-                BaseService.GetCurrency();
-
-                if (BaseModel.token.IsCancellationRequested)
-                    return;
-                StartUp.Progress = Tuple.Create(5, "Get Account...");
                 SteamAccount.GetSteamAccount();
+
+                if (BaseModel.token.IsCancellationRequested)
+                    return;
+                StartUp.Progress = Tuple.Create(5, "Preparation...");
+                ItemBaseService itemBase = new();
+                itemBase.CreateItemsBase();
 
                 if (BaseModel.token.IsCancellationRequested)
                     return;

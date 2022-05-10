@@ -72,7 +72,7 @@ namespace ItemChecker.MVVM.ViewModel
                 if (ParserInfo.ST)
                 {
                     ParserInfo.ItemSt = new();
-                    DataSteamMarket data = DataSteamMarket.MarketItems.Where(x => x.ItemName == value.ItemName).FirstOrDefault();
+                    DataSteamMarket data = DataSteamMarket.MarketItems.FirstOrDefault(x => x.ItemName == value.ItemName);
                     Task.Run(() => {
                         if (data != null && !data.PriceHistory.Any())
                         {
@@ -314,32 +314,36 @@ namespace ItemChecker.MVVM.ViewModel
                     else
                         Main.Message.Enqueue((object)"It is not possible to add an empty list.");
                 }));
-            }, (obj) => !BaseModel.IsParsing);
+            }, (obj) => !ParserConfig.IsParser);
         public ICommand CheckCommand =>
             new RelayCommand((obj) =>
             {
-                BaseModel.IsParsing = true;
-                ParserConfig.cts = new();
-                ParserConfig.token = ParserConfig.cts.Token;
-                Task.Run(() => {
-                    PreparationCheck((ParserConfig)obj);
-                });
-                SaveConfig((ParserConfig)obj);
-            }, (obj) => !BaseModel.IsParsing & !ParserConfig.Timer.Enabled & ParserConfig.ServiceOne != ParserConfig.ServiceTwo & /*ParserProperties.Default.CheckList.Any()*/ ParserConfig.CheckList.Any());
-        public ICommand StopCommand =>
+                if (!ParserConfig.IsParser)
+                    Task.Run(() => PreparationCheck((ParserConfig)obj, null));
+                else
+                {
+                    ParserConfig.cts.Cancel();
+                    ParserConfig.IsParser = false;
+                    ParserConfig.IsStoped = true;
+                }
+            }, (obj) => ParserConfig.ServiceOne != ParserConfig.ServiceTwo && ParserConfig.CheckList.Any());
+        public ICommand ContinueCheckCommand =>
             new RelayCommand((obj) =>
             {
-                ParserConfig.cts.Cancel();
-                ParserStatistics.CurrentProgress = ParserStatistics.MaxProgress;
-            }, (obj) => BaseModel.IsParsing);
-        void PreparationCheck(ParserConfig parserConfig)
+                Task.Run(() => PreparationCheck(ParserConfig, ParserGrid.ToList()));
+            }, (obj) => !ParserConfig.IsParser && ParserConfig.IsStoped && ParserConfig.CheckList.Any());
+        void PreparationCheck(ParserConfig parserConfig, List<DataParser> checkedList)
         {
             try
             {
-                ParserStatistics.TimerOn = true;
                 ParserStatistics.Timer = "Preparation...";
+                ParserStatistics.TimerOn = true;
+                ParserConfig.IsParser = true;
+                ParserConfig.IsStoped = false;
+                ParserConfig.cts = new();
+                ParserConfig.token = ParserConfig.cts.Token;
+                SaveConfig(parserConfig);
                 DataGrid("CheckList", parserConfig.ServiceOne, parserConfig.ServiceTwo);
-                DataSteamMarket.MarketItems.Clear();
 
                 ParserStatistics.Timer = "Create List...";
                 List<string> checkList = ParserCheckService.ApplyConfig(parserConfig);
@@ -347,9 +351,9 @@ namespace ItemChecker.MVVM.ViewModel
                 ParserStatistics.CurrentProgress = 0;
                 ParserStatistics.MaxProgress = checkList.Count;
                 if (checkList.Any())
-                    StartCheck(checkList);
+                    StartCheck(checkList, checkedList);
                 else
-                    Application.Current.Dispatcher.Invoke(() => { MessageBox.Show("Nothing found. Adjust the parameters.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning); });
+                    MessageBox.Show("Nothing found. Adjust the parameters.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
 
                 ParserGridView = CollectionViewSource.GetDefaultView(ParserGrid);
             }
@@ -362,7 +366,7 @@ namespace ItemChecker.MVVM.ViewModel
             finally
             {
                 ParserStatistics.TimerOn = false;
-                BaseModel.IsParsing = false;
+                ParserConfig.IsParser = false;
             }
         }
         void DataGrid(string mode, int serviceOne, int serviceTwo)
@@ -491,34 +495,39 @@ namespace ItemChecker.MVVM.ViewModel
 
             ParserProperties.Default.Save();
         }
-        void StartCheck(List<string> checkList)
+        void StartCheck(List<string> checkList, List<DataParser> checkedList)
         {
             if (ParserConfig.token.IsCancellationRequested)
                 return;
 
+            checkedList ??= (new());
             DateTime now = DateTime.Now;
+            int itemCount = checkList.Count - checkedList.Count;
             ParserConfig.Timer.Elapsed += (sender, e) => timerTick(checkList.Count, now);
             ParserConfig.Timer.Enabled = true;
 
             ParserCheckService checkService = new();
-            List<DataParser> checkedList = new();
             foreach (string itemName in checkList)
             {
                 try
                 {
-                    DataParser data = checkService.Check(itemName, ParserProperties.Default.ServiceOne, ParserProperties.Default.ServiceTwo);
-                    checkedList.Add(data);
+                    if (!checkedList.Any(x => x.ItemName == itemName))
+                    {
+                        DataParser data = checkService.Check(itemName, ParserProperties.Default.ServiceOne, ParserProperties.Default.ServiceTwo);
+                        checkedList.Add(data);
+                    }
                 }
                 catch (Exception exp)
                 {
-                    ParserConfig.cts.Cancel();
                     if (!exp.Message.Contains("429"))
                     {
                         BaseService.errorLog(exp);
                         BaseService.errorMessage(exp);
                     }
                     else
-                        Application.Current.Dispatcher.Invoke(() => { MessageBox.Show(exp.Message, "Parser stoped!", MessageBoxButton.OK, MessageBoxImage.Warning); });
+                        MessageBox.Show(exp.Message + "\n\nTo continue, you need to change the IP address.", "Parser stoped!", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    ParserConfig.IsStoped = true;
+                    ParserConfig.cts.Cancel();
                 }
                 finally
                 {
@@ -551,7 +560,7 @@ namespace ItemChecker.MVVM.ViewModel
                     BaseModel.IsWorking = false;
                     Main.Message.Enqueue((object)"Service inventory update completed.");
                 });
-            }, (obj) => ParserGrid.Any() & !BaseModel.IsWorking & !BaseModel.IsParsing);
+            }, (obj) => ParserGrid.Any() & !BaseModel.IsWorking & !ParserConfig.IsParser);
         //order
         public ICommand AddQueueCommand =>
             new RelayCommand((obj) =>
@@ -623,16 +632,16 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 Task.Run((Action)(() => {
                     ParserService list = new();
-                    list.ExportCsv(ParserGrid, ParserGridView, ParserStatistics.Mode);
+                    list.ExportCsv(ParserGrid, ParserStatistics.Mode);
                     Main.Message.Enqueue((object)"Export to CSV file done.");
                 }));
-            }, (obj) => ParserGrid.Any() & !BaseModel.IsParsing);
+            }, (obj) => ParserGrid.Any() & !ParserConfig.IsParser);
         public ICommand ImportCsvCommand =>
             new RelayCommand((obj) =>
             {
                 Task.Run((Action)(() =>
                 {
-                    BaseModel.IsParsing = true;
+                    ParserConfig.IsParser = true;
                     ParserService list = new();
                     ItemBaseService baseService = new();
                     ObservableCollection<DataParser> response = list.ImportCsv();
@@ -651,9 +660,9 @@ namespace ItemChecker.MVVM.ViewModel
                         ParserStatistics.Currency = ParserStatistics.DataCurrency;
                         Main.Message.Enqueue((object)"Import from CSV file done.");
                     }
-                    BaseModel.IsParsing = false;
+                    ParserConfig.IsParser = false;
                 }));
-            }, (obj) => !BaseModel.IsParsing);
+            }, (obj) => !ParserConfig.IsParser);
         //favorite
         public ICommand AddFavoriteCommand =>
             new RelayCommand((obj) =>
