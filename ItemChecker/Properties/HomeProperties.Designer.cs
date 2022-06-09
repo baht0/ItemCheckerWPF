@@ -12,7 +12,7 @@ namespace ItemChecker.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.1.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.2.0.0")]
     internal sealed partial class HomeProperties : global::System.Configuration.ApplicationSettingsBase {
         
         private static HomeProperties defaultInstance = ((HomeProperties)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new HomeProperties())));
@@ -38,48 +38,12 @@ namespace ItemChecker.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("10")]
-        public int TimeFloat {
-            get {
-                return ((int)(this["TimeFloat"]));
-            }
-            set {
-                this["TimeFloat"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("10")]
         public int Reserve {
             get {
                 return ((int)(this["Reserve"]));
             }
             set {
                 this["Reserve"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int Compare {
-            get {
-                return ((int)(this["Compare"]));
-            }
-            set {
-                this["Compare"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("7")]
-        public int MaxPrecent {
-            get {
-                return ((int)(this["MaxPrecent"]));
-            }
-            set {
-                this["MaxPrecent"] = value;
             }
         }
         
@@ -104,6 +68,54 @@ namespace ItemChecker.Properties {
             }
             set {
                 this["Unwanted"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int SellingPriceId {
+            get {
+                return ((int)(this["SellingPriceId"]));
+            }
+            set {
+                this["SellingPriceId"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int TasksId {
+            get {
+                return ((int)(this["TasksId"]));
+            }
+            set {
+                this["TasksId"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool AllAvailable {
+            get {
+                return ((bool)(this["AllAvailable"]));
+            }
+            set {
+                this["AllAvailable"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool SelectedOnly {
+            get {
+                return ((bool)(this["SelectedOnly"]));
+            }
+            set {
+                this["SelectedOnly"] = value;
             }
         }
     }

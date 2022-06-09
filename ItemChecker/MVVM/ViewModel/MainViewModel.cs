@@ -2,7 +2,6 @@
 using ItemChecker.MVVM.Model;
 using ItemChecker.Properties;
 using ItemChecker.Services;
-using ItemChecker.Support;
 using System;
 using System.Threading.Tasks;
 using System.Timers;
@@ -58,16 +57,10 @@ namespace ItemChecker.MVVM.ViewModel
             TimerInfo.Enabled = true;
             TimerWindow.Enabled = true;
         }
-        public ICommand OpenFolderCommand =>
-            new RelayCommand((obj) =>
-            {
-                Edit.OpenUrl(BaseModel.DocumentPath);
-            });
         public ICommand ExitCommand =>
             new RelayCommand((obj) =>
             {
                 Task.Run(() => {
-                    BaseModel.cts.Cancel();
                     BaseService.BrowserExit();
                 }).Wait(5000);
                 Application.Current.Shutdown();
@@ -97,21 +90,20 @@ namespace ItemChecker.MVVM.ViewModel
         {
             try
             {
-                BaseModel.StatusCommunity = BaseService.StatusSteam();
-                if (BaseModel.StatusCommunity != "normal")
+                SteamBase.StatusCommunity = BaseService.StatusSteam();
+                if (SteamBase.StatusCommunity != "normal")
                 {
-                    MainInfo.Notifications.Add(new()
+                    Main.Notifications.Add(new()
                     {
                         Title = "Steam Status",
                         Message = "There are problems with Steam servers. The program may not work correctly!"
                     });
                 }
-                BaseService.GetCurrency();
 
                 SteamAccount.GetSteamBalance();
                 if (SteamAccount.BalanceStartUp > SteamAccount.Balance)
                 {
-                    MainInfo.Notifications.Add(new()
+                    Main.Notifications.Add(new()
                     {
                         Title = "Balance",
                         Message = $"Your balance has decreased\n-{SteamAccount.BalanceStartUp - SteamAccount.Balance}."
@@ -120,7 +112,7 @@ namespace ItemChecker.MVVM.ViewModel
                 }
                 else if (SteamAccount.BalanceStartUp < SteamAccount.Balance)
                 {
-                    MainInfo.Notifications.Add(new()
+                    Main.Notifications.Add(new()
                     {
                         Title = "Balance",
                         Message = $"Your balance has increased\n+{SteamAccount.Balance - SteamAccount.BalanceStartUp}."
@@ -130,7 +122,7 @@ namespace ItemChecker.MVVM.ViewModel
             }
             catch (Exception ex)
             {
-                BaseService.errorLog(ex);
+                BaseService.errorLog(ex, false);
             }
         }
         void UpdateWindow(Object sender, ElapsedEventArgs e)
@@ -146,7 +138,7 @@ namespace ItemChecker.MVVM.ViewModel
             }
             catch (Exception ex)
             {
-                BaseService.errorLog(ex);
+                BaseService.errorLog(ex, false);
             }
         }
     }

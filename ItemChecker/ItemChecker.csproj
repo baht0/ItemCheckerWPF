@@ -6,8 +6,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>Resources\logo-taskbar.ico</ApplicationIcon>
-    <AssemblyVersion>2.0.0.2</AssemblyVersion>
-    <FileVersion>2.0.0.2</FileVersion>
+    <AssemblyVersion>2.0.1.0</AssemblyVersion>
+    <FileVersion>2.0.1.0</FileVersion>
     <Win32Resource />
   </PropertyGroup>
 
@@ -42,10 +42,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Properties\FloatProperties.Designer.cs">
+    <Compile Update="Properties\RareProperties.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
-      <DependentUpon>FloatProperties.settings</DependentUpon>
+      <DependentUpon>RareProperties.settings</DependentUpon>
     </Compile>
     <Compile Update="Properties\SettingsProperties.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -70,9 +70,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Properties\FloatProperties.settings">
+    <None Update="Properties\RareProperties.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>FloatProperties.Designer.cs</LastGenOutput>
+      <LastGenOutput>RareProperties.Designer.cs</LastGenOutput>
     </None>
     <None Update="Properties\SettingsProperties.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

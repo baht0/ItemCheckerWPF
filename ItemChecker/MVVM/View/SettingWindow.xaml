@@ -48,85 +48,13 @@
             </Grid>
             <TabControl Grid.Row="1" Style="{StaticResource MaterialDesignNavigatilRailTabControl}"
                         DataContext="{Binding Settings}">
-                <TabItem Header="General" Height="67.5">
+                <TabItem Header="General" Height="90">
                     <Grid Margin="3">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="130"/>
-                            <RowDefinition/>
+                            <RowDefinition Height="115"/>
+                            <RowDefinition Height="70"/>
                         </Grid.RowDefinitions>
-                        <GroupBox Grid.Row="0" Style="{DynamicResource None}" 
-                                  Header="General">
-                            <Grid Margin="5">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="100"/>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition Width="30"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Row="0" Grid.Column="0"
-                                           Text="Currency API Key:" Height="15"/>
-                                <TextBox Grid.Row="0" Grid.Column="1" ToolTip="API key of the currency server"
-                                         VerticalAlignment="Center" Text="{Binding CurrencyApi}"
-                                          Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
-                                <Button Grid.Row="0" Grid.Column="2" ToolTip="Open services in browser"
-                                        Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
-                                        Command="{Binding DataContext.GetCurrencyApiCommand, RelativeSource={RelativeSource AncestorType=Window}}">
-                                    <materialDesign:PackIcon Kind="OpenInNew"/>
-                                </Button>
-                                <TextBlock Grid.Row="1" Grid.Column="0"
-                                           Text="Currency:" VerticalAlignment="Center"/>
-                                <ComboBox Grid.Row="1" Grid.Column="1" VerticalAlignment="Center"
-                                          ItemsSource="{Binding CurrencyList}" ToolTip="Displaying prices in tables"
-                                          SelectedIndex="{Binding CurrencyId}"/>
-                                <CheckBox Grid.Row="2" Grid.Column="0" VerticalAlignment="Center"
-                                          Content="Quit Driver"
-                                          ToolTip="Destroy the browser after work"
-                                          IsChecked="{Binding Quit}"/>
-                            </Grid>
-                        </GroupBox>
-                        <GroupBox Grid.Row="1" Style="{DynamicResource None}" Header="Dark Theme">
-                            <Grid Margin="5">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="120"/>
-                                    <ColumnDefinition/>
-                                </Grid.ColumnDefinitions>                                
-                                <CheckBox Grid.Row="0" Content="Set hours"
-                                          ToolTip="Automatic theme change"
-                                          HorizontalAlignment="Left"
-                                          IsChecked="{Binding SetHours}">
-                                </CheckBox>
-                                <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                    <ToggleButton IsChecked="{Binding DataContext.Theme, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource ThemeToBooleanConverter}}" 
-                                                  Command="{Binding DataContext.ThemeCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                  Style="{StaticResource MaterialDesignSwitchToggleButton}"
-                                                  ToolTip="Switch Theme" IsEnabled="{Binding SetHours , Converter={StaticResource BooleanReverseConverter}}">
-                                        <materialDesign:PackIcon Kind="{Binding DataContext.Theme, RelativeSource={RelativeSource AncestorType=Window}}"/>
-                                    </ToggleButton>
-                                </StackPanel>
-                                <TextBlock Grid.Row="1" Text="Turn on:" Height="15"/>
-                                <materialDesign:TimePicker Grid.Row="1" Grid.Column="1" SelectedTime="{Binding TurnOn}"/>
-                                <TextBlock Grid.Row="2" Text="Turn off:" Height="15"/>
-                                <materialDesign:TimePicker Grid.Row="2" Grid.Column="1" SelectedTime="{Binding TurnOff}"/>
-                                </Grid>
-                        </GroupBox>
-                    </Grid>
-                </TabItem>
-                <TabItem Header="Order" Height="67.5">
-                    <Grid Margin="3">
-                        <Grid.RowDefinitions>
-                            <RowDefinition/>
-                            <RowDefinition Height="170"/>
-                        </Grid.RowDefinitions>
-                        <GroupBox Header="Order" Grid.Row="0"
+                        <GroupBox Header="Order" Grid.Row="0" Height="100"
                                   Style="{DynamicResource None}">
                             <Grid Margin="5">
                                 <Grid.RowDefinitions>
@@ -140,7 +68,7 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Min. precent:" VerticalAlignment="Center"/>
                                 <TextBox Grid.Column="1" VerticalAlignment="Center" ToolTip="Cancel order less than"
-                                             Text="{Binding MinPrecent}" PreviewTextInput="Number_PreviewTextInput"
+                                             Text="{Binding MinPrecent}" TextInput="Decimal_PreviewTextInput"
                                           Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                                 <TextBlock Grid.Column="2" Text="%" Height="15" VerticalAlignment="Center"/>
                                 <TextBlock Grid.Row="1" Text="ToService:" VerticalAlignment="Center"/>
@@ -149,10 +77,45 @@
                                           SelectedIndex="{Binding ServiceId}"/>
                             </Grid>
                         </GroupBox>
-                        <GroupBox Header="Steam Information" Grid.Row="1"
-                                  Style="{DynamicResource None}">
+                        <GroupBox Grid.Row="1" Style="{DynamicResource None}" >
+                            <GroupBox.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Theme:  "/>
+                                    <ToggleButton Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" ToolTip="Switch Theme"
+                                              IsChecked="{Binding DataContext.Theme, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource ThemeToBooleanConverter}}"
+                                              Command="{Binding DataContext.ThemeCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                              Style="{StaticResource MaterialDesignSwitchToggleButton}"
+                                              IsEnabled="{Binding SetHours, Converter={StaticResource BooleanReverseConverter}}">
+                                        <materialDesign:PackIcon Kind="{Binding DataContext.Theme, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                    </ToggleButton>
+                                </StackPanel>
+                            </GroupBox.Header>
+                            <Grid Margin="5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <CheckBox Grid.Row="1" Content="Set time"
+                                          ToolTip="Automatic dark theme change"
+                                          HorizontalAlignment="Left"
+                                          IsChecked="{Binding SetHours}">
+                                </CheckBox>
+                                <materialDesign:TimePicker Grid.Row="1" Grid.Column="1" SelectedTime="{Binding TurnOn}"/>
+                                <materialDesign:TimePicker Grid.Row="1" Grid.Column="3" SelectedTime="{Binding TurnOff}"/>
+                            </Grid>
+                        </GroupBox>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="Steam" Height="90">
+                    <Grid Margin="3">
+                        <GroupBox Header="Information" Style="{DynamicResource None}">
                             <Grid Margin="5">
                                 <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
                                     <RowDefinition/>
                                     <RowDefinition/>
                                     <RowDefinition/>
@@ -163,103 +126,45 @@
                                     <ColumnDefinition/>
                                     <ColumnDefinition Width="30"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="API Key:" Height="15"/>
-                                <TextBox Grid.Column="1" VerticalAlignment="Center" Text="{Binding SteamApiKey, UpdateSourceTrigger=PropertyChanged}"
+                                <CheckBox Content="Remember me" Grid.ColumnSpan="2" IsChecked="{Binding RememberMe}" ToolTip="Remember this account"/>
+                                <TextBlock Text="API Key:" Grid.Row="1" Height="15"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Text="{Binding SteamApiKey, UpdateSourceTrigger=PropertyChanged}"
                                           Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
-                                <Button Grid.Column="2" Height="25" ToolTip="Get API Key"
-                                Style="{StaticResource MaterialDesignToolForegroundButton}" 
-                                Command="{Binding DataContext.GetSteamApiCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
+                                <Button Grid.Row="1" Grid.Column="2" Height="25" ToolTip="Get API Key"
+                                        Style="{StaticResource MaterialDesignToolForegroundButton}" 
+                                        Command="{Binding DataContext.GetSteamApiCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
                                     <materialDesign:PackIcon Kind="OpenInNew"/>
                                 </Button>
-                                <TextBlock Grid.Row="1" Text="Account:" Height="15"/>
-                                <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Text="{Binding AccountName}"/>
-                                <Button Grid.Row="1" Grid.Column="2" Height="25" ToolTip="Logout"
+                                <TextBlock Grid.Row="2" Text="User:" Height="15"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Text="{Binding UserName}"/>
+                                <TextBlock Grid.Row="3" Text="Account:" Height="15"/>
+                                <TextBlock Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" Text="{Binding AccountName}"/>
+                                <Button Grid.Row="3" Grid.Column="2" Height="25" ToolTip="Logout"
                                             Style="{StaticResource MaterialDesignToolForegroundButton}" 
                                             Command="{Binding DataContext.LogoutCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
                                     <materialDesign:PackIcon Kind="Logout"/>
                                 </Button>
-                                <TextBlock Grid.Row="2" Text="ID64:" Height="15"/>
-                                <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Text="{Binding SteamId}"/>
-                                <Button Grid.Row="2" Grid.Column="2" Height="25" ToolTip="Copy ID"
+                                <TextBlock Grid.Row="4" Text="ID64:" Height="15"/>
+                                <TextBlock Grid.Row="4" Grid.Column="1" VerticalAlignment="Center" Text="{Binding SteamId}"/>
+                                <Button Grid.Row="4" Grid.Column="2" Height="25" ToolTip="Copy ID"
                                             Style="{StaticResource MaterialDesignToolForegroundButton}" 
                                             Command="{Binding DataContext.CopyIdCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
                                     <materialDesign:PackIcon Kind="ContentCopy"/>
                                 </Button>
-                                <TextBlock Grid.Row="3" Text="Market:" Height="15"/>
-                                <TextBlock Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" Text="{Binding SteamMarket}"/>
-                                <Button Grid.Row="3" Grid.Column="2" Height="25" ToolTip="Open FAQ"
+                                <TextBlock Grid.Row="5" Text="Market:" Height="15"/>
+                                <TextBlock Grid.Row="5" Grid.Column="1" VerticalAlignment="Center" Text="{Binding SteamMarket}"/>
+                                <Button Grid.Row="5" Grid.Column="2" Height="25" ToolTip="Open FAQ"
                                             Style="{StaticResource MaterialDesignToolForegroundButton}" 
                                             Command="{Binding DataContext.OpenMarketCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
                                     <materialDesign:PackIcon Kind="OpenInNew"/>
                                 </Button>
+                                <TextBlock Grid.Row="6" Text="Currency:" Height="15"/>
+                                <TextBlock Grid.Row="6" Grid.Column="1" VerticalAlignment="Center" Text="{Binding SteamCurrency}"/>
                             </Grid>
                         </GroupBox>
                     </Grid>
                 </TabItem>
-                <TabItem Header="Float" Height="67.5">
-                    <GroupBox Margin="3" Style="{DynamicResource None}" Header="Max. Float Value">
-                        <Grid Margin="5">
-                            <Grid.RowDefinitions>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                            </Grid.RowDefinitions>
-                            <Grid Grid.Row="0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="120"/>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition Width="20"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Factory New:" VerticalAlignment="Center"/>
-                                <TextBlock Text="0.00 – 0.07" VerticalAlignment="Bottom" FontSize="9"/>
-                                <TextBox Grid.Column="1" VerticalAlignment="Center" Text="{Binding FactoryNew}" TextInput="Decimal_PreviewTextInput" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
-                            </Grid>
-                            <Grid Grid.Row="1">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="120"/>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition Width="20"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Minimal Wear:" VerticalAlignment="Center"/>
-                                <TextBlock Text="0.07 – 0.15" VerticalAlignment="Bottom" FontSize="9"/>
-                                <TextBox Grid.Column="1" VerticalAlignment="Center" Text="{Binding MinimalWear}" TextInput="Decimal_PreviewTextInput" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
-                            </Grid>
-                            <Grid Grid.Row="2">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="120"/>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition Width="20"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Field-Tested:" VerticalAlignment="Center"/>
-                                <TextBlock Text="0.15 – 0.38" VerticalAlignment="Bottom" FontSize="9"/>
-                                <TextBox Grid.Column="1" VerticalAlignment="Center" Text="{Binding FieldTested}" TextInput="Decimal_PreviewTextInput" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
-                            </Grid>
-                            <Grid Grid.Row="3">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="120"/>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition Width="20"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Well-Worn:" VerticalAlignment="Center"/>
-                                <TextBlock Text="0.38 – 0.45" VerticalAlignment="Bottom" FontSize="9"/>
-                                <TextBox Grid.Column="1" VerticalAlignment="Center" Text="{Binding WellWorn}" TextInput="Decimal_PreviewTextInput" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
-                            </Grid>
-                            <Grid Grid.Row="4">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="120"/>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition Width="20"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Battle-Scarred:" VerticalAlignment="Center"/>
-                                <TextBlock Text="0.45 – 1.00" VerticalAlignment="Bottom" FontSize="9"/>
-                                <TextBox Grid.Column="1" VerticalAlignment="Center" Text="{Binding BattleScarred}" TextInput="Decimal_PreviewTextInput" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
-                            </Grid>
-                        </Grid>
-                    </GroupBox>
-                </TabItem>
-                <TabItem Header="About" Height="67.5">
+                <TabItem Header="About" Height="90">
                     <GroupBox Margin="3" Style="{DynamicResource None}" Header="About">
                         <Grid Margin="5">
                             <Grid.RowDefinitions>

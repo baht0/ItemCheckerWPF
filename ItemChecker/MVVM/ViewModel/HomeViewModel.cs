@@ -21,37 +21,36 @@ namespace ItemChecker.MVVM.ViewModel
         #region Properties
         System.Timers.Timer TimerView = new(500);
 
-        //DataGrid
-        private ObservableCollection<DataOrder> _orderedGrid = new(DataOrder.Orders);
-        private DataOrder _selectedOrderItem;
-        public ObservableCollection<DataOrder> OrderedGrid
+        //homeView
+        private Home _home = new();
+        public Home Home
         {
             get
             {
-                return _orderedGrid;
+                return _home;
             }
             set
             {
-                _orderedGrid = value;
+                _home = value;
                 OnPropertyChanged();
             }
         }
-        public DataOrder SelectedOrderItem
+        private HomeTable _homeTable = new();
+        public HomeTable HomeTable
         {
             get
             {
-                return _selectedOrderItem;
+                return _homeTable;
             }
             set
             {
-                _selectedOrderItem = value;
+                _homeTable = value;
                 OnPropertyChanged();
             }
         }
 
-        //services
+        //tools
         private HomePush _homePush = new();
-        private HomeFloatCheck _homeFloatCheck = new();
         public HomePush HomePush
         {
             get
@@ -64,22 +63,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        public HomeFloatCheck HomeFloatCheck
-        {
-            get
-            {
-                return _homeFloatCheck;
-            }
-            set
-            {
-                _homeFloatCheck = value;
-                OnPropertyChanged();
-            }
-        }
-        //tools
         private HomeWithdraw _homeWithdraw = new();
-        private HomeTrade _homeTrade = new();
-        private HomeSell _homeSell = new();
         public HomeWithdraw HomeWithdraw
         {
             get
@@ -92,48 +76,58 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        public HomeTrade HomeTrade
+        //inventory
+        private HomeInventory _homeInventory = new();
+        public HomeInventory HomeInventory
         {
             get
             {
-                return _homeTrade;
+                return _homeInventory;
             }
             set
             {
-                _homeTrade = value;
+                _homeInventory = value;
                 OnPropertyChanged();
             }
         }
-        public HomeSell HomeSell
+        private DataInventory _selectedInventory = new();
+        public DataInventory SelectedInventory
         {
             get
             {
-                return _homeSell;
+                return _selectedInventory;
             }
             set
             {
-                _homeSell = value;
-                OnPropertyChanged();
+                DataInventory item = value;
+                Task.Run(() =>
+                {
+                    item.CsmGive = Math.Round(SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName).Csm.Price * Calculator.CommissionCsm, 2);
+                    item.LfmGive = Math.Round(SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName).Lfm.Price * Calculator.CommissionLf, 2);
+                    ItemBaseService baseService = new();
+                    baseService.UpdateSteamInfoItem(item.ItemName);
+                    baseService.UpdateBuffInfoItem(item.ItemName);
+                    item.LowestSellOrder = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName).Steam.LowestSellOrder;
+                    item.HighestBuyOrder = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName).Steam.HighestBuyOrder;
+                    item.PriceBuff = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Price;
+                    item.BuyOrderBuff = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.BuyOrder;
+                    _selectedInventory = item;
+                    OnPropertyChanged();
+                });
+
             }
         }
         //favorite
-        private ObservableCollection<string> _favoriteList = HomeFavorite.FavoriteList;
-        private string _selectedFavItem;
-        public ObservableCollection<string> FavoriteList
+        private HomeFavorite _homeFavorite = new();
+        public HomeFavorite HomeFavorite
         {
-            get { return _favoriteList; }
-            set
+            get
             {
-                _favoriteList = value;
-                OnPropertyChanged();
+                return _homeFavorite;
             }
-        }
-        public string SelectedFavItem
-        {
-            get { return _selectedFavItem; }
             set
             {
-                _selectedFavItem = value;
+                _homeFavorite = value;
                 OnPropertyChanged();
             }
         }
@@ -148,14 +142,44 @@ namespace ItemChecker.MVVM.ViewModel
         {
             try
             {
-                FavoriteList = HomeFavorite.FavoriteList;
+                HomeFavorite.List = new(DataSavedList.Items.Where(x => x.ListName == "favorite"));
             }
             catch (Exception ex)
             {
-                BaseService.errorLog(ex);
+                BaseService.errorLog(ex, false);
             }
         }
         //table
+        public ICommand OpenItemOutCommand =>
+            new RelayCommand((obj) =>
+            {
+                var item = HomeTable.SelectedOrderItem;
+                string itemName = item.ItemName.Replace("(Holo/Foil)", "(Holo-Foil)");
+                string market_hash_name = Edit.EncodeMarketHashName(itemName);
+                switch ((Int32)obj)
+                {
+                    case 1 or 2:
+                        Edit.OpenUrl("https://steamcommunity.com/market/listings/730/" + market_hash_name);
+                        break;
+                    case 3 or 4:
+                        switch (SettingsProperties.Default.ServiceId)
+                        {
+                            case 0 or 1:
+                                Edit.OpenUrl("https://steamcommunity.com/market/listings/730/" + market_hash_name);
+                                break;
+                            case 2:
+                                Edit.OpenCsm(market_hash_name);
+                                break;
+                            case 4:
+                                Edit.OpenUrl("https://buff.163.com/goods/" + SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id);
+                                break;
+                        }
+                        break;
+                    default:
+                        Clipboard.SetText(itemName);
+                        break;
+                }
+            });
         public ICommand OrdersCommand =>
             new RelayCommand((obj) =>
             {
@@ -166,7 +190,7 @@ namespace ItemChecker.MVVM.ViewModel
                         Task.Run(() => {
                             OrderCheckService orderCheck = new();
                             orderCheck.SteamOrders(true);
-                            OrderedGrid = new ObservableCollection<DataOrder>(DataOrder.Orders);
+                            HomeTable.OrderedGrid = new ObservableCollection<DataOrder>(DataOrder.Orders);
                             BaseModel.IsWorking = false;
                             Main.Message.Enqueue("MyOrders update is complete.");
                         });
@@ -181,7 +205,7 @@ namespace ItemChecker.MVVM.ViewModel
                                 List<DataOrder> orders = new(DataOrder.Orders);
                                 foreach (DataOrder order in orders)
                                     OrderService.CancelOrder(order);
-                                OrderedGrid = new ObservableCollection<DataOrder>(DataOrder.Orders);
+                                HomeTable.OrderedGrid = new ObservableCollection<DataOrder>(DataOrder.Orders);
                                 SteamAccount.GetAvailableAmount();
                                 BaseModel.IsWorking = false;
                                 Main.Message.Enqueue("All MyOrders have been cancelled.");
@@ -200,26 +224,12 @@ namespace ItemChecker.MVVM.ViewModel
                 if (result == MessageBoxResult.Yes)
                 {
                     OrderService.CancelOrder(item);
-                    OrderedGrid = new ObservableCollection<DataOrder>(DataOrder.Orders);
+                    HomeTable.OrderedGrid = new ObservableCollection<DataOrder>(DataOrder.Orders);
                     Main.Message.Enqueue($"{item.ItemName}\nOrder has been canceled.");
                 }
             });
 
-        #region services
-        public ICommand AddFloatListCommand =>
-            new RelayCommand((obj) =>
-            {
-                Task.Run(() =>
-                {
-                    List<string> response = BaseService.OpenFileDialog("txt");
-                    if (response.Any())
-                    {
-                        HomeFloatCheck.ListCount = response.Count;
-                        HomeFloatCheck.List = response;
-                        BaseService.SaveList("FloatList", HomeFloatCheck.List);
-                    }
-                });
-            }, (obj) => !HomeFloatCheck.IsService);
+        #region tools
         public ICommand PushCommand =>
             new RelayCommand((obj) =>
             {
@@ -246,32 +256,6 @@ namespace ItemChecker.MVVM.ViewModel
                     HomePush.Timer.Elapsed -= timerPushTick;
                 }
             }, (obj) => DataOrder.Orders.Any());
-        public ICommand FloatCommand => 
-            new RelayCommand((obj) =>
-            {
-                if (!HomeFloatCheck.IsService)
-                {
-                    HomeFloatCheck.IsService = true;
-                    HomeFloatCheck config = obj as HomeFloatCheck;
-                    HomeProperties.Default.TimeFloat = config.Time;
-                    HomeProperties.Default.MaxPrecent = config.MaxPrecent;
-                    HomeProperties.Default.Compare = config.Compare;
-                    HomeProperties.Default.Save();
-
-                    HomeFloatCheck.Timer.Elapsed += timerFloatTick;
-                    HomeFloatCheck.TimerTick = config.Time * 60;
-                    HomeFloatCheck.Timer.Enabled = true;
-                }
-                else
-                {
-                    HomeFloatCheck.cts.Cancel();
-                    HomeFloatCheck.Status = "Off";
-                    HomeFloatCheck.IsService = false;
-                    HomeFloatCheck.Timer.Enabled = false;
-                    HomeFloatCheck.TimerTick = 0;
-                    HomeFloatCheck.Timer.Elapsed -= timerFloatTick;
-                }
-            }, (obj) => HomeFloatCheck.List.Any());
         void timerPushTick(Object sender, ElapsedEventArgs e)
         {
             HomePush.TimerTick--;
@@ -288,22 +272,6 @@ namespace ItemChecker.MVVM.ViewModel
                 OrderPush();
             }
         }
-        void timerFloatTick(Object sender, ElapsedEventArgs e)
-        {
-            HomeFloatCheck.TimerTick--;
-            TimeSpan timeSpan = TimeSpan.FromSeconds(HomeFloatCheck.TimerTick);
-            HomeFloatCheck.Status = timeSpan.ToString("mm':'ss");
-            if (HomeFloatCheck.TimerTick <= 0)
-            {
-                HomeFloatCheck.Status = "Preparation...";
-                HomeFloatCheck.Timer.Enabled = false;
-                HomeFloatCheck.Progress = 0;
-
-                HomeFloatCheck.cts = new();
-                HomeFloatCheck.token = HomeFloatCheck.cts.Token;
-                FloatCheck();
-            }
-        }
         void OrderPush()
         {
             try
@@ -311,8 +279,7 @@ namespace ItemChecker.MVVM.ViewModel
                 SteamAccount.GetSteamBalance();
 
                 OrderCheckService orderCheck = new();
-                bool isUpdateService = HomePush.Check % 10 == 0;
-                orderCheck.SteamOrders(isUpdateService);
+                orderCheck.SteamOrders(false);
                 OrderPushService pushOrder = new();
 
                 HomePush.Status = "Pushing...";
@@ -325,7 +292,7 @@ namespace ItemChecker.MVVM.ViewModel
                     }
                     catch (Exception exp)
                     {
-                        BaseService.errorLog(exp);
+                        BaseService.errorLog(exp, false);
                     }
                     finally
                     {
@@ -335,27 +302,23 @@ namespace ItemChecker.MVVM.ViewModel
                         break;
                 }
                 HomePush.Status = "Update...";
-                decimal availableAmount = SteamAccount.GetAvailableAmount();
-                if (HomePush.Check % 5 == 4 && availableAmount >= SteamAccount.Balance * 10 * 0.15m)
+                if (HomePush.Check % 5 == 4)//every 5 check
                 {
-                    FavoriteService favorite = new();
-                    int count = favorite.PlaceOrderFav(availableAmount);
-                    if (count > 0)
-                        Main.Notifications.Add(new()
-                        {
-                            Title = "BuyOrderPush",
-                            Message = $"{count} orders were placed in the last push.",
-                        });
+                    orderCheck.SteamOrders(true);//update service info
+                    decimal availableAmount = SteamAccount.GetAvailableAmount();
+                    if (availableAmount >= SteamAccount.Balance * 10 * 0.15m)//order fav items
+                    {
+                        FavoriteService favorite = new();
+                        favorite.PlaceOrderFav(availableAmount);
+                    }
                 }
-                orderCheck.SteamOrders(false);
-                OrderedGrid = new(DataOrder.Orders);
+                HomeTable.OrderedGrid = new(DataOrder.Orders);
                 HomePush.Check++;
             }
             catch (Exception exp)
             {
                 HomePush.cts.Cancel();
-                BaseService.errorLog(exp);
-                BaseService.errorMessage(exp);
+                BaseService.errorLog(exp, true);
             }
             finally
             {
@@ -363,50 +326,6 @@ namespace ItemChecker.MVVM.ViewModel
                 {
                     HomePush.TimerTick = HomeProperties.Default.TimePush * 60;
                     HomePush.Timer.Enabled = true;
-                }
-            }
-        }
-        void FloatCheck()
-        {
-            try
-            {
-                FloatCheckService floatCheck = new();
-                BaseService.GetCurrency();
-                SteamAccount.GetSteamBalance();
-
-                HomeFloatCheck.MaxProgress = HomeFloatCheck.List.Count;
-                HomeFloatCheck.Status = "Checking...";
-                foreach (string item in HomeFloatCheck.List)
-                {
-                    try
-                    {
-                        HomeFloatCheck.PurchasesMade += floatCheck.checkFloat(item);
-                    }
-                    catch (Exception exp)
-                    {
-                        BaseService.errorLog(exp);
-                    }
-                    finally
-                    {
-                        HomeFloatCheck.Progress++;
-                    }
-                    if (HomeFloatCheck.token.IsCancellationRequested)
-                        break;
-                }
-                HomeFloatCheck.Check++;
-            }
-            catch (Exception exp)
-            {
-                HomeFloatCheck.cts.Cancel();
-                BaseService.errorLog(exp);
-                BaseService.errorMessage(exp);
-            }
-            finally
-            {
-                if (!HomeFloatCheck.token.IsCancellationRequested)
-                {
-                    HomeFloatCheck.TimerTick = HomeProperties.Default.TimeFloat * 60;
-                    HomeFloatCheck.Timer.Enabled = true;
                 }
             }
         }
@@ -418,49 +337,9 @@ namespace ItemChecker.MVVM.ViewModel
                     case 0:
                         HomePush.TimerTick = 1;
                         break;
-                    case 1:
-                        HomeFloatCheck.TimerTick = 1;
-                        break;
 
                 }
-            }, (obj) => HomePush.IsService | HomeFloatCheck.IsService);
-        #endregion
-
-        #region tools
-        public ICommand TradeOfferCommand =>
-            new RelayCommand((obj) =>
-            {
-                if (!HomeTrade.IsService)
-                {
-                    HomeTrade.IsService = true;
-                    HomeTrade.cts = new();
-                    HomeTrade.token = HomeTrade.cts.Token;
-                    Task.Run(() => TradeOffer());
-                }
-                else
-                {
-                    HomeTrade.cts.Cancel();
-                    HomeTrade.IsService = false;
-                }
-            }, (obj) => !String.IsNullOrEmpty(SteamAccount.ApiKey));
-        public ICommand QuickSellCommand =>
-            new RelayCommand((obj) =>
-            {
-                if (!HomeSell.IsService)
-                {
-                    HomeSell.IsService = true;
-                    HomeSell.cts = new();
-                    HomeSell.token = HomeSell.cts.Token;
-                    HomeProperties.Default.MaxPrice = (int)obj;
-                    HomeProperties.Default.Save();
-                    Task.Run(() => QuickSell());
-                }
-                else
-                {
-                    HomeSell.cts.Cancel();
-                    HomeSell.IsService = false;
-                }
-            });
+            }, (obj) => HomePush.IsService);
         public ICommand WithdrawCommand =>
             new RelayCommand((obj) =>
             {
@@ -478,90 +357,6 @@ namespace ItemChecker.MVVM.ViewModel
                     HomeWithdraw.IsService = false;
                 }
             }, (obj) => !BaseModel.IsBrowser);
-        void TradeOffer()
-        {
-            try
-            {
-                TradeOfferService tradeOffer = new();
-                do
-                {
-                    HomeTrade.Progress = 0;
-                    HomeTrade.MaxProgress = DataTradeOffer.TradeOffers.Count;
-                    HomeTrade.Count += DataTradeOffer.TradeOffers.Count;
-                    foreach (DataTradeOffer offer in DataTradeOffer.TradeOffers)
-                    {
-                        try
-                        {
-                            tradeOffer.acceptTrade(offer.TradeOfferId, offer.PartnerId);
-                        }
-                        catch (Exception exp)
-                        {
-                            BaseService.errorLog(exp);
-                        }
-                        finally
-                        {
-                            HomeTrade.Progress++;
-                        }
-                        if (HomeTrade.token.IsCancellationRequested)
-                            break;
-                    }
-                }
-                while (tradeOffer.checkOffer());
-            }
-            catch (Exception exp)
-            {
-                HomeTrade.cts.Cancel();
-                BaseService.errorLog(exp);
-                BaseService.errorMessage(exp);
-            }
-            finally
-            {
-                HomeTrade.IsService = false;
-                Main.Message.Enqueue("Accept trades has finished.");
-            }
-        }
-        void QuickSell()
-        {
-            try
-            {
-                QuickSellService quickSell = new();
-                quickSell.checkInventory();
-
-                HomeSell.Progress = 0;
-                HomeSell.MaxProgress = DataSell.SellItems.Count;
-                HomeSell.Count = DataSell.SellItems.Count;
-                HomeSell.Sum = DataSell.SellItems.Sum(s => s.Price);
-                foreach (DataSell item in DataSell.SellItems)
-                {
-                    try
-                    {
-                        quickSell.sellItems(item);
-                    }
-                    catch (Exception exp)
-                    {
-                        BaseService.errorLog(exp);
-                    }
-                    finally
-                    {
-                        HomeSell.Progress++;
-                        Thread.Sleep(1500);
-                    }
-                    if (HomeSell.token.IsCancellationRequested)
-                        break;
-                }
-            }
-            catch (Exception exp)
-            {
-                HomeSell.cts.Cancel();
-                BaseService.errorLog(exp);
-                BaseService.errorMessage(exp);
-            }
-            finally
-            {
-                HomeSell.IsService = false;
-                Main.Message.Enqueue("Quick sell items has finished.");
-            }
-        }
         void Withdraw()
         {
             try
@@ -571,7 +366,7 @@ namespace ItemChecker.MVVM.ViewModel
                 bool isLogin = false;
                 do isLogin = CsmAccount.Login();
                 while (!isLogin);
-                
+
                 WithdrawService withdraw = new();
                 JArray inventory = withdraw.CheckInventory();
                 JArray items = new();
@@ -591,7 +386,7 @@ namespace ItemChecker.MVVM.ViewModel
                     }
                     catch (Exception exp)
                     {
-                        BaseService.errorLog(exp);
+                        BaseService.errorLog(exp, false);
                     }
                     finally
                     {
@@ -605,16 +400,12 @@ namespace ItemChecker.MVVM.ViewModel
             catch (Exception exp)
             {
                 HomeWithdraw.cts.Cancel();
-                BaseService.errorLog(exp);
-                BaseService.errorMessage(exp);
+                BaseService.errorLog(exp, true);
             }
             finally
             {
-                if (SettingsProperties.Default.Quit)
-                {
-                    BaseModel.Browser.Quit();
-                    BaseModel.Browser = null;
-                }
+                BaseModel.Browser.Quit();
+                BaseModel.Browser = null;
                 BaseModel.IsBrowser = false;
                 HomeWithdraw.IsService = false;
                 Main.Message.Enqueue("Withdraw has finished.");
@@ -622,49 +413,169 @@ namespace ItemChecker.MVVM.ViewModel
         }
         #endregion
 
+        //inventory
+        public ICommand UpdateInformationsCommand =>
+            new RelayCommand((obj) =>
+            {
+                BaseModel.IsWorking = true;
+                Task.Run(() =>
+                {
+                    ItemBaseService baseService = new();
+                    baseService.UpdateCsmInfo();
+                    baseService.UpdateLfmInfo();
+                    InventoryService inventoryService = new();
+                    var items = inventoryService.CheckInventory();
+                    HomeInventory.Items = new(items);
+                    Main.Message.Enqueue("MyInventory updated.");
+                    BaseModel.IsWorking = false;
+                });
+            }, (obj) => !BaseModel.IsWorking);
+        public ICommand InventoryTaskCommand =>
+            new RelayCommand((obj) =>
+            {
+                if (!HomeInventory.IsService)
+                {
+                    var config = (HomeInventory)obj;
+                    HomeInventory.IsService = true;
+                    HomeInventory.cts = new();
+                    HomeInventory.token = HomeInventory.cts.Token;
+
+                    HomeProperties.Default.AllAvailable = config.AllAvailable;
+                    HomeProperties.Default.SelectedOnly = config.SelectedOnly;
+                    HomeProperties.Default.MaxPrice = config.MaxPrice;
+                    HomeProperties.Default.SellingPriceId = config.SellingPriceId;
+                    HomeProperties.Default.TasksId = config.TasksId;
+                    HomeProperties.Default.Save();
+                    switch (config.TasksId)
+                    {
+                        case 0:
+                            if (!String.IsNullOrEmpty(SteamAccount.ApiKey))
+                                Task.Run(() => TradeOffer());
+                            break;
+                        case 1:
+                            if (config.SelectedOnly && SelectedInventory == null)
+                            {
+                                HomeInventory.cts.Cancel();
+                                HomeInventory.IsService = false;
+                                break;
+                            }
+                            DataInventory selected = SelectedInventory;
+                            Task.Run(() => QuickSell(selected));
+                            break;
+                    }
+                }
+                else
+                {
+                    HomeInventory.cts.Cancel();
+                    HomeInventory.IsService = false;
+                }
+            });
+        void TradeOffer()
+        {
+            try
+            {
+                InventoryService tradeOffer = new();
+                do
+                {
+                    HomeInventory.Progress = 0;
+                    HomeInventory.MaxProgress = DataTradeOffer.Offers.Count;
+                    HomeInventory.Count += DataTradeOffer.Offers.Count;
+                    foreach (DataTradeOffer offer in DataTradeOffer.Offers)
+                    {
+                        try
+                        {
+                            tradeOffer.AcceptTrade(offer.TradeOfferId, offer.PartnerId);
+                        }
+                        catch (Exception exp)
+                        {
+                            BaseService.errorLog(exp, false);
+                        }
+                        finally
+                        {
+                            HomeInventory.Progress++;
+                        }
+                        if (HomeInventory.token.IsCancellationRequested)
+                            break;
+                    }
+                }
+                while (tradeOffer.CheckOffer());
+            }
+            catch (Exception exp)
+            {
+                HomeInventory.cts.Cancel();
+                BaseService.errorLog(exp, true);
+            }
+            finally
+            {
+                HomeInventory.IsService = false;
+                Main.Message.Enqueue("Accept trades has finished.");
+            }
+        }
+        void QuickSell(DataInventory selected)
+        {
+            try
+            {
+                InventoryService quickSell = new();
+                List<DataInventory> items = quickSell.CheckInventory();
+
+                HomeInventory.Items = new(items);
+                HomeInventory.Progress = 0;
+                HomeInventory.MaxProgress = items.Count;
+                HomeInventory.Count = items.Count;
+                decimal sum = HomeProperties.Default.SellingPriceId == 0 ? items.Sum(s => s.LowestSellOrder) : items.Sum(s => s.HighestBuyOrder);
+                HomeInventory.Sum = Math.Round(sum * Calculator.CommissionSteam, 2);
+                foreach (var item in items)
+                {
+                    try
+                    {
+                        if (HomeProperties.Default.SelectedOnly && selected.ItemName != item.ItemName)
+                            continue;
+                        quickSell.SellItem(item);
+                    }
+                    catch (Exception exp)
+                    {
+                        BaseService.errorLog(exp, false);
+                    }
+                    finally
+                    {
+                        HomeInventory.Progress++;
+                        Thread.Sleep(1500);
+                    }
+                    if (HomeInventory.token.IsCancellationRequested)
+                        break;
+                }
+            }
+            catch (Exception exp)
+            {
+                HomeInventory.cts.Cancel();
+                BaseService.errorLog(exp, true);
+            }
+            finally
+            {
+                HomeInventory.IsService = false;
+                Main.Message.Enqueue("Quick sell items has finished.");
+            }
+        }
+
         #region Favorite
         public ICommand ClearFavListCommand =>
             new RelayCommand((obj) =>
             {
-                MessageBoxResult result = MessageBox.Show(
-                    "Are you sure you want to clear the list?",
-                    "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                MessageBoxResult result = MessageBox.Show( "Are you sure you want to clear the list?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result == MessageBoxResult.Yes)
-                {
-                    Application.Current.Dispatcher.Invoke(() => {
-                        HomeFavorite.FavoriteList.Clear();
-                    });
-                    BaseService.SaveList("FavoriteList", HomeFavorite.FavoriteList.ToList());
-                }
-            }, (obj) => HomeFavorite.FavoriteList.Any());
-        public ICommand ExportFavCommand =>
-            new RelayCommand((obj) =>
-            {
-                FavoriteService.ExportTxt(HomeFavorite.FavoriteList);
-            }, (obj) => HomeFavorite.FavoriteList.Any());
-        public ICommand ImportFavCommand =>
-            new RelayCommand((obj) =>
-            {
-                ObservableCollection<string> list = new(BaseService.OpenFileDialog("txt"));
-                if (list.Any() && list.Count <= 200)
-                {
-                    HomeFavorite.FavoriteList = list;
-                    BaseService.SaveList("FavoriteList", HomeFavorite.FavoriteList.ToList());
-                }
-                else if (list.Count > 200)
-                    Main.Message.Enqueue("Limit. The maximum is only 200!");
-            });
+                    DataSavedList.Clear("favorite");
+
+            }, (obj) => DataSavedList.Items.Any(x => x.ListName == "favorite"));
         public ICommand RemoveFavoriteCommand =>
             new RelayCommand((obj) =>
             {
-                string itemName = (string)obj;
-                if (!String.IsNullOrEmpty(itemName))
-                {
-                    HomeFavorite.FavoriteList.Remove(itemName);
-                    Main.Message.Enqueue($"{itemName}\nRemoved from list.");
-                    BaseService.SaveList("FavoriteList", HomeFavorite.FavoriteList.ToList());
-                }
-            }, (obj) => HomeFavorite.FavoriteList.Any() && !String.IsNullOrEmpty(SelectedFavItem));
+                var item = (DataSavedList)obj;
+
+                DataSavedList.Items.Remove(item);
+                Main.Message.Enqueue($"{item.ItemName}\nRemoved from list.");
+                DataSavedList.Save();
+
+            }, (obj) => DataSavedList.Items.Any() && HomeFavorite.SelectedItem != null);
         #endregion
     }
 }

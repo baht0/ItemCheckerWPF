@@ -16,11 +16,11 @@ namespace ItemChecker
     /// </summary>
     public partial class App : Application
     {
-        private readonly Forms.NotifyIcon notifyIcon;
+        private readonly Forms.NotifyIcon notifyIcon = new();
 
         public App()
         {
-            notifyIcon = new();
+
         }
         public ResourceDictionary ThemeDictionary => Resources.MergedDictionaries[0];
 
@@ -36,14 +36,14 @@ namespace ItemChecker
             var turnOff = now.Date + SettingsProperties.Default.TurnOff.TimeOfDay;
             bool dark = turnOn < now & now < turnOff.AddDays(1);
             bool light = turnOn > now & now > turnOff;
-            if (dark & Model.BaseModel.Theme == "Light")
+            if (dark & Model.ProjectInfo.Theme == "Light")
             {
-                Model.BaseModel.Theme = "Dark";
+                Model.ProjectInfo.Theme = "Dark";
                 ChangeTheme(new("/Themes/Dark.xaml", UriKind.RelativeOrAbsolute));
             }
-            if (light & Model.BaseModel.Theme == "Dark")
+            if (light & Model.ProjectInfo.Theme == "Dark")
             {
-                Model.BaseModel.Theme = "Light";
+                Model.ProjectInfo.Theme = "Light";
                 ChangeTheme(new("/Themes/Light.xaml", UriKind.RelativeOrAbsolute));
             }
         }
@@ -52,6 +52,7 @@ namespace ItemChecker
             RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
 
             notifyIcon.Icon = new Icon(@"icon.ico");
+            notifyIcon.Text = "ItemChecker";
             notifyIcon.MouseDoubleClick += notifyIconMouseDoubleClick;
 
             notifyIcon.ContextMenuStrip = new();
@@ -69,11 +70,11 @@ namespace ItemChecker
                 switch (SettingsProperties.Default.Theme)
                 {
                     case "Light":
-                        Model.BaseModel.Theme = "Light";
+                        Model.ProjectInfo.Theme = "Light";
                         ChangeTheme(new("/Themes/Light.xaml", UriKind.RelativeOrAbsolute));
                         break;
                     case "Dark":
-                        Model.BaseModel.Theme = "Dark";
+                        Model.ProjectInfo.Theme = "Dark";
                         ChangeTheme(new("/Themes/Dark.xaml", UriKind.RelativeOrAbsolute));
                         break;
                 }

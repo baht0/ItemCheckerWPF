@@ -10,11 +10,14 @@ namespace ItemChecker.MVVM.View
     {
         HomeViewModel homeViewModel = new();
         ParserViewModel parserViewModel = new();
+        RareViewModel rareViewModel = new();
+
         public MainWindow()
         {
             InitializeComponent();
             DataContext = new MainViewModel();
             bodyContent.Content = homeViewModel;
+            Home.IsEnabled = false;
         }
         private void Window_DragMove(object sender, MouseButtonEventArgs e)
         {
@@ -37,25 +40,34 @@ namespace ItemChecker.MVVM.View
         private void Home_Click(object sender, RoutedEventArgs e)
         {
             if (bodyContent.Content != homeViewModel)
+            {
                 bodyContent.Content = homeViewModel;
+                Home.IsEnabled = false;
+                Parser.IsEnabled = true;
+                Rare.IsEnabled = true;
+            }
         }
         private void Parser_Click(object sender, RoutedEventArgs e)
         {
             if (bodyContent.Content != parserViewModel)
-                bodyContent.Content = parserViewModel;
-        }
-
-        private void Image_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ChangedButton == MouseButton.Left)
             {
-                Image rectangle = sender as Image;
-                ContextMenu contextMenu = rectangle.ContextMenu;
-                contextMenu.PlacementTarget = rectangle;
-                contextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
-                contextMenu.IsOpen = true;
+                bodyContent.Content = parserViewModel;
+                Home.IsEnabled = true;
+                Parser.IsEnabled = false;
+                Rare.IsEnabled = true;
             }
         }
+        private void Rare_Click(object sender, RoutedEventArgs e)
+        {
+            if (bodyContent.Content != rareViewModel)
+            {
+                bodyContent.Content = rareViewModel;
+                Home.IsEnabled = true;
+                Parser.IsEnabled = true;
+                Rare.IsEnabled = false;
+            }
+        }
+
         private void Calculator_Click(object sender, RoutedEventArgs e)
         {
             PopupCalculator.IsOpen = true;
@@ -70,6 +82,23 @@ namespace ItemChecker.MVVM.View
             setting.ShowDialog();
         }
 
+        private void Image_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                Image rectangle = sender as Image;
+                ContextMenu contextMenu = rectangle.ContextMenu;
+                contextMenu.PlacementTarget = rectangle;
+                contextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+                contextMenu.IsOpen = true;
+            }
+        }
+        private void Exit_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult result = MessageBox.Show("Are you sure you want to close?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes && DataContext is MainViewModel viewModel && viewModel.ExitCommand.CanExecute(null))
+                viewModel.ExitCommand.Execute(null);
+        }
         private void CSM_MenuItem_Click(object sender, RoutedEventArgs e)
         {
             Edit.OpenUrl("https://cs.money/");

@@ -15,7 +15,7 @@ namespace ItemChecker.MVVM.ViewModel
     public class SettingViewModel : ObservableObject
     {
         SnackbarMessageQueue _message = new();
-        private string _theme = BaseModel.Theme == "Light" ? "WhiteBalanceSunny" : "WeatherNight";
+        private string _theme = ProjectInfo.Theme == "Light" ? "WhiteBalanceSunny" : "WeatherNight";
         private Settings _settings = new();
         private SettingsAbout _about = new();
 
@@ -99,9 +99,12 @@ namespace ItemChecker.MVVM.ViewModel
                 MessageBoxResult result = MessageBox.Show("Are you sure you want to logout?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result == MessageBoxResult.No)
                     return;
-                SettingsProperties.Default.SteamLoginSecure = string.Empty;
+                StartUpProperties.Default.SteamLoginSecure = string.Empty;
+                StartUpProperties.Default.SteamCurrencyId = 0;
+                StartUpProperties.Default.SessionBuff = string.Empty;
+                StartUpProperties.Default.Remember = false;
 
-                string profilesDir = BaseModel.AppPath + "Profile";
+                string profilesDir = ProjectInfo.AppPath + "Profile";
                 if (!Directory.Exists(profilesDir))
                     Directory.Delete(profilesDir);
 
@@ -140,7 +143,7 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 BaseModel.IsWorking = true;
                 Task.Run(() => {
-                    bool status = ProjectInfoService.CreateCurrentVersion();
+                    bool status = ProjectInfoService.UploadCurrentVersion();
                     string mess = status ? "File upload was successful." : "Something went wrong...";
                     Message.Enqueue(mess);
                     BaseModel.IsWorking = false;
@@ -158,12 +161,6 @@ namespace ItemChecker.MVVM.ViewModel
                 Settings settings = obj as Settings;
 
                 Task.Run(() => {
-                    if (Net.Get.Currency(settings.CurrencyApi, "RUB") == 0)
-                    {
-                        MessageBox.Show(
-                            "The \"CurrencyApi\" you provided is not working!", "Error",
-                            MessageBoxButton.OK, MessageBoxImage.Stop);
-                    }
                     string steamApi = Services.BaseService.StatusSteam();
                     if (steamApi == "error")
                     {
@@ -179,46 +176,43 @@ namespace ItemChecker.MVVM.ViewModel
                         });
                 });
 
-                Theme = BaseModel.Theme == "Light" ? "WhiteBalanceSunny" : "WeatherNight";
+                Theme = ProjectInfo.Theme == "Light" ? "WhiteBalanceSunny" : "WeatherNight";
 
-                SettingsProperties.Default.CurrencyApiKey = settings.CurrencyApi;
-                SettingsProperties.Default.CurrencyId = settings.CurrencyId;
-                SettingsProperties.Default.Quit = settings.Quit;
                 SettingsProperties.Default.SetHours = settings.SetHours;
                 SettingsProperties.Default.TurnOn = settings.TurnOn;
                 SettingsProperties.Default.TurnOff = settings.TurnOff;
 
                 SettingsProperties.Default.MinPrecent = settings.MinPrecent;
                 SettingsProperties.Default.ServiceId = settings.ServiceId;
+
+                StartUpProperties.Default.Remember = settings.RememberMe;
                 SteamAccount.ApiKey = settings.SteamApiKey;
 
-                FloatProperties.Default.maxFloatValue_FN = settings.FactoryNew;
-                FloatProperties.Default.maxFloatValue_MW = settings.MinimalWear;
-                FloatProperties.Default.maxFloatValue_FT = settings.FieldTested;
-                FloatProperties.Default.maxFloatValue_WW = settings.WellWorn;
-                FloatProperties.Default.maxFloatValue_BS = settings.BattleScarred;
+                if (!settings.RememberMe)
+                    StartUpProperties.Default.SteamLoginSecure = string.Empty;
 
-                SettingsProperties.Default.Save();                
-            }, (obj) => !BaseModel.IsWorking & !BaseModel.IsBrowser);
+                SettingsProperties.Default.Save();
+                StartUpProperties.Default.Save();
+            }, (obj) => !BaseModel.IsWorking);
 
         public ICommand ThemeCommand =>
             new RelayCommand((obj) =>
             {
                 SettingsProperties.Default.SetHours = false;
                 App app = (App)Application.Current;
-                if (BaseModel.Theme == "Light")
+                if (ProjectInfo.Theme == "Light")
                 {
                     Theme = "WeatherNight";
                     app.ChangeTheme(new("/Themes/Dark.xaml", UriKind.RelativeOrAbsolute));
-                    BaseModel.Theme = "Dark";
+                    ProjectInfo.Theme = "Dark";
                 }
-                else if (BaseModel.Theme == "Dark")
+                else if (ProjectInfo.Theme == "Dark")
                 {
                     Theme = "WhiteBalanceSunny";
                     app.ChangeTheme(new("/Themes/Light.xaml", UriKind.RelativeOrAbsolute));
-                    BaseModel.Theme = "Light";
+                    ProjectInfo.Theme = "Light";
                 }
-                SettingsProperties.Default.Theme = BaseModel.Theme;
+                SettingsProperties.Default.Theme = ProjectInfo.Theme;
                 SettingsProperties.Default.Save();
             });
     }

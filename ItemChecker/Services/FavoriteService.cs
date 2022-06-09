@@ -1,10 +1,7 @@
 ﻿using ItemChecker.MVVM.Model;
 using ItemChecker.Properties;
-using ItemChecker.Support;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Windows;
 
@@ -12,90 +9,74 @@ namespace ItemChecker.Services
 {
     public class FavoriteService : BaseService
     {
-        #region file
-        public static ObservableCollection<string> ReadFavoriteList()
+        public void PlaceOrderFav(decimal availableAmount)
         {
-            try
-            {
-                string path = DocumentPath + "FavoriteList";
-                List<string> list = new();
-
-                if (File.Exists(path))
-                    list = File.ReadAllLines(path).ToList();
-                return new(list);
-            }
-            catch (Exception ex)
-            {
-                return new();
-            }
-        }
-        public static void ExportTxt(ObservableCollection<string> FavoriteList)
-        {
-            string txt = string.Empty;
-            foreach (string item in FavoriteList)
-                txt += $"{item}\r\n";
-
-            string path = DocumentPath + "extract";
-            if (!Directory.Exists(path))
-                Directory.CreateDirectory(path);
-            File.WriteAllText(path + $"FavoriteList_{DateTime.Now:dd.MM.yyyy_hh.mm}.txt", Edit.replaceSymbols(txt));
-        }
-        #endregion
-
-        public Int32 PlaceOrderFav(decimal availableAmount)
-        {
-            ObservableCollection<QueueData> checkedList = Check();
-            checkedList = new ObservableCollection<QueueData>(checkedList.OrderByDescending(x => x.Precent));
+            ObservableCollection<DataQueue> checkedList = new(Check().OrderByDescending(x => x.Precent));
             int count = 0;
             decimal sum = 0m;
-            foreach (var item in checkedList)
+            foreach (DataQueue item in checkedList)
             {
-                if (HomePush.token.IsCancellationRequested)
-                    break;
                 try
                 {
                     sum += item.OrderPrice;
                     if (sum > availableAmount)
-                        break;
-                    Queue.PlaceOrder(item.ItemName);
+                        continue;
+                    ParserQueue.PlaceOrder(item.ItemName);
                     count++;
                 }
                 catch (Exception exp)
                 {
-                    BaseService.errorLog(exp);
+                    BaseService.errorLog(exp, false);
                     continue;
                 }
-            }
-            return count;
-        }
-        ObservableCollection<QueueData> Check()
-        {
-            ParserCheckService checkService = new();
-            ObservableCollection<QueueData> checkedList = new();
-
-            foreach (string itemName in HomeFavorite.FavoriteList)
-            {
+                finally
+                {
+                    if (item.Precent < SettingsProperties.Default.MinPrecent && HomeProperties.Default.Unwanted)
+                    {
+                        DataSavedList data = DataSavedList.Items.FirstOrDefault(x => x.ItemName == item.ItemName);
+                        DataSavedList.Items.Remove(data);
+                        DataSavedList.Save();
+                    }
+                }
                 if (HomePush.token.IsCancellationRequested)
                     break;
+            }
+            Main.Notifications.Add(new()
+            {
+                Title = "BuyOrderPush",
+                Message = $"{count} orders were placed in the last push.",
+            });
+        }
+        ObservableCollection<DataQueue> Check()
+        {
+            ParserCheckService checkService = new();
+            ObservableCollection<DataQueue> checkedList = new();
+
+            foreach (DataSavedList item in DataSavedList.Items.Where(x => x.ListName == "favorite" && x.ServiceId == SettingsProperties.Default.ServiceId))
+            {
                 try
                 {
-                    DataParser data = checkService.Check(itemName, 0, SettingsProperties.Default.ServiceId);
-                    if (data.Precent >= SettingsProperties.Default.MinPrecent + HomeProperties.Default.Reserve)
-                        checkedList = Queue.AddQueue(checkedList, data);
-                    else if (data.Precent < SettingsProperties.Default.MinPrecent && HomeProperties.Default.Unwanted)
-                        HomeFavorite.FavoriteList.Remove(itemName);
+                    DataParser parseredItem = checkService.Check(item.ItemName, 0, SettingsProperties.Default.ServiceId);
+                    if (parseredItem.Precent >= SettingsProperties.Default.MinPrecent + HomeProperties.Default.Reserve && !ParserQueue.CheckConditions(checkedList, parseredItem))
+                    {
+                        checkedList.Add(new()
+                        {
+                            ItemName = parseredItem.ItemName,
+                            OrderPrice = parseredItem.Price2,
+                            Precent = parseredItem.Precent
+                        });
+                    }
                 }
                 catch (Exception exp)
                 {
                     HomePush.cts.Cancel();
                     if (!exp.Message.Contains("429"))
-                    {
-                        BaseService.errorLog(exp);
-                        BaseService.errorMessage(exp);
-                    }
+                        BaseService.errorLog(exp, true);
                     else
-                        MessageBox.Show(exp.Message, "Parser stoped!", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        MessageBox.Show(exp.Message, "PlaceOrder stoped!", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
+                if (HomePush.token.IsCancellationRequested)
+                    break;
             }
             return checkedList;
         }

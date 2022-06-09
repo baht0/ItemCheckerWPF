@@ -26,10 +26,20 @@ namespace ItemChecker.MVVM.Model
 
         public static Boolean AllowUser(string login)
         {
-            JArray users = JArray.Parse(Post.DropboxRead("Users.json"));
-            var user = users.FirstOrDefault(x => x["Login"].ToString() == login);
+            JArray users = JArray.Parse(Get.DropboxRead("Users.json"));
+            JObject user = (JObject)users.FirstOrDefault(x => x["Login"].ToString() == login);
+            if (user != null)
+            {
+                int id = users.IndexOf(user);
+                users[id]["LastLoggedIn"] = DateTime.Now;
+                users[id]["Version"] = DataProjectInfo.CurrentVersion;
 
-            return user != null && Convert.ToBoolean(user["Status"]);
+                Post.DropboxDelete("Users.json");
+                Thread.Sleep(200);
+                Post.DropboxUpload("Users.json", users.ToString());
+                return Convert.ToBoolean(user["Allowed"]);
+            }
+            return false;
         }
     }
     public class SteamAccount : BaseModel
@@ -39,35 +49,36 @@ namespace ItemChecker.MVVM.Model
         public static string AccountName { get; set; } = string.Empty;
         public static string UserName { get; set; } = string.Empty;
         public static string SteamMarket { get; set; } = "Enabled";
-        public static decimal Balance { get; set; } = 0.00m;
-        public static decimal BalanceUsd { get; set; } = 0.00m;
-        public static decimal BalanceStartUp { get; set; } = 0.00m;
+        public static int CurrencyId { get; set; } = 5;
+        public static decimal Balance { get; set; }
+        public static decimal BalanceStartUp { get; set; }
         public static string ApiKey { get; set; } = string.Empty;
 
         public static Boolean IsLogIn()
         {
-            bool isLogin = true;
+            bool showLogin = true;
             string url = "https://steamcommunity.com/login/home/?goto=my/profile";
-            System.Net.Cookie steamSessionId = Get.SteamSessionId();
-            string steamLoginSecure = SettingsProperties.Default.SteamLoginSecure.Replace("\r\n", "").Trim();
+            string steamLoginSecure = StartUpProperties.Default.SteamLoginSecure.Replace("\r\n", "").Trim();
+
             if (!String.IsNullOrEmpty(steamLoginSecure))
             {
+                System.Net.Cookie steamSessionId = Get.SteamSessionId();
                 SteamAccount.Cookies.Add(steamSessionId);
                 SteamAccount.Cookies.Add(new System.Net.Cookie("steamLoginSecure", steamLoginSecure, "/", "steamcommunity.com"));
                 string html = Get.Request(SteamAccount.Cookies, url);
                 HtmlDocument htmlDoc = new();
                 htmlDoc.LoadHtml(html);
                 string title = htmlDoc.DocumentNode.SelectSingleNode("html/head/title").InnerText;
-                isLogin = title.Contains("Sign In");
+                showLogin = title.Contains("Sign In");
             }
-            if (isLogin)
+            if (showLogin || !StartUpProperties.Default.BrowserRemember)
             {
                 if (Browser == null)
                     BaseService.OpenBrowser();
                 Browser.Navigate().GoToUrl(url);
-                isLogin = !Browser.Url.Contains("id") & !Browser.Url.Contains("profiles") ? true : GetCookies();
+                showLogin = !Browser.Url.Contains("id") & !Browser.Url.Contains("profiles") ? true : GetCookies();
             }
-            return isLogin;
+            return showLogin;
         }
         public static Boolean Login()
         {
@@ -81,8 +92,14 @@ namespace ItemChecker.MVVM.Model
                 {
                     IWebElement remember = WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@name='remember_login']")));
                     remember.Click();
+                    StartUpProperties.Default.BrowserRemember = true;
+                    StartUpProperties.Default.Save();
                 }
-                catch { }
+                catch
+                {
+                    StartUpProperties.Default.BrowserRemember = false;
+                    StartUpProperties.Default.Save();
+                }
                 IWebElement signin = WebDriverWait.Until(e => e.FindElement(By.XPath("//button[@class='btn_blue_steamui btn_medium login_btn']")));
 
                 while (!SteamSignUp.SignUp.IsLoggedIn)
@@ -115,24 +132,31 @@ namespace ItemChecker.MVVM.Model
             {
                 System.Net.Cookie steamSessionId = Get.SteamSessionId();
                 string steamLoginSecure = Browser.Manage().Cookies.GetCookieNamed("steamLoginSecure").Value.ToString();
+
+                CurrencyId = StartUpProperties.Default.SteamCurrencyId;
+                if (CurrencyId == 0)
+                {
+                    string country = Browser.Manage().Cookies.GetCookieNamed("steamCountry").Value.ToString()[..2];
+                    var currency = SteamBase.CurrencyList.FirstOrDefault(x => x.Country == country);
+                    CurrencyId = currency != null ? currency.Id : 1;
+                    StartUpProperties.Default.SteamCurrencyId = CurrencyId;
+                }
+
                 SteamAccount.Cookies = new();
                 SteamAccount.Cookies.Add(steamSessionId);
                 SteamAccount.Cookies.Add(new System.Net.Cookie("steamLoginSecure", steamLoginSecure, "/", "steamcommunity.com"));
 
                 if (StartUpProperties.Default.Remember)
-                {
-                    SettingsProperties.Default.SteamLoginSecure = steamLoginSecure;
-                    SettingsProperties.Default.Save();
-                }
-                if (SettingsProperties.Default.Quit)
-                {
-                    Browser.Quit();
-                    Browser = null;
-                }
+                    StartUpProperties.Default.SteamLoginSecure = steamLoginSecure;
+
+                StartUpProperties.Default.Save();
+                Browser.Quit();
+                Browser = null;
                 return false;
             }
-            catch
+            catch (Exception ex)
             {
+                BaseService.errorLog(ex, false);
                 return true;
             }
         }
@@ -145,21 +169,20 @@ namespace ItemChecker.MVVM.Model
             HtmlDocument htmlDoc = new();
             htmlDoc.LoadHtml(html);
             Balance = Edit.GetPrice(htmlDoc.DocumentNode.SelectSingleNode("//a[@id='header_wallet_balance']").InnerText);
-            BalanceUsd = Math.Round(Balance / SettingsProperties.Default.RUB, 2);
             UserName = htmlDoc.DocumentNode.SelectSingleNode("//span[@id='account_pulldown']").InnerText.Trim();
             AccountName = htmlDoc.DocumentNode.SelectSingleNode("//span[@class='persona online']").InnerText.Trim();
             if (!SteamSignUp.AllowUser(AccountName))
             {
-                MessageBox.Show("User is not found.", "Opps...", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("User is not found.\n\nContact your administrator.", "Opps...", MessageBoxButton.OK, MessageBoxImage.Information);
                 Application.Current.Dispatcher.Invoke(() => {
-                    if (Application.Current.MainWindow.DataContext is StartUpViewModel startVM)
-                        startVM.ExitCommand.Execute(null);
+                    if (Application.Current.MainWindow.DataContext is StartUpViewModel vw)
+                        vw.ExitCommand.Execute(null);
                 });
             }
 
             var nodes = htmlDoc.DocumentNode.Descendants().Where(n => n.Attributes.Any(a => a.Value.Contains("market_headertip_container market_headertip_container_warning")));
             GetSteamApiKey();
-            BaseModel.StatusCommunity = BaseService.StatusSteam();
+            SteamBase.StatusCommunity = BaseService.StatusSteam();
         }
         public static void GetSteamBalance()
         {
@@ -167,7 +190,6 @@ namespace ItemChecker.MVVM.Model
             var htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(html);
             Balance = Edit.GetPrice(htmlDoc.DocumentNode.SelectSingleNode("//a[@id='header_wallet_balance']").InnerText);
-            BalanceUsd = Math.Round(Balance / SettingsProperties.Default.RUB, 2);
             BalanceStartUp = Balance;
         }
         static void GetSteamApiKey()
@@ -204,7 +226,6 @@ namespace ItemChecker.MVVM.Model
     public class CsmAccount
     {
         public static decimal Balance { get; set; } = 0.00m;
-        public static decimal BalanceUsd { get; set; } = 0.00m;
 
         public static Boolean Login()
         {
@@ -231,6 +252,14 @@ namespace ItemChecker.MVVM.Model
             }
             catch
             {
+                if (!StartUpProperties.Default.BrowserRemember)
+                {
+                    MessageBox.Show("You need to sign in to your Steam account again.\n\nRestart the program. The program will close.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Application.Current.Dispatcher.Invoke(() => {
+                        if (Application.Current.MainWindow.DataContext is MainViewModel vw)
+                            vw.ExitCommand.Execute(null);
+                    });
+                }
                 return false;
             }
         }
@@ -240,12 +269,11 @@ namespace ItemChecker.MVVM.Model
             {
                 BaseModel.Browser.Navigate().GoToUrl("https://cs.money/personal-info/");
                 IWebElement balance = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//span[@class='styles_price__1m7op TradeBalance_balance__2Hxq3']/span")));
-                BalanceUsd = Edit.GetPrice(balance.GetAttribute("textContent"));
-                Balance = Math.Round(BalanceUsd * SettingsProperties.Default.RUB, 2);
+                Balance = Edit.GetPrice(balance.GetAttribute("textContent"));
             }
             catch (Exception exp)
             {
-                BaseService.errorLog(exp);
+                BaseService.errorLog(exp, false);
             }
         }
     }
@@ -255,20 +283,18 @@ namespace ItemChecker.MVVM.Model
 
         public static Boolean IsLogIn()
         {
-            string session = SettingsProperties.Default.SessionBuff;
-            Cookies.Add(new System.Net.Cookie("session", session, "/", "buff.163.com"));
-            string html = Get.Request(SteamAccount.Cookies, "https://buff.163.com/api/market/goods?game=csgo&page_num=2&use_suggestion=0&trigger=undefined_trigger&page_size=80");
+            Cookies.Add(new System.Net.Cookie("session", StartUpProperties.Default.SessionBuff, "/", "buff.163.com"));
+            string html = Get.Request(Cookies, "https://buff.163.com/api/market/goods?game=csgo&page_num=2&use_suggestion=0&trigger=undefined_trigger&page_size=80");
 
             if (html.Contains("Login Required"))
             {
                 if (BaseModel.Browser == null)
                     BaseService.OpenBrowser();
 
-                BaseModel.Browser.Navigate().GoToUrl("https://buff.163.com/user-center/asset/recharge/");
+                BaseModel.Browser.Navigate().GoToUrl("https://buff.163.com/user-center/asset/recharge/"); 
                 if (BaseModel.Browser.Title == "Login")
                 {
                     BaseModel.Browser.Navigate().GoToUrl("https://buff.163.com/account/login/steam?back_url=/market/csgo");
-
                     IWebElement signins = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@class='btn_green_white_innerfade']")));
                     signins.Click();
                     Thread.Sleep(500);
@@ -284,17 +310,22 @@ namespace ItemChecker.MVVM.Model
                 string session = BaseModel.Browser.Manage().Cookies.GetCookieNamed("session").Value.ToString();
                 Cookies = new();
                 Cookies.Add(new System.Net.Cookie("session", session, "/", "buff.163.com"));
-                SettingsProperties.Default.SessionBuff = session;
-                SettingsProperties.Default.Save();
-                if (SettingsProperties.Default.Quit)
-                {
-                    BaseModel.Browser.Quit();
-                    BaseModel.Browser = null;
-                }
+                StartUpProperties.Default.SessionBuff = session;
+                StartUpProperties.Default.Save();
+                BaseModel.Browser.Quit();
+                BaseModel.Browser = null;
                 return true;
             }
             catch
             {
+                if (!StartUpProperties.Default.BrowserRemember)
+                {
+                    MessageBox.Show("You need to sign in to your Steam account again.\n\nRestart the program. The program will close.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Application.Current.Dispatcher.Invoke(() => {
+                        if (Application.Current.MainWindow.DataContext is MainViewModel vw)
+                            vw.ExitCommand.Execute(null);
+                    });
+                }
                 return false;
             }
         }

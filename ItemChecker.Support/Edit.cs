@@ -26,7 +26,7 @@ namespace ItemChecker.Support
 
             return itemName;
         }
-        public static String MarketHashName(string name)
+        public static String EncodeMarketHashName(string name)
         {
             name = name.Replace("★", "%E2%98%85");
             name = name.Replace("™", "%E2%84%A2");
@@ -34,6 +34,17 @@ namespace ItemChecker.Support
             name = name.Replace("|", "%7C");
             name = name.Replace("(", "%28");
             name = name.Replace(")", "%29");
+
+            return name;
+        }
+        public static String DecodeMarketHashName(string name)
+        {
+            name = name.Replace("%E2%98%85", "★");
+            name = name.Replace("%E2%84%A2", "™");
+            name = name.Replace("%20", " ");
+            name = name.Replace("%7C", "|");
+            name = name.Replace("%28", "(");
+            name = name.Replace("%29", ")");
 
             return name;
         }
@@ -70,7 +81,7 @@ namespace ItemChecker.Support
 
             return Convert.ToDecimal(str, CultureInfo.InvariantCulture);
         }
-        public static String removeDoppler(string itemName)
+        public static String RemoveDoppler(string itemName)
         {
             if (itemName.Contains("★") & itemName.Contains("Doppler"))
             {
@@ -84,13 +95,6 @@ namespace ItemChecker.Support
                 itemName = itemName.Replace(" Emerald", string.Empty);
             }
             return itemName;
-        }
-
-        public static String replaceSymbols(string str)
-        {
-            str = str.Replace("â„¢", "™");
-            str = str.Replace("â˜…", "★");
-            return str;
         }
 
         public static Decimal ConverterFromUsd(decimal value, decimal currency)

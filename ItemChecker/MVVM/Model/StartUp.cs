@@ -1,11 +1,15 @@
 ﻿using ItemChecker.Core;
 using MaterialDesignThemes.Wpf;
 using System;
+using System.Threading;
 
 namespace ItemChecker.MVVM.Model
 {
     public class StartUp : ObservableObject
     {
+        public static CancellationTokenSource cts { get; set; } = new();
+        public static CancellationToken token { get; set; } = cts.Token;
+
         bool _isUpdate = DataProjectInfo.IsUpdate;
         string _version = DataProjectInfo.CurrentVersion;
         SnackbarMessageQueue _mess = new();

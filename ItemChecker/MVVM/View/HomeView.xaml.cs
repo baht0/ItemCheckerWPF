@@ -1,7 +1,4 @@
 ﻿using ItemChecker.MVVM.ViewModel;
-using ItemChecker.Support;
-using System.Reflection;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
@@ -29,7 +26,7 @@ namespace ItemChecker.MVVM.View
             {
                 HomeViewModel viewModel = (HomeViewModel)DataContext;
                 if (e.Key == Key.Back && viewModel.CancelOrderCommand.CanExecute(null))
-                    viewModel.CancelOrderCommand.Execute(viewModel.SelectedOrderItem);
+                    viewModel.CancelOrderCommand.Execute(viewModel.HomeTable.SelectedOrderItem);
             }
         }
         private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -37,24 +34,9 @@ namespace ItemChecker.MVVM.View
             object item = ordersGrid.CurrentItem;
             if (!ordersGrid.Items.IsEmpty && item != null)
             {
-                PropertyInfo info = item.GetType().GetProperty("ItemName");
-                string ItemName = (string)info.GetValue(item, null);
-                ItemName = ItemName.Replace("(Holo/Foil)", "(Holo-Foil)");
-                string market_has_name = Edit.MarketHashName(ItemName);
-
                 int columnIndex = ordersGrid.CurrentColumn.DisplayIndex;
-                switch (columnIndex)
-                {
-                    case 1 or 2:
-                        Edit.OpenUrl("https://steamcommunity.com/market/listings/730/" + market_has_name);
-                        break;
-                    case 3 or 4:
-                        Edit.OpenCsm(market_has_name);
-                        break;
-                    default:
-                        Clipboard.SetText(ItemName);
-                        break;
-                }
+                if (DataContext is HomeViewModel viewModel && viewModel.OpenItemOutCommand.CanExecute(null))
+                    viewModel.OpenItemOutCommand.Execute(columnIndex);
             }
         }
         private void TimerPush_PreviewMouseDown(object sender, MouseButtonEventArgs e)
@@ -63,11 +45,10 @@ namespace ItemChecker.MVVM.View
             if (viewModel.TimerCommand.CanExecute(null))
                 viewModel.TimerCommand.Execute(0);
         }
-        private void TimerFloat_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+
+        private void inventComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            HomeViewModel viewModel = (HomeViewModel)DataContext;
-            if (viewModel.TimerCommand.CanExecute(null))
-                viewModel.TimerCommand.Execute(1);
+            sellGroup.IsEnabled = invenTasks.SelectedIndex == 1;
         }
     }
 }

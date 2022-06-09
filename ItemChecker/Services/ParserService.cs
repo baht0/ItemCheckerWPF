@@ -1,86 +1,70 @@
 ﻿using ItemChecker.Properties;
 using ItemChecker.Services;
-using ItemChecker.Support;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Windows;
 
 namespace ItemChecker.MVVM.Model
 {
     public class ParserService : ItemBaseService
     {
-        #region CSV
-        public void ExportCsv(ObservableCollection<DataParser> parserGrid, string mode)
+        public void Export(List<DataParser> parserGrid, ParserCheckConfig parserConfig)
         {
-            string csv = $"{ParserStatistics.DataCurrency},{ParserProperties.Default.ServiceOne},{ParserProperties.Default.ServiceTwo}\r\n";
-            foreach (var item in parserGrid)
-            {
-                string itemName = item.ItemName;
-                if (itemName.Contains(','))
-                    itemName = itemName.Replace(",", ";");
-                csv += $"{item.ItemType},{itemName},{item.Price1},{item.Price2},{item.Price3},{item.Price4},{item.Precent},{item.Difference},{item.Status},{item.Have}\r\n";
-            }
+            string items = JsonConvert.SerializeObject(parserGrid, Formatting.Indented);
+            JObject json = new(
+                new JProperty("Size", parserGrid.Count),
+                new JProperty("ParserCheckConfig", JObject.FromObject(parserConfig)),
+                new JProperty("Items", JArray.Parse(items)));
 
-            //write
-            string path = DocumentPath + "extract";
+            string path = ProjectInfo.DocumentPath + "extract\\";
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
-            File.WriteAllText(path + $"Parser_{mode}_{ParserStatistics.DataCurrency}_{DateTime.Now:dd.MM.yyyy_hh.mm}.csv", Edit.replaceSymbols(csv));
+            File.WriteAllText(path + $"Parser_{parserConfig.CheckedTime:dd.MM_hh.mm}_{parserConfig.ServiceOne}{parserConfig.ServiceTwo}.json", json.ToString());
         }
-        public ObservableCollection<DataParser> ImportCsv()
+        public List<DataParser> Import()
         {
-            List<string> list = OpenFileDialog("csv");
-            ObservableCollection<DataParser> datas = new();
-            if (!list.Any())
-                return datas;
+            string file = OpenFileDialog("json");
+            if (String.IsNullOrEmpty(file))
+                return new();
+            JObject json = JObject.Parse(file);
 
-            foreach (string info in list)
-            {
-                string[] line = info.Split(',');
-                if (line.Length == 3)
+            ParserProperties.Default.ServiceOne = Convert.ToInt32(json["Service1"]);
+            ParserProperties.Default.ServiceTwo = Convert.ToInt32(json["Service2"]);
+            ParserCheckConfig.CheckedConfig = json["ParserCheckConfig"].ToObject<ParserCheckConfig>();
+
+            List<DataParser> data = JsonConvert.DeserializeObject<List<DataParser>>(json["Items"].ToString());
+
+            if (ParserCheckConfig.CheckedConfig.ServiceOne < 2 || ParserCheckConfig.CheckedConfig.ServiceTwo < 2)// with comision
+                foreach (var item in data)
                 {
-                    ParserStatistics.DataCurrency = line[0].ToString();
-                    ParserProperties.Default.ServiceOne = int.Parse(line[1]);
-                    ParserProperties.Default.ServiceTwo = int.Parse(line[2]);
-                    continue;
+                    var itemBase = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName).Steam;
+                    if (ParserCheckConfig.CheckedConfig.ServiceOne < 2)
+                    {
+                        itemBase.LowestSellOrder = item.Price1;
+                        itemBase.HighestBuyOrder = item.Price2;
+                    }
+                    if (ParserCheckConfig.CheckedConfig.ServiceTwo < 2)
+                    {
+                        itemBase.LowestSellOrder = item.Price3;
+                        itemBase.HighestBuyOrder = item.Price4;
+                    }
                 }
 
-                string itemName = line[1];
-                if (itemName.Contains(','))
-                    itemName = itemName.Replace(";", ",");
-
-                datas.Add(
-                    new DataParser(
-                        line[0],
-                        itemName,
-                        decimal.Parse(line[2]),
-                        decimal.Parse(line[3]),
-                        decimal.Parse(line[4]),
-                        decimal.Parse(line[5]),
-                        decimal.Parse(line[6]),
-                        decimal.Parse(line[7]),
-                        line[8],
-                        bool.Parse(line[9])
-                        )
-                    );
-            }
-
-            return datas;
+            return data;
         }
-        #endregion
 
         public static bool ApplyFilter(ParserFilter filterConfig, DataParser item)
         {
+            var baseItem = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName);
             //category
             bool category = true;
             if (filterConfig.Normal || filterConfig.Stattrak || filterConfig.Souvenir || filterConfig.KnifeGlove || filterConfig.KnifeGloveStattrak)
             {
                 category = false;
-                if (item.ItemType == "Weapon" || item.ItemType == "Knife" || item.ItemType == "Gloves")
+                if (baseItem.Type == "Weapon" || baseItem.Type == "Knife" || baseItem.Type == "Gloves")
                 {
                     if (filterConfig.Normal)
                         category = !item.ItemName.Contains("Souvenir") && !item.ItemName.Contains("StatTrak™") && !item.ItemName.Contains("★");
@@ -94,19 +78,14 @@ namespace ItemChecker.MVVM.Model
                         category = item.ItemName.Contains("★ StatTrak™");
                 }
             }
-            //status
-            bool status = true;
-            if (filterConfig.Tradable || filterConfig.Ordered || filterConfig.Overstock || filterConfig.Unavailable)
+            //other
+            bool other = true;
+            if (filterConfig.Have || filterConfig.SelectedWeapon != "Any")
             {
-                status = false;
-                if (filterConfig.Tradable)
-                    status = item.Status.Contains("Tradable");
-                if (filterConfig.Ordered && !status)
-                    status = item.Status.Contains("Ordered");
-                if (filterConfig.Overstock && !status)
-                    status = item.Status.Contains("Overstock");
-                if (filterConfig.Unavailable && !status)
-                    status = item.Status.Contains("Unavailable");
+                if (filterConfig.Have)
+                    other = item.Have;
+                if (filterConfig.SelectedWeapon != "Any" && other)
+                    other = item.ItemName.Contains(filterConfig.SelectedWeapon);
             }
             //exterior
             bool exterior = true;
@@ -119,7 +98,7 @@ namespace ItemChecker.MVVM.Model
                         !item.ItemName.Contains("Field-Tested") &&
                         !item.ItemName.Contains("Minimal Wear") &&
                         !item.ItemName.Contains("Factory New") &&
-                        item.ItemType.Contains("KnifeGlove");
+                        baseItem.Type.Contains("KnifeGlove");
                 if (filterConfig.BattleScarred && !exterior)
                     exterior = item.ItemName.Contains("Battle-Scarred");
                 if (filterConfig.WellWorn && !exterior)
@@ -136,7 +115,7 @@ namespace ItemChecker.MVVM.Model
             if (filterConfig.Industrial || filterConfig.MilSpec || filterConfig.Restricted || filterConfig.Classified || filterConfig.Covert || filterConfig.Contraband)
             {
                 quality = false;
-                string Quality = ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item.ItemName).Quality;
+                string Quality = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName).Quality;
                 if (filterConfig.Industrial)
                     quality = Quality == "Industrial Grade";
                 if (filterConfig.MilSpec && !quality)
@@ -156,33 +135,33 @@ namespace ItemChecker.MVVM.Model
             {
                 types = false;
                 if (filterConfig.Weapon)
-                    types = item.ItemType == "Weapon";
+                    types = baseItem.Type == "Weapon";
                 if (filterConfig.Knife && !types)
-                    types = item.ItemType == "Knife";
+                    types = baseItem.Type == "Knife";
                 if (filterConfig.Gloves && !types)
-                    types = item.ItemType == "Gloves";
+                    types = baseItem.Type == "Gloves";
                 if (filterConfig.Agent && !types)
-                    types = item.ItemType == "Agent";
+                    types = baseItem.Type == "Agent";
                 if (filterConfig.Capsule && !types)
-                    types = item.ItemType.Contains("Capsule");
+                    types = baseItem.Type.Contains("Capsule");
                 if (filterConfig.Sticker && !types)
-                    types = item.ItemType == "Sticker";
+                    types = baseItem.Type == "Sticker";
                 if (filterConfig.Patch && !types)
-                    types = item.ItemType == "Patch";
+                    types = baseItem.Type == "Patch";
                 if (filterConfig.Collectible && !types)
-                    types = item.ItemType == "Collectable";
+                    types = baseItem.Type == "Collectable";
                 if (filterConfig.Key && !types)
-                    types = item.ItemType == "Key";
+                    types = baseItem.Type == "Key";
                 if (filterConfig.Pass && !types)
-                    types = item.ItemType == "Pass";
+                    types = baseItem.Type == "Pass";
                 if (filterConfig.MusicKit && !types)
-                    types = item.ItemType == "Music Kit";
+                    types = baseItem.Type == "Music Kit";
                 if (filterConfig.Graffiti && !types)
-                    types = item.ItemType == "Graffiti";
+                    types = baseItem.Type == "Graffiti";
                 if (filterConfig.Case && !types)
-                    types = item.ItemType == "Skin Case";
+                    types = baseItem.Type == "Skin Case";
                 if (filterConfig.Package && !types)
-                    types = item.ItemType.Contains("Package");
+                    types = baseItem.Type.Contains("Package");
             }
             //Prices
             bool prices = true;
@@ -197,28 +176,21 @@ namespace ItemChecker.MVVM.Model
                 if (filterConfig.Price4 && prices)
                     prices = filterConfig.Price4From < item.Price4 && filterConfig.Price4To > item.Price4;
             }
-            //other
-            bool other = true;
-            if (filterConfig.PrecentFrom != 0 || filterConfig.PrecentTo != 0 || filterConfig.DifferenceFrom != 0 || filterConfig.DifferenceTo != 0 || filterConfig.Hide100 || filterConfig.Hide0 || filterConfig.Have)
+            //profit
+            bool profit = true;
+            if (filterConfig.PrecentFrom != 0 || filterConfig.PrecentTo != 0 || filterConfig.DifferenceFrom != 0 || filterConfig.DifferenceTo != 0)
             {
                 if (filterConfig.PrecentFrom != 0)
-                    other = filterConfig.PrecentFrom < item.Precent;
-                if (filterConfig.PrecentTo != 0 && other)
-                    other = filterConfig.PrecentTo > item.Precent;
-                if (filterConfig.DifferenceFrom != 0 && other)
-                    other = filterConfig.DifferenceFrom < item.Difference;
-                if (filterConfig.DifferenceTo != 0 && other)
-                    other = filterConfig.DifferenceTo > item.Difference;
-
-                if (filterConfig.Hide100 && other)
-                    other = item.Precent != -100;
-                if (filterConfig.Hide0 && other)
-                    other = item.Precent != 0;
-                if (filterConfig.Have && other)
-                    other = item.Have;
+                    profit = filterConfig.PrecentFrom < item.Precent;
+                if (filterConfig.PrecentTo != 0 && profit)
+                    profit = filterConfig.PrecentTo > item.Precent;
+                if (filterConfig.DifferenceFrom != 0 && profit)
+                    profit = filterConfig.DifferenceFrom < item.Difference;
+                if (filterConfig.DifferenceTo != 0 && profit)
+                    profit = filterConfig.DifferenceTo > item.Difference;
             }
 
-            bool isShow = category && status && exterior && quality && types && prices && other;
+            bool isShow = category && other && exterior && quality && types && prices && profit;
             return isShow;
         }
     }

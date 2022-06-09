@@ -24,15 +24,9 @@ namespace ItemChecker.MVVM.View
         {
             this.Close();
         }
-        private void Number_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-            int result;
-            e.Handled = !int.TryParse(e.Text, out result);
-        }
         private void Decimal_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            decimal result;
-            e.Handled = !decimal.TryParse(e.Text, out result);
+            e.Handled = !decimal.TryParse(e.Text, out decimal result);
         }
         private void String_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {

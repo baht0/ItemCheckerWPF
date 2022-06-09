@@ -12,7 +12,7 @@ namespace ItemChecker.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.1.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.2.0.0")]
     internal sealed partial class SettingsProperties : global::System.Configuration.ApplicationSettingsBase {
         
         private static SettingsProperties defaultInstance = ((SettingsProperties)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new SettingsProperties())));
@@ -20,90 +20,6 @@ namespace ItemChecker.Properties {
         public static SettingsProperties Default {
             get {
                 return defaultInstance;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string SteamLoginSecure {
-            get {
-                return ((string)(this["SteamLoginSecure"]));
-            }
-            set {
-                this["SteamLoginSecure"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string SessionBuff {
-            get {
-                return ((string)(this["SessionBuff"]));
-            }
-            set {
-                this["SessionBuff"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public decimal RUB {
-            get {
-                return ((decimal)(this["RUB"]));
-            }
-            set {
-                this["RUB"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public decimal CNY {
-            get {
-                return ((decimal)(this["CNY"]));
-            }
-            set {
-                this["CNY"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string CurrencyApiKey {
-            get {
-                return ((string)(this["CurrencyApiKey"]));
-            }
-            set {
-                this["CurrencyApiKey"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int CurrencyId {
-            get {
-                return ((int)(this["CurrencyId"]));
-            }
-            set {
-                this["CurrencyId"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool Quit {
-            get {
-                return ((bool)(this["Quit"]));
-            }
-            set {
-                this["Quit"] = value;
             }
         }
         
@@ -169,7 +85,7 @@ namespace ItemChecker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2")]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
         public int ServiceId {
             get {
                 return ((int)(this["ServiceId"]));

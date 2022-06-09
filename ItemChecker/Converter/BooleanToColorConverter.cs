@@ -11,7 +11,7 @@ namespace ItemChecker.Converter
         {
             if (!(bool)value)
             {
-                switch (BaseModel.Theme)
+                switch (ProjectInfo.Theme)
                 {
                     case "Light":
                         return "Black";
@@ -26,7 +26,7 @@ namespace ItemChecker.Converter
         {
             if (!(bool)value)
             {
-                switch (BaseModel.Theme)
+                switch (ProjectInfo.Theme)
                 {
                     case "Light":
                         return "Black";

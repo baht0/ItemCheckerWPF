@@ -1,6 +1,5 @@
 ﻿using ItemChecker.MVVM.Model;
 using ItemChecker.Net;
-using ItemChecker.Properties;
 using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
 using OpenQA.Selenium.Edge;
@@ -18,12 +17,29 @@ namespace ItemChecker.Services
     {
         public static void GetCurrency()
         {
-            decimal rub = Get.Currency(SettingsProperties.Default.CurrencyApiKey, "RUB");
-            SettingsProperties.Default.RUB = rub != 0 ? rub : SettingsProperties.Default.RUB;
-            decimal cny = Get.Currency(SettingsProperties.Default.CurrencyApiKey, "CNY");
-            SettingsProperties.Default.CNY = cny != 0 ? cny : SettingsProperties.Default.CNY;
+            int item_nameid = 1548540; //StatTrak™ AK-47 | Fire Serpent (Field-Tested)
+            string url = "https://steamcommunity.com/market/itemordershistogram?country=RU&language=english&currency=1&item_nameid=" + item_nameid + "&two_factor=0";
+            decimal price_usd = Convert.ToDecimal(JObject.Parse(Get.Request(url))["highest_buy_order"]);
 
-            SettingsProperties.Default.Save();
+            JObject json = JObject.Parse(Get.DropboxRead("steamBase.json"));
+            List<Currency> currencies = JArray.Parse(json["Currency"].ToString()).ToObject<List<Currency>>();
+
+            List<int> allowCurrencyId = new() { 1, 5, 23 };//steamCurrencies ID
+            foreach (var currency in currencies)
+            {
+                if (allowCurrencyId.Any(x=> x == currency.Id))
+                {
+                    SteamBase.CurrencyList.Add(new()
+                    {
+                        Id = currency.Id,
+                        Code = currency.Code,
+                        Country = currency.Country,
+                        Symbol = currency.Symbol,
+                        Name = $"{currency.Code} ({currency.Symbol})",
+                        Value = Get.CurrencySteam(currency.Id, item_nameid, price_usd),
+                    });
+                }
+            }
         }
         public static String StatusSteam()
         {
@@ -42,7 +58,7 @@ namespace ItemChecker.Services
 
         public static void OpenBrowser()
         {
-            string profilesDir = DocumentPath + "profile";
+            string profilesDir = ProjectInfo.DocumentPath + "profile";
 
             if (!Directory.Exists(profilesDir))
                 Directory.CreateDirectory(profilesDir);
@@ -51,6 +67,8 @@ namespace ItemChecker.Services
             edgeDriverService.HideCommandPromptWindow = true;
             EdgeOptions option = new();
             option.AddArguments(
+                $"--user-data-dir={profilesDir}",
+                "profile-directory=Default",
                 "--headless",
                 "--disable-gpu",
                 "no-sandbox",
@@ -59,7 +77,6 @@ namespace ItemChecker.Services
                 "--disable-blink-features=AutomationControlled",
                 "ignore-certificate-errors");
 
-            option.AddArguments($"--user-data-dir={profilesDir}", "profile-directory=Default");
             option.Proxy = null;
 
             Browser = new EdgeDriver(edgeDriverService, option, TimeSpan.FromSeconds(30));
@@ -94,62 +111,41 @@ namespace ItemChecker.Services
             }
         }
 
-        public static void errorLog(Exception exp)
-        {
-            string message = null;
-            message += exp.Message + "\n";
-            message += exp.StackTrace;
-            if (!File.Exists("errorsLog.txt"))
-                File.WriteAllText(DocumentPath + "ErrorsLog.txt", "v." + DataProjectInfo.CurrentVersion + " [" + DateTime.Now + "]\n" + message + "\n");
-            else
-                File.WriteAllText(DocumentPath + "ErrorsLog.txt", string.Format("{0}{1}", "v." + DataProjectInfo.CurrentVersion + " [" + DateTime.Now + "]\n" + message + "\n", File.ReadAllText("ErrorsLog.txt")));
-        }
-        public static void errorMessage(Exception exp)
-        {
-            Application.Current.Dispatcher.Invoke(() => { MessageBox.Show("Something went wrong :(", "Error", MessageBoxButton.OK, MessageBoxImage.Error); });
-        }
-
-        #region file
-        public static List<string> OpenFileDialog(string filter)
-        {
-            List<string> itemList = new();
-            OpenFileDialog dialog = new()
-            {
-                InitialDirectory = DocumentPath,
-                RestoreDirectory = true,
-                Filter = $"ItemsList ({filter}) | *.{filter}"
-            };
-
-            if (dialog.ShowDialog() == true)
-                itemList = File.ReadAllLines(dialog.FileName).ToList();
-
-            return itemList;
-        }
-        public static List<string> ReadList(string name)
+        public static void errorLog(Exception exp, bool isShow)
         {
             try
             {
-                string path = DocumentPath + name;
-                List<string> list = new();
+                string info = $"v.{DataProjectInfo.CurrentVersion} [{DateTime.Now}] {exp.Message}\n{exp.StackTrace}\n";
+                string file = String.IsNullOrEmpty(SteamAccount.AccountName) ? "NoAccountName.txt" : $"{SteamAccount.AccountName}.txt";
+                JObject json = Post.DropboxListFolder($"ErrorLogs");
+                JArray usersLog = JArray.Parse(json["entries"].ToString());
+                if (usersLog.Any(x => x["name"].ToString() == file))
+                {
+                    string read = Get.DropboxRead($"ErrorLogs/{file}");
+                    info = string.Format("{0}{1}", info, read);
+                    Post.DropboxDelete($"ErrorLogs/{file}");
+                }
+                Post.DropboxUpload($"ErrorLogs/{file}", info);
 
-                if (File.Exists(path))
-                    list = File.ReadAllLines(path).ToList();
-                return list;
+                if (isShow)
+                    MessageBox.Show($"Something went wrong :(\n\n{exp.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            catch (Exception ex)
+            catch
             {
-                errorLog(ex);
-                return new();
+                MessageBox.Show($"Error saving logs.\n\n{exp.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        public static void SaveList(string name, List<string> list)
-        {
-            string str = string.Empty;
-            foreach (string item in list)
-                str += item + "\r\n";
 
-            File.WriteAllText(DocumentPath + name, str);
+        public static String OpenFileDialog(string filter)
+        {
+            OpenFileDialog dialog = new()
+            {
+                InitialDirectory = ProjectInfo.DocumentPath,
+                RestoreDirectory = true,
+                Filter = $"File | *.{filter}"
+            };
+
+            return dialog.ShowDialog() == true ? File.ReadAllText(dialog.FileName) : string.Empty;
         }
-        #endregion
     }
 }

@@ -25,9 +25,9 @@
             <Grid Grid.Row="0" Background="Transparent" MouseLeftButtonDown="Window_DragMove">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="What's New" VerticalAlignment="Center" />
-                    <ComboBox x:Name="ListUpdates" Width="120" Margin="10 0 0 0" VerticalAlignment="Center" ItemsSource="{Binding ListUpdates}"
+                    <ComboBox x:Name="ListUpdates" Width="80" Margin="10 0 0 0" VerticalAlignment="Center" ItemsSource="{Binding Versions}"
                               SelectionChanged="ComboBox_SelectionChanged"
-                              SelectedIndex="0"/>
+                              SelectedItem="{Binding SelectedVersion}" ScrollViewer.VerticalScrollBarVisibility="Hidden"/>
                 </StackPanel>
                 <Button Height="25" HorizontalAlignment="Right" Margin="0 0 -10 0" Style="{StaticResource MaterialDesignFlatButton}" Click="Button_Close">
                     <materialDesign:PackIcon Kind="Close"/>
@@ -43,7 +43,7 @@
                 </RichTextBox.Document>
             </RichTextBox>
             <TextBlock Grid.Row="2" 
-                   Text="{Binding CurrentVersion, StringFormat='CurrentVersion: {0}'}"
+                   Text="{Binding Released, StringFormat='Released: {0:dd.MM.yyyy}'}"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Center"
                        FontSize="10" Foreground="#FF7E7E7E"/>

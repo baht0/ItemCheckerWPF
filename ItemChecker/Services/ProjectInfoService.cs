@@ -8,18 +8,21 @@ using ItemChecker.Services;
 using Newtonsoft.Json.Linq;
 using System.Threading;
 using Newtonsoft.Json;
+using System.Linq;
 
 namespace ItemChecker.MVVM.Model
 {
-    public class ProjectInfoService : BaseService
+    public class ProjectInfoService : ProjectInfo
     {
         public static void AppCheck()
         {
-            if (StartUpProperties.Default.completionUpdate)
+            if (!Directory.Exists(DocumentPath))
+                Directory.CreateDirectory(DocumentPath);
+            if (StartUpProperties.Default.CompletionUpdate)
             {
-                if (Directory.Exists(BaseModel.AppPath + "\\update\\ItemChecker"))
+                if (Directory.Exists(AppPath + "\\update\\ItemChecker"))
                 {
-                    DirectoryInfo info = new(BaseModel.AppPath + "\\update\\ItemChecker");
+                    DirectoryInfo info = new(AppPath + "\\update\\ItemChecker");
                     FileInfo[] Files = info.GetFiles();
                     foreach (FileInfo file in Files)
                     {
@@ -34,18 +37,19 @@ namespace ItemChecker.MVVM.Model
                 SettingsProperties.Default.Upgrade();
                 HomeProperties.Default.Upgrade();
                 ParserProperties.Default.Upgrade();
-                FloatProperties.Default.Upgrade();
+                RareProperties.Default.Upgrade();
+                StartUpProperties.Default.Upgrade();
 
-                StartUpProperties.Default.completionUpdate = false;
+                StartUpProperties.Default.CompletionUpdate = false;
                 StartUpProperties.Default.Save();
             }
             CheckUpdate();
         }
         public static void CheckUpdate()
         {
-            JObject json = JObject.Parse(Post.DropboxRead("Updates/Version.json"));
+            JArray json = JArray.Parse(Get.DropboxRead("Updates.json"));
 
-            DataProjectInfo.LatestVersion = (string)json["LatestVersion"];
+            DataProjectInfo.LatestVersion = (string)(json.LastOrDefault()["version"]);
             int latest = Convert.ToInt32(DataProjectInfo.LatestVersion.Replace(".", string.Empty));
             int current = Convert.ToInt32(DataProjectInfo.CurrentVersion.Replace(".", string.Empty));
             DataProjectInfo.IsUpdate = latest > current;
@@ -66,36 +70,47 @@ namespace ItemChecker.MVVM.Model
             updater.Arguments = "1";
             Process.Start(updater);
 
-            BrowserExit();
+            BaseService.BrowserExit();
             Application.Current.Shutdown();
         }
 
-        public static Boolean CreateCurrentVersion()
+        public static Boolean UploadCurrentVersion()
         {
             try
             {
-                Post.DropboxDelete("ItemChecker");
-                Thread.Sleep(200);
-                Post.DropboxFolder("ItemChecker");
-                foreach (var file in DataProjectInfo.FilesList)
+                string text = BaseService.OpenFileDialog("txt");
+                if (!String.IsNullOrEmpty(text))
                 {
+                    //upload file
+                    Post.DropboxDelete("ItemChecker");
                     Thread.Sleep(200);
-                    Post.DropboxUploadFile("ItemChecker/" + file, AppPath + file);
+                    Post.DropboxFolder("ItemChecker");
+                    foreach (var file in DataProjectInfo.FilesList)
+                    {
+                        Thread.Sleep(200);
+                        Post.DropboxUploadFile("ItemChecker/" + file, AppPath + file);
+                    }
+                    //ver file
+                    JArray json = JArray.Parse(Get.DropboxRead("Updates.json"));
+                    var obj = json.FirstOrDefault(x => (string)x["version"] == DataProjectInfo.CurrentVersion);
+                    if (obj != null)
+                        json.Remove(obj);
+                    json.Add(new JObject(
+                                    new JProperty("date", DateTime.Now),
+                                    new JProperty("version", DataProjectInfo.CurrentVersion),
+                                    new JProperty("text", text)));
+                    json = new JArray(json.OrderBy(obj => (DateTime)obj["date"]));
+                    Post.DropboxDelete("Updates.json");
+                    Thread.Sleep(200);
+                    Post.DropboxUpload("Updates.json", json.ToString());
+
+                    return true;
                 }
-                JObject json = new(
-                    new JProperty("LatestVersion", DataProjectInfo.CurrentVersion),
-                    new JProperty("Updated", DateTime.Now));
-
-                Post.DropboxDelete("Updates/Version.json");
-                Thread.Sleep(200);
-                Post.DropboxUpload("Updates/Version.json", json.ToString(Formatting.None));
-
-                return true;
+                return false;
             }
             catch (Exception ex)
             {
-                errorLog(ex);
-                errorMessage(ex);
+                BaseService.errorLog(ex, true);
                 return false;
             }
         }

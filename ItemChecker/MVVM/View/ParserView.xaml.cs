@@ -1,7 +1,4 @@
 ﻿using ItemChecker.MVVM.ViewModel;
-using ItemChecker.Support;
-using System.Reflection;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
@@ -15,13 +12,11 @@ namespace ItemChecker.MVVM.View
         }
         private void InputDecimal(object sender, TextCompositionEventArgs e)
         {
-            decimal result;
-            e.Handled = !decimal.TryParse(e.Text, out result);
+            e.Handled = !decimal.TryParse(e.Text, out decimal result);
         }
         private void NumberPlus_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            int result;
-            e.Handled = !int.TryParse(e.Text, out result);
+            e.Handled = !int.TryParse(e.Text, out int result);
         }
 
         private void DataGrid_KeyDown(object sender, KeyEventArgs e)
@@ -30,11 +25,11 @@ namespace ItemChecker.MVVM.View
             {
                 ParserViewModel viewModel = (ParserViewModel)DataContext;
                 if (e.Key == Key.Insert && viewModel.AddQueueCommand.CanExecute(null))
-                    viewModel.AddQueueCommand.Execute(viewModel.SelectedParserItem);
+                    viewModel.AddQueueCommand.Execute(viewModel.SelectedItem);
                 else if (e.Key == Key.F && Keyboard.IsKeyDown(Key.LeftCtrl) && viewModel.RemoveFavoriteCommand.CanExecute(null))
-                    viewModel.RemoveFavoriteCommand.Execute(((ParserViewModel)DataContext).SelectedParserItem.ItemName);
+                    viewModel.RemoveFavoriteCommand.Execute(((ParserViewModel)DataContext).SelectedItem.ItemName);
                 else if (e.Key == Key.F && viewModel.AddFavoriteCommand.CanExecute(null))
-                    viewModel.AddFavoriteCommand.Execute(((ParserViewModel)DataContext).SelectedParserItem.ItemName);
+                    viewModel.AddFavoriteCommand.Execute(((ParserViewModel)DataContext).SelectedItem.ItemName);
             }
         }
         private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -43,8 +38,7 @@ namespace ItemChecker.MVVM.View
             if (!parserGrid.Items.IsEmpty && item != null)
             {
                 int columnIndex = parserGrid.CurrentColumn.DisplayIndex;
-                ParserViewModel viewModel = (ParserViewModel)DataContext;
-                if (viewModel.OpenItemOutCommand.CanExecute(null))
+                if (DataContext is ParserViewModel viewModel && viewModel.OpenItemOutCommand.CanExecute(null))
                     viewModel.OpenItemOutCommand.Execute(columnIndex);
             }
         }
@@ -56,10 +50,12 @@ namespace ItemChecker.MVVM.View
 
         private void ComboBoxSer1_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (service1.SelectedIndex == 2)
-                csmGroup.IsEnabled = true;
-            else
-                csmGroup.IsEnabled = false;
+            csmGroup.IsEnabled = service1.SelectedIndex == 2;
+        }
+        private void currency_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!parserGrid.Items.IsEmpty && DataContext is ParserViewModel vm && vm.SwitchCurrencyCommand.CanExecute(currency.SelectedItem))
+                vm.SwitchCurrencyCommand.Execute(currency.SelectedItem);
         }
     }
 }

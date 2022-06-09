@@ -40,7 +40,7 @@ namespace ItemChecker.Net
         }
         public static Tuple<Decimal, Decimal> PriceOverview(string market_hash_name)
         {
-            string json = Request("https://steamcommunity.com/market/priceoverview/?country=RU&currency=5&appid=730&market_hash_name=" + market_hash_name);
+            string json = Request("https://steamcommunity.com/market/priceoverview/?country=RU&currency=1&appid=730&market_hash_name=" + market_hash_name);
             JObject response = JObject.Parse(json);
             decimal lowest_price = response.ContainsKey("lowest_price") ? Edit.GetPrice(response["lowest_price"].ToString()) : 0m;
             decimal median_price = response.ContainsKey("median_price") ? Edit.GetPrice(response["median_price"].ToString()) : 0m;
@@ -54,33 +54,44 @@ namespace ItemChecker.Net
         }
         public static JObject ItemOrdersHistogram(int item_nameid)
         {
-            string json = Request("https://steamcommunity.com/market/itemordershistogram?country=RU&language=english&currency=5&item_nameid=" + item_nameid + "&two_factor=0");
+            string json = Request("https://steamcommunity.com/market/itemordershistogram?country=RU&language=english&currency=1&item_nameid=" + item_nameid + "&two_factor=0");
             return JObject.Parse(json);
         }
-
-        public static Decimal Currency(string currency_api_key, string currency)
+        public static JObject ItemOrdersHistogram(int item_nameid, int currencyId)
+        {
+            string json = Request("https://steamcommunity.com/market/itemordershistogram?country=RU&language=english&currency=" + currencyId + "&item_nameid=" + item_nameid + "&two_factor=0");
+            return JObject.Parse(json);
+        }
+        public static Decimal CurrencySteam(int currencyId, int item_nameid, decimal price_usd)
         {
             try
             {
-                if (currency_api_key.Length == 20)
-                {
-                    string url = @"https://free.currconv.com/api/v7/convert?q=USD_" + currency + "&compact=ultra&apiKey=" + currency_api_key;
-                    var json = Get.Request(url);
+                string url = "https://steamcommunity.com/market/itemordershistogram?country=RU&language=english&currency=" + currencyId + "&item_nameid=" + item_nameid + "&two_factor=0";
+                decimal price = Convert.ToDecimal(JObject.Parse(Request(url))["highest_buy_order"]);
 
-                    return Math.Round(Convert.ToDecimal(JObject.Parse(json)[$"USD_{currency}"].ToString()), 2);
-                }
-                else
-                {
-                    string url = @"https://openexchangerates.org/api/latest.json?app_id=" + currency_api_key;
-                    var json = Get.Request(url);
-
-                    return Math.Round(Convert.ToDecimal(JObject.Parse(json)["rates"][currency].ToString()), 2);
-                }
+                return price / price_usd;
             }
             catch
             {
                 return 0;
             }
+        }
+
+        //dropbox
+        public static String DropboxRead(string path)
+        {
+            HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create("https://content.dropboxapi.com/2/files/download");
+
+            httpRequest.Method = "GET";
+            httpRequest.Headers["Dropbox-API-Arg"] = "{\"path\": \"/" + path + "\"}";
+            httpRequest.Headers["Authorization"] = "Bearer a94CSH6hwyUAAAAAAAAAAf3zRyhyZknI9J8KM3VZihWEILAuv6Vr3ht_-4RQcJxs";
+
+            HttpWebResponse httpResponse = (HttpWebResponse)httpRequest.GetResponse();
+            Stream stream = httpResponse.GetResponseStream();
+            StreamReader streamReader = new(stream);
+            string s = httpResponse.StatusCode.ToString();
+
+            return streamReader.ReadToEnd();
         }
     }
 }

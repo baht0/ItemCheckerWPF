@@ -5,8 +5,6 @@ using ItemChecker.Services;
 using ItemChecker.Support;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
@@ -18,66 +16,51 @@ namespace ItemChecker.MVVM.ViewModel
 {
     public class ParserViewModel : ObservableObject
     {
-        #region field and property
+        #region prop
         Timer TimerView = new(500);
-        private ObservableCollection<DataParser> _parserGrid = new();
-        private ICollectionView _parserGridView;
-        private DataParser _selectedParserItem;
-        private ParserStatistics _parserStatistics = new();
+        //table
+        private ParserTable _parserTable = new();
+        private DataParser _selectedItem;
         private ParserFilter _filterConfig = new();
         private string _searchString;
-
-        //panel
-        private ParserConfig _parserConfig = new();
-        private ParserInfo _parserInfo = new();
-        private int _manualCount = 0;
-        private QueueInfo _queueInfo = new();
-
-        public ObservableCollection<DataParser> ParserGrid
+        public ParserTable ParserTable
         {
             get
             {
-                return _parserGrid;
+                return _parserTable;
             }
             set
             {
-                _parserGrid = value;
+                _parserTable = value;
                 OnPropertyChanged();
             }
         }
-        public ICollectionView ParserGridView
+        public DataParser SelectedItem
         {
             get
             {
-                return _parserGridView;
+                return _selectedItem;
             }
             set
             {
-                _parserGridView = value;
-                OnPropertyChanged();
-            }
-        }
-        public DataParser SelectedParserItem
-        {
-            get
-            {
-                return _selectedParserItem;
-            }
-            set
-            {
-                _selectedParserItem = value;
+                _selectedItem = value;
                 OnPropertyChanged();
                 if (value == null)
                     return;
+
+                ParserInfo.ItemName = value.ItemName;
                 if (ParserInfo.ST)
                 {
                     ParserInfo.ItemSt = new();
-                    DataSteamMarket data = DataSteamMarket.MarketItems.FirstOrDefault(x => x.ItemName == value.ItemName);
+                    var data = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == value.ItemName).Steam;
                     Task.Run(() => {
-                        if (data != null && !data.PriceHistory.Any())
+                        if (!data.PriceHistory.Any())
                         {
-                            ParserCheckService checkService = new();
-                            var history = checkService.PriceHistory(value.ItemName);
+                            data.LowestSellOrder = Edit.ConverterFromUsd(data.LowestSellOrder, ParserTable.CurectCurrency.Value);
+                            data.HighestBuyOrder = Edit.ConverterFromUsd(data.HighestBuyOrder, ParserTable.CurectCurrency.Value);
+
+                            ItemBaseService baseService = new();
+                            var history = baseService.GetPriceHistory(value.ItemName);
                             data.PriceHistory = history;
                             int days = (int)(DateTime.Now - history.FirstOrDefault().Date).TotalDays;
                             data.LastSale = Tuple.Create(history.FirstOrDefault().Date, days, history.FirstOrDefault().Price);
@@ -95,36 +78,15 @@ namespace ItemChecker.MVVM.ViewModel
                 }
                 else if (ParserInfo.CSM)
                 {
-                    List<DataInventoriesCsm> datas = DataInventoriesCsm.Items.Where(x => x.ItemName == value.ItemName).Reverse().ToList();
-                    ParserInfo.InventoryCsm = datas;
-                    ParserInfo.ItemCsmComparePrice = value.Price2;
-                    if (ParserStatistics.DataCurrency == "RUB")
-                        ParserInfo.ItemCsmComparePrice = Edit.ConverterToUsd(value.Price1, SettingsProperties.Default.RUB);
+                    ParserInfo.InventoryCsm = DataInventoriesCsm.Items.Where(x => x.ItemName == value.ItemName).Reverse().ToList();
+                    ParserInfo.ItemCsmComparePrice = value.Price1;
                     ParserInfo.InfoItemCount = ParserInfo.InventoryCsm.Count - 1;
                     ParserInfo.InfoItemCurrent = 0;
                 }
                 else if (ParserInfo.LF)
-                {
-                    ParserInfo.ItemLf = ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == value.ItemName).LfmInfo;
-                    ParserInfo.ItemNameLfm = value.ItemName;
-                }
+                    ParserInfo.ItemLf = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == value.ItemName).Lfm;
                 else if (ParserInfo.BF)
-                {
-                    ParserInfo.ItemBf = ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == value.ItemName).BuffInfo;
-                    ParserInfo.ItemNameBf = value.ItemName;
-                }
-            }
-        }
-        public ParserStatistics ParserStatistics
-        {
-            get
-            {
-                return _parserStatistics;
-            }
-            set
-            {
-                _parserStatistics = value;
-                OnPropertyChanged();
+                    ParserInfo.ItemBf = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == value.ItemName).Buff;
             }
         }
         public ParserFilter FilterConfig
@@ -150,8 +112,8 @@ namespace ItemChecker.MVVM.ViewModel
                 _searchString = value;
                 OnPropertyChanged();
                 FilterConfig = new ParserFilter();
-                if (ParserGridView != null)
-                    ParserGridView.Filter = item =>
+                if (ParserTable.GridView != null)
+                    ParserTable.GridView.Filter = item =>
                     {
                         return ((DataParser)item).ItemName.Contains(value, StringComparison.OrdinalIgnoreCase);
                     };
@@ -159,15 +121,31 @@ namespace ItemChecker.MVVM.ViewModel
         }
 
         //panel
-        public ParserConfig ParserConfig
+        private ParserCheckConfig _parserCheckConfig = new();
+        private ParserCheckInfo _parserCheckInfo = new();
+        private ParserInfo _parserInfo = new();
+        private ParserQueue _parserQueue = new();
+        public ParserCheckConfig ParserCheckConfig
         {
             get
             {
-                return _parserConfig;
+                return _parserCheckConfig;
             }
             set
             {
-                _parserConfig = value;
+                _parserCheckConfig = value;
+                OnPropertyChanged();
+            }
+        }
+        public ParserCheckInfo ParserCheckInfo
+        {
+            get
+            {
+                return _parserCheckInfo;
+            }
+            set
+            {
+                _parserCheckInfo = value;
                 OnPropertyChanged();
             }
         }
@@ -183,21 +161,12 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        public int ManualCount
+        public ParserQueue ParserQueue
         {
-            get { return _manualCount; }
+            get { return _parserQueue; }
             set
             {
-                _manualCount = value;
-                OnPropertyChanged();
-            }
-        }
-        public QueueInfo QueueInfo
-        {
-            get { return _queueInfo; }
-            set
-            {
-                _queueInfo = value;
+                _parserQueue = value;
                 OnPropertyChanged();
             }
         }
@@ -205,8 +174,7 @@ namespace ItemChecker.MVVM.ViewModel
 
         public ParserViewModel()
         {
-            ManualCount = ParserConfig.CheckList.Count;
-
+            ParserTable.GridView = CollectionViewSource.GetDefaultView(ParserTable.Items);
             TimerView.Elapsed += UpdateView;
             TimerView.Enabled = true;
         }
@@ -216,45 +184,73 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 decimal availableAmount = SteamAccount.GetAvailableAmount();
                 decimal total = SteamAccount.Balance * 10;
-                QueueInfo.TotalAllowed = total;
-                QueueInfo.AvailableAmount = availableAmount;
-                QueueInfo.Remaining = availableAmount - QueueInfo.OrderAmout;
-                QueueInfo.AvailableAmountPrecent = Math.Round(availableAmount / total * 100, 1);
+                ParserQueue.TotalAllowed = total;
+                ParserQueue.AvailableAmount = availableAmount;
+                ParserQueue.Remaining = availableAmount - ParserQueue.OrderAmout;
+                ParserQueue.AvailableAmountPrecent = Math.Round(availableAmount / total * 100, 1);
             }
             catch (Exception ex)
             {
-                BaseService.errorLog(ex);
+                BaseService.errorLog(ex, false);
             }
         }
+        //grid
         public ICommand OpenItemOutCommand =>
             new RelayCommand((obj) =>
             {
-                DataParser item = SelectedParserItem;
-                string itemName = Edit.removeDoppler(item.ItemName).Replace("(Holo/Foil)", "(Holo-Foil)");
-                string market_hash_name = Edit.MarketHashName(itemName);
+                DataParser item = SelectedItem;
+                string itemName = item.ItemName.Replace("(Holo/Foil)", "(Holo-Foil)");
+                string market_hash_name = Edit.EncodeMarketHashName(itemName);
                 switch ((Int32)obj)
                 {
                     case 1 or 2:
-                        if (ParserStatistics.Service1 == "SteamMarket" | ParserStatistics.Service1 == "SteamMarket(A)")
+                        if (ParserCheckInfo.Service1 == "SteamMarket" || ParserCheckInfo.Service1 == "SteamMarket(A)")
                             Edit.OpenUrl("https://steamcommunity.com/market/listings/730/" + market_hash_name);
-                        else if (ParserStatistics.Service1 == "Cs.Money")
+                        else if (ParserCheckInfo.Service1 == "Cs.Money")
                             Edit.OpenCsm(market_hash_name);
-                        else if (ParserStatistics.Service1 == "Buf163")
-                            Edit.OpenUrl("https://buff.163.com/goods/" + ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item.ItemName).BuffInfo.Id);
+                        else if (ParserCheckInfo.Service1 == "Buf163")
+                            Edit.OpenUrl("https://buff.163.com/goods/" + SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id);
                         break;
                     case 3 or 4:
-                        if (ParserStatistics.Service2 == "SteamMarket" | ParserStatistics.Service2 == "SteamMarket(A)")
+                        if (ParserCheckInfo.Service2 == "SteamMarket" || ParserCheckInfo.Service2 == "SteamMarket(A)")
                             Edit.OpenUrl("https://steamcommunity.com/market/listings/730/" + market_hash_name);
-                        else if (ParserStatistics.Service2 == "Cs.Money")
+                        else if (ParserCheckInfo.Service2 == "Cs.Money")
                             Edit.OpenCsm(market_hash_name);
-                        else if (ParserStatistics.Service2 == "Buf163")
-                            Edit.OpenUrl("https://buff.163.com/goods/" + ItemBase.SkinsBase.FirstOrDefault(x => x.ItemName == item.ItemName).BuffInfo.Id);
+                        else if (ParserCheckInfo.Service2 == "Buf163")
+                            Edit.OpenUrl("https://buff.163.com/goods/" + SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id);
                         break;
                     default:
                         Clipboard.SetText(itemName);
                         break;
                 }
             });
+        public ICommand SwitchCurrencyCommand =>
+            new RelayCommand((obj) =>
+            {
+                Currency currency = SteamBase.CurrencyList.FirstOrDefault(x => x.Name == (string)obj);
+                List<DataParser> items = ParserTable.Items.ToList();
+                if (ParserTable.CurectCurrency.Id != 1)
+                    foreach (DataParser item in items)
+                    {
+                        item.Price1 = Edit.ConverterToUsd(item.Price1, ParserTable.CurectCurrency.Value);
+                        item.Price2 = Edit.ConverterToUsd(item.Price2, ParserTable.CurectCurrency.Value);
+                        item.Price3 = Edit.ConverterToUsd(item.Price3, ParserTable.CurectCurrency.Value);
+                        item.Price4 = Edit.ConverterToUsd(item.Price4, ParserTable.CurectCurrency.Value);
+                        item.Difference = Edit.ConverterToUsd(item.Difference, ParserTable.CurectCurrency.Value);
+                    }
+                foreach (DataParser item in items)
+                {
+                    item.Price1 = Edit.ConverterFromUsd(item.Price1, currency.Value);
+                    item.Price2 = Edit.ConverterFromUsd(item.Price2, currency.Value);
+                    item.Price3 = Edit.ConverterFromUsd(item.Price3, currency.Value);
+                    item.Price4 = Edit.ConverterFromUsd(item.Price4, currency.Value);
+                    item.Difference = Edit.ConverterFromUsd(item.Difference, currency.Value);
+                }
+                ParserTable.CurrencySymbol = currency.Symbol;
+                ParserTable.CurectCurrency = currency;
+                FilterConfig = new();
+                ParserTable.GridView = CollectionViewSource.GetDefaultView(items);
+            }, (obj) => ParserTable.Items.Any());
         //filter
         public ICommand ClearSearchCommand =>
             new RelayCommand((obj) =>
@@ -266,165 +262,133 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 ParserFilter filterConfig = obj as ParserFilter;
 
-                ParserGridView.Filter = null;
-                ParserGridView.Filter = item =>
+                ParserTable.GridView.Filter = null;
+                ParserTable.GridView.Filter = item =>
                 {
                     return ParserService.ApplyFilter(filterConfig, (DataParser)item);
                 };
                 ParserFilter.FilterConfig = filterConfig;
-            }, (obj) => ParserGridView != null);
+            }, (obj) => ParserTable.Items.Any());
         public ICommand ResetCommand =>
             new RelayCommand((obj) =>
             {
                 FilterConfig = new();
-                ParserGridView.Filter = null;
+                ParserTable.GridView.Filter = null;
                 ParserFilter.FilterConfig = new();
-            }, (obj) => ParserGridView != null);
+            }, (obj) => ParserTable.Items.Any());
         //check
-        public ICommand AddListCommand =>
-            new RelayCommand((obj) =>
-            {
-                Task.Run((Action)(() =>
-                {
-                    List<string> response = new();
-                    switch (Convert.ToInt32(obj))
-                    {
-                        case 0:
-                            response = ItemBase.SkinsBase.Select(x => x.ItemName).ToList();
-                            break;
-                        case 1:
-                            response = BaseService.OpenFileDialog("txt");
-                            break;
-                        case 2:
-                            response = ItemBase.SkinsBase.Where(x => x.LfmInfo.Price != 0).Select(x => x.ItemName).ToList();
-                            break;
-                        case 3:
-                            response = HomeFavorite.FavoriteList.ToList();
-                            break;
-                        case 4:
-                            response = DataOrder.Orders.Select(x => x.ItemName).ToList();
-                            break;
-                    }
-                    if (response.Any())
-                    {
-                        ParserConfig.CheckList = response;
-                        ManualCount = ParserConfig.CheckList.Count;
-                        ParserService.SaveList("CheckList", response);
-                    }
-                    else
-                        Main.Message.Enqueue((object)"It is not possible to add an empty list.");
-                }));
-            }, (obj) => !ParserConfig.IsParser);
         public ICommand CheckCommand =>
             new RelayCommand((obj) =>
             {
-                if (!ParserConfig.IsParser)
-                    Task.Run(() => PreparationCheck((ParserConfig)obj, null));
+                if (!ParserCheckInfo.IsParser)
+                {
+                    var config = (ParserCheckConfig)obj;
+                    config.CheckedTime = DateTime.Now;
+                    ParserCheckConfig.CheckedConfig = (ParserCheckConfig)config.Clone();
+                    Task.Run(() => PreparationCheck(config, new()));
+                }
                 else
                 {
-                    ParserConfig.cts.Cancel();
-                    ParserConfig.IsParser = false;
-                    ParserConfig.IsStoped = true;
+                    ParserCheckInfo.cts.Cancel();
+                    ParserCheckInfo.IsParser = false;
+                    ParserCheckInfo.IsStoped = true;
                 }
-            }, (obj) => ParserConfig.ServiceOne != ParserConfig.ServiceTwo && ParserConfig.CheckList.Any());
+            }, (obj) => ParserCheckConfig.ServiceOne != ParserCheckConfig.ServiceTwo && SteamBase.ItemList.Any());
         public ICommand ContinueCheckCommand =>
             new RelayCommand((obj) =>
             {
-                Task.Run(() => PreparationCheck(ParserConfig, ParserGrid.ToList()));
-            }, (obj) => !ParserConfig.IsParser && ParserConfig.IsStoped && ParserConfig.CheckList.Any());
-        void PreparationCheck(ParserConfig parserConfig, List<DataParser> checkedList)
+                Task.Run(() => PreparationCheck(ParserCheckConfig.CheckedConfig, ParserTable.Items.ToList()));
+            }, (obj) => !ParserCheckInfo.IsParser && ParserCheckInfo.IsStoped);
+        void PreparationCheck(ParserCheckConfig config, List<DataParser> checkedList)
         {
             try
             {
-                ParserStatistics.Timer = "Preparation...";
-                ParserStatistics.TimerOn = true;
-                ParserConfig.IsParser = true;
-                ParserConfig.IsStoped = false;
-                ParserConfig.cts = new();
-                ParserConfig.token = ParserConfig.cts.Token;
-                SaveConfig(parserConfig);
-                DataGrid("CheckList", parserConfig.ServiceOne, parserConfig.ServiceTwo);
+                ParserCheckInfo.Status = "Preparation...";
+                ParserCheckInfo.TimerOn = true;
+                ParserCheckInfo.IsParser = true;
+                ParserCheckInfo.IsStoped = false;
+                ParserCheckInfo.cts = new();
+                ParserCheckInfo.token = ParserCheckInfo.cts.Token;
+                SaveConfig(config);
+                DataGrid(config, "CheckList");
 
-                ParserStatistics.Timer = "Create List...";
-                List<string> checkList = ParserCheckService.ApplyConfig(parserConfig);
-                ParserStatistics.CountList = checkList.Count;
-                ParserStatistics.CurrentProgress = 0;
-                ParserStatistics.MaxProgress = checkList.Count;
+                ParserCheckInfo.Status = "Create List...";
+                List<string> checkList = ParserCheckService.ApplyConfig(config);
+                ParserCheckInfo.CountList = checkList.Count;
+                ParserCheckInfo.CurrentProgress = 0;
+                ParserCheckInfo.MaxProgress = checkList.Count;
                 if (checkList.Any())
                     StartCheck(checkList, checkedList);
                 else
                     MessageBox.Show("Nothing found. Adjust the parameters.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
 
-                ParserGridView = CollectionViewSource.GetDefaultView(ParserGrid);
+                ParserTable.Count = ParserTable.Items.Count;
+                ParserTable.GridView = CollectionViewSource.GetDefaultView(ParserTable.Items);
             }
             catch (Exception exp)
             {
-                ParserConfig.cts.Cancel();
-                BaseService.errorLog(exp);
-                BaseService.errorMessage(exp);
+                ParserCheckInfo.cts.Cancel();
+                BaseService.errorLog(exp, true);
             }
             finally
             {
-                ParserStatistics.TimerOn = false;
-                ParserConfig.IsParser = false;
+                if (ParserTable.Items.Any())
+                {
+                    ParserService list = new();
+                    list.Export(ParserTable.Items, ParserCheckConfig.CheckedConfig);
+                }
+                ParserCheckInfo.TimerOn = false;
+                ParserCheckInfo.IsParser = false;
             }
         }
-        void DataGrid(string mode, int serviceOne, int serviceTwo)
+        void DataGrid(ParserCheckConfig config, string mode)
         {
-            switch (SettingsProperties.Default.CurrencyId)
-            {
-                case 0:
-                    ParserStatistics.DataCurrency = "USD";
-                    break;
-                case 1:
-                    ParserStatistics.DataCurrency = "RUB";
-                    break;
-            }
-            ParserStatistics.Currency = ParserStatistics.DataCurrency;
-            if (ParserGrid.Any())
+            ParserTable.Count = 0;
+            ParserCheckInfo.DateTime = config.CheckedTime;
+            if (ParserTable.Items.Any())
             {
                 FilterConfig = new();
                 ParserFilter.FilterConfig = new();
 
-                ParserGrid = new();
-                ParserGridView = CollectionViewSource.GetDefaultView(ParserGrid);
+                ParserTable.Items = new();
+                ParserTable.GridView = CollectionViewSource.GetDefaultView(ParserTable.Items);
             }
-            ParserStatistics.Mode = mode;
+            ParserCheckInfo.Mode = mode;
             ItemBaseService baseService = new();
-            switch (serviceOne)
+            switch (config.ServiceOne)
             {
                 case 0:
-                    ParserStatistics.Service1 = "SteamMarket(A)";
-                    ParserStatistics.Price1 = "Sale(ST)";
-                    ParserStatistics.Price2 = "BuyOrder";
+                    ParserCheckInfo.Service1 = "SteamMarket(A)";
+                    ParserTable.Price1 = "Sale(ST)";
+                    ParserTable.Price2 = "BuyOrder(ST)";
                     ParserInfo.ST = true;
                     ParserInfo.CSM = false;
                     ParserInfo.LF = false;
                     ParserInfo.BF = false;
                     break;
                 case 1:
-                    ParserStatistics.Service1 = "SteamMarket";
-                    ParserStatistics.Price1 = "Sale(ST)";
-                    ParserStatistics.Price2 = "BuyOrder";
+                    ParserCheckInfo.Service1 = "SteamMarket";
+                    ParserTable.Price1 = "Sale(ST)";
+                    ParserTable.Price2 = "BuyOrder(ST)";
                     ParserInfo.ST = true;
                     ParserInfo.CSM = false;
                     ParserInfo.LF = false;
                     ParserInfo.BF = false;
                     break;
                 case 2:
-                    ParserStatistics.Service1 = "Cs.Money";
-                    ParserStatistics.Price1 = "Trade(CSM)";
-                    ParserStatistics.Price2 = "Give(CSM)";
+                    ParserCheckInfo.Service1 = "Cs.Money";
+                    ParserTable.Price1 = "Trade(CSM)";
+                    ParserTable.Price2 = "Give(CSM)";
                     ParserInfo.ST = false;
                     ParserInfo.CSM = true;
                     ParserInfo.LF = false;
                     ParserInfo.BF = false;
-                    baseService.LoadInventoriesCsm(ParserConfig);
+                    baseService.LoadInventoriesCsm(config);
                     break;
                 case 3:
-                    ParserStatistics.Service1 = "Loot.Farm";
-                    ParserStatistics.Price1 = "Trade(LF)";
-                    ParserStatistics.Price2 = "Give(LF)";
+                    ParserCheckInfo.Service1 = "Loot.Farm";
+                    ParserTable.Price1 = "Trade(LF)";
+                    ParserTable.Price2 = "Give(LF)";
                     ParserInfo.ST = false;
                     ParserInfo.CSM = false;
                     ParserInfo.LF = true;
@@ -432,79 +396,83 @@ namespace ItemChecker.MVVM.ViewModel
                     baseService.UpdateLfmInfo();
                     break;
                 case 4:
-                    ParserStatistics.Service1 = "Buf163";
-                    ParserStatistics.Price1 = "Sale(BF)";
-                    ParserStatistics.Price2 = "BuyOrder";
+                    ParserCheckInfo.Service1 = "Buf163";
+                    ParserTable.Price1 = "Sale(BF)";
+                    ParserTable.Price2 = "BuyOrder(BF)";
                     ParserInfo.ST = false;
                     ParserInfo.CSM = false;
                     ParserInfo.LF = false;
                     ParserInfo.BF = true;
-                    baseService.UpdateBuffInfo(false, ParserConfig.MinPrice, ParserConfig.MaxPrice);
+                    baseService.UpdateBuffInfo(false, config.MinPrice, config.MaxPrice);
                     break;
             }
-            switch (serviceTwo)
+            switch (config.ServiceTwo)
             {
                 case 0:
-                    ParserStatistics.Service2 = "SteamMarket(A)";
-                    ParserStatistics.Price3 = "Sale(ST)";
-                    ParserStatistics.Price4 = "BuyOrder";
+                    ParserCheckInfo.Service2 = "SteamMarket(A)";
+                    ParserTable.Price3 = "Sale(ST)";
+                    ParserTable.Price4 = "BuyOrder(ST)";
                     break;
                 case 1:
-                    ParserStatistics.Service2 = "SteamMarket";
-                    ParserStatistics.Price3 = "Sale(ST)";
-                    ParserStatistics.Price4 = "BuyOrder";
+                    ParserCheckInfo.Service2 = "SteamMarket";
+                    ParserTable.Price3 = "Sale(ST)";
+                    ParserTable.Price4 = "BuyOrder(ST)";
                     break;
                 case 2:
-                    ParserStatistics.Service2 = "Cs.Money";
-                    ParserStatistics.Price3 = "Trade(CSM)";
-                    ParserStatistics.Price4 = "Give(CSM)";
+                    ParserCheckInfo.Service2 = "Cs.Money";
+                    ParserTable.Price3 = "Trade(CSM)";
+                    ParserTable.Price4 = "Give(CSM)";
                     baseService.UpdateCsmInfo();
                     break;
                 case 3:
-                    ParserStatistics.Service2 = "Loot.Farm";
-                    ParserStatistics.Price3 = "Trade(LF)";
-                    ParserStatistics.Price4 = "Give(LF)";
+                    ParserCheckInfo.Service2 = "Loot.Farm";
+                    ParserTable.Price3 = "Trade(LF)";
+                    ParserTable.Price4 = "Give(LF)";
                     baseService.UpdateLfmInfo();
                     break;
                 case 4:
-                    ParserStatistics.Service2 = "Buf163";
-                    ParserStatistics.Price3 = "Sale(BF)";
-                    ParserStatistics.Price4 = "BuyOrder";
-                    baseService.UpdateBuffInfo(true, ParserConfig.MinPrice, ParserConfig.MaxPrice);
+                    ParserCheckInfo.Service2 = "Buf163";
+                    ParserTable.Price3 = "Sale(BF)";
+                    ParserTable.Price4 = "BuyOrder(BF)";
+                    int min = (int)(config.MinPrice * 0.5m);
+                    int max = (int)(config.MaxPrice * 2.5m);
+                    baseService.UpdateBuffInfo(true, min, max);
                     break;
             }
+            ParserCheckInfo.IsVisible = true;
         }
-        void SaveConfig(ParserConfig parser)
+        void SaveConfig(ParserCheckConfig config)
         {
-            ParserProperties.Default.ServiceOne = parser.ServiceOne;
-            ParserProperties.Default.ServiceTwo = parser.ServiceTwo;
+            ParserProperties.Default.ServiceOne = config.ServiceOne;
+            ParserProperties.Default.ServiceTwo = config.ServiceTwo;
 
-            ParserProperties.Default.MinPrice = parser.MinPrice;
-            ParserProperties.Default.MaxPrice = parser.MaxPrice;
+            ParserProperties.Default.MinPrice = config.MinPrice;
+            ParserProperties.Default.MaxPrice = config.MaxPrice;
 
-            ParserProperties.Default.Normal = parser.Normal;
-            ParserProperties.Default.Souvenir = parser.Souvenir;
-            ParserProperties.Default.Stattrak = parser.Stattrak;
-            ParserProperties.Default.KnifeGlove = parser.KnifeGlove;
-            ParserProperties.Default.KnifeGloveStattrak = parser.KnifeGloveStattrak;
+            ParserProperties.Default.NotWeapon = config.NotWeapon;
+            ParserProperties.Default.Normal = config.Normal;
+            ParserProperties.Default.Souvenir = config.Souvenir;
+            ParserProperties.Default.Stattrak = config.Stattrak;
+            ParserProperties.Default.KnifeGlove = config.KnifeGlove;
+            ParserProperties.Default.KnifeGloveStattrak = config.KnifeGloveStattrak;
 
-            ParserProperties.Default.Overstock = parser.Overstock;
-            ParserProperties.Default.Ordered = parser.Ordered;
-            ParserProperties.Default.UserItems = parser.UserItems;
-            ParserProperties.Default.OnlyDopplers = parser.OnlyDopplers;
+            ParserProperties.Default.SelectedOnly = config.SelectedOnly;
+
+            ParserProperties.Default.WithoutLock = config.WithoutLock;
+            ParserProperties.Default.UserItems = config.UserItems;
+            ParserProperties.Default.RareItems = config.RareItems;
 
             ParserProperties.Default.Save();
         }
         void StartCheck(List<string> checkList, List<DataParser> checkedList)
         {
-            if (ParserConfig.token.IsCancellationRequested)
+            if (ParserCheckInfo.token.IsCancellationRequested)
                 return;
 
-            checkedList ??= (new());
             DateTime now = DateTime.Now;
             int itemCount = checkList.Count - checkedList.Count;
-            ParserConfig.Timer.Elapsed += (sender, e) => timerTick(checkList.Count, now);
-            ParserConfig.Timer.Enabled = true;
+            ParserCheckInfo.Timer.Elapsed += (sender, e) => timerTick(checkList.Count, now);
+            ParserCheckInfo.Timer.Enabled = true;
 
             ParserCheckService checkService = new();
             foreach (string itemName in checkList)
@@ -520,70 +488,113 @@ namespace ItemChecker.MVVM.ViewModel
                 catch (Exception exp)
                 {
                     if (!exp.Message.Contains("429"))
-                    {
-                        BaseService.errorLog(exp);
-                        BaseService.errorMessage(exp);
-                    }
+                        BaseService.errorLog(exp, true);
                     else
                         MessageBox.Show(exp.Message + "\n\nTo continue, you need to change the IP address.", "Parser stoped!", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    ParserConfig.IsStoped = true;
-                    ParserConfig.cts.Cancel();
+                    ParserCheckInfo.IsStoped = true;
+                    ParserCheckInfo.cts.Cancel();
                 }
                 finally
                 {
-                    ParserStatistics.CurrentProgress++;
+                    ParserCheckInfo.CurrentProgress++;
                 }
-                if (ParserConfig.token.IsCancellationRequested)
+                if (ParserCheckInfo.token.IsCancellationRequested)
                     break;
             }
-            ParserGrid = new ObservableCollection<DataParser>(checkedList);
-            ParserConfig.Timer.Enabled = false;
-            ParserConfig.Timer.Elapsed -= (sender, e) => timerTick(checkList.Count, now);
+            ParserTable.CurrencyId = 0;
+            System.Threading.Thread.Sleep(1000);
+            ParserTable.Items = new(checkedList);
+            ParserCheckInfo.Timer.Enabled = false;
+            ParserCheckInfo.Timer.Elapsed -= (sender, e) => timerTick(checkList.Count, now);
         }
         void timerTick(int itemCount, DateTime timeStart)
         {
-            if (ParserConfig.token.IsCancellationRequested)
-                ParserConfig.Timer.Enabled = false;
-            ParserStatistics.Timer = Edit.calcTimeLeft(timeStart, itemCount, ParserStatistics.CurrentProgress);
+            if (ParserCheckInfo.token.IsCancellationRequested)
+                ParserCheckInfo.Timer.Enabled = false;
+            ParserCheckInfo.Status = Edit.calcTimeLeft(timeStart, itemCount, ParserCheckInfo.CurrentProgress);
         }
+        //file
+        public ICommand ImportCommand =>
+            new RelayCommand((obj) =>
+            {
+                Task.Run(() =>
+                {
+                    ParserCheckInfo.Status = "Reading...";
+                    ParserCheckInfo.TimerOn = true;
+                    ParserCheckInfo.IsParser = true;
+                    ParserService service = new();
+                    var response = service.Import();
+                    if (response.Any())
+                    {
+                        ParserCheckInfo.Status = "Preparation...";
+                        DataGrid(ParserCheckConfig.CheckedConfig, "Import");
 
+                        ParserTable.Count = response.Count;
+                        ParserTable.Items = response;
+                        ParserTable.GridView = CollectionViewSource.GetDefaultView(response);
+
+                        Main.Message.Enqueue("Import table done.");
+                    }
+                    ParserCheckInfo.IsParser = false;
+                    ParserCheckInfo.TimerOn = false;
+                });
+            }, (obj) => !ParserCheckInfo.IsParser);
+        //info
         public ICommand UpdateInventoryCommand =>
             new RelayCommand((obj) =>
             {
                 BaseModel.IsWorking = true;
                 ItemBaseService baseService = new();
                 Task.Run(() => {
-                    if (ParserStatistics.Service1 == "Cs.Money")
-                        baseService.LoadInventoriesCsm(ParserConfig);
-                    else if (ParserStatistics.Service1 == "Loot.Farm")
-                        baseService.UpdateLfmInfo();
+                    switch (ParserCheckConfig.CheckedConfig.ServiceOne)
+                    {
+                        case 2:
+                            baseService.LoadInventoriesCsm(ParserCheckConfig.CheckedConfig);
+                            break;
+                        case 3:
+                            baseService.UpdateLfmInfo();
+                            break;
+                        case 4:
+                            baseService.UpdateBuffInfo(false, ParserCheckConfig.CheckedConfig.MinPrice, ParserCheckConfig.CheckedConfig.MaxPrice);
+                            break;
+                    }
                     BaseModel.IsWorking = false;
-                    Main.Message.Enqueue((object)"Service inventory update completed.");
+                    Main.Message.Enqueue("Service inventory update completed.");
                 });
-            }, (obj) => ParserGrid.Any() & !BaseModel.IsWorking & !ParserConfig.IsParser);
+            }, (obj) => ParserTable.Items.Any() && !BaseModel.IsWorking && !ParserCheckInfo.IsParser && ParserCheckConfig.CheckedConfig.ServiceOne > 1);
         //order
         public ICommand AddQueueCommand =>
             new RelayCommand((obj) =>
             {
-                DataParser item = obj as DataParser;
-                int count = QueueInfo.Items.Count;
+                var parseredItem = obj as DataParser;
 
-                QueueInfo.Items = Queue.AddQueue(QueueInfo.Items, item);
-                QueueInfo.OrderAmout = QueueInfo.Items.Select(x => x.OrderPrice).Sum();
+                if (!ParserQueue.CheckConditions(ParserQueue.Items, parseredItem))
+                {
+                    decimal price = parseredItem.Price2;
+                    var currency = SteamBase.CurrencyList.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId);
+                    if (ParserTable.CurectCurrency.Id != 1)
+                        price = Edit.ConverterToUsd(price, ParserTable.CurectCurrency.Value);
+                    price = Edit.ConverterFromUsd(price, currency.Value);
+                    ParserQueue.Items.Add(new()
+                    {
+                        ItemName = parseredItem.ItemName,
+                        OrderPrice = price,
+                        Precent = parseredItem.Precent
+                    });
+                    ParserQueue.OrderAmout = ParserQueue.Items.Select(x => x.OrderPrice).Sum();
+                    Main.Message.Enqueue($"Success, added to Queue.\n{parseredItem.ItemName}");
+                }
 
-                if (count < QueueInfo.Items.Count)
-                    Main.Message.Enqueue($"Success, added to Queue.\n{item.ItemName}");
-
-            }, (obj) => QueueInfo.Items.Select(x => x.OrderPrice).Sum() < SteamAccount.GetAvailableAmount() && ParserConfig.ServiceOne == 0);
+            }, (obj) => ParserQueue.Items.Select(x => x.OrderPrice).Sum() < SteamAccount.GetAvailableAmount() && ParserCheckConfig.CheckedConfig.ServiceOne < 2);
         public ICommand RemoveQueueCommand =>
             new RelayCommand((obj) =>
             {
-                QueueData item = obj as QueueData;
+                var item = obj as DataQueue;
 
-                QueueInfo.Items.Remove(item);
-                QueueInfo.OrderAmout = QueueInfo.Items.Select(x => x.OrderPrice).Sum();
+                ParserQueue.Items.Remove(item);
+                ParserQueue.OrderAmout = ParserQueue.Items.Select(x => x.OrderPrice).Sum();
 
-            }, (obj) => QueueInfo.Items.Any() & QueueInfo.SelectedQueue != null);
+            }, (obj) => ParserQueue.Items.Any() && ParserQueue.SelectedQueue != null);
         public ICommand ClearQueueCommand =>
             new RelayCommand((obj) =>
             {
@@ -592,105 +603,70 @@ namespace ItemChecker.MVVM.ViewModel
                     "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result == MessageBoxResult.Yes)
                 {
-                    QueueInfo.Items = new();
-                    QueueInfo.OrderAmout = 0;
+                    ParserQueue.Items = new();
+                    ParserQueue.OrderAmout = 0;
                 }
-            }, (obj) => QueueInfo.Items.Any());
+            }, (obj) => ParserQueue.Items.Any());
         public ICommand PlaceOrderCommand =>
             new RelayCommand((obj) =>
             {
                 BaseModel.IsWorking = true;
                 Task.Run(() => {
-                    QueueInfo.MaxProgress = QueueInfo.Items.Count;
-                    QueueInfo.CurrentProgress = 0;
-                    foreach (var item in QueueInfo.Items)
+                    int success = 0;
+                    ParserQueue.MaxProgress = ParserQueue.Items.Count;
+                    ParserQueue.CurrentProgress = 0;
+                    foreach (var item in ParserQueue.Items)
                     {
                         try
                         {
-                            Queue.PlaceOrder(item.ItemName);
-                            if (!HomeFavorite.FavoriteList.Contains(item.ItemName) && HomeFavorite.FavoriteList.Count < 200)
-                                HomeFavorite.FavoriteList.Add(item.ItemName);
+                            ParserQueue.PlaceOrder(item.ItemName);
+                            DataSavedList.Add(item.ItemName, "favorite", ParserCheckConfig.CheckedConfig.ServiceTwo);
+                            success++;
                         }
                         catch (Exception exp)
                         {
-                            BaseService.errorLog(exp);
-                            continue;
+                            if (!exp.Message.Contains("429"))
+                                BaseService.errorLog(exp, true);
+                            else
+                                MessageBox.Show(exp.Message + "\n\nTo continue, you need to change the IP address.", "PlaceOrder stoped!", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            break;
                         }
                         finally
                         {
-                            QueueInfo.CurrentProgress++;
+                            ParserQueue.CurrentProgress++;
                         }
                     }
-                    QueueInfo.Items = new();
-                    QueueInfo.OrderAmout = 0;
+                    Main.Notifications.Add(new()
+                    {
+                        Title = "Place Order",
+                        Message = $"{success}/{ParserQueue.Items.Count} orders has been placed."
+                    });
+                    ParserQueue.Items = new();
+                    ParserQueue.OrderAmout = 0;
                     BaseModel.IsWorking = false;
                 });
-            }, (obj) => QueueInfo.Items.Any() & !BaseModel.IsWorking);
-        //file
-        public ICommand ExportCsvCommand =>
-            new RelayCommand((obj) =>
-            {
-                Task.Run((Action)(() => {
-                    ParserService list = new();
-                    list.ExportCsv(ParserGrid, ParserStatistics.Mode);
-                    Main.Message.Enqueue((object)"Export to CSV file done.");
-                }));
-            }, (obj) => ParserGrid.Any() & !ParserConfig.IsParser);
-        public ICommand ImportCsvCommand =>
-            new RelayCommand((obj) =>
-            {
-                Task.Run((Action)(() =>
-                {
-                    ParserConfig.IsParser = true;
-                    ParserService list = new();
-                    ItemBaseService baseService = new();
-                    ObservableCollection<DataParser> response = list.ImportCsv();
-                    if (response.Any())
-                    {
-                        DataGrid("Import", ParserProperties.Default.ServiceOne, ParserProperties.Default.ServiceTwo);
-
-                        ParserGrid = response;
-                        ParserGridView = CollectionViewSource.GetDefaultView(ParserGrid);
-
-                        if (ParserProperties.Default.ServiceOne > 1)
-                        {
-                            baseService.LoadInventoriesCsm(ParserConfig);
-                            baseService.UpdateLfmInfo();
-                        }
-                        ParserStatistics.Currency = ParserStatistics.DataCurrency;
-                        Main.Message.Enqueue((object)"Import from CSV file done.");
-                    }
-                    ParserConfig.IsParser = false;
-                }));
-            }, (obj) => !ParserConfig.IsParser);
+            }, (obj) => ParserQueue.Items.Any() & !BaseModel.IsWorking);
         //favorite
         public ICommand AddFavoriteCommand =>
             new RelayCommand((obj) =>
             {
-                string itemName = (string)obj;
-                if (!HomeFavorite.FavoriteList.Contains(itemName) && HomeFavorite.FavoriteList.Count < 200 && !String.IsNullOrEmpty(itemName))
-                {
-                    HomeFavorite.FavoriteList.Add(itemName);
+                var itemName = (string)obj;
+                if (DataSavedList.Add(itemName, "favorite", ParserCheckConfig.CheckedConfig.ServiceTwo))
                     Main.Message.Enqueue($"Success, added to Favorites\n{itemName}");
-                    BaseService.SaveList("FavoriteList", HomeFavorite.FavoriteList.ToList());
-                }
-                else if (HomeFavorite.FavoriteList.Contains(itemName))
-                    Main.Message.Enqueue("The item is already on the list.");
-                else if (HomeFavorite.FavoriteList.Count >= 200)
-                    Main.Message.Enqueue("Limit. The maximum is only 200!");
-                else if (String.IsNullOrEmpty(itemName))
+                else
                     Main.Message.Enqueue("Oops, something went wrong.");
-            });
+            }, (obj) => ParserCheckConfig.ServiceOne < 2);
         public ICommand RemoveFavoriteCommand =>
             new RelayCommand((obj) =>
             {
                 string itemName = (string)obj;
-                if (!String.IsNullOrEmpty(itemName))
+                var item = DataSavedList.Items.FirstOrDefault(x => x.ItemName == itemName);
+                if (item != null)
                 {
-                    HomeFavorite.FavoriteList.Remove(itemName);
+                    DataSavedList.Items.Remove(item);
                     Main.Message.Enqueue($"{itemName}\nRemoved from list.");
-                    BaseService.SaveList("FavoriteList", HomeFavorite.FavoriteList.ToList());
+                    DataSavedList.Save();
                 }
-            }, (obj) => HomeFavorite.FavoriteList.Any());        
+            }, (obj) => DataSavedList.Items.Any());        
     }
 }

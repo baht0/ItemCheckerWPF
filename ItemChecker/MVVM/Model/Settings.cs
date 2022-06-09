@@ -1,26 +1,16 @@
-﻿using ItemChecker.Properties;
+﻿using ItemChecker.Core;
+using ItemChecker.Properties;
 using System;
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ItemChecker.MVVM.Model
 {
     public class Settings
     {
         //general
-        public string CurrencyApi { get; set; } = SettingsProperties.Default.CurrencyApiKey;
-        public ObservableCollection<string> CurrencyList { get; set; } = new()
-        {
-            "USD ($)",
-            "RUB (₽)"
-        };
-        public int CurrencyId { get; set; } = SettingsProperties.Default.CurrencyId;
-        public bool Quit { get; set; } = SettingsProperties.Default.Quit;
-        public bool SetHours { get; set; } = SettingsProperties.Default.SetHours;
-        public DateTime TurnOn { get; set; } = SettingsProperties.Default.TurnOn;
-        public DateTime TurnOff { get; set; } = SettingsProperties.Default.TurnOff;
-
-        //order
-        public ObservableCollection<string> ServicesList { get; set; } = new()
+        public int MinPrecent { get; set; } = SettingsProperties.Default.MinPrecent;
+        public List<string> ServicesList { get; set; } = new()
         {
             "SteamMarket(A)",
             "SteamMarket",
@@ -29,17 +19,73 @@ namespace ItemChecker.MVVM.Model
             "Buff163"
         };
         public int ServiceId { get; set; } = SettingsProperties.Default.ServiceId;
-        public int MinPrecent { get; set; } = SettingsProperties.Default.MinPrecent;
+        public bool SetHours { get; set; } = SettingsProperties.Default.SetHours;
+        public DateTime TurnOn { get; set; } = SettingsProperties.Default.TurnOn;
+        public DateTime TurnOff { get; set; } = SettingsProperties.Default.TurnOff;
 
+        //steam
+        public bool RememberMe { get; set; } = StartUpProperties.Default.Remember;
         public string SteamApiKey { get; set; } = SteamAccount.ApiKey;
+        public string UserName { get; set; } = SteamAccount.UserName;
         public string AccountName { get; set; } = SteamAccount.AccountName;
         public string SteamId { get; set; } = SteamAccount.Id64;
         public string SteamMarket { get; set; } = SteamAccount.SteamMarket;
-        //float
-        public decimal FactoryNew { get; set; } = FloatProperties.Default.maxFloatValue_FN;
-        public decimal MinimalWear { get; set; } = FloatProperties.Default.maxFloatValue_MW;
-        public decimal FieldTested { get; set; } = FloatProperties.Default.maxFloatValue_FT;
-        public decimal WellWorn { get; set; } = FloatProperties.Default.maxFloatValue_WW;
-        public decimal BattleScarred { get; set; } = FloatProperties.Default.maxFloatValue_BS;
+        public string SteamCurrency { get; set; } = SteamBase.CurrencyList.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Name;
+    }
+    public class SettingsAbout : ObservableObject
+    {
+        private string _currentVersion = DataProjectInfo.CurrentVersion;
+        private string _latestVersion = DataProjectInfo.LatestVersion;
+        private string _isUpdate = DataProjectInfo.IsUpdate ? "Download" : "Reload";
+        private bool _admin = SteamAccount.AccountName == "bahtiarov116";
+
+        public string CurrentVersion
+        {
+            get
+            {
+                return _currentVersion;
+            }
+            set
+            {
+                _currentVersion = value;
+                OnPropertyChanged();
+            }
+        }
+        public string LatestVersion
+        {
+            get
+            {
+                return _latestVersion;
+            }
+            set
+            {
+                _latestVersion = value;
+                OnPropertyChanged();
+            }
+        }
+        public string IsUpdate
+        {
+            get
+            {
+                return _isUpdate;
+            }
+            set
+            {
+                _isUpdate = value;
+                OnPropertyChanged();
+            }
+        }
+        public bool Admin
+        {
+            get
+            {
+                return _admin;
+            }
+            set
+            {
+                _admin = value;
+                OnPropertyChanged();
+            }
+        }
     }
 }

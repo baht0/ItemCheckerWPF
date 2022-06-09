@@ -74,6 +74,18 @@ namespace ItemChecker.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool NotWeapon {
+            get {
+                return ((bool)(this["NotWeapon"]));
+            }
+            set {
+                this["NotWeapon"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool Normal {
             get {
                 return ((bool)(this["Normal"]));
@@ -134,30 +146,6 @@ namespace ItemChecker.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool Overstock {
-            get {
-                return ((bool)(this["Overstock"]));
-            }
-            set {
-                this["Overstock"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool Ordered {
-            get {
-                return ((bool)(this["Ordered"]));
-            }
-            set {
-                this["Ordered"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool WithoutLock {
             get {
                 return ((bool)(this["WithoutLock"]));
@@ -193,13 +181,13 @@ namespace ItemChecker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool OnlyDopplers {
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int SelectedOnly {
             get {
-                return ((bool)(this["OnlyDopplers"]));
+                return ((int)(this["SelectedOnly"]));
             }
             set {
-                this["OnlyDopplers"] = value;
+                this["SelectedOnly"] = value;
             }
         }
     }

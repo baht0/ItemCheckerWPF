@@ -63,12 +63,11 @@ namespace ItemChecker.Net
 
             return (HttpWebResponse)response;
         }
-        public static HttpWebResponse CreateBuyOrder(CookieContainer cookies, string marketHashName, decimal price)
+        public static HttpWebResponse CreateBuyOrder(CookieContainer cookies, string marketHashName, decimal highest_buy_order, int currencyId)
         {
             CookieCollection cookieCollection = cookies.GetAllCookies();
             Cookie sessionId = cookieCollection.FirstOrDefault(x => x.Name == "sessionid");
-            int price_total = (int)(price * 100 + 1);
-            string body = $"sessionid={sessionId.Value}&currency=5&appid=730&market_hash_name={marketHashName}&price_total={price_total}&quantity=1&billing_state=&save_my_address=0";
+            string body = $"sessionid={sessionId.Value}&currency={currencyId}&appid=730&market_hash_name={marketHashName}&price_total={(int)(highest_buy_order * 100 + 1)}&quantity=1&billing_state=&save_my_address=0";
             string url = "https://steamcommunity.com/market/createbuyorder/";
             string referer = "https://steamcommunity.com/market/listings/730/" + marketHashName;
 
@@ -84,11 +83,11 @@ namespace ItemChecker.Net
 
             return SteamRequest(cookies, body, url, referer);
         }
-        public static HttpWebResponse BuyListing(CookieContainer cookies, string marketHashName, string listingId, decimal fee, decimal subtotal, decimal total)
+        public static HttpWebResponse BuyListing(CookieContainer cookies, string marketHashName, string listingId, decimal fee, decimal subtotal, decimal total, int currencyId)
         {
             CookieCollection cookieCollection = cookies.GetAllCookies();
             Cookie sessionId = cookieCollection.FirstOrDefault(x => x.Name == "sessionid");
-            string body = $"sessionid={sessionId.Value}&currency=5&fee={(int)fee}&subtotal={(int)subtotal}&total={(int)total}&quantity=1&first_name=&last_name=&billing_address=&billing_address_two=&billing_country=&billing_city=&billing_state=&billing_postal_code=&save_my_address=1";
+            string body = $"sessionid={sessionId.Value}&currency={currencyId}&fee={(int)fee}&subtotal={(int)subtotal}&total={(int)total}&quantity=1&first_name=&last_name=&billing_address=&billing_address_two=&billing_country=&billing_city=&billing_state=&billing_postal_code=&save_my_address=1";
             string url = "https://steamcommunity.com/market/buylisting/" + listingId;
             string referer = "https://steamcommunity.com/market/listings/730/" + marketHashName;
 
@@ -148,21 +147,7 @@ namespace ItemChecker.Net
         }
 
         //dropbox
-        public static String DropboxRead(string path)
-        {
-            HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create("https://content.dropboxapi.com/2/files/download");
-
-            httpRequest.Headers["Dropbox-API-Arg"] = "{\"path\": \"/" + path + "\"}";
-            httpRequest.Headers["Authorization"] = "Bearer a94CSH6hwyUAAAAAAAAAAf3zRyhyZknI9J8KM3VZihWEILAuv6Vr3ht_-4RQcJxs";
-
-            HttpWebResponse httpResponse = (HttpWebResponse)httpRequest.GetResponse();
-            Stream stream = httpResponse.GetResponseStream();
-            StreamReader streamReader = new(stream);
-            string s = httpResponse.StatusCode.ToString();
-
-            return streamReader.ReadToEnd();
-        }
-        public static String DropboxListFolder(string path)
+        public static JObject DropboxListFolder(string path)
         {
             HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create("https://api.dropboxapi.com/2/files/list_folder");
 
@@ -187,7 +172,7 @@ namespace ItemChecker.Net
             var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
             var streamReader = new StreamReader(httpResponse.GetResponseStream());
 
-            return streamReader.ReadToEnd();
+            return JObject.Parse(streamReader.ReadToEnd());
         }
         public static String DropboxDelete(string path)
         {

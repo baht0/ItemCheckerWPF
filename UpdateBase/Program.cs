@@ -2,28 +2,23 @@
 using Newtonsoft.Json.Linq;
 using HtmlAgilityPack;
 using System.Web;
+using System.Diagnostics;
 
 namespace UpdateBase
 {
     class Program
     {
-        static List<SteamBase> SteamBase { get; set; } = new();
-        static List<SteamBase> NewItemsBase { get; set; } = new();
+        static JArray Currency { get; set; } = new();
+        static List<Items> Items { get; set; } = new();
+        static int Count { get; set; }
+
         static void Main(string[] args)
         {
             try
             {
-                JArray skinsBase = JArray.Parse(Post.DropboxRead("steamBase.json"));
-                foreach (JObject item in skinsBase)
-                {
-                    SteamBase.Add(new SteamBase()
-                    {
-                        ItemName = item["itemName"].ToString(),
-                        SteamId = Convert.ToInt32(item["steamId"]),
-                        Type = item["type"].ToString(),
-                        Quality = item["quality"].ToString(),
-                    });
-                }
+                JObject json = JObject.Parse(Get.DropboxRead("steamBase.json"));
+                Currency = JArray.Parse(json["Currency"].ToString());
+                Items = JArray.Parse(json["Items"].ToString()).ToObject<List<Items>>();
 
                 List<string> weapons = new()
                 {
@@ -128,29 +123,37 @@ namespace UpdateBase
             }
             finally
             {
-                Console.WriteLine($"\r\n======================\r\n[{NewItemsBase.Count}] Program ended: {DateTime.Now}");
-                JArray jArray = new();
-                foreach (SteamBase item in NewItemsBase)
-                {
-                    jArray.Add(new JObject(
-                        new JProperty("itemName", item.ItemName),
-                        new JProperty("steamId", item.SteamId),
-                        new JProperty("type", item.Type),
-                        new JProperty("quality", item.Quality)));
-                }
-                File.WriteAllText($"_newItems.txt", jArray.ToString());
+                Console.WriteLine($"\r\n======================\r\n[{Count}] Program ended: {DateTime.Now}");
+                SaveJsonFile();
                 Console.ReadKey();
             }
+        }
+        static void SaveJsonFile()
+        {
+            JArray newItemsBase = JArray.FromObject(Items);
+            JArray sorted = new(newItemsBase.OrderBy(obj => (string)obj["itemName"]));
+            JObject json = new(
+                    new JProperty("Currency", Currency),
+                    new JProperty("Items", sorted));
+            File.WriteAllText($"steamBase.json", json.ToString());
+
+            var psi = new ProcessStartInfo(AppDomain.CurrentDomain.BaseDirectory)
+            {
+                UseShellExecute = true,
+                Verb = "open"
+            };
+            Process.Start(psi);
         }
         static void Check(List<string> items, string type, string sub = "")
         {
             int pages = 1;
+            int count = 0;
             Console.WriteLine($"'{type}' start. {DateTime.Now}");
             for (int i = 1; i <= pages; i++)
             {
                 foreach (string item in items)
                 {
-                    int start = NewItemsBase.Count;
+                    int start = Count;
 
                     string url = string.Empty;
                     switch (type)
@@ -191,8 +194,8 @@ namespace UpdateBase
                     HtmlDocument htmlDoc = new();
                     htmlDoc.LoadHtml(html);
                     HtmlNodeCollection skins = htmlDoc.DocumentNode.SelectNodes("//div[@class='container main-content']/div[@class='row'][" + rowId + "]/div[@class='col-lg-4 col-md-6 col-widen text-center']");
-                    
-                    pages = CountPages(htmlDoc, row);                    
+
+                    pages = CountPages(htmlDoc, row);
                     foreach (HtmlNode skin in skins)
                     {
                         switch (type)
@@ -231,10 +234,12 @@ namespace UpdateBase
                                 break;
                         }
                     }
-                    Console.WriteLine($"'{item}' {i}/{pages} done. Added [{NewItemsBase.Count - start}]...");
+
+                    count += Count - start;
+                    Console.WriteLine($"'{item}' {i}/{pages} done. Added [{Count - start}]");
                 }
             }
-            Console.WriteLine($"'{type}' [{NewItemsBase.Count}] done...");
+            Console.WriteLine($"'{type}' [{count}] done...");
         }
 
         static void CheckAll(List<string> weapons, List<string> knifes)
@@ -364,54 +369,51 @@ namespace UpdateBase
         static void SetSteamId()
         {
             int i = 1;
-            int start = SteamBase.Where(x => x.SteamId == 0).Count();
+            int start = Items.Where(x => x.steamId == 0).Count();
             Console.WriteLine($"Found: {start}, {DateTime.Now}");
-            foreach (var item in SteamBase)
+            foreach (var item in Items)
             {
-                if (item.SteamId == 0)
+                if (item.steamId == 0)
                 {
                     string html = string.Empty;
                     do
                     {
                         Thread.Sleep(100);
-                        html = SteamRequest(item.ItemName);
+                        html = SteamRequest(item.itemName);
                     } while (String.IsNullOrEmpty(html));
 
-                    item.SteamId = ItemNameId(html);
-                    Console.WriteLine($"{i}) {item.ItemName} / {item.SteamId}");
+                    item.steamId = ItemNameId(html);
+                    Console.WriteLine($"{i}) {item.itemName} / {item.steamId}");
                     i++;
                 }
             }
-            int end = SteamBase.Where(x => x.SteamId == 0).Count();
+            int end = Items.Where(x => x.steamId == 0).Count();
             Console.WriteLine($"Successfully: {start - end}/{start}.");
-
-            if (start - end > 0)
-            {
-                JArray jArray = new();
-                foreach (SteamBase item in SteamBase)
-                {
-                    jArray.Add(new JObject(
-                        new JProperty("itemName", item.ItemName),
-                        new JProperty("steamId", item.SteamId),
-                        new JProperty("type", item.Type),
-                        new JProperty("quality", item.Quality)));
-                }
-                File.WriteAllText($"_steamBase.txt", jArray.ToString());
-            }
         }
 
         static void AddBase(string itemName, string quality, string type)
         {
+            List<string> exceptions = new()
+            {
+                "MP5-SD | Lab Rats (Factory New)",
+                "MP5-SD | Lab Rats (Minimal Wear)",
+                "MP5-SD | Lab Rats (Field-Tested)"
+            };
+
             itemName = HttpUtility.HtmlDecode(itemName);
             itemName = itemName.Trim();
             itemName = itemName.Replace("\n", " ");
-            if (!SteamBase.Any(x => x.ItemName == itemName))
-                NewItemsBase.Add(new()
+
+            if (Items.FirstOrDefault(x => x.itemName == itemName) == null && !exceptions.Any(x => x == itemName))
+            {
+                Items.Add(new()
                 {
-                    ItemName = itemName,
-                    Quality = quality,
-                    Type = type
+                    itemName = itemName,
+                    quality = quality,
+                    type = type
                 });
+                Count++;
+            }
         }
         static String SetQuality(string line)
         {

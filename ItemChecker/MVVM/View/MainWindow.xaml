@@ -27,6 +27,9 @@
         <DataTemplate DataType="{x:Type viewModel:ParserViewModel}">
             <view:ParserView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModel:RareViewModel}">
+            <view:RareView />
+        </DataTemplate>
         <customConverter:BooleanToColorConverter x:Key="BooleanToColorConverter"/>
         <customConverter:BooleanToNotificationIconConverter x:Key="BooleanToNotificationIconConverter"/>
     </Window.Resources>
@@ -40,7 +43,7 @@
             <!--top-->
             <Grid Grid.Row="0" Background="Transparent">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="160"/>
+                    <ColumnDefinition Width="225"/>
                     <ColumnDefinition/>
                     <ColumnDefinition Width="170"/>
                 </Grid.ColumnDefinitions>
@@ -51,14 +54,13 @@
                             <ContextMenu Style="{StaticResource MaterialDesignContextMenu}" Background="{DynamicResource ElementBackground}">
                                 <MenuItem Header="Links">
                                     <MenuItem Header="SteamMarket" Click="SteamMarket_MenuItem_Click"/>
-                                    <MenuItem Header="Inventory" Click="Inventory_MenuItem_Click"/>
+                                    <MenuItem Header="MyInventory" Click="Inventory_MenuItem_Click"/>
                                     <Separator/>
                                     <MenuItem Header="Cs.Money" Click="CSM_MenuItem_Click"/>
                                     <MenuItem Header="Loot.Farm" Click="Lf_MenuItem_Click"/>
                                     <MenuItem Header="Buff163" Click="Buff_MenuItem_Click"/>
                                 </MenuItem>
-                                <MenuItem Header="OpenFolder" Command="{Binding OpenFolderCommand}"/>
-                                <MenuItem Header="Exit" Command="{Binding ExitCommand}"/>
+                                <MenuItem Header="Exit" Click="Exit_Click"/>
                             </ContextMenu>
                         </Image.ContextMenu>
                         <Image.ToolTip>
@@ -66,12 +68,16 @@
                         </Image.ToolTip>
                     </Image>
                     <Button Height="25" Style="{StaticResource MaterialDesignFlatButton}" 
-                        Click="Home_Click">
+                        Click="Home_Click" x:Name="Home">
                         <TextBlock Text="Home"/>
                     </Button>
                     <Button Height="25" Style="{StaticResource MaterialDesignFlatButton}" 
-                        Click="Parser_Click">
+                        Click="Parser_Click" x:Name="Parser">
                         <TextBlock Text="Parser"/>
+                    </Button>
+                    <Button Height="25" Style="{StaticResource MaterialDesignFlatButton}" 
+                        Click="Rare_Click" x:Name="Rare">
+                        <TextBlock Text="Rare"/>
                     </Button>
                 </StackPanel>
                 <Grid Background="Transparent" Grid.Column="1" MouseLeftButtonDown="Window_DragMove"/>
@@ -166,7 +172,7 @@
                         </Grid>
                     </Border>
                 </Popup>
-                <Popup Grid.Column="2" x:Name="PopupNotification" StaysOpen="False" Width="270" MaxHeight="200" Placement="Bottom" HorizontalOffset="1018">
+                <Popup Grid.Column="2" x:Name="PopupNotification" StaysOpen="False" Width="270" MaxHeight="210" Placement="Bottom" HorizontalOffset="1018">
                     <Border Background="{DynamicResource ElementBackground}" BorderThickness="0.5" BorderBrush="{DynamicResource Background}">
                         <ListView Margin="5" ItemsSource="{Binding MainInfo.Notifications}" SelectedItem="{Binding Notification}">
                             <ListView.ItemTemplate>
@@ -199,25 +205,17 @@
                     <ColumnDefinition/>
                     <ColumnDefinition Width="25"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0">
+                <TextBlock Grid.Column="0" VerticalAlignment="Center">
                     <TextBlock.Text>
-                        <MultiBinding StringFormat="{}{0} | Balance: {1}₽ / {2}$">
-                            <Binding Path="User"/>
+                        <MultiBinding StringFormat="Balance: {0}{1} / {2}$">
                             <Binding Path="Balance" />
+                            <Binding Path="CurrencySymbol" />
                             <Binding Path="BalanceUsd" />
                         </MultiBinding>
                     </TextBlock.Text>
                 </TextBlock>
-                <TextBlock Grid.Column="1" HorizontalAlignment="Right">
-                    <TextBlock.Text>
-                        <MultiBinding StringFormat="{}{0}₽ | {1}">
-                            <Binding Path="Currency" />
-                            <Binding Path="CurrencyString"/>
-                        </MultiBinding>
-                    </TextBlock.Text>
-                </TextBlock>
-                <TextBlock Grid.Column="2" ToolTip="Steam Status" HorizontalAlignment="Right">
-                        <materialDesign:PackIcon Kind="{Binding StatusCommunity}"/>
+                <TextBlock Grid.Column="2" ToolTip="Steam Status" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <materialDesign:PackIcon Kind="{Binding StatusCommunity}"/>
                 </TextBlock>
             </Grid>
             <materialDesign:Snackbar x:Name="MyMessage" Grid.Row="1" MessageQueue="{Binding MainInfo.Message}"/>

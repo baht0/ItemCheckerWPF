@@ -12,7 +12,7 @@ namespace ItemChecker.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.1.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.2.0.0")]
     internal sealed partial class StartUpProperties : global::System.Configuration.ApplicationSettingsBase {
         
         private static StartUpProperties defaultInstance = ((StartUpProperties)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new StartUpProperties())));
@@ -26,12 +26,12 @@ namespace ItemChecker.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool completionUpdate {
+        public bool CompletionUpdate {
             get {
-                return ((bool)(this["completionUpdate"]));
+                return ((bool)(this["CompletionUpdate"]));
             }
             set {
-                this["completionUpdate"] = value;
+                this["CompletionUpdate"] = value;
             }
         }
         
@@ -44,6 +44,54 @@ namespace ItemChecker.Properties {
             }
             set {
                 this["Remember"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SteamLoginSecure {
+            get {
+                return ((string)(this["SteamLoginSecure"]));
+            }
+            set {
+                this["SteamLoginSecure"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int SteamCurrencyId {
+            get {
+                return ((int)(this["SteamCurrencyId"]));
+            }
+            set {
+                this["SteamCurrencyId"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SessionBuff {
+            get {
+                return ((string)(this["SessionBuff"]));
+            }
+            set {
+                this["SessionBuff"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool BrowserRemember {
+            get {
+                return ((bool)(this["BrowserRemember"]));
+            }
+            set {
+                this["BrowserRemember"] = value;
             }
         }
     }
