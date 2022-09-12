@@ -44,7 +44,7 @@
             <Grid Background="{DynamicResource WindowTopBackground}" Margin="-10 0 -10 0"/>
             <Grid Grid.Row="0" Background="Transparent" MouseLeftButtonDown="Window_DragMove">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="225"/>
+                    <ColumnDefinition Width="235"/>
                     <ColumnDefinition/>
                     <ColumnDefinition Width="170"/>
                 </Grid.ColumnDefinitions>

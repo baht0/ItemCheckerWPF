@@ -169,13 +169,15 @@ namespace ItemChecker.MVVM.ViewModel
                                     OrderCheckService orderCheck = new();
                                     orderCheck.SteamOrders(true);
                                     HomeTable.OrderedGrid = new(SteamMarket.Orders);
-                                    BaseModel.IsWorking = false;
                                     Main.Message.Enqueue("MyOrders update is complete.");
                                 }
                                 catch (Exception ex)
                                 {
-                                    BaseModel.IsWorking = false;
                                     BaseService.errorLog(ex, true);
+                                }
+                                finally
+                                {
+                                    BaseModel.IsWorking = false;
                                 }
                             });
                             break;
@@ -194,13 +196,15 @@ namespace ItemChecker.MVVM.ViewModel
                                         foreach (DataOrder order in orders)
                                             SteamMarket.Orders.Cancel(order);
                                         HomeTable.OrderedGrid = new(SteamMarket.Orders);
-                                        BaseModel.IsWorking = false;
                                         Main.Message.Enqueue("All MyOrders have been cancelled.");
                                     }
                                     catch (Exception ex)
                                     {
-                                        BaseModel.IsWorking = false;
                                         BaseService.errorLog(ex, true);
+                                    }
+                                    finally
+                                    {
+                                        BaseModel.IsWorking = false;
                                     }
                                 });
                             break;
@@ -347,6 +351,7 @@ namespace ItemChecker.MVVM.ViewModel
                 {
                     try
                     {
+                        BaseModel.IsWorking = true;
                         InventoryService inventoryService = new();
                         var items = inventoryService.CheckInventory(null);
                         HomeInventoryInfo.Items = new(items);
@@ -357,8 +362,12 @@ namespace ItemChecker.MVVM.ViewModel
                     {
                         BaseService.errorLog(ex, true);
                     }
+                    finally
+                    {
+                        BaseModel.IsWorking = false;
+                    }
                 });
-            });
+            }, (obj) => !BaseModel.IsWorking);
         public ICommand ShowInventoryItemCommand =>
             new RelayCommand((obj) =>
             {

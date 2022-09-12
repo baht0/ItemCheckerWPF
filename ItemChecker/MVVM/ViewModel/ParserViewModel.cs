@@ -484,39 +484,49 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 BaseModel.IsWorking = true;
                 Task.Run(() => {
-                    SteamAccount.GetBalance();
+                    try
+                    {
+                        SteamAccount.GetBalance();
 
-                    int success = 0;
-                    ParserQueue.MaxProgress = ParserQueue.Items.Count;
-                    ParserQueue.CurrentProgress = 0;
-                    foreach (var item in ParserQueue.Queues)
-                    {
-                        try
+                        int success = 0;
+                        ParserQueue.MaxProgress = ParserQueue.Items.Count;
+                        ParserQueue.CurrentProgress = 0;
+                        foreach (var item in ParserQueue.Queues)
                         {
-                            OrderService.PlaceOrder(item.ItemName);
-                            success++;
+                            try
+                            {
+                                OrderService.PlaceOrder(item.ItemName);
+                                success++;
+                            }
+                            catch (Exception exp)
+                            {
+                                if (!exp.Message.Contains("429"))
+                                    BaseService.errorLog(exp, true);
+                                else
+                                    MessageBox.Show(exp.Message + "\n\nTo continue, you need to change the IP address.", "PlaceOrder stoped!", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                break;
+                            }
+                            finally
+                            {
+                                ParserQueue.CurrentProgress++;
+                            }
                         }
-                        catch (Exception exp)
+                        Main.Notifications.Add(new()
                         {
-                            if (!exp.Message.Contains("429"))
-                                BaseService.errorLog(exp, true);
-                            else
-                                MessageBox.Show(exp.Message + "\n\nTo continue, you need to change the IP address.", "PlaceOrder stoped!", MessageBoxButton.OK, MessageBoxImage.Warning);
-                            break;
-                        }
-                        finally
-                        {
-                            ParserQueue.CurrentProgress++;
-                        }
+                            Title = "Place Order",
+                            Message = $"{success}/{ParserQueue.Items.Count} orders has been placed."
+                        });
+                        ParserQueue.Items = new();
+                        ParserQueue.Queues.Clear();
                     }
-                    Main.Notifications.Add(new()
+                    catch (Exception ex)
                     {
-                        Title = "Place Order",
-                        Message = $"{success}/{ParserQueue.Items.Count} orders has been placed."
-                    });
-                    ParserQueue.Items = new();
-                    ParserQueue.Queues.Clear();
-                    BaseModel.IsWorking = false;
+                        BaseService.errorLog(ex, true);
+                    }
+                    finally
+                    {
+                        BaseModel.IsWorking = false;
+                    }                    
                 });
             }, (obj) => ParserQueue.Items.Any() & !BaseModel.IsWorking);
         //favorite

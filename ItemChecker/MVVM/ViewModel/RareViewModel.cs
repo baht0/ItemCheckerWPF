@@ -378,27 +378,32 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand BuyItemCommand =>
             new RelayCommand((obj) =>
             {
-                try
+                MessageBoxResult result = MessageBox.Show(
+                        "Are you sure you want to buy this item?", "Question",
+                        MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.No)
+                    return;
+                Task.Run(() =>
                 {
-                    MessageBoxResult result = MessageBox.Show("Are you sure you want to buy this item?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                    if (result == MessageBoxResult.Yes)
+                    try
                     {
-                        Task.Run(() =>
-                        {
-                            var data = (DataRare)obj;
-                            string marketHashName = Edit.EncodeMarketHashName(data.ItemName);
-                            var response = Post.BuyListing(SteamAccount.Cookies, marketHashName, data.DataBuy.ListingId, data.DataBuy.Fee, data.DataBuy.Subtotal, data.DataBuy.Total, SteamAccount.CurrencyId);
-                            if (response.StatusCode == System.Net.HttpStatusCode.OK)
-                                Main.Message.Enqueue($"{data.ItemName}\nWas bought.");
-                            else
-                                Main.Message.Enqueue($"Something went wrong...");
-                        });
+                        BaseModel.IsWorking = true;
+                        var data = (DataRare)obj;
+                        string marketHashName = Edit.EncodeMarketHashName(data.ItemName);
+                        var response = Post.BuyListing(SteamAccount.Cookies, marketHashName, data.DataBuy.ListingId, data.DataBuy.Fee, data.DataBuy.Subtotal, data.DataBuy.Total, SteamAccount.CurrencyId);
+                        string message = response.StatusCode == System.Net.HttpStatusCode.OK ? $"{data.ItemName}\nWas bought." : "Something went wrong...";
+                        Main.Message.Enqueue(message);
                     }
-                }
-                catch (Exception exp)
-                {
-                    BaseService.errorLog(exp, true);
-                }
+                    catch (Exception exp)
+                    {
+                        BaseService.errorLog(exp, true);
+                    }
+                    finally
+                    {
+                        BaseModel.IsWorking = false;
+                    }
+                });
+                
             }, (obj) => SelectedItem != null && !String.IsNullOrEmpty(SelectedItem.Link));
     }
 }
