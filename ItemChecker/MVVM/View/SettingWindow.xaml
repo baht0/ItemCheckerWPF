@@ -232,14 +232,11 @@
                     <GroupBox Margin="3" Style="{DynamicResource None}" Header="About" BorderThickness="0.5">
                         <Grid Margin="5">
                             <Grid.RowDefinitions>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                                <RowDefinition/>
+                                <RowDefinition Height="70"/>
+                                <RowDefinition Height="25"/>
+                                <RowDefinition Height="25"/>
+                                <RowDefinition Height="25"/>
+                                <RowDefinition Height="25"/>
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
@@ -247,25 +244,35 @@
                                 <ColumnDefinition/>
                                 <ColumnDefinition Width="40"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.ColumnSpan="3" HorizontalAlignment="Center" Text="ItemChecker" FontWeight="Bold" FontSize="16"/>
-                            <TextBlock Grid.Row="1" Text="Autor:" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="2" Text="Current version:" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="3" Text="Latest version:" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="8" Text="© 2018-2022" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" Text="baht0"  VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DataContext.About.CurrentVersion, RelativeSource={RelativeSource AncestorType=Window}}" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding DataContext.About.LatestVersion, RelativeSource={RelativeSource AncestorType=Window}}" VerticalAlignment="Center"/>
-                            <Button Grid.Row="2" Grid.Column="2" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
+                            <Grid Background="#fafafa" Height="42" Width="50"
+                                  HorizontalAlignment="Center" Grid.ColumnSpan="3"/>
+                            <Image Source="../../Resources/logo.png" Grid.ColumnSpan="3"/>
+                            <TextBlock Grid.Row="1" Grid.ColumnSpan="3" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       Text="ItemChecker" FontWeight="Bold" FontSize="16"/>
+
+                            <TextBlock Grid.Row="2" Text="Autor:" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="Rasim Bakhtiyarov" VerticalAlignment="Center"/>
+
+                            <TextBlock Grid.Row="3" Text="Current version:" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" VerticalAlignment="Center"
+                                       Text="{Binding DataContext.About.CurrentVersion, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                            <Button Grid.Row="3" Grid.Column="2" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
                                     Click="whatIsNewButton_Click" x:Name="whatIsNewButton">
                                 <materialDesign:PackIcon Kind="InfoOutline"/>
                             </Button>
-                            <Button Grid.Row="3" Grid.Column="2" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
+                            
+                            <TextBlock Grid.Row="4" Text="Latest version:" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" VerticalAlignment="Center"
+                                       Text="{Binding DataContext.About.LatestVersion, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                            <Button Grid.Row="4" Grid.Column="2" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
                                 Command="{Binding DataContext.UpdateCommand, RelativeSource={RelativeSource AncestorType=Window}}">
                                 <materialDesign:PackIcon Kind="{Binding DataContext.About.IsUpdate, RelativeSource={RelativeSource AncestorType=Window}}"/>
                             </Button>
-                            <Button Grid.Row="8" Grid.Column="2" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
+
+                            <TextBlock Grid.Row="5" Text="© 2018-2022 baht0" VerticalAlignment="Bottom" Grid.ColumnSpan="3"/>
+                            <Button Grid.Row="5" Grid.Column="2" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}" VerticalAlignment="Bottom"
                                     Visibility="{Binding DataContext.About.Admin, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                Command="{Binding DataContext.CreateCurrentVersionCommand, RelativeSource={RelativeSource AncestorType=Window}}">
+                                    Command="{Binding DataContext.CreateCurrentVersionCommand, RelativeSource={RelativeSource AncestorType=Window}}">
                                 <materialDesign:PackIcon Kind="Upload"/>
                             </Button>
                         </Grid>
