@@ -133,6 +133,7 @@ namespace UpdateBase
             JArray newItemsBase = JArray.FromObject(Items);
             JArray sorted = new(newItemsBase.OrderBy(obj => (string)obj["itemName"]));
             JObject json = new(
+                    new JProperty("Updated", DateTime.Now),
                     new JProperty("Currency", Currency),
                     new JProperty("Items", sorted));
             File.WriteAllText($"steamBase.json", json.ToString());
