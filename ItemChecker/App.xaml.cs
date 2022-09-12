@@ -8,6 +8,8 @@ using Model = ItemChecker.MVVM.Model;
 using ItemChecker.MVVM.ViewModel;
 using ItemChecker.MVVM.View;
 using ItemChecker.Properties;
+using ItemChecker.MVVM.Model;
+using System.IO;
 
 namespace ItemChecker
 {
@@ -56,6 +58,7 @@ namespace ItemChecker
             notifyIcon.MouseDoubleClick += notifyIconMouseDoubleClick;
 
             notifyIcon.ContextMenuStrip = new();
+            notifyIcon.ContextMenuStrip.Items.Add("Logout", null, LogoutClicked);
             notifyIcon.ContextMenuStrip.Items.Add("Exit", null, ExitClicked);
 
             notifyIcon.Visible = true;
@@ -117,6 +120,23 @@ namespace ItemChecker
                 startVM.ExitCommand.Execute(null);
             else if (MainWindow.DataContext is MainViewModel mainVM)
                 mainVM.ExitCommand.Execute(null);
+        }
+        void LogoutClicked(object sender, EventArgs e)
+        {
+            MessageBoxResult result = MessageBox.Show("Are you sure you want to logout?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.No)
+                return;
+
+            StartUpProperties.Default.SteamLoginSecure = string.Empty;
+            StartUpProperties.Default.SteamCurrencyId = 0;
+            StartUpProperties.Default.SessionBuff = string.Empty;
+            StartUpProperties.Default.Save();
+
+            string profilesDir = ProjectInfo.DocumentPath + "profile";
+            if (Directory.Exists(profilesDir))
+                Directory.Delete(profilesDir);
+
+            Application.Current.Shutdown();
         }
     }
 }

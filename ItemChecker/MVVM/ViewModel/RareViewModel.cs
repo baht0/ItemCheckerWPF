@@ -49,18 +49,6 @@ namespace ItemChecker.MVVM.ViewModel
                 if (value == null)
                     return;
                 RareInfo.Data = value;
-
-                RareInfo.BaseItem = new();
-                var baseItem = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == value.ItemName);
-                if (baseItem != null)
-                {
-                    Task.Run(() => {
-                        ItemBaseService baseService = new();
-                        baseService.UpdateBuffInfoItem(value.ItemName);
-                        RareInfo.BaseItem = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == value.ItemName);
-                    });
-                }
-
             }
         }
         public RareFilter FilterConfig
@@ -97,7 +85,6 @@ namespace ItemChecker.MVVM.ViewModel
         private RareCheckConfig _rareCheckConfig = new();
         private RareCheckStatus _rareCheckStatus = new();
         private RareInfo _rareInfo = new();
-        private RareItems _rareItems = new();
         private string _addItem = string.Empty;
         public RareCheckConfig RareCheckConfig
         {
@@ -135,18 +122,6 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        public RareItems RareItems
-        {
-            get
-            {
-                return _rareItems;
-            }
-            set
-            {
-                _rareItems = value;
-                OnPropertyChanged();
-            }
-        }
         public string AddItem
         {
             get
@@ -171,7 +146,7 @@ namespace ItemChecker.MVVM.ViewModel
         {
             try
             {
-                RareItems.List = new(DataSavedList.Items.Where(x => x.ListName == "rare"));
+
             }
             catch (Exception ex)
             {
@@ -253,6 +228,18 @@ namespace ItemChecker.MVVM.ViewModel
                 RareFilter.FilterConfig = new();
             }, (obj) => RareTable.Items.Any());
         //Check
+        public ICommand ClearCheckedCommand =>
+            new RelayCommand((obj) =>
+            {
+                MessageBoxResult result = MessageBox.Show("Are you sure you want to clear the list?",
+                    "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
+                {
+                    RareCheckStatus = new();
+                    RareTable.Items.Clear();
+                    RareTable.GridView = CollectionViewSource.GetDefaultView(RareTable.Items);
+                }
+            }, (obj) => RareTable.Items.Any() && !RareCheckStatus.IsService);
         public ICommand CheckCommand =>
             new RelayCommand((obj) =>
             {
@@ -275,7 +262,7 @@ namespace ItemChecker.MVVM.ViewModel
                     RareCheckStatus.TimerTick = 0;
                     RareCheckStatus.Timer.Elapsed -= timerTick;
                 }
-            }, (obj) => RareItems.List.Any());
+            }, (obj) => ItemsList.Rare.Any());
         void SaveConfig(RareCheckConfig config)
         {
             RareProperties.Default.Time = config.Time;
@@ -296,6 +283,7 @@ namespace ItemChecker.MVVM.ViewModel
             RareProperties.Default.IsGold = config.Gold;
             RareProperties.Default.IsContraband = config.Contraband;
             RareProperties.Default.StickerCount = config.StickerCount;
+            RareProperties.Default.NameContains = config.NameContains;
 
             RareProperties.Default.Phase1 = config.Phase1;
             RareProperties.Default.Phase2 = config.Phase2;
@@ -313,7 +301,7 @@ namespace ItemChecker.MVVM.ViewModel
         {
             RareCheckStatus.TimerTick--;
             TimeSpan timeSpan = TimeSpan.FromSeconds(RareCheckStatus.TimerTick);
-            RareCheckStatus.Status = "Next check: " + timeSpan.ToString("mm':'ss");
+            RareCheckStatus.Status = timeSpan.ToString("mm':'ss");
             if (RareCheckStatus.TimerTick <= 0)
             {
                 RareCheckStatus.Status = "Preparation...";
@@ -330,15 +318,11 @@ namespace ItemChecker.MVVM.ViewModel
             try
             {
                 int start = RareTable.Items.Count;
-                ItemBaseService baseService = new();
-                baseService.UpdateCsmInfo();
-                baseService.UpdateLfmInfo();
 
                 RareCheckService floatCheck = new();
-                SteamAccount.GetSteamBalance();
-                RareCheckStatus.MaxProgress = RareItems.List.Count;
+                RareCheckStatus.MaxProgress = ItemsList.Rare.Count;
                 RareCheckStatus.Status = "Checking...";
-                foreach (var list in RareItems.List)
+                foreach (var list in ItemsList.Rare)
                 {
                     try
                     {
@@ -370,6 +354,10 @@ namespace ItemChecker.MVVM.ViewModel
                 RareCheckStatus.cts.Cancel();
                 RareCheckStatus.Status = string.Empty;
                 RareCheckStatus.IsService = false;
+                RareCheckStatus.Timer.Enabled = false;
+                RareCheckStatus.TimerTick = 0;
+                RareCheckStatus.Timer.Elapsed -= timerTick;
+
                 BaseService.errorLog(exp, true);
             }
             finally
@@ -390,38 +378,27 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand BuyItemCommand =>
             new RelayCommand((obj) =>
             {
-                MessageBoxResult result = MessageBox.Show("Are you sure you want to buy this item?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if (result == MessageBoxResult.Yes)
+                try
                 {
-                    var data = (DataRare)obj;
-                    string marketHashName = Edit.EncodeMarketHashName(data.ItemName);
-                    var response = Post.BuyListing(SteamAccount.Cookies, marketHashName, data.DataBuy.ListingId, data.DataBuy.Fee, data.DataBuy.Subtotal, data.DataBuy.Total, SteamAccount.CurrencyId);
-                    if (response.StatusCode == System.Net.HttpStatusCode.OK)
-                        Main.Message.Enqueue($"{data.ItemName}\nWas bought.");
-                    else
-                        Main.Message.Enqueue($"Something went wrong...");
+                    MessageBoxResult result = MessageBox.Show("Are you sure you want to buy this item?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        Task.Run(() =>
+                        {
+                            var data = (DataRare)obj;
+                            string marketHashName = Edit.EncodeMarketHashName(data.ItemName);
+                            var response = Post.BuyListing(SteamAccount.Cookies, marketHashName, data.DataBuy.ListingId, data.DataBuy.Fee, data.DataBuy.Subtotal, data.DataBuy.Total, SteamAccount.CurrencyId);
+                            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                                Main.Message.Enqueue($"{data.ItemName}\nWas bought.");
+                            else
+                                Main.Message.Enqueue($"Something went wrong...");
+                        });
+                    }
+                }
+                catch (Exception exp)
+                {
+                    BaseService.errorLog(exp, true);
                 }
             }, (obj) => SelectedItem != null && !String.IsNullOrEmpty(SelectedItem.Link));
-        //items
-        public ICommand AddItemCommand =>
-            new RelayCommand((obj) =>
-            {
-                DataSavedList.Add(AddItem, "rare");
-                AddItem = string.Empty;
-            });
-        public ICommand RemoveItemCommand =>
-            new RelayCommand((obj) =>
-            {
-                var item = (DataSavedList)obj;
-                DataSavedList.Items.Remove(item);
-                DataSavedList.Save();
-            }, (obj) => DataSavedList.Items.Any(x => x.ListName == "rare") && RareItems.SelectedItem != null);
-        public ICommand ClearItemsCommand =>
-            new RelayCommand((obj) =>
-            {
-                MessageBoxResult result = MessageBox.Show("Are you sure you want to clear the list?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if (result == MessageBoxResult.Yes)
-                    DataSavedList.Clear("rare");
-            }, (obj) => !RareCheckStatus.IsService && DataSavedList.Items.Any(x => x.ListName == "rare"));
     }
 }

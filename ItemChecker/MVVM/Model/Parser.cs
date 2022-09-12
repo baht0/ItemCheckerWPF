@@ -53,12 +53,21 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        private DataParser _selectedItem;
+        public DataParser SelectedItem
+        {
+            get
+            {
+                return _selectedItem;
+            }
+            set
+            {
+                _selectedItem = value;
+                OnPropertyChanged();
+            }
+        }
 
         private int _count = 0;
-        private string _price1 = "Price1";
-        private string _price2 = "Price2";
-        private string _price3 = "Price3";
-        private string _price4 = "Price4";
         public int Count
         {
             get
@@ -68,54 +77,6 @@ namespace ItemChecker.MVVM.Model
             set
             {
                 _count = value;
-                OnPropertyChanged();
-            }
-        }
-        public string Price1
-        {
-            get
-            {
-                return _price1;
-            }
-            set
-            {
-                _price1 = value;
-                OnPropertyChanged();
-            }
-        }
-        public string Price2
-        {
-            get
-            {
-                return _price2;
-            }
-            set
-            {
-                _price2 = value;
-                OnPropertyChanged();
-            }
-        }
-        public string Price3
-        {
-            get
-            {
-                return _price3;
-            }
-            set
-            {
-                _price3 = value;
-                OnPropertyChanged();
-            }
-        }
-        public string Price4
-        {
-            get
-            {
-                return _price4;
-            }
-            set
-            {
-                _price4 = value;
                 OnPropertyChanged();
             }
         }
@@ -224,15 +185,12 @@ namespace ItemChecker.MVVM.Model
         public bool Price1 { get; set; }
         public bool Price2 { get; set; }
         public bool Price3 { get; set; }
-        public bool Price4 { get; set; }
         public decimal Price1From { get; set; }
         public decimal Price1To { get; set; }
         public decimal Price2From { get; set; }
         public decimal Price2To { get; set; }
         public decimal Price3From { get; set; }
         public decimal Price3To { get; set; }
-        public decimal Price4From { get; set; }
-        public decimal Price4To { get; set; }
         //profit
         public decimal PrecentFrom { get; set; }
         public decimal PrecentTo { get; set; }

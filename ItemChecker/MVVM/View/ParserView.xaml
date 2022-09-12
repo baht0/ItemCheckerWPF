@@ -13,9 +13,9 @@
              d:DesignHeight="660" d:DesignWidth="1280">
     <UserControl.Resources>
         <ControlTemplate x:Key="ValidError"/>
-        <customConverter:DateTimeConverter x:Key="DateTimeConverter"/>
         <customConverter:BooleanToYesNoConverter x:Key="BooleanToYesNoConverter"/>
         <customConverter:BooleanToPlayButtonConverter x:Key="BooleanToPlayButtonConverter"/>
+        <customConverter:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
         <Storyboard x:Key="MenuOpen">
             <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(FrameworkElement.Width)" Storyboard.TargetName="FilterGrid">
                 <EasingDoubleKeyFrame KeyTime="0" Value="0"/>
@@ -65,39 +65,21 @@
                       SelectedIndex="{Binding ParserTable.CurrencyId}"
                       SelectionChanged="currency_SelectionChanged"/>
             <DataGrid Grid.Row="1" x:Name="parserGrid" AlternationCount="2" AlternatingRowBackground="{DynamicResource ElementBackground}"
-                      AutoGenerateColumns="False" IsReadOnly="True"
-                      ItemsSource="{Binding ParserTable.GridView, UpdateSourceTrigger=PropertyChanged}"
-                      SelectedItem="{Binding SelectedItem}"
-                      KeyDown="DataGrid_KeyDown" MouseDoubleClick="DataGrid_MouseDoubleClick"
-                      ToolTip="Press 'Insert' to add to queue&#x0a;Press 'F' to add to favorites&#x0a;Press 'F+Ctrl' to remove from favorites">
+                      AutoGenerateColumns="False" SelectionMode="Single" KeyDown="DataGrid_KeyDown" MouseDoubleClick="DataGrid_MouseDoubleClick"
+                      ItemsSource="{Binding ParserTable.GridView, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding ParserTable.SelectedItem}"
+                      ToolTip="Press 'Insert' to add to queue&#x0a;Press 'F' to add to favorites&#x0a;Press 'F+Ctrl' to remove from favorites"
+                      IsReadOnly="True" CanUserReorderColumns="False" CanUserResizeRows="False" CanUserResizeColumns="False">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Binding="{Binding ItemName}" CanUserResize="False" Width="auto" MaxWidth="400" MinWidth="320">
+                    <DataGridTextColumn Binding="{Binding ItemName}" CanUserResize="False" Width="auto" MaxWidth="500" MinWidth="420">
                         <DataGridTextColumn.Header>
                             <TextBlock Text="{Binding DataContext.ParserTable.GridView.Count, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat='Item: {0}'}"/>
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding Price1}" CanUserResize="False" Width="auto">
-                        <DataGridTextColumn.Header>
-                            <TextBlock Text="{Binding DataContext.ParserTable.Price1, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
-                        </DataGridTextColumn.Header>
-                    </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding Price2}" CanUserResize="False" Width="auto">
-                        <DataGridTextColumn.Header>
-                            <TextBlock Text="{Binding DataContext.ParserTable.Price2, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
-                        </DataGridTextColumn.Header>
-                    </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding Price3}" CanUserResize="False" Width="auto">
-                        <DataGridTextColumn.Header>
-                            <TextBlock Text="{Binding DataContext.ParserTable.Price3, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
-                        </DataGridTextColumn.Header>
-                    </DataGridTextColumn>
-                    <DataGridTextColumn Binding="{Binding Price4}" CanUserResize="False" Width="auto">
-                        <DataGridTextColumn.Header>
-                            <TextBlock Text="{Binding DataContext.ParserTable.Price4, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
-                        </DataGridTextColumn.Header>
-                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding Purchase}" Header="Purchase" CanUserResize="False" Width="auto"/>
+                    <DataGridTextColumn Binding="{Binding Price}" Header="Price" CanUserResize="False" Width="auto"/>
+                    <DataGridTextColumn Binding="{Binding Get}" Header="Get" CanUserResize="False" Width="auto"/>
                     <DataGridTextColumn Header="Precent" Binding="{Binding Precent}" CanUserResize="False" Width="auto"/>
-                    <DataGridTextColumn Header="Differece" Binding="{Binding Difference}" CanUserResize="False" Width="auto" MaxWidth="110"/>
+                    <DataGridTextColumn Header="Difference" Binding="{Binding Difference}" CanUserResize="False" Width="auto" MaxWidth="110"/>
                 </DataGrid.Columns>
             </DataGrid>
             <!--search-->
@@ -109,12 +91,12 @@
                     <ColumnDefinition Width="30"/>
                 </Grid.ColumnDefinitions>
                 <Button Grid.Column="0" x:Name="OpenFilter" Style="{StaticResource MaterialDesignToolForegroundButton}">
-                    <materialDesign:PackIcon Kind="FormatListBulleted"/>
+                    <materialDesign:PackIcon Kind="Tune"/>
                 </Button>
                 <TextBlock Grid.Column="1" Text="Search Item:" VerticalAlignment="Center"/>
                 <TextBox Grid.Column="2" VerticalAlignment="Center" x:Name="SearchTxt" Text="{Binding SearchString}" KeyDown="TextBox_KeyDown"/>
                 <Button Grid.Column="3" Command="{Binding ClearSearchCommand}" Style="{StaticResource MaterialDesignToolForegroundButton}">
-                    <materialDesign:PackIcon Kind="Close"/>
+                    <materialDesign:PackIcon Kind="Clear"/>
                 </Button>
             </Grid>
             <!--filter-->
@@ -131,15 +113,15 @@
                             <RowDefinition Height="117"/>
                             <RowDefinition Height="132"/>
                             <RowDefinition Height="132"/>
-                            <RowDefinition Height="112"/>
-                            <RowDefinition Height="70"/>
+                            <RowDefinition Height="95"/>
+                            <RowDefinition Height="72"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <GroupBox Header="Category:" Grid.Row="0" Grid.Column="0"
-                              Style="{DynamicResource None}">
+                              Style="{DynamicResource None}" BorderThickness="0.5">
                             <Grid Margin="2">
                                 <Grid.RowDefinitions>
                                     <RowDefinition/>
@@ -156,7 +138,7 @@
                             </Grid>
                         </GroupBox>
                         <GroupBox Header="Other:" Grid.Row="0" Grid.Column="1"
-                              Style="{DynamicResource None}">
+                              Style="{DynamicResource None}" BorderThickness="0.5">
                             <Grid Margin="2">
                                 <Grid.RowDefinitions>
                                     <RowDefinition/>
@@ -171,7 +153,7 @@
                             </Grid>
                         </GroupBox>
                         <GroupBox Header="Exterior:" Grid.Row="1" Grid.Column="0"
-                              Style="{DynamicResource None}">
+                              Style="{DynamicResource None}" BorderThickness="0.5">
                             <Grid Margin="2">
                                 <Grid.RowDefinitions>
                                     <RowDefinition/>
@@ -190,7 +172,7 @@
                             </Grid>
                         </GroupBox>
                         <GroupBox Header="Quality:" Grid.Row="1" Grid.Column="1"
-                              Style="{DynamicResource None}">
+                              Style="{DynamicResource None}" BorderThickness="0.5">
                             <Grid Margin="2">
                                 <Grid.RowDefinitions>
                                     <RowDefinition/>
@@ -209,7 +191,7 @@
                             </Grid>
                         </GroupBox>
                         <GroupBox Header="Types:" Grid.Row="2" Grid.ColumnSpan="2"
-                              Style="{DynamicResource None}">
+                              Style="{DynamicResource None}" BorderThickness="0.5">
                             <Grid Margin="2">
                                 <Grid.RowDefinitions>
                                     <RowDefinition/>
@@ -244,10 +226,9 @@
                             </Grid>
                         </GroupBox>
                         <GroupBox Header="Prices:" Grid.Row="3" Grid.ColumnSpan="2"
-                              Style="{DynamicResource None}">
+                              Style="{DynamicResource None}" BorderThickness="0.5">
                             <Grid Margin="2">
                                 <Grid.RowDefinitions>
-                                    <RowDefinition/>
                                     <RowDefinition/>
                                     <RowDefinition/>
                                     <RowDefinition/>
@@ -258,37 +239,25 @@
                                     <ColumnDefinition Width="15"/>
                                     <ColumnDefinition Width="65"/>
                                 </Grid.ColumnDefinitions>
-                                <CheckBox Grid.Row="0" Grid.Column="0"
-                                          Content="{Binding DataContext.ParserTable.Price1, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-                                          IsChecked="{Binding Price1}"/>
-                                <CheckBox Grid.Row="1" Grid.Column="0" 
-                                          Content="{Binding DataContext.ParserTable.Price2, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                          IsChecked="{Binding Price2}"/>
-                                <CheckBox Grid.Row="2" Grid.Column="0" 
-                                          Content="{Binding DataContext.ParserTable.Price3, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                          IsChecked="{Binding Price3}"/>
-                                <CheckBox Grid.Row="3" Grid.Column="0" 
-                                          Content="{Binding DataContext.ParserTable.Price4, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                          IsChecked="{Binding Price4}"/>
+                                <CheckBox Grid.Row="0" Grid.Column="0" Content="Purchase" IsChecked="{Binding Price1}"/>
+                                <CheckBox Grid.Row="1" Grid.Column="0" Content="Price" IsChecked="{Binding Price2}"/>
+                                <CheckBox Grid.Row="2" Grid.Column="0" Content="Get" IsChecked="{Binding Price3}"/>
 
                                 <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Price1From}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                                 <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Price2From}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                                 <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Price3From}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
-                                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Price4From}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
 
                                 <TextBlock Grid.Row="0" Grid.Column="2" Text="-" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                 <TextBlock Grid.Row="1" Grid.Column="2" Text="-" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                 <TextBlock Grid.Row="2" Grid.Column="2" Text="-" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                <TextBlock Grid.Row="3" Grid.Column="2" Text="-" VerticalAlignment="Center" HorizontalAlignment="Center"/>
 
                                 <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding Price1To}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                                 <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding Price2To}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                                 <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding Price3To}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
-                                <TextBox Grid.Row="3" Grid.Column="3" Text="{Binding Price4To}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                             </Grid>
                         </GroupBox>
                         <GroupBox Header="Profit:" Grid.Row="4" Grid.ColumnSpan="2"
-                              Style="{DynamicResource None}">
+                              Style="{DynamicResource None}" BorderThickness="0.5">
                             <Grid Margin="2">
                                 <Grid.RowDefinitions>
                                     <RowDefinition/>
@@ -345,9 +314,8 @@
             </Grid.RowDefinitions>
             <materialDesign:ColorZone Background="Transparent">
                     <StackPanel Orientation="Horizontal" Margin="2" HorizontalAlignment="Center">
-                        <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="checkTab" Margin="2" Content="Check" IsChecked="True"/>
-                        <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="infoTab" Margin="2" Content="Info"/>
-                        <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="queueTab" Margin="2" Content="Queue"/>
+                    <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="checkTab" Width="124" Margin="1" Content="Check" IsChecked="True"/>
+                    <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="queueTab" Width="124" Margin="1" Content="Queue"/>
                     </StackPanel>
             </materialDesign:ColorZone>
             <Border Grid.Row="1" BorderBrush="{StaticResource PrimaryHueMidBrush}" Margin="10">
@@ -365,7 +333,7 @@
                                 <RowDefinition Height="32"/>
                                 <RowDefinition Height="160"/>
                                 <RowDefinition Height="60"/>
-                                <RowDefinition Height="140"/>
+                                <RowDefinition Height="100"/>
                             </Grid.RowDefinitions>
                             <TextBlock VerticalAlignment="Center" FontWeight="Bold"
                                        Text="{Binding ParserCheckInfo.CountList, StringFormat='Generated list: {0}'}"/>
@@ -385,9 +353,11 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="Price:" VerticalAlignment="Center" ToolTip="For Service 1"/>
                                     <VirtualizingStackPanel Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                        <TextBox Width="60" Height="23" Text="{Binding ParserCheckConfig.MinPrice}" TextInput="NumberPlus_PreviewTextInput" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
+                                        <TextBox Width="60" Height="23" Text="{Binding ParserCheckConfig.MinPrice}"
+                                                 TextInput="NumberPlus_PreviewTextInput" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                                         <TextBlock Margin="8 0 8 0" Text="-" VerticalAlignment="Center"/>
-                                        <TextBox Width="60" Height="23" Text="{Binding ParserCheckConfig.MaxPrice}" TextInput="NumberPlus_PreviewTextInput" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
+                                        <TextBox Width="60" Height="23" Text="{Binding ParserCheckConfig.MaxPrice}"
+                                                 TextInput="NumberPlus_PreviewTextInput" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                                         <TextBlock Grid.Column="4" Text="$" VerticalAlignment="Center"/>
                                     </VirtualizingStackPanel>
                                     <CheckBox Grid.Row="1" Grid.Column="0" x:Name="Normal"
@@ -448,16 +418,13 @@
                                         <RowDefinition/>
                                         <RowDefinition/>
                                         <RowDefinition/>
-                                        <RowDefinition/>
                                     </Grid.RowDefinitions>
                                     <TextBlock Text="From:" Grid.Row="0" VerticalAlignment="Center"/>
                                     <TextBlock Text="{Binding ParserCheckInfo.Service1}" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center"/>
                                     <TextBlock Text="To:" Grid.Row="1" VerticalAlignment="Center"/>
                                     <TextBlock Text="{Binding ParserCheckInfo.Service2}" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Mode:" Grid.Row="2" VerticalAlignment="Center"/>
-                                    <TextBlock Text="{Binding ParserCheckInfo.Mode}" Grid.Row="2" Grid.Column="1" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Checked:" Grid.Row="3" VerticalAlignment="Center"/>
-                                    <TextBlock Text="{Binding ParserCheckInfo.DateTime, StringFormat='{}{0:dd MMM hh:mm}'}" Grid.Row="3" Grid.Column="2" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Checked:" Grid.Row="2" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding ParserCheckInfo.DateTime, StringFormat='{}{0:dd MMM hh:mm tt}'}" Grid.Row="3" Grid.Column="2" VerticalAlignment="Center"/>
                                 </Grid>
                             </GroupBox>
                         </Grid>
@@ -481,15 +448,15 @@
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
                             <VirtualizingStackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                <Button ToolTip="Import Table from *.json" VerticalAlignment="Center"
+                                <Button ToolTip="Import saved tables" VerticalAlignment="Center"
                                         Style="{StaticResource MaterialDesignToolForegroundButton}"
-                                        Command="{Binding ImportCommand}">
+                                        Click="Import_Click">
                                     <materialDesign:PackIcon Kind="Upload"/>
                                 </Button>
                                 <TextBlock Text="{Binding ParserCheckInfo.Status}" 
                                            Visibility="{Binding ParserCheckInfo.TimerOn, Converter={StaticResource BooleanToVisibilityConverter}}" 
                                            Margin="5 0 0 0" VerticalAlignment="Center" FontSize="12"/>
-                            </VirtualizingStackPanel>                            
+                            </VirtualizingStackPanel>
                             <VirtualizingStackPanel Orientation="Horizontal" HorizontalAlignment="Right"
                                                     Grid.Column="2">
                                 <Button Style="{StaticResource MaterialDesignFlatButton}"
@@ -509,297 +476,91 @@
                                          Maximum="{Binding ParserCheckInfo.MaxProgress}"/>
                         </Grid>
                     </Grid>
-                    <!--info-->
-                    <Grid Visibility="{Binding IsChecked, ElementName=infoTab, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="32"/>
-                            <RowDefinition/>
-                        </Grid.RowDefinitions>
-                        <TextBlock Text="Item Informations" VerticalAlignment="Center" FontWeight="Bold"/>
-                        <Button ToolTip="Update service inventory"
-                                        Style="{StaticResource MaterialDesignToolForegroundButton}" HorizontalAlignment="Right"
-                                        Command="{Binding UpdateInventoryCommand}">
-                            <materialDesign:PackIcon Kind="Reload"/>
-                        </Button>
-                        <Separator VerticalAlignment="Bottom"/>
-                        <!--ST-->
-                        <Grid Grid.Row="1"
-                              Visibility="{Binding DataContext.ParserInfo.ST, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="45"/>
-                                <RowDefinition Height="20"/>
-                                <RowDefinition Height="20"/>
-                                <RowDefinition Height="45"/>
-                                <RowDefinition/>
-                                <RowDefinition Height="20"/>
-                                <RowDefinition Height="20"/>
-                            </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" VerticalAlignment="Center" TextWrapping="Wrap"
-                                       Text="{Binding StringFormat=Item: {0}, Path=ParserInfo.ItemName}"/>
-                            <TextBlock Grid.Row="1" VerticalAlignment="Center">
-                                <TextBlock.Text>
-                                    <MultiBinding StringFormat="LowestSellOrder: {0}{1}">
-                                        <Binding Path="ParserInfo.ItemSt.LowestSellOrder" />
-                                        <Binding Path="ParserTable.CurrencySymbol" />
-                                    </MultiBinding>
-                                </TextBlock.Text>
-                            </TextBlock>
-                            <TextBlock Grid.Row="2" VerticalAlignment="Center">
-                                <TextBlock.Text>
-                                    <MultiBinding StringFormat="HighestBuyOrder: {0}{1}">
-                                        <Binding Path="ParserInfo.ItemSt.HighestBuyOrder" />
-                                        <Binding Path="ParserTable.CurrencySymbol" />
-                                    </MultiBinding>
-                                </TextBlock.Text>
-                            </TextBlock>
-                            <TextBlock Grid.Row="3" VerticalAlignment="Bottom">
-                                <TextBlock.Text>
-                                    <MultiBinding StringFormat="LastSale: {0:dd MMM yyyy} | {1} DaysAgo &#x0a;Price: {2}{3}">
-                                        <Binding Path="ParserInfo.ItemSt.LastSale.Item1" />
-                                        <Binding Path="ParserInfo.ItemSt.LastSale.Item2" />
-                                        <Binding Path="ParserInfo.ItemSt.LastSale.Item3" />
-                                        <Binding Path="ParserTable.CurrencySymbolSteam" />
-                                    </MultiBinding>
-                                </TextBlock.Text>
-                            </TextBlock>
-                            <DataGrid Grid.Row="4" ItemsSource="{Binding ParserInfo.ItemSt.PriceHistory}" FontSize="11"
-                                      AlternationCount="2" AlternatingRowBackground="{DynamicResource ElementBackground}"
-                                      AutoGenerateColumns="False" IsReadOnly="True">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Date" CanUserResize="False"
-                                                        Binding="{Binding Date, StringFormat='{}{0:dd MMM yyyy}'}"
-                                                        MaxWidth="100"/>
-                                    <DataGridTextColumn Header="Price" CanUserResize="False" Binding="{Binding Price}"
-                                                        Width="Auto"/>
-                                    <DataGridTextColumn Header="Count" Width="auto" CanUserResize="False" Binding="{Binding Count}"/>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                            <TextBlock Grid.Row="5" VerticalAlignment="Center" FontStyle="Italic">
-                                <TextBlock.Text>
-                                    <MultiBinding StringFormat="Last 30 days Avg ({0}): {1}{2}">
-                                        <Binding Path="ParserInfo.ItemSt.Count30" />
-                                        <Binding Path="ParserInfo.ItemSt.Avg30" />
-                                        <Binding Path="ParserTable.CurrencySymbolSteam" />
-                                    </MultiBinding>
-                                </TextBlock.Text>
-                            </TextBlock>
-                            <TextBlock Grid.Row="6" VerticalAlignment="Center" FontStyle="Italic">
-                                <TextBlock.Text>
-                                    <MultiBinding StringFormat="Last 60 days Avg ({0}): {1}{2}">
-                                        <Binding Path="ParserInfo.ItemSt.Count60" />
-                                        <Binding Path="ParserInfo.ItemSt.Avg60" />
-                                        <Binding Path="ParserTable.CurrencySymbolSteam" />
-                                    </MultiBinding>
-                                </TextBlock.Text>
-                            </TextBlock>
-                        </Grid>
-                        <!--CSM-->
-                        <Grid Grid.Row="1" DataContext="{Binding ParserInfo}"
-                                  Visibility="{Binding DataContext.ParserInfo.CSM, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="50"/>
-                                <RowDefinition Height="25"/>
-                                <RowDefinition Height="25"/>
-                                <RowDefinition Height="45"/>
-                                <RowDefinition Height="250"/>
-                            </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" VerticalAlignment="Center" TextWrapping="Wrap"
-                                           Text="{Binding ItemCsm.ItemName, StringFormat='Item: {0}'}"/>
-                            <TextBlock Grid.Row="1" VerticalAlignment="Center"
-                                           Text="{Binding ItemCsm.DefaultPrice, StringFormat='Default Price: {0}$'}"/>
-                            <TextBlock Grid.Row="2" VerticalAlignment="Center"
-                                           Text="{Binding ItemCsmComparePrice, StringFormat='Compare Price: {0}'}"/>
-                            <Slider Grid.Row="3" Width="200" VerticalAlignment="Center"
-                                        Maximum="{Binding InfoItemCount}"
-                                        Value="{Binding InfoItemCurrent}"/>
-                            <Border Grid.Row="4" Background="{DynamicResource ElementBackground}">
-                                <Grid Margin="10" DataContext="{Binding ItemCsm}">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="70"/>
-                                        <ColumnDefinition/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Row="0" Text="Stack Size:" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding StackSize}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="1" Text="Price:" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Price, StringFormat='{}{0}$'}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="2" Text="Stickers:" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Sticker, Converter={StaticResource BooleanToYesNoConverter}}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="3" Text="Float:" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Float}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="4" Text="UserItem:" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding User, Converter={StaticResource BooleanToYesNoConverter}}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="5" Text="RareItem:" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding RareItem, Converter={StaticResource BooleanToYesNoConverter}}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="6" Text="TradeLock:" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding TradeLock, Converter={StaticResource DateTimeConverter}}" VerticalAlignment="Center"/>
-                                </Grid>
-                            </Border>
-                        </Grid>
-                        <!--LF-->
-                        <Grid Grid.Row="1"
-                                  Visibility="{Binding DataContext.ParserInfo.LF, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="50"/>
-                                <RowDefinition Height="210"/>
-                            </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" VerticalAlignment="Center" TextWrapping="Wrap"
-                                           Text="{Binding ParserInfo.ItemName, StringFormat='Item: {0}'}"/>
-                            <Border Grid.Row="2" DataContext="{Binding ParserInfo.ItemLf}" Background="{DynamicResource ElementBackground}">
-                                <Grid Margin="10" >
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Row="0" Text="Have:" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Have}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="1" Text="Price:" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Price, StringFormat='{}{0}$'}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="2" Text="Tradable:" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Tradable}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="3" Text="Reservable:" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Reservable}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="4" Text="Limit:" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Limit}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="5" Text="Steam price rate:" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding SteamPriceRate}" VerticalAlignment="Center"/>
-                                </Grid>
-                            </Border>
-                        </Grid>
-                        <!--BF-->
-                        <Grid Grid.Row="1"
-                                  Visibility="{Binding DataContext.ParserInfo.BF, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="50"/>
-                                <RowDefinition Height="150"/>
-                            </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" VerticalAlignment="Center" TextWrapping="Wrap"
-                                           Text="{Binding ParserInfo.ItemName, StringFormat='Item: {0}'}"/>
-                            <Border Grid.Row="2" DataContext="{Binding ParserInfo.ItemBf}" Background="{DynamicResource ElementBackground}">
-                                <Grid Margin="10" >
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Row="0" Text="Price:" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Price, StringFormat='{}{0}$'}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="1" Text="Sell:" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Count}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="2" Text="BuyOrder:" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding BuyOrder, StringFormat='{}{0}$'}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="3" Text="OrderCount:" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding OrderCount}" VerticalAlignment="Center"/>
-                                </Grid>
-                            </Border>
-                        </Grid>
-                    </Grid>
                     <!--queue-->
                     <Grid Visibility="{Binding IsChecked, ElementName=queueTab, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="32"/>
-                            <RowDefinition Height="25"/>
-                            <RowDefinition Height="25"/>
-                            <RowDefinition Height="25"/>
-                            <RowDefinition Height="25"/>
-                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="100"/>
                             <RowDefinition/>
                         </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="110"/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.ColumnSpan="2" VerticalAlignment="Center" FontWeight="Bold"
-                                   Text="{Binding ParserQueue.Items.Count, StringFormat='Place Order: {0}'}"/>
-                        <Button Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Style="{StaticResource MaterialDesignFlatButton}"
+                        <VirtualizingStackPanel Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center" FontWeight="Bold" Text="{Binding ParserQueue.Items.Count, StringFormat='Place Order: {0}'}"/>
+                            <Button VerticalAlignment="Center" Style="{StaticResource MaterialDesignToolForegroundButton}"
+                                        Command="{Binding ClearQueueCommand}">
+                                <materialDesign:PackIcon Kind="Delete"/>
+                            </Button>
+                        </VirtualizingStackPanel>
+                        <Button HorizontalAlignment="Right" VerticalAlignment="Bottom" Style="{StaticResource MaterialDesignFlatButton}"
                                 Command="{Binding PlaceOrderCommand}">
                             <materialDesign:PackIcon Kind="Play"/>
                         </Button>
-                        <ProgressBar Grid.ColumnSpan="2" VerticalAlignment="Bottom" Height="3" Style="{StaticResource MaterialDesignLinearProgressBar}"
-                                     Value="{Binding ParserQueue.CurrentProgress}"
-                                     Maximum="{Binding ParserQueue.MaxProgress}"/>
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Total Allowed:" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock.Text>
-                                <MultiBinding StringFormat="{}{0}{1}">
-                                    <Binding Path="ParserQueue.TotalAllowed" />
-                                    <Binding Path="ParserTable.CurrencySymbolSteam" />
-                                </MultiBinding>
-                            </TextBlock.Text>
-                        </TextBlock>
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="{Binding ParserQueue.AvailableAmountPrecent, StringFormat='Available ({0}%):'}" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock.Text>
-                                <MultiBinding StringFormat="{}{0}{1}">
-                                    <Binding Path="ParserQueue.AvailableAmount" />
-                                    <Binding Path="ParserTable.CurrencySymbolSteam" />
-                                </MultiBinding>
-                            </TextBlock.Text>
-                        </TextBlock>
-                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Orders:" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Row="3" Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock.Text>
-                                <MultiBinding StringFormat="{}{0}{1}">
-                                    <Binding Path="ParserQueue.OrderAmout" />
-                                    <Binding Path="ParserTable.CurrencySymbolSteam" />
-                                </MultiBinding>
-                            </TextBlock.Text>
-                        </TextBlock>
-                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Remaining:" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Row="4" Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock.Text>
-                                <MultiBinding StringFormat="{}{0}{1}">
-                                    <Binding Path="ParserQueue.Remaining" />
-                                    <Binding Path="ParserTable.CurrencySymbolSteam" />
-                                </MultiBinding>
-                            </TextBlock.Text>
-                        </TextBlock>                       
-                        <Button Grid.Row="5" Grid.Column="0" HorizontalAlignment="Left" Style="{StaticResource MaterialDesignToolForegroundButton}"
-                                        Command="{Binding RemoveQueueCommand}"
-                                        CommandParameter="{Binding ParserQueue.SelectedQueue}">
-                            <materialDesign:PackIcon Kind="Minus"/>
-                        </Button>
-                        <Button Grid.Row="5" Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignToolForegroundButton}"
-                                        Command="{Binding ClearQueueCommand}">
-                            <materialDesign:PackIcon Kind="Remove"/>
-                        </Button>
-                        <DataGrid Grid.Row="6" FontSize="11" Grid.ColumnSpan="2"
+                        <ProgressBar VerticalAlignment="Bottom" Height="3" Style="{StaticResource MaterialDesignLinearProgressBar}"
+                                     Value="{Binding ParserQueue.CurrentProgress}" Maximum="{Binding ParserQueue.MaxProgress}"/>
+                        <!--info-->
+                        <Grid Grid.Row="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="25"/>
+                                <RowDefinition Height="25"/>
+                                <RowDefinition Height="25"/>
+                                <RowDefinition Height="25"/>
+                                <RowDefinition Height="25"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Total Allowed:" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="{}{0}{1}">
+                                        <Binding Path="ParserQueue.TotalAllowed" />
+                                        <Binding Path="ParserTable.CurrencySymbolSteam" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding ParserQueue.AvailableAmountPrecent, StringFormat='Available ({0}%):'}" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="{}{0}{1}">
+                                        <Binding Path="ParserQueue.AvailableAmount" />
+                                        <Binding Path="ParserTable.CurrencySymbolSteam" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Orders:" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="{}{0}{1}">
+                                        <Binding Path="ParserQueue.OrderAmout" />
+                                        <Binding Path="ParserTable.CurrencySymbolSteam" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Remaining:" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="{}{0}{1}">
+                                        <Binding Path="ParserQueue.Remaining" />
+                                        <Binding Path="ParserTable.CurrencySymbolSteam" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </Grid>
+                        <!--table-->
+                        <Grid Grid.Row="2">
+                            <TextBlock Text="Nothing has been added yet." HorizontalAlignment="Center" VerticalAlignment="Center" FontStyle="Italic"/>
+                        </Grid>
+                        <ListBox Grid.Row="2" FontSize="11" SelectionMode="Single" ToolTip="Mouse double click to show item.&#x0a;Press 'Backspace' to remove item"
+                                 x:Name="queueListBox" KeyDown="queueListBox_KeyDown" MouseDoubleClick="queueListBox_MouseDoubleClick"
+                                  Visibility="{Binding ParserQueue.Items.Count, Converter={StaticResource IntToVisibilityConverter}}"
                                   ItemsSource="{Binding ParserQueue.Items}" SelectedItem="{Binding ParserQueue.SelectedQueue}"
-                                  AlternationCount="2" AlternatingRowBackground="{DynamicResource ElementBackground}"
-                                  AutoGenerateColumns="False" IsReadOnly="True">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Item" CanUserResize="False"
-                                                    Binding="{Binding ItemName}"
-                                                    Width="Auto"/>
-                                <DataGridTextColumn Header="Price" CanUserResize="False"
-                                                    Binding="{Binding OrderPrice}"
-                                                    Width="Auto"/>
-                                <DataGridTextColumn Header="Precent" CanUserResize="False"
-                                                    Binding="{Binding Precent}"
-                                                    Width="Auto"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
+                                  AlternationCount="2" Background="{DynamicResource ElementBackground}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding ItemName}"/>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
                     </Grid>
                 </Grid>
             </Border>

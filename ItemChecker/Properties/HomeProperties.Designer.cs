@@ -49,73 +49,13 @@ namespace ItemChecker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("100")]
-        public int MaxPrice {
-            get {
-                return ((int)(this["MaxPrice"]));
-            }
-            set {
-                this["MaxPrice"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool Unwanted {
             get {
                 return ((bool)(this["Unwanted"]));
             }
             set {
                 this["Unwanted"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int SellingPriceId {
-            get {
-                return ((int)(this["SellingPriceId"]));
-            }
-            set {
-                this["SellingPriceId"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int TasksId {
-            get {
-                return ((int)(this["TasksId"]));
-            }
-            set {
-                this["TasksId"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool AllAvailable {
-            get {
-                return ((bool)(this["AllAvailable"]));
-            }
-            set {
-                this["AllAvailable"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool SelectedOnly {
-            get {
-                return ((bool)(this["SelectedOnly"]));
-            }
-            set {
-                this["SelectedOnly"] = value;
             }
         }
     }

@@ -10,27 +10,29 @@ namespace ItemChecker.MVVM.Model
     {
         //general
         public int MinPrecent { get; set; } = SettingsProperties.Default.MinPrecent;
-        public List<string> ServicesList { get; set; } = new()
-        {
-            "SteamMarket(A)",
-            "SteamMarket",
-            "Cs.Money",
-            "Loot.Farm",
-            "Buff163"
-        };
+        public List<string> ServicesList { get; set; } = Main.Services;
         public int ServiceId { get; set; } = SettingsProperties.Default.ServiceId;
         public bool SetHours { get; set; } = SettingsProperties.Default.SetHours;
         public DateTime TurnOn { get; set; } = SettingsProperties.Default.TurnOn;
         public DateTime TurnOff { get; set; } = SettingsProperties.Default.TurnOff;
 
         //steam
-        public bool RememberMe { get; set; } = StartUpProperties.Default.Remember;
         public string SteamApiKey { get; set; } = SteamAccount.ApiKey;
         public string UserName { get; set; } = SteamAccount.UserName;
         public string AccountName { get; set; } = SteamAccount.AccountName;
         public string SteamId { get; set; } = SteamAccount.Id64;
-        public string SteamMarket { get; set; } = SteamAccount.SteamMarket;
-        public string SteamCurrency { get; set; } = SteamBase.CurrencyList.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Name;
+        public string SteamMarket { get; set; } = SteamAccount.StatusMarket;
+        public string Currency { get; set; } = SteamBase.CurrencyList.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Name;
+
+        //Base
+        public int StmCount { get; set; } = SteamBase.ItemList.Count;
+        public DateTime StmUpdated { get; set; } = SteamBase.Updated;
+        public int CsmCount { get; set; } = SteamBase.ItemList.Where(x => x.Csm.Id != 0).Count();
+        public int CsmUpdated { get; set; } = (int)(DateTime.Now - SteamBase.ItemList.Select(x => x.Csm.Updated).Max()).TotalMinutes;
+        public int LfmCount { get; set; } = SteamBase.ItemList.Where(x => x.Lfm.Price != 0).Count();
+        public int LfmUpdated { get; set; } = (int)(DateTime.Now - SteamBase.ItemList.Select(x => x.Lfm.Updated).Max()).TotalMinutes;
+        public int BuffCount { get; set; } = SteamBase.ItemList.Where(x => x.Buff.Id != 0).Count();
+        public int BuffUpdated { get; set; } = (int)(DateTime.Now - SteamBase.ItemList.Select(x => x.Buff.Updated).Max()).TotalMinutes;
     }
     public class SettingsAbout : ObservableObject
     {

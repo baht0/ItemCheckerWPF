@@ -1,6 +1,7 @@
 ﻿using ItemChecker.Core;
 using ItemChecker.Net;
 using ItemChecker.Properties;
+using ItemChecker.Support;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -24,26 +25,25 @@ namespace ItemChecker.MVVM.Model
         public bool KnifeGlove { get; set; } = ParserProperties.Default.KnifeGlove;
         public bool KnifeGloveStattrak { get; set; } = ParserProperties.Default.KnifeGloveStattrak;
 
-        public List<string> OnlyList { get; set; } = new()
+        public List<string> OnlyList
         {
-            "None",
-            "Ordered",
-            "Favorite",
-        };
+            get
+            {
+                return new()
+                        {
+                            "None",
+                            "Ordered",
+                            "Favorite",
+                        };
+            }
+        }
         public int SelectedOnly { get; set; } = ParserProperties.Default.SelectedOnly;
 
         public bool WithoutLock { get; set; } = ParserProperties.Default.WithoutLock;
         public bool RareItems { get; set; } = ParserProperties.Default.RareItems;
         public bool UserItems { get; set; } = ParserProperties.Default.UserItems;
 
-        public List<string> Services { get; set; } = new()
-        {
-            "SteamMarket(A)",
-            "SteamMarket",
-            "Cs.Money",
-            "Loot.Farm",
-            "Buff163"
-        };
+        public List<string> Services { get; set; } = Main.Services;
         public int ServiceOne { get; set; } = ParserProperties.Default.ServiceOne;
         public int ServiceTwo { get; set; } = ParserProperties.Default.ServiceTwo;
 
@@ -58,7 +58,6 @@ namespace ItemChecker.MVVM.Model
     {
         //info
         private bool _isVisible;
-        private string _mode = "Unknown";
         private string _service1 = "Service1";
         private string _service2 = "Service2";
         private DateTime _dateTime = DateTime.MinValue;
@@ -71,18 +70,6 @@ namespace ItemChecker.MVVM.Model
             set
             {
                 _isVisible = value;
-                OnPropertyChanged();
-            }
-        }
-        public string Mode
-        {
-            get
-            {
-                return _mode;
-            }
-            set
-            {
-                _mode = value;
                 OnPropertyChanged();
             }
         }
@@ -195,191 +182,9 @@ namespace ItemChecker.MVVM.Model
         public static CancellationTokenSource cts { get; set; } = new();
         public static CancellationToken token { get; set; } = cts.Token;
     }
-    public class ParserInfo : ObservableObject
-    {
-        private string _itemName = "Unknown";
-        public string ItemName
-        {
-            get
-            {
-                return _itemName;
-            }
-            set
-            {
-                _itemName = value;
-                OnPropertyChanged();
-            }
-        }
-
-        //steam
-        private SteamInfo _itemSt = new();
-        private bool _st = false;
-        public SteamInfo ItemSt
-        {
-            get
-            {
-                return _itemSt;
-            }
-            set
-            {
-                _itemSt = value;
-                OnPropertyChanged();
-            }
-        }
-        public bool ST
-        {
-            get
-            {
-                return _st;
-            }
-            set
-            {
-                _st = value;
-                OnPropertyChanged();
-            }
-        }
-
-        //csm
-        private int _infoItemCurrent;
-        private int _infoItemCount;
-        private List<DataInventoriesCsm> _inventoryCsm = new();
-        private DataInventoriesCsm _itemCsm = new();
-        private decimal _itemCsmComparePrice = 0;
-        private bool _csm = false;
-        public int InfoItemCurrent
-        {
-            get
-            {
-                return _infoItemCurrent;
-            }
-            set
-            {
-                _infoItemCurrent = value;
-                OnPropertyChanged();
-                ItemCsm = InventoryCsm.Any() ? InventoryCsm[value] : new();
-            }
-        }
-        public int InfoItemCount
-        {
-            get
-            {
-                return _infoItemCount;
-            }
-            set
-            {
-                _infoItemCount = value;
-                OnPropertyChanged();
-            }
-        }
-        public List<DataInventoriesCsm> InventoryCsm
-        {
-            get
-            {
-                return _inventoryCsm;
-            }
-            set
-            {
-                _inventoryCsm = value;
-                OnPropertyChanged();
-            }
-        }
-        public DataInventoriesCsm ItemCsm
-        {
-            get
-            {
-                return _itemCsm;
-            }
-            set
-            {
-                _itemCsm = value;
-                OnPropertyChanged();
-            }
-        }
-        public decimal ItemCsmComparePrice
-        {
-            get
-            {
-                return _itemCsmComparePrice;
-            }
-            set
-            {
-                _itemCsmComparePrice = value;
-                OnPropertyChanged();
-            }
-        }
-        public bool CSM
-        {
-            get
-            {
-                return _csm;
-            }
-            set
-            {
-                _csm = value;
-                OnPropertyChanged();
-            }
-        }
-
-        //lfm
-        private LfmInfo _itemLf = new();
-        private bool _lf = false;
-        public LfmInfo ItemLf
-        {
-            get
-            {
-                return _itemLf;
-            }
-            set
-            {
-                _itemLf = value;
-                OnPropertyChanged();
-            }
-        }
-        public bool LF
-        {
-            get
-            {
-                return _lf;
-            }
-            set
-            {
-                _lf = value;
-                OnPropertyChanged();
-            }
-        }
-
-        //buff
-        private BuffInfo _itemBf = new();
-        private bool _bf = false;
-        public BuffInfo ItemBf
-        {
-            get
-            {
-                return _itemBf;
-            }
-            set
-            {
-                _itemBf = value;
-                OnPropertyChanged();
-            }
-        }
-        public bool BF
-        {
-            get
-            {
-                return _bf;
-            }
-            set
-            {
-                _bf = value;
-                OnPropertyChanged();
-            }
-        }
-    }
     public class ParserQueue : ObservableObject
     {
         private ObservableCollection<DataQueue> _items = new();
-        private DataQueue _selectedQueue;
         public ObservableCollection<DataQueue> Items
         {
             get
@@ -392,6 +197,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        private DataQueue _selectedQueue;
         public DataQueue SelectedQueue
         {
             get
@@ -492,27 +298,6 @@ namespace ItemChecker.MVVM.Model
             }
         }
 
-        public static Boolean CheckConditions(ObservableCollection<DataQueue> queueItems, DataParser parseredItem)
-        {
-            string itemName = parseredItem.ItemName;
-            decimal price = parseredItem.Price2;
-
-            return queueItems.Any(n => n.ItemName == itemName) ||
-                (queueItems.Select(x => x.OrderPrice).Sum() + price) > SteamAccount.GetAvailableAmount() ||
-                DataOrder.Orders.Any(n => n.ItemName == itemName) ||
-                price > SteamAccount.Balance ||
-                parseredItem.Precent < SettingsProperties.Default.MinPrecent ||
-                itemName.Contains("Doppler");
-        }
-        public static void PlaceOrder(string itemName)
-        {
-            var market_hash_name = HttpUtility.UrlEncode(itemName);
-            var item_nameid = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName).Steam.Id;
-            JObject json = Get.ItemOrdersHistogram(item_nameid, SteamAccount.CurrencyId);
-            decimal highest_buy_order = Convert.ToDecimal(json["highest_buy_order"]) / 100;
-
-            if (SteamAccount.Balance > highest_buy_order)
-                Post.CreateBuyOrder(SteamAccount.Cookies, market_hash_name, highest_buy_order, SteamAccount.CurrencyId);
-        }
+        public static Queue<DataQueue> Queues { get; set; } = new();
     }
 }

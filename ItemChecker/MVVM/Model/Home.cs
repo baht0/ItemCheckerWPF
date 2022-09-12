@@ -10,7 +10,7 @@ namespace ItemChecker.MVVM.Model
     }
     public class HomeTable : ObservableObject
     {
-        private ObservableCollection<DataOrder> _orderedGrid = new(DataOrder.Orders);
+        private ObservableCollection<DataOrder> _orderedGrid = new(SteamMarket.Orders);
         private DataOrder _selectedOrderItem;
         public ObservableCollection<DataOrder> OrderedGrid
         {

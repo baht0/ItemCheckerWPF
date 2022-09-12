@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ItemChecker.MVVM.Model
 {
@@ -34,8 +31,6 @@ namespace ItemChecker.MVVM.Model
         public string Version { get; set; }
         public string Text { get; set; }
         public DateTime Date { get; set; }
-
-        public static List<ProjectUpdates> Updates { get; set; } = new();
     }
     public class DataProjectInfo
     {
@@ -56,10 +51,18 @@ namespace ItemChecker.MVVM.Model
             "Newtonsoft.Json.dll",
             "HtmlAgilityPack.dll",
             "MaterialDesignColors.dll",
-            "MaterialDesignThemes.Wpf.dll"
+            "MaterialDesignThemes.Wpf.dll",
+            "LiveCharts.dll",
+            "LiveCharts.Wpf.dll"
         };
-        public static string CurrentVersion { get; set; } = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-        public static string LatestVersion { get; set; } = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-        public static bool IsUpdate { get; set; } = false;
+        public static string CurrentVersion
+        {
+            get
+            {
+                return Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            }
+        }
+        public static string LatestVersion { get; set; } = string.Empty;
+        public static bool IsUpdate { get; set; }
     }
 }

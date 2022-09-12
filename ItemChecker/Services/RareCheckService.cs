@@ -89,7 +89,7 @@ namespace ItemChecker.Services
 
         Decimal SetPrice(string itemName, string market_hash_name)
         {
-            Tuple<decimal, decimal> steamPrices = Get.PriceOverview(market_hash_name);
+            Tuple<decimal, decimal> steamPrices = Get.PriceOverview(market_hash_name, 1);
 
             decimal csmPrice = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName) != null ? SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName).Csm.Price : 0;
             csmPrice = Edit.ConverterFromUsd(csmPrice, SteamBase.CurrencyList.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Value);
@@ -152,6 +152,8 @@ namespace ItemChecker.Services
 
         Boolean CheckStickers(DataRare data)
         {
+            if (!String.IsNullOrEmpty(RareCheckConfig.CheckedConfig.NameContains) && !data.Stickers.Any(x => x.Contains(RareCheckConfig.CheckedConfig.NameContains)))
+                return false;
             if (data.Stickers.Count >= RareCheckConfig.CheckedConfig.StickerCount)
             {
                 foreach (var sticker in data.Stickers)

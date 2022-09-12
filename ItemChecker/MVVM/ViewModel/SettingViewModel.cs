@@ -9,15 +9,13 @@ using ItemChecker.Support;
 using MaterialDesignThemes.Wpf;
 using System.Threading.Tasks;
 using ItemChecker.MVVM.View;
+using System.Linq;
 
 namespace ItemChecker.MVVM.ViewModel
 {
     public class SettingViewModel : ObservableObject
     {
-        SnackbarMessageQueue _message = new();
         private string _theme = ProjectInfo.Theme == "Light" ? "WhiteBalanceSunny" : "WeatherNight";
-        private Settings _settings = new();
-        private SettingsAbout _about = new();
 
         public SnackbarMessageQueue Message
         {
@@ -28,6 +26,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+        SnackbarMessageQueue _message = new();
         public string Theme
         {
             get
@@ -52,6 +51,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+        private Settings _settings = new();
         public SettingsAbout About
         {
             get
@@ -64,6 +64,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+        private SettingsAbout _about = new();
 
         public SettingViewModel()
         {
@@ -82,11 +83,11 @@ namespace ItemChecker.MVVM.ViewModel
                 });
             }
         }
-        //order
-        public ICommand GetSteamApiCommand =>
+        //steam
+        public ICommand ResetSteamApiCommand =>
             new RelayCommand((obj) =>
             {
-                Edit.OpenUrl("https://steamcommunity.com/dev/apikey");
+                SteamAccount.ApiKey = string.Empty;
             });
         public ICommand CopyIdCommand =>
             new RelayCommand((obj) =>
@@ -99,12 +100,13 @@ namespace ItemChecker.MVVM.ViewModel
                 MessageBoxResult result = MessageBox.Show("Are you sure you want to logout?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result == MessageBoxResult.No)
                     return;
+
                 StartUpProperties.Default.SteamLoginSecure = string.Empty;
                 StartUpProperties.Default.SteamCurrencyId = 0;
                 StartUpProperties.Default.SessionBuff = string.Empty;
-                StartUpProperties.Default.Remember = false;
+                StartUpProperties.Default.Save();
 
-                string profilesDir = ProjectInfo.AppPath + "Profile";
+                string profilesDir = ProjectInfo.DocumentPath + "profile";
                 if (!Directory.Exists(profilesDir))
                     Directory.Delete(profilesDir);
 
@@ -114,14 +116,29 @@ namespace ItemChecker.MVVM.ViewModel
             new RelayCommand((obj) =>
             {
                 Edit.OpenUrl("https://help.steampowered.com/en/faqs/view/71D3-35C2-AD96-AA3A");
-            }, (obj) => SteamAccount.SteamMarket == "Disabled");
-        //about
-        public ICommand WhatIsNewCommand => 
+            }, (obj) => SteamAccount.StatusMarket == "Disabled");
+        //base
+        public ICommand ResetBaseCommand =>
             new RelayCommand((obj) =>
             {
-                WhatsNewWindow window = new();
-                window.ShowDialog();
+                var id = Convert.ToInt32(obj);
+                switch (id)
+                {
+                    case 2:
+                        foreach (var item in SteamBase.ItemList.Where(x => x.Csm.Updated.AddMinutes(30) > DateTime.Now).ToList())
+                            item.Csm.Updated = DateTime.MinValue;
+                        break;
+                    case 3:
+                        foreach (var item in SteamBase.ItemList.Where(x => x.Lfm.Updated.AddMinutes(30) > DateTime.Now).ToList())
+                            item.Lfm.Updated = DateTime.MinValue;
+                        break;
+                    case 4:
+                        foreach (var item in SteamBase.ItemList.Where(x => x.Buff.Updated.AddMinutes(30) > DateTime.Now).ToList())
+                            item.Buff.Updated = DateTime.MinValue;
+                        break;
+                }
             });
+        //about
         public ICommand UpdateCommand =>
             new RelayCommand((obj) =>
             {
@@ -144,12 +161,11 @@ namespace ItemChecker.MVVM.ViewModel
                 BaseModel.IsWorking = true;
                 Task.Run(() => {
                     bool status = ProjectInfoService.UploadCurrentVersion();
-                    string mess = status ? "File upload was successful." : "Something went wrong...";
-                    Message.Enqueue(mess);
+                    string mess = status ? $"File upload was successful.\nVersion: {DataProjectInfo.CurrentVersion}" : "Something went wrong...";
                     BaseModel.IsWorking = false;
                     Main.Notifications.Add(new()
                     {
-                        Title = "Update",
+                        Title = "Load Update.",
                         Message = mess
                     });
                 });
@@ -160,22 +176,6 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 Settings settings = obj as Settings;
 
-                Task.Run(() => {
-                    string steamApi = Services.BaseService.StatusSteam();
-                    if (steamApi == "error")
-                    {
-                        MessageBox.Show(
-                            "The \"SteamApiKey\" you provided is not working!", "Error",
-                            MessageBoxButton.OK, MessageBoxImage.Stop);
-                    }
-                    else if (string.IsNullOrEmpty(steamApi))
-                        Main.Notifications.Add(new()
-                        {
-                            Title = "Steam Account",
-                            Message = "Failed to get your API Key!\nSome features will not be available to you."
-                        });
-                });
-
                 Theme = ProjectInfo.Theme == "Light" ? "WhiteBalanceSunny" : "WeatherNight";
 
                 SettingsProperties.Default.SetHours = settings.SetHours;
@@ -185,14 +185,7 @@ namespace ItemChecker.MVVM.ViewModel
                 SettingsProperties.Default.MinPrecent = settings.MinPrecent;
                 SettingsProperties.Default.ServiceId = settings.ServiceId;
 
-                StartUpProperties.Default.Remember = settings.RememberMe;
-                SteamAccount.ApiKey = settings.SteamApiKey;
-
-                if (!settings.RememberMe)
-                    StartUpProperties.Default.SteamLoginSecure = string.Empty;
-
                 SettingsProperties.Default.Save();
-                StartUpProperties.Default.Save();
             }, (obj) => !BaseModel.IsWorking);
 
         public ICommand ThemeCommand =>

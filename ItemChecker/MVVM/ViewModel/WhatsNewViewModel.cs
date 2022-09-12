@@ -12,10 +12,7 @@ namespace ItemChecker.MVVM.ViewModel
 {
     public class WhatsNewViewModel : ObservableObject
     {
-        private List<string> _versions = new();
-        private string _selectedVersion;
-        private string _text = "Loading...";
-        private DateTime _released;
+        List<ProjectUpdates> Updates { get; set; } = new();
 
         public List<string> Versions
         {
@@ -29,6 +26,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+        private List<string> _versions = new();
         public string SelectedVersion
         {
             get
@@ -41,6 +39,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+        private string _selectedVersion;
         public string Text
         {
             get
@@ -53,6 +52,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+        private string _text = "Loading...";
         public DateTime Released
         {
             get
@@ -65,6 +65,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+        private DateTime _released;
 
         public WhatsNewViewModel()
         {
@@ -75,7 +76,7 @@ namespace ItemChecker.MVVM.ViewModel
             JArray json = JArray.Parse(Get.DropboxRead("Updates.json"));
             foreach (JObject update in json)
             {
-                ProjectUpdates.Updates.Add(new()
+                Updates.Add(new()
                 {
                     Version = (string)update["version"],
                     Text = (string)update["text"],
@@ -89,7 +90,7 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand ShowCommand =>
             new RelayCommand((obj) =>
             {
-                var info = ProjectUpdates.Updates.FirstOrDefault(x => x.Version == (string)obj);
+                var info = Updates.FirstOrDefault(x => x.Version == (string)obj);
                 Released = info.Date;
                 Text = info.Text;
             });

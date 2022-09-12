@@ -111,7 +111,7 @@ namespace ItemChecker.MVVM.ViewModel
                     return;
                 StartUp.Progress = Tuple.Create(2, "Signing In...");
                 KillProccess();
-                ShowLogin = SteamAccount.IsLogIn();
+                ShowLogin = SteamAccount.NeedLogin();
                 StartUp.Progress = ShowLogin ? Tuple.Create(2, "Please, Signing In...") : Tuple.Create(3, "Get Account...");
                 while (ShowLogin)
                 {
@@ -123,7 +123,9 @@ namespace ItemChecker.MVVM.ViewModel
                 }
                 if (token.IsCancellationRequested)
                     return;
-                SteamAccount.GetSteamAccount();
+                SteamAccount.GetAccount();
+                while (!BuffAccount.IsLogIn())
+                    System.Threading.Thread.Sleep(200);
 
                 if (token.IsCancellationRequested)
                     return;
@@ -200,7 +202,7 @@ namespace ItemChecker.MVVM.ViewModel
                 {
                     SteamSignUp.SignUp = SignUp;
                     SteamSignUp.SignUp.IsLoggedIn = true;
-                    StartUp.Progress = Tuple.Create(3, "Signing In...");
+                    StartUp.Progress = Tuple.Create(2, "Signing In...");
                     ShowLogin = false;
                 }
             }, (obj) => !SteamSignUp.SignUp.IsLoggedIn && !String.IsNullOrEmpty(SignUp.Login) && SignUp.Code2AF.Length == 5);

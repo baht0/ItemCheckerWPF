@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows;
+using System.Linq;
 
 namespace ItemChecker.MVVM.View
 {
@@ -47,6 +48,18 @@ namespace ItemChecker.MVVM.View
                     vm.OpenItemOutCommand.Execute(columnIndex);
             }
         }
+        private void rareGrid_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (!rareGrid.Items.IsEmpty)
+            {
+                var viewModel = (RareViewModel)DataContext;
+                if (e.Key == Key.F1)
+                {
+                    DetailsWindow detailsWindow = new(viewModel.SelectedItem.ItemName);
+                    detailsWindow.Show();
+                }
+            }
+        }
         private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             floatGroup.Visibility = parameter.SelectedIndex == 0 ? Visibility.Visible : Visibility.Hidden;
@@ -57,6 +70,19 @@ namespace ItemChecker.MVVM.View
         {
             if (DataContext is RareViewModel vm && vm.OpenStickerOutCommand.CanExecute(stickersList.SelectedItem))
                 vm.OpenStickerOutCommand.Execute(stickersList.SelectedItem);
+        }
+        private void ListShow_Click(object sender, RoutedEventArgs e)
+        {
+            if (!MainWindow.IsWindowOpen<Window>("showListWindow"))
+            {
+                ShowListWindow window = new("Rare");
+                window.Show();
+            }
+            else
+            {
+                Window wnd = Application.Current.Windows.OfType<Window>().Where(w => w.Name.Equals("showListWindow")).FirstOrDefault();
+                wnd.Activate();
+            }
         }
     }
 }

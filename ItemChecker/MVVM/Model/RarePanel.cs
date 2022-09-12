@@ -1,8 +1,6 @@
 ﻿using ItemChecker.Core;
 using ItemChecker.Properties;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading;
 
 namespace ItemChecker.MVVM.Model
@@ -34,6 +32,7 @@ namespace ItemChecker.MVVM.Model
         public bool Gold { get; set; } = RareProperties.Default.IsGold;
         public bool Contraband { get; set; } = RareProperties.Default.IsContraband;
         public int StickerCount { get; set; } = RareProperties.Default.StickerCount;
+        public string NameContains { get; set; } = RareProperties.Default.NameContains;
         //stickers
         public bool Phase1 { get; set; } = RareProperties.Default.Phase1;
         public bool Phase2 { get; set; } = RareProperties.Default.Phase2;
@@ -71,7 +70,7 @@ namespace ItemChecker.MVVM.Model
         private int _purchasesMade = 0;
         private int _progress = 0;
         private int _maxProgress = 0;
-        private string _status = string.Empty;
+        private string _status = "Off";
 
         public bool IsService
         {
@@ -140,7 +139,6 @@ namespace ItemChecker.MVVM.Model
     public class RareInfo : ObservableObject
     {
         private DataRare _data = new();
-        private Item _item = new();
         public DataRare Data
         {
             get
@@ -150,41 +148,6 @@ namespace ItemChecker.MVVM.Model
             set
             {
                 _data = value;
-                OnPropertyChanged();
-            }
-        }
-        public Item BaseItem
-        {
-            get
-            {
-                return _item;
-            }
-            set
-            {
-                _item = value;
-                OnPropertyChanged();
-            }
-        }
-    }
-    public class RareItems : ObservableObject
-    {
-        private ObservableCollection<DataSavedList> _list = new(DataSavedList.Items.Where(x => x.ListName == "rare"));
-        private DataSavedList _selectedItem = new();
-        public ObservableCollection<DataSavedList> List
-        {
-            get { return _list; }
-            set
-            {
-                _list = value;
-                OnPropertyChanged();
-            }
-        }
-        public DataSavedList SelectedItem
-        {
-            get { return _selectedItem; }
-            set
-            {
-                _selectedItem = value;
                 OnPropertyChanged();
             }
         }

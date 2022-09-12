@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
 using ItemChecker.MVVM.ViewModel;
@@ -32,6 +33,20 @@ namespace ItemChecker.MVVM.View
         {
             Regex regex = new(@"^[a-zA-Z_]+$");
             e.Handled = !regex.IsMatch(e.Text);
+        }
+
+        private void whatIsNewButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!MainWindow.IsWindowOpen<Window>("whatsNewWindow"))
+            {
+                WhatsNewWindow window = new();
+                window.Show();
+            }
+            else
+            {
+                Window window = Application.Current.Windows.OfType<Window>().Where(w => w.Name.Equals("whatsNewWindow")).FirstOrDefault();
+                window.Activate();
+            }
         }
     }
 }

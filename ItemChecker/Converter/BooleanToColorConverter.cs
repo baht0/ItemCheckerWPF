@@ -16,7 +16,7 @@ namespace ItemChecker.Converter
                     case "Light":
                         return "Black";
                     case "Dark":
-                        return "White";
+                        return "WhiteSmoke";
                 }
             }
             return "Gray";
@@ -31,7 +31,7 @@ namespace ItemChecker.Converter
                     case "Light":
                         return "Black";
                     case "Dark":
-                        return "White";
+                        return "WhiteSmoke";
                 }
             }
             return "Gray";

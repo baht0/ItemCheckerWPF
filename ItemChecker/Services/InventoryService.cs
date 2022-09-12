@@ -1,7 +1,5 @@
 ﻿using ItemChecker.MVVM.Model;
 using ItemChecker.Net;
-using ItemChecker.Properties;
-using ItemChecker.Support;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -10,9 +8,9 @@ using System.Threading;
 
 namespace ItemChecker.Services
 {
-    public class InventoryService : BaseService
+    public class InventoryService
     {
-        public List<DataInventory> CheckInventory()
+        public List<DataInventory> CheckInventory(string itemName)
         {
             var json = Get.Request(SteamAccount.Cookies, "http://steamcommunity.com/my/inventory/json/730/2");
             JObject rgInventory = (JObject)JObject.Parse(json)["rgInventory"];
@@ -26,27 +24,30 @@ namespace ItemChecker.Services
                 string instanceid = jObject.Value["instanceid"].ToString();
 
                 JObject item = (JObject)rgDescriptions[$"{classid}_{instanceid}"];
+
                 string name = item["market_name"].ToString();
+                if (!String.IsNullOrEmpty(itemName) && itemName != name)
+                    continue;
+
                 bool marketable = (int)item["marketable"] != 0;
+                if (!marketable) continue;
                 bool tradable = (int)item["tradable"] != 0;
                 bool nameTag = item.ContainsKey("fraudwarnings");
-                string descriptions = item["descriptions"].ToString();
-                bool stickers = descriptions.Contains("sticker_info");
+                bool stickers = item["descriptions"].ToString().Contains("sticker_info");
+                DateTime tradeLock = item.ContainsKey("cache_expiration") ? (DateTime)item["cache_expiration"] : new();
 
-                if (marketable)
+                items.Add(new()
                 {
-                    items.Add(new()
-                    {
-                        ItemName = name,
-                        AssetId = assetid,
-                        ClassId = classid,
-                        InstanceId = instanceid,
-                        Tradable = tradable,
-                        Marketable = marketable,
-                        Stickers = stickers,
-                        NameTag = nameTag,
-                    });
-                }
+                    ItemName = name,
+                    AssetId = assetid,
+                    ClassId = classid,
+                    InstanceId = instanceid,
+                    Tradable = tradable,
+                    TradeLock = tradeLock,
+                    Marketable = marketable,
+                    Stickers = stickers,
+                    NameTag = nameTag,
+                });
             }
             return items;
         }
@@ -79,16 +80,22 @@ namespace ItemChecker.Services
                 return false;
             }
         }
-        public void SellItem(DataInventory item)
+        public void SellItem(DataInventory item, HomeInventoryConfig config)
         {
             if (!item.Marketable || item.Stickers || item.NameTag)
                 return;
 
-            if (item.SellPrice <= 0)
-                item.SellPrice = SetSellPrice(item.ItemName);
+            if (item.LowestSellOrder <= 0 && item.HighestBuyOrder <= 0)
+            {
+                int item_nameid = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName).Steam.Id;
+                JObject json = Get.ItemOrdersHistogram(item_nameid, SteamAccount.CurrencyId);
 
-            int sell_price = (int)(item.SellPrice * Calculator.CommissionSteam);
+                item.LowestSellOrder = !String.IsNullOrEmpty(json["lowest_sell_order"].ToString()) ? Convert.ToDecimal(json["lowest_sell_order"]) / 100 : 0;
+                item.HighestBuyOrder = !String.IsNullOrEmpty(json["highest_buy_order"].ToString()) ? Convert.ToDecimal(json["highest_buy_order"]) / 100 : 0;
+            }
 
+            decimal sellPrice = config.SellingPriceId == 0 ? item.LowestSellOrder : item.HighestBuyOrder;
+            int sell_price = (int)((sellPrice * 100 - 0.01m) * Calculator.CommissionSteam);
             Post.SellItem(SteamAccount.Cookies, SteamAccount.UserName, item.AssetId, sell_price);
         }
 
@@ -96,32 +103,6 @@ namespace ItemChecker.Services
         {
             Thread.Sleep(1000);
             Post.AcceptTrade(SteamAccount.Cookies, tradeOfferId, partnerId);
-        }
-        Decimal SetSellPrice(string itemName)
-        {
-            decimal lowest_price = 0;
-            decimal median_price = 0;
-            bool check = true;
-            do
-            {
-                try
-                {
-                    Tuple<Decimal, Decimal> prices = Get.PriceOverview(Edit.EncodeMarketHashName(itemName));
-                    lowest_price = prices.Item1;
-                    median_price = prices.Item2;
-                    check = false;
-                }
-                catch
-                {
-                    Thread.Sleep(10000);
-                }
-            } while (check);
-
-            if (lowest_price > HomeProperties.Default.MaxPrice || lowest_price == 0)
-                return -1;
-
-            decimal sellPrice = HomeProperties.Default.SellingPriceId == 0 ? lowest_price : median_price;
-            return sellPrice * 100 - 0.01m;
         }
     }
 }

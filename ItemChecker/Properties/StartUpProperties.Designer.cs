@@ -37,18 +37,6 @@ namespace ItemChecker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool Remember {
-            get {
-                return ((bool)(this["Remember"]));
-            }
-            set {
-                this["Remember"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string SteamLoginSecure {
             get {
@@ -80,18 +68,6 @@ namespace ItemChecker.Properties {
             }
             set {
                 this["SessionBuff"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool BrowserRemember {
-            get {
-                return ((bool)(this["BrowserRemember"]));
-            }
-            set {
-                this["BrowserRemember"] = value;
             }
         }
     }

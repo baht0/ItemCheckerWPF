@@ -3,28 +3,48 @@ using ItemChecker.Net;
 using ItemChecker.Properties;
 using System;
 using System.Linq;
+using System.Threading;
 using System.Web;
 
 namespace ItemChecker.Services
 {
-    public class OrderService : BaseService
+    public class OrderService
     {
-        public static void CancelOrder(DataOrder order)
+        public static void PlaceOrder(string itemName)
         {
-            string market_hash_name = HttpUtility.UrlEncode(order.ItemName);
+            ItemBaseService baseService = new();
+            baseService.UpdateSteamItem(itemName, SteamAccount.CurrencyId);
+            var item = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName).Steam;
 
-            Post.CancelBuyOrder(SteamAccount.Cookies, market_hash_name, order.OrderId);
-            if (DataOrder.Orders.Contains(order))
-                DataOrder.Orders.Remove(order);
+            if (SteamAccount.Balance > item.HighestBuyOrder)
+            {
+                string market_hash_name = HttpUtility.UrlEncode(itemName);
+                Post.CreateBuyOrder(SteamAccount.Cookies, market_hash_name, item.HighestBuyOrder, SteamAccount.CurrencyId);
+                ItemsList.Favorite.Add(new(itemName, ParserCheckConfig.CheckedConfig.ServiceTwo));
+            }
         }
-        protected Boolean IsCancel(DataOrder order)
+        public static Boolean IsAllow(DataParser item)
         {
-            var item = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == order.ItemName);
+            return (SteamMarket.Orders.Select(x => x.OrderPrice).Sum() + item.Purchase) > SteamMarket.Orders.GetAvailableAmount() &&
+                !SteamMarket.Orders.Any(n => n.ItemName == item.ItemName) &&
+                item.Precent > SettingsProperties.Default.MinPrecent;
+        }
+        public static Boolean PushItems(DataOrder order)
+        {
+            ItemBaseService baseService = new();
+            baseService.UpdateSteamItem(order.ItemName, SteamAccount.CurrencyId);
+            var item = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == order.ItemName).Steam;
 
-            return SteamAccount.Balance < order.OrderPrice ||
-                (SettingsProperties.Default.MinPrecent > order.Precent && SettingsProperties.Default.ServiceId != 0) || 
-                (SettingsProperties.Default.ServiceId == 2 && (item.Csm.Overstock || item.Csm.Unavailable)) || 
-                (SettingsProperties.Default.ServiceId == 3 && (item.Lfm.Overstock || item.Lfm.Unavailable));
+            if (item.HighestBuyOrder > order.OrderPrice & SteamAccount.Balance >= item.HighestBuyOrder & (item.HighestBuyOrder - order.OrderPrice) <= SteamMarket.Orders.GetAvailableAmount())
+            {
+                string market_hash_name = HttpUtility.UrlEncode(order.ItemName);
+                Post.CancelBuyOrder(SteamAccount.Cookies, market_hash_name, order.Id);
+                Thread.Sleep(1500);
+                Post.CreateBuyOrder(SteamAccount.Cookies, market_hash_name, item.HighestBuyOrder, SteamAccount.CurrencyId);
+                Thread.Sleep(1500);
+                return true;
+            }
+            return false;
         }
     }
 }

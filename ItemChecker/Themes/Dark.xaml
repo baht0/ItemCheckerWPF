@@ -7,7 +7,8 @@
         <!-- additional resources -->
         <ResourceDictionary>
             <SolidColorBrush x:Key="Background" Color="#303030"/>
-            <SolidColorBrush x:Key="ElementBackground" Color="#282828"/>
+            <SolidColorBrush x:Key="ElementBackground" Color="#292929"/>
+            <SolidColorBrush x:Key="WindowTopBackground" Color="#202020"/>
 
             <!--<SolidColorBrush x:Key="PrimaryHueLightBrush" Color="LightBlue"/>
             <SolidColorBrush x:Key="PrimaryHueLightForegroundBrush" Color="Black"/>-->

@@ -2,7 +2,6 @@
 using ItemChecker.Core;
 using System.Collections.ObjectModel;
 using System.Threading;
-using System.Linq;
 using System.Collections.Generic;
 
 namespace ItemChecker.MVVM.Model
@@ -90,61 +89,25 @@ namespace ItemChecker.MVVM.Model
             }
         }
     }
-    public class HomeWithdraw : ObservableObject
-    {
-        public static CancellationTokenSource cts { get; set; } = new();
-        public static CancellationToken token { get; set; } = cts.Token;
-
-        private bool _isService;
-        private int _count = 0;
-        private int _progress = 0;
-        private int _maxProgress = 0;
-
-        public bool IsService
-        {
-            get
-            {
-                return _isService;
-            }
-            set
-            {
-                _isService = value;
-                OnPropertyChanged();
-            }
-        }
-        public int Count
-        {
-            get
-            {
-                return _count;
-            }
-            set
-            {
-                _count = value;
-                OnPropertyChanged();
-            }
-        }
-        public int Progress
-        {
-            get { return _progress; }
-            set
-            {
-                _progress = value;
-                OnPropertyChanged();
-            }
-        }
-        public int MaxProgress
-        {
-            get { return _maxProgress; }
-            set
-            {
-                _maxProgress = value;
-                OnPropertyChanged();
-            }
-        }
-    }
     //inventory
-    public class HomeInventory : ObservableObject
+    public class HomeInventoryConfig : ObservableObject
+    {
+        public bool AllAvailable { get; set; } = true;
+        public bool SelectedOnly { get; set; }
+        public List<string> SellingPrice { get; set; } = new()
+        {
+            "LowestSellOrder",
+            "HighestBuyOrder",
+        };
+        public int SellingPriceId { get; set; }
+        public List<string> Tasks { get; set; } = new()
+        {
+            "TradeOffers",
+            "QuickSell",
+        };
+        public int TasksId { get; set; }
+    }
+    public class HomeInventoryInfo : ObservableObject
     {
         private ObservableCollection<DataInventory> _items = new();
         public ObservableCollection<DataInventory> Items
@@ -157,28 +120,11 @@ namespace ItemChecker.MVVM.Model
             }
         }
 
-        public bool AllAvailable { get; set; } = HomeProperties.Default.AllAvailable;
-        public bool SelectedOnly { get; set; } = HomeProperties.Default.SelectedOnly;
-        public int MaxPrice { get; set; } = HomeProperties.Default.MaxPrice;
-        public List<string> SellingPrice { get; set; } = new()
-        {
-            "LowestSellOrder",
-            "HighestBuyOrder",
-        };
-        public int SellingPriceId { get; set; } = HomeProperties.Default.SellingPriceId;
-        public List<string> Tasks { get; set; } = new()
-        {
-            "TradeOffers",
-            "QuickSell",
-        };
-        public int TasksId { get; set; } = HomeProperties.Default.TasksId;
-
         private bool _isService;
         private int _count = 0;
         private decimal _sum = 0;
         private int _progress = 0;
         private int _maxProgress = 0;
-
         public bool IsService
         {
             get
@@ -235,29 +181,5 @@ namespace ItemChecker.MVVM.Model
         }
         public static CancellationTokenSource cts { get; set; } = new();
         public static CancellationToken token { get; set; } = cts.Token;
-    }
-    //favorite
-    public class HomeFavorite : ObservableObject
-    {
-        private ObservableCollection<DataSavedList> _list = new(DataSavedList.Items.Where(x => x.ListName == "favorite"));
-        public ObservableCollection<DataSavedList> List
-        {
-            get { return _list; }
-            set
-            {
-                _list = value;
-                OnPropertyChanged();
-            }
-        }
-        private DataSavedList _selectedItem;
-        public DataSavedList SelectedItem
-        {
-            get { return _selectedItem; }
-            set
-            {
-                _selectedItem = value;
-                OnPropertyChanged();
-            }
-        }
     }
 }

@@ -7,7 +7,6 @@ using ItemChecker.Properties;
 using ItemChecker.Services;
 using Newtonsoft.Json.Linq;
 using System.Threading;
-using Newtonsoft.Json;
 using System.Linq;
 
 namespace ItemChecker.MVVM.Model
@@ -91,18 +90,26 @@ namespace ItemChecker.MVVM.Model
                         Post.DropboxUploadFile("ItemChecker/" + file, AppPath + file);
                     }
                     //ver file
-                    JArray json = JArray.Parse(Get.DropboxRead("Updates.json"));
-                    var obj = json.FirstOrDefault(x => (string)x["version"] == DataProjectInfo.CurrentVersion);
+                    JArray updates = JArray.Parse(Get.DropboxRead("Updates.json"));
+                    JObject obj = (JObject)updates.FirstOrDefault(x => (string)x["version"] == DataProjectInfo.CurrentVersion);
+
                     if (obj != null)
-                        json.Remove(obj);
-                    json.Add(new JObject(
-                                    new JProperty("date", DateTime.Now),
-                                    new JProperty("version", DataProjectInfo.CurrentVersion),
-                                    new JProperty("text", text)));
-                    json = new JArray(json.OrderBy(obj => (DateTime)obj["date"]));
+                    {
+                        int id = updates.IndexOf(obj);
+                        updates[id]["text"] = text;
+                    }
+                    else
+                    {
+                        updates.Add(new JObject(
+                                        new JProperty("date", DateTime.Now),
+                                        new JProperty("version", DataProjectInfo.CurrentVersion),
+                                        new JProperty("text", text)));
+                    }
+
+                    updates = new JArray(updates.OrderBy(obj => (DateTime)obj["date"]));
                     Post.DropboxDelete("Updates.json");
                     Thread.Sleep(200);
-                    Post.DropboxUpload("Updates.json", json.ToString());
+                    Post.DropboxUpload("Updates.json", updates.ToString());
 
                     return true;
                 }

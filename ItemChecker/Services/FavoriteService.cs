@@ -1,27 +1,56 @@
 ﻿using ItemChecker.MVVM.Model;
 using ItemChecker.Properties;
+using ItemChecker.Support;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 
 namespace ItemChecker.Services
 {
-    public class FavoriteService : BaseService
+    public class FavoriteService
     {
-        public void PlaceOrderFav(decimal availableAmount)
+        public void Check()
         {
-            ObservableCollection<DataQueue> checkedList = new(Check().OrderByDescending(x => x.Precent));
+            ItemBaseService baseService = new();
+            switch (SettingsProperties.Default.ServiceId)
+            {
+                case 2:
+                    baseService.UpdateCsm();
+                    break;
+                case 3:
+                    baseService.UpdateLfm();
+                    break;
+                case 4:
+                    var currency = SteamBase.CurrencyList.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Value;
+                    decimal valueUsd = Edit.ConverterToUsd(SteamMarket.Orders.Min(x => x.OrderPrice), currency);
+                    int min = (int)(valueUsd * 0.5m);
+                    valueUsd = Edit.ConverterToUsd(SteamAccount.Balance, SteamBase.CurrencyList.FirstOrDefault(x => x.Id == 1).Value);
+                    int max = (int)(valueUsd * 2.0m);
+                    baseService.UpdateBuff(true, min, max);
+                    break;
+                case 5:
+                    currency = SteamBase.CurrencyList.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Value;
+                    valueUsd = Edit.ConverterToUsd(SteamMarket.Orders.Min(x => x.OrderPrice), currency);
+                    min = (int)(valueUsd * 0.5m);
+                    valueUsd = Edit.ConverterToUsd(SteamAccount.Balance, SteamBase.CurrencyList.FirstOrDefault(x => x.Id == 1).Value);
+                    max = (int)(valueUsd * 2.0m);
+                    baseService.UpdateBuff(false, min, max);
+                    break;
+            }
+            var compareList = Compare().OrderByDescending(x => x.Precent);
+
             int count = 0;
             decimal sum = 0m;
-            foreach (DataQueue item in checkedList)
+            foreach (DataQueue item in compareList)
             {
                 try
                 {
                     sum += item.OrderPrice;
-                    if (sum > availableAmount)
+                    if (sum > SteamMarket.Orders.GetAvailableAmount())
                         continue;
-                    ParserQueue.PlaceOrder(item.ItemName);
+                    OrderService.PlaceOrder(item.ItemName);
                     count++;
                 }
                 catch (Exception exp)
@@ -33,9 +62,8 @@ namespace ItemChecker.Services
                 {
                     if (item.Precent < SettingsProperties.Default.MinPrecent && HomeProperties.Default.Unwanted)
                     {
-                        DataSavedList data = DataSavedList.Items.FirstOrDefault(x => x.ItemName == item.ItemName);
-                        DataSavedList.Items.Remove(data);
-                        DataSavedList.Save();
+                        DataItem data = ItemsList.Favorite.FirstOrDefault(x => x.ItemName == item.ItemName);
+                        ItemsList.Favorite.Remove(data);
                     }
                 }
                 if (HomePush.token.IsCancellationRequested)
@@ -47,25 +75,18 @@ namespace ItemChecker.Services
                 Message = $"{count} orders were placed in the last push.",
             });
         }
-        ObservableCollection<DataQueue> Check()
+        List<DataQueue> Compare()
         {
             ParserCheckService checkService = new();
-            ObservableCollection<DataQueue> checkedList = new();
+            List<DataQueue> checkedList = new();
 
-            foreach (DataSavedList item in DataSavedList.Items.Where(x => x.ListName == "favorite" && x.ServiceId == SettingsProperties.Default.ServiceId))
+            foreach (DataItem item in ItemsList.Favorite.Where(x => x.ServiceId == SettingsProperties.Default.ServiceId))
             {
                 try
                 {
                     DataParser parseredItem = checkService.Check(item.ItemName, 0, SettingsProperties.Default.ServiceId);
-                    if (parseredItem.Precent >= SettingsProperties.Default.MinPrecent + HomeProperties.Default.Reserve && !ParserQueue.CheckConditions(checkedList, parseredItem))
-                    {
-                        checkedList.Add(new()
-                        {
-                            ItemName = parseredItem.ItemName,
-                            OrderPrice = parseredItem.Price2,
-                            Precent = parseredItem.Precent
-                        });
-                    }
+                    if (parseredItem.Precent >= SettingsProperties.Default.MinPrecent + HomeProperties.Default.Reserve && !OrderService.IsAllow(parseredItem))
+                        checkedList.Add(new(parseredItem.ItemName, parseredItem.Purchase, parseredItem.Precent));
                 }
                 catch (Exception exp)
                 {

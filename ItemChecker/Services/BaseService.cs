@@ -41,20 +41,6 @@ namespace ItemChecker.Services
                 }
             }
         }
-        public static String StatusSteam()
-        {
-            try
-            {
-                if (String.IsNullOrEmpty(SteamAccount.ApiKey))
-                    return string.Empty;
-                JObject res = Get.GameServersStatus(SteamAccount.ApiKey);
-                return res["result"]["services"]["SteamCommunity"].ToString();
-            }
-            catch
-            {
-                return "error";
-            }
-        }
 
         public static void OpenBrowser()
         {
@@ -95,8 +81,8 @@ namespace ItemChecker.Services
             }
             catch
             {
-                foreach (Process proc in Process.GetProcessesByName("chrome")) proc.Kill();
-                foreach (Process proc in Process.GetProcessesByName("chromedriver")) proc.Kill();
+                foreach (Process proc in Process.GetProcessesByName("msedge")) proc.Kill();
+                foreach (Process proc in Process.GetProcessesByName("msedgedriver")) proc.Kill();
                 foreach (Process proc in Process.GetProcessesByName("conhost"))
                 {
                     try
@@ -128,7 +114,7 @@ namespace ItemChecker.Services
                 Post.DropboxUpload($"ErrorLogs/{file}", info);
 
                 if (isShow)
-                    MessageBox.Show($"Something went wrong :(\n\n{exp.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(exp.Message, "Something went wrong :(", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             catch
             {

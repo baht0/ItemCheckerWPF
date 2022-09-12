@@ -20,7 +20,6 @@ namespace ItemChecker.MVVM.ViewModel
         Timer TimerView = new(500);
         //table
         private ParserTable _parserTable = new();
-        private DataParser _selectedItem;
         private ParserFilter _filterConfig = new();
         private string _searchString;
         public ParserTable ParserTable
@@ -33,60 +32,6 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 _parserTable = value;
                 OnPropertyChanged();
-            }
-        }
-        public DataParser SelectedItem
-        {
-            get
-            {
-                return _selectedItem;
-            }
-            set
-            {
-                _selectedItem = value;
-                OnPropertyChanged();
-                if (value == null)
-                    return;
-
-                ParserInfo.ItemName = value.ItemName;
-                if (ParserInfo.ST)
-                {
-                    ParserInfo.ItemSt = new();
-                    var data = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == value.ItemName).Steam;
-                    Task.Run(() => {
-                        if (!data.PriceHistory.Any())
-                        {
-                            data.LowestSellOrder = Edit.ConverterFromUsd(data.LowestSellOrder, ParserTable.CurectCurrency.Value);
-                            data.HighestBuyOrder = Edit.ConverterFromUsd(data.HighestBuyOrder, ParserTable.CurectCurrency.Value);
-
-                            ItemBaseService baseService = new();
-                            var history = baseService.GetPriceHistory(value.ItemName);
-                            data.PriceHistory = history;
-                            int days = (int)(DateTime.Now - history.FirstOrDefault().Date).TotalDays;
-                            data.LastSale = Tuple.Create(history.FirstOrDefault().Date, days, history.FirstOrDefault().Price);
-                            List<decimal> last30 = history.Where(x => x.Date > DateTime.Today.AddDays(-30)).Select(x => x.Price).ToList();
-                            data.Count30 = last30.Count;
-                            List<decimal> last60 = history.Where(x => x.Date > DateTime.Today.AddDays(-60)).Select(x => x.Price).ToList();
-                            data.Count60 = last60.Count;
-                            if (last30.Any())
-                                data.Avg30 = Math.Round(Queryable.Average(last30.AsQueryable()), 2);
-                            if (last60.Any())
-                                data.Avg60 = Math.Round(Queryable.Average(last60.AsQueryable()), 2);
-                        }
-                        ParserInfo.ItemSt = data;
-                    });
-                }
-                else if (ParserInfo.CSM)
-                {
-                    ParserInfo.InventoryCsm = DataInventoriesCsm.Items.Where(x => x.ItemName == value.ItemName).Reverse().ToList();
-                    ParserInfo.ItemCsmComparePrice = value.Price1;
-                    ParserInfo.InfoItemCount = ParserInfo.InventoryCsm.Count - 1;
-                    ParserInfo.InfoItemCurrent = 0;
-                }
-                else if (ParserInfo.LF)
-                    ParserInfo.ItemLf = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == value.ItemName).Lfm;
-                else if (ParserInfo.BF)
-                    ParserInfo.ItemBf = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == value.ItemName).Buff;
             }
         }
         public ParserFilter FilterConfig
@@ -110,20 +55,19 @@ namespace ItemChecker.MVVM.ViewModel
             set
             {
                 _searchString = value;
-                OnPropertyChanged();
                 FilterConfig = new ParserFilter();
                 if (ParserTable.GridView != null)
                     ParserTable.GridView.Filter = item =>
                     {
                         return ((DataParser)item).ItemName.Contains(value, StringComparison.OrdinalIgnoreCase);
                     };
+                OnPropertyChanged();
             }
         }
 
         //panel
         private ParserCheckConfig _parserCheckConfig = new();
         private ParserCheckInfo _parserCheckInfo = new();
-        private ParserInfo _parserInfo = new();
         private ParserQueue _parserQueue = new();
         public ParserCheckConfig ParserCheckConfig
         {
@@ -149,18 +93,6 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        public ParserInfo ParserInfo
-        {
-            get
-            {
-                return _parserInfo;
-            }
-            set
-            {
-                _parserInfo = value;
-                OnPropertyChanged();
-            }
-        }
         public ParserQueue ParserQueue
         {
             get { return _parserQueue; }
@@ -182,12 +114,12 @@ namespace ItemChecker.MVVM.ViewModel
         {
             try
             {
-                decimal availableAmount = SteamAccount.GetAvailableAmount();
-                decimal total = SteamAccount.Balance * 10;
-                ParserQueue.TotalAllowed = total;
+                decimal availableAmount = SteamMarket.Orders.GetAvailableAmount();
+                ParserQueue.TotalAllowed = SteamAccount.MaxAmount;
                 ParserQueue.AvailableAmount = availableAmount;
+                ParserQueue.OrderAmout = ParserQueue.Queues.Select(x => x.OrderPrice).Sum();
                 ParserQueue.Remaining = availableAmount - ParserQueue.OrderAmout;
-                ParserQueue.AvailableAmountPrecent = Math.Round(availableAmount / total * 100, 1);
+                ParserQueue.AvailableAmountPrecent = Math.Round(availableAmount / SteamAccount.MaxAmount * 100, 1);
             }
             catch (Exception ex)
             {
@@ -198,26 +130,50 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand OpenItemOutCommand =>
             new RelayCommand((obj) =>
             {
-                DataParser item = SelectedItem;
+                DataParser item = ParserTable.SelectedItem;
                 string itemName = item.ItemName.Replace("(Holo/Foil)", "(Holo-Foil)");
                 string market_hash_name = Edit.EncodeMarketHashName(itemName);
                 switch ((Int32)obj)
                 {
-                    case 1 or 2:
-                        if (ParserCheckInfo.Service1 == "SteamMarket" || ParserCheckInfo.Service1 == "SteamMarket(A)")
-                            Edit.OpenUrl("https://steamcommunity.com/market/listings/730/" + market_hash_name);
-                        else if (ParserCheckInfo.Service1 == "Cs.Money")
-                            Edit.OpenCsm(market_hash_name);
-                        else if (ParserCheckInfo.Service1 == "Buf163")
-                            Edit.OpenUrl("https://buff.163.com/goods/" + SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id);
+                    case 1:
+                        switch (ParserCheckConfig.CheckedConfig.ServiceOne)
+                        {
+                            case 0 or 1:
+                                Edit.OpenUrl("https://steamcommunity.com/market/listings/730/" + market_hash_name);
+                                break;
+                            case 2:
+                                Edit.OpenCsm(market_hash_name);
+                                break;
+                            case 3:
+                                Edit.OpenUrl("https://loot.farm/");
+                                break;
+                            case 4:
+                                Edit.OpenUrl("https://buff.163.com/goods/" + SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id + "#tab=buying");
+                                break;
+                            case 5:
+                                Edit.OpenUrl("https://buff.163.com/goods/" + SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id);
+                                break;
+                        }
                         break;
-                    case 3 or 4:
-                        if (ParserCheckInfo.Service2 == "SteamMarket" || ParserCheckInfo.Service2 == "SteamMarket(A)")
-                            Edit.OpenUrl("https://steamcommunity.com/market/listings/730/" + market_hash_name);
-                        else if (ParserCheckInfo.Service2 == "Cs.Money")
-                            Edit.OpenCsm(market_hash_name);
-                        else if (ParserCheckInfo.Service2 == "Buf163")
-                            Edit.OpenUrl("https://buff.163.com/goods/" + SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id);
+                    case 2 or 3:
+                        switch (ParserCheckConfig.CheckedConfig.ServiceTwo)
+                        {
+                            case 0 or 1:
+                                Edit.OpenUrl("https://steamcommunity.com/market/listings/730/" + market_hash_name);
+                                break;
+                            case 2:
+                                Edit.OpenCsm(market_hash_name);
+                                break;
+                            case 3:
+                                Edit.OpenUrl("https://loot.farm/");
+                                break;
+                            case 4:
+                                Edit.OpenUrl("https://buff.163.com/goods/" + SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id + "#tab=buying");
+                                break;
+                            case 5:
+                                Edit.OpenUrl("https://buff.163.com/goods/" + SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id);
+                                break;
+                        }
                         break;
                     default:
                         Clipboard.SetText(itemName);
@@ -232,18 +188,16 @@ namespace ItemChecker.MVVM.ViewModel
                 if (ParserTable.CurectCurrency.Id != 1)
                     foreach (DataParser item in items)
                     {
-                        item.Price1 = Edit.ConverterToUsd(item.Price1, ParserTable.CurectCurrency.Value);
-                        item.Price2 = Edit.ConverterToUsd(item.Price2, ParserTable.CurectCurrency.Value);
-                        item.Price3 = Edit.ConverterToUsd(item.Price3, ParserTable.CurectCurrency.Value);
-                        item.Price4 = Edit.ConverterToUsd(item.Price4, ParserTable.CurectCurrency.Value);
+                        item.Purchase = Edit.ConverterToUsd(item.Purchase, ParserTable.CurectCurrency.Value);
+                        item.Price = Edit.ConverterToUsd(item.Price, ParserTable.CurectCurrency.Value);
+                        item.Get = Edit.ConverterToUsd(item.Get, ParserTable.CurectCurrency.Value);
                         item.Difference = Edit.ConverterToUsd(item.Difference, ParserTable.CurectCurrency.Value);
                     }
                 foreach (DataParser item in items)
                 {
-                    item.Price1 = Edit.ConverterFromUsd(item.Price1, currency.Value);
-                    item.Price2 = Edit.ConverterFromUsd(item.Price2, currency.Value);
-                    item.Price3 = Edit.ConverterFromUsd(item.Price3, currency.Value);
-                    item.Price4 = Edit.ConverterFromUsd(item.Price4, currency.Value);
+                    item.Purchase = Edit.ConverterFromUsd(item.Purchase, currency.Value);
+                    item.Price = Edit.ConverterFromUsd(item.Price, currency.Value);
+                    item.Get = Edit.ConverterFromUsd(item.Get, currency.Value);
                     item.Difference = Edit.ConverterFromUsd(item.Difference, currency.Value);
                 }
                 ParserTable.CurrencySymbol = currency.Symbol;
@@ -310,7 +264,7 @@ namespace ItemChecker.MVVM.ViewModel
                 ParserCheckInfo.cts = new();
                 ParserCheckInfo.token = ParserCheckInfo.cts.Token;
                 SaveConfig(config);
-                DataGrid(config, "CheckList");
+                DataGrid(config);
 
                 ParserCheckInfo.Status = "Create List...";
                 List<string> checkList = ParserCheckService.ApplyConfig(config);
@@ -341,7 +295,7 @@ namespace ItemChecker.MVVM.ViewModel
                 ParserCheckInfo.IsParser = false;
             }
         }
-        void DataGrid(ParserCheckConfig config, string mode)
+        void DataGrid(ParserCheckConfig config)
         {
             ParserTable.Count = 0;
             ParserCheckInfo.DateTime = config.CheckedTime;
@@ -353,90 +307,39 @@ namespace ItemChecker.MVVM.ViewModel
                 ParserTable.Items = new();
                 ParserTable.GridView = CollectionViewSource.GetDefaultView(ParserTable.Items);
             }
-            ParserCheckInfo.Mode = mode;
+
             ItemBaseService baseService = new();
+            ParserCheckInfo.Service1 = Main.Services[config.ServiceOne];
             switch (config.ServiceOne)
             {
-                case 0:
-                    ParserCheckInfo.Service1 = "SteamMarket(A)";
-                    ParserTable.Price1 = "Sale(ST)";
-                    ParserTable.Price2 = "BuyOrder(ST)";
-                    ParserInfo.ST = true;
-                    ParserInfo.CSM = false;
-                    ParserInfo.LF = false;
-                    ParserInfo.BF = false;
-                    break;
-                case 1:
-                    ParserCheckInfo.Service1 = "SteamMarket";
-                    ParserTable.Price1 = "Sale(ST)";
-                    ParserTable.Price2 = "BuyOrder(ST)";
-                    ParserInfo.ST = true;
-                    ParserInfo.CSM = false;
-                    ParserInfo.LF = false;
-                    ParserInfo.BF = false;
-                    break;
                 case 2:
-                    ParserCheckInfo.Service1 = "Cs.Money";
-                    ParserTable.Price1 = "Trade(CSM)";
-                    ParserTable.Price2 = "Give(CSM)";
-                    ParserInfo.ST = false;
-                    ParserInfo.CSM = true;
-                    ParserInfo.LF = false;
-                    ParserInfo.BF = false;
-                    baseService.LoadInventoriesCsm(config);
+                    baseService.UpdateInventoryCsm(config);
                     break;
                 case 3:
-                    ParserCheckInfo.Service1 = "Loot.Farm";
-                    ParserTable.Price1 = "Trade(LF)";
-                    ParserTable.Price2 = "Give(LF)";
-                    ParserInfo.ST = false;
-                    ParserInfo.CSM = false;
-                    ParserInfo.LF = true;
-                    ParserInfo.BF = false;
-                    baseService.UpdateLfmInfo();
+                    baseService.UpdateLfm();
                     break;
-                case 4:
-                    ParserCheckInfo.Service1 = "Buf163";
-                    ParserTable.Price1 = "Sale(BF)";
-                    ParserTable.Price2 = "BuyOrder(BF)";
-                    ParserInfo.ST = false;
-                    ParserInfo.CSM = false;
-                    ParserInfo.LF = false;
-                    ParserInfo.BF = true;
-                    baseService.UpdateBuffInfo(false, config.MinPrice, config.MaxPrice);
+                case 4 or 5:
+                    baseService.UpdateBuff(false, config.MinPrice, config.MaxPrice);
                     break;
             }
+            ParserCheckInfo.Service2 = Main.Services[config.ServiceTwo];
             switch (config.ServiceTwo)
             {
-                case 0:
-                    ParserCheckInfo.Service2 = "SteamMarket(A)";
-                    ParserTable.Price3 = "Sale(ST)";
-                    ParserTable.Price4 = "BuyOrder(ST)";
-                    break;
-                case 1:
-                    ParserCheckInfo.Service2 = "SteamMarket";
-                    ParserTable.Price3 = "Sale(ST)";
-                    ParserTable.Price4 = "BuyOrder(ST)";
-                    break;
                 case 2:
-                    ParserCheckInfo.Service2 = "Cs.Money";
-                    ParserTable.Price3 = "Trade(CSM)";
-                    ParserTable.Price4 = "Give(CSM)";
-                    baseService.UpdateCsmInfo();
+                    baseService.UpdateCsm();
                     break;
                 case 3:
-                    ParserCheckInfo.Service2 = "Loot.Farm";
-                    ParserTable.Price3 = "Trade(LF)";
-                    ParserTable.Price4 = "Give(LF)";
-                    baseService.UpdateLfmInfo();
+                    baseService.UpdateLfm();
                     break;
                 case 4:
-                    ParserCheckInfo.Service2 = "Buf163";
-                    ParserTable.Price3 = "Sale(BF)";
-                    ParserTable.Price4 = "BuyOrder(BF)";
                     int min = (int)(config.MinPrice * 0.5m);
                     int max = (int)(config.MaxPrice * 2.5m);
-                    baseService.UpdateBuffInfo(true, min, max);
+                    baseService.UpdateBuff(true, min, max);
+                    break;
+                case 5:
+                    min = (int)(config.MinPrice * 0.5m);
+                    max = (int)(config.MaxPrice * 2.5m);
+                    baseService.UpdateBuff(false, min, max);
                     break;
             }
             ParserCheckInfo.IsVisible = true;
@@ -517,18 +420,20 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand ImportCommand =>
             new RelayCommand((obj) =>
             {
+                string filePath = (string)obj;
                 Task.Run(() =>
                 {
                     ParserCheckInfo.Status = "Reading...";
                     ParserCheckInfo.TimerOn = true;
                     ParserCheckInfo.IsParser = true;
                     ParserService service = new();
-                    var response = service.Import();
+                    var response = service.Import(filePath);
                     if (response.Any())
                     {
                         ParserCheckInfo.Status = "Preparation...";
-                        DataGrid(ParserCheckConfig.CheckedConfig, "Import");
+                        DataGrid(ParserCheckConfig.CheckedConfig);
 
+                        ParserTable.CurrencyId = 0;
                         ParserTable.Count = response.Count;
                         ParserTable.Items = response;
                         ParserTable.GridView = CollectionViewSource.GetDefaultView(response);
@@ -539,60 +444,27 @@ namespace ItemChecker.MVVM.ViewModel
                     ParserCheckInfo.TimerOn = false;
                 });
             }, (obj) => !ParserCheckInfo.IsParser);
-        //info
-        public ICommand UpdateInventoryCommand =>
-            new RelayCommand((obj) =>
-            {
-                BaseModel.IsWorking = true;
-                ItemBaseService baseService = new();
-                Task.Run(() => {
-                    switch (ParserCheckConfig.CheckedConfig.ServiceOne)
-                    {
-                        case 2:
-                            baseService.LoadInventoriesCsm(ParserCheckConfig.CheckedConfig);
-                            break;
-                        case 3:
-                            baseService.UpdateLfmInfo();
-                            break;
-                        case 4:
-                            baseService.UpdateBuffInfo(false, ParserCheckConfig.CheckedConfig.MinPrice, ParserCheckConfig.CheckedConfig.MaxPrice);
-                            break;
-                    }
-                    BaseModel.IsWorking = false;
-                    Main.Message.Enqueue("Service inventory update completed.");
-                });
-            }, (obj) => ParserTable.Items.Any() && !BaseModel.IsWorking && !ParserCheckInfo.IsParser && ParserCheckConfig.CheckedConfig.ServiceOne > 1);
         //order
         public ICommand AddQueueCommand =>
             new RelayCommand((obj) =>
             {
                 var parseredItem = obj as DataParser;
-
-                if (!ParserQueue.CheckConditions(ParserQueue.Items, parseredItem))
+                if (ParserQueue.Queues.Add(new(parseredItem.ItemName, parseredItem.Purchase, parseredItem.Precent)))
                 {
-                    decimal price = parseredItem.Price2;
-                    var currency = SteamBase.CurrencyList.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId);
-                    if (ParserTable.CurectCurrency.Id != 1)
-                        price = Edit.ConverterToUsd(price, ParserTable.CurectCurrency.Value);
-                    price = Edit.ConverterFromUsd(price, currency.Value);
-                    ParserQueue.Items.Add(new()
-                    {
-                        ItemName = parseredItem.ItemName,
-                        OrderPrice = price,
-                        Precent = parseredItem.Precent
-                    });
-                    ParserQueue.OrderAmout = ParserQueue.Items.Select(x => x.OrderPrice).Sum();
+                    ParserQueue.Items = new(ParserQueue.Queues);
                     Main.Message.Enqueue($"Success, added to Queue.\n{parseredItem.ItemName}");
+                    return;
                 }
+                Main.Message.Enqueue("Not successful. Conditions not met.");
 
-            }, (obj) => ParserQueue.Items.Select(x => x.OrderPrice).Sum() < SteamAccount.GetAvailableAmount() && ParserCheckConfig.CheckedConfig.ServiceOne < 2);
+            }, (obj) => ParserCheckConfig.CheckedConfig.ServiceOne == 0);
         public ICommand RemoveQueueCommand =>
             new RelayCommand((obj) =>
             {
                 var item = obj as DataQueue;
 
-                ParserQueue.Items.Remove(item);
-                ParserQueue.OrderAmout = ParserQueue.Items.Select(x => x.OrderPrice).Sum();
+                ParserQueue.Queues.Remove(item);
+                ParserQueue.Items = new(ParserQueue.Queues);
 
             }, (obj) => ParserQueue.Items.Any() && ParserQueue.SelectedQueue != null);
         public ICommand ClearQueueCommand =>
@@ -603,8 +475,8 @@ namespace ItemChecker.MVVM.ViewModel
                     "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result == MessageBoxResult.Yes)
                 {
+                    ParserQueue.Queues.Clear();
                     ParserQueue.Items = new();
-                    ParserQueue.OrderAmout = 0;
                 }
             }, (obj) => ParserQueue.Items.Any());
         public ICommand PlaceOrderCommand =>
@@ -612,15 +484,16 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 BaseModel.IsWorking = true;
                 Task.Run(() => {
+                    SteamAccount.GetBalance();
+
                     int success = 0;
                     ParserQueue.MaxProgress = ParserQueue.Items.Count;
                     ParserQueue.CurrentProgress = 0;
-                    foreach (var item in ParserQueue.Items)
+                    foreach (var item in ParserQueue.Queues)
                     {
                         try
                         {
-                            ParserQueue.PlaceOrder(item.ItemName);
-                            DataSavedList.Add(item.ItemName, "favorite", ParserCheckConfig.CheckedConfig.ServiceTwo);
+                            OrderService.PlaceOrder(item.ItemName);
                             success++;
                         }
                         catch (Exception exp)
@@ -642,7 +515,7 @@ namespace ItemChecker.MVVM.ViewModel
                         Message = $"{success}/{ParserQueue.Items.Count} orders has been placed."
                     });
                     ParserQueue.Items = new();
-                    ParserQueue.OrderAmout = 0;
+                    ParserQueue.Queues.Clear();
                     BaseModel.IsWorking = false;
                 });
             }, (obj) => ParserQueue.Items.Any() & !BaseModel.IsWorking);
@@ -650,23 +523,22 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand AddFavoriteCommand =>
             new RelayCommand((obj) =>
             {
-                var itemName = (string)obj;
-                if (DataSavedList.Add(itemName, "favorite", ParserCheckConfig.CheckedConfig.ServiceTwo))
-                    Main.Message.Enqueue($"Success, added to Favorites\n{itemName}");
-                else
-                    Main.Message.Enqueue("Oops, something went wrong.");
+                var name = obj as string;
+
+                DataItem item = new(name, ParserCheckConfig.CheckedConfig.ServiceTwo);
+                string message = ItemsList.Favorite.Add(item) ? $"{item.ItemName}\nItem has been added." : "Opps something went wrong...";
+                Main.Message.Enqueue(message);
             }, (obj) => ParserCheckConfig.ServiceOne < 2);
         public ICommand RemoveFavoriteCommand =>
             new RelayCommand((obj) =>
             {
                 string itemName = (string)obj;
-                var item = DataSavedList.Items.FirstOrDefault(x => x.ItemName == itemName);
+                var item = ItemsList.Favorite.FirstOrDefault(x => x.ItemName == itemName);
                 if (item != null)
                 {
-                    DataSavedList.Items.Remove(item);
+                    ItemsList.Favorite.Remove(item);
                     Main.Message.Enqueue($"{itemName}\nRemoved from list.");
-                    DataSavedList.Save();
                 }
-            }, (obj) => DataSavedList.Items.Any());        
+            }, (obj) => ItemsList.Favorite.Any());
     }
 }

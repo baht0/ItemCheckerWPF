@@ -7,6 +7,7 @@
         xmlns:viewModel="clr-namespace:ItemChecker.MVVM.ViewModel"
         xmlns:customConverter="clr-namespace:ItemChecker.Converter"
         mc:Ignorable="d"
+        x:Name="mainWindow"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         d:DataContext="{d:DesignInstance Type=viewModel:MainViewModel}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
@@ -14,12 +15,11 @@
         TextElement.FontWeight="Normal"
         TextElement.FontSize="12"
         FontFamily="{materialDesign:MaterialDesignFont}"
-        Title="ItemChecker" 
-        Height="710" Width="1300"
-        MinHeight="540" MinWidth="955"
+        Title="ItemChecker" Height="710" Width="1300" MinHeight="540" MinWidth="955"
         WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="NoResize"
         Closing="Window_Closing">
     <Window.Resources>
+        <Image x:Key="Icon" Source="../../Resources/ico.png"/>
         <ControlTemplate x:Key="ValidError"/>
         <DataTemplate DataType="{x:Type viewModel:HomeViewModel}">
             <view:BuyOrderView/>
@@ -36,187 +36,129 @@
     <Border BorderBrush="DimGray" BorderThickness="0.5">
         <Grid Margin="10 0 10 0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="25"/>
+                <RowDefinition Height="26"/>
                 <RowDefinition/>
                 <RowDefinition Height="25"/>
             </Grid.RowDefinitions>
             <!--top-->
-            <Grid Grid.Row="0" Background="Transparent">
+            <Grid Background="{DynamicResource WindowTopBackground}" Margin="-10 0 -10 0"/>
+            <Grid Grid.Row="0" Background="Transparent" MouseLeftButtonDown="Window_DragMove">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="225"/>
                     <ColumnDefinition/>
                     <ColumnDefinition Width="170"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Grid.Column="0">
-                    <Image Source="../../Resources/ico.png" Height="18" Margin="1"
-                           MouseLeftButtonDown="Image_MouseDown">
-                        <Image.ContextMenu>
-                            <ContextMenu Style="{StaticResource MaterialDesignContextMenu}" Background="{DynamicResource ElementBackground}">
-                                <MenuItem Header="Links">
-                                    <MenuItem Header="SteamMarket" Click="SteamMarket_MenuItem_Click"/>
-                                    <MenuItem Header="MyInventory" Click="Inventory_MenuItem_Click"/>
-                                    <Separator/>
-                                    <MenuItem Header="Cs.Money" Click="CSM_MenuItem_Click"/>
-                                    <MenuItem Header="Loot.Farm" Click="Lf_MenuItem_Click"/>
-                                    <MenuItem Header="Buff163" Click="Buff_MenuItem_Click"/>
+                    <Button x:Name="buttonItemChecker" ToolTip="ItemChecker" Height="26" Margin="1"
+                            Content="{StaticResource Icon}" Style="{StaticResource MaterialDesignToolForegroundButton}"
+                            Click="buttonItemChecker_Click" ContextMenuService.IsEnabled="false">
+                        <Button.ContextMenu>
+                            <ContextMenu Style="{StaticResource MaterialDesignContextMenu}"
+                                         FontSize="13" FontWeight="Bold" Background="{DynamicResource ElementBackground}">
+                                <MenuItem Header="Trades" Click="MenuItem_Click">
+                                    <MenuItem.Icon>
+                                        <materialDesign:PackIcon Kind="SwapHorizontal"/>
+                                    </MenuItem.Icon>
                                 </MenuItem>
-                                <MenuItem Header="Exit" Click="Exit_Click"/>
+                                <MenuItem Header="Calculator" Click="MenuItem_Click">
+                                    <MenuItem.Icon>
+                                        <materialDesign:PackIcon Kind="Calculator"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="Links">
+                                    <MenuItem.Icon>
+                                        <materialDesign:PackIcon Kind="Link"/>
+                                    </MenuItem.Icon>
+                                    <MenuItem Header="SteamMarket" Click="MenuItem_Click"/>
+                                    <MenuItem Header="MyInventory" Click="MenuItem_Click"/>
+                                    <Separator/>
+                                    <MenuItem Header="Cs.Money" Click="MenuItem_Click"/>
+                                    <MenuItem Header="Loot.Farm" Click="MenuItem_Click"/>
+                                    <MenuItem Header="Buff163" Click="MenuItem_Click"/>
+                                </MenuItem>
+                                <Separator/>
+                                <MenuItem Header="Settings" Click="MenuItem_Click">
+                                    <MenuItem.Icon>
+                                        <materialDesign:PackIcon Kind="Settings"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="Exit" Click="MenuItem_Click">
+                                    <MenuItem.Icon>
+                                        <materialDesign:PackIcon Kind="ExitToApp"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
                             </ContextMenu>
-                        </Image.ContextMenu>
-                        <Image.ToolTip>
-                            <TextBlock Text="ItemChecker"/>
-                        </Image.ToolTip>
-                    </Image>
-                    <Button Height="25" Style="{StaticResource MaterialDesignFlatButton}" 
-                        Click="Home_Click" x:Name="Home">
+                        </Button.ContextMenu>
+                    </Button>
+                    <Button Height="25" Style="{StaticResource MaterialDesignFlatButton}" Click="Home_Click" x:Name="Home">
                         <TextBlock Text="Home"/>
                     </Button>
-                    <Button Height="25" Style="{StaticResource MaterialDesignFlatButton}" 
-                        Click="Parser_Click" x:Name="Parser">
+                    <Button Height="25" Style="{StaticResource MaterialDesignFlatButton}" Click="Parser_Click" x:Name="Parser">
                         <TextBlock Text="Parser"/>
                     </Button>
-                    <Button Height="25" Style="{StaticResource MaterialDesignFlatButton}" 
-                        Click="Rare_Click" x:Name="Rare">
+                    <Button Height="25" Style="{StaticResource MaterialDesignFlatButton}" Click="Rare_Click" x:Name="Rare">
                         <TextBlock Text="Rare"/>
                     </Button>
                 </StackPanel>
-                <Grid Background="Transparent" Grid.Column="1" MouseLeftButtonDown="Window_DragMove"/>
                 <StackPanel Grid.Column="2" Margin="0 0 -10 0" HorizontalAlignment="Right" Orientation="Horizontal">
-                    <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}" Click="Calculator_Click">
-                        <materialDesign:PackIcon Kind="Calculator"/>
-                    </Button>
-                    <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}" Click="Notification_Click">
-                        <materialDesign:PackIcon Kind="{Binding MainInfo.IsNotification, Converter={StaticResource BooleanToNotificationIconConverter}}"/>
-                    </Button>
-                    <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}" Click="Settings_Click">
-                        <materialDesign:PackIcon Kind="Settings"/>
-                    </Button>
-                    <Button Height="25" Style="{StaticResource MaterialDesignFlatButton}" Click="MinWin_Click">
+                    <Button Style="{StaticResource MaterialDesignFlatButton}" Click="MinWin_Click" VerticalAlignment="Center">
                         <materialDesign:PackIcon Kind="Minus"/>
                     </Button>
-                    <Button Height="25" Style="{StaticResource MaterialDesignFlatButton}" Click="Close_Click">
+                    <Button Style="{StaticResource MaterialDesignFlatButton}" Click="Button_Close" VerticalAlignment="Center">
                         <materialDesign:PackIcon Kind="Close"/>
                     </Button>
                 </StackPanel>
-                <Popup x:Name="PopupCalculator" StaysOpen="False" Width="315" Height="240" Placement="Bottom" HorizontalOffset="973">
-                    <Border BorderBrush="Gray" BorderThickness="0.5" Background="{DynamicResource ElementBackground}">
-                        <Grid Margin="10 0 10 10">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="32"/>
-                                <RowDefinition Height="25"/>
-                                <RowDefinition Height="25"/>
-                                <RowDefinition Height="25"/>
-                                <RowDefinition Height="20"/>
-                                <RowDefinition Height="32"/>
-                                <RowDefinition Height="30"/>
-                                <RowDefinition Height="30"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="70"/>
-                                <ColumnDefinition/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="Compare" Grid.Row="0" VerticalAlignment="Center" FontWeight="Bold"/>
-                            <Separator VerticalAlignment="Bottom" Grid.ColumnSpan="2"/>
-                            <TextBlock Text="ToService:" Grid.Row="1" VerticalAlignment="Center"/>
-                            <ComboBox Width="105" Height="25" Grid.Row="1" Grid.Column="1"  HorizontalAlignment="Left"
-                                      ItemsSource="{Binding Calculator.Services}"
-                                      SelectedIndex="{Binding Calculator.Service}"/>
-                            <TextBlock Text="Price:" Grid.Row="2" VerticalAlignment="Center"/>
-                            <VirtualizingStackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                <TextBox x:Name="price1" Width="100" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}" 
-                                         Text="{Binding Calculator.Price1}"
-                                         KeyDown="TextBox_KeyDown" TextInput="InputDecimal" />
-                                <TextBlock Text="-" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="6 0 6 0"/>
-                                <TextBox x:Name="price2" Width="100" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"
-                                         Text="{Binding Calculator.Price2}"
-                                         KeyDown="TextBox_KeyDown" TextInput="InputDecimal"/>
-                            </VirtualizingStackPanel>
-                            <TextBlock Text="Result:" Grid.Row="3" VerticalAlignment="Center"/>
-                            <TextBox Grid.Row="3" Grid.Column="1" Width="100" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}" 
-                                     Text="{Binding Calculator.Result}" HorizontalAlignment="Left"
-                                     IsReadOnly="True" TextInput="InputDecimal"/>
-                            <TextBlock Grid.Row="4" Grid.ColumnSpan="2" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <TextBlock.Text>
-                                    <MultiBinding StringFormat="Precent: {0}% | Difference: {1}">
-                                        <Binding Path="Calculator.Precent"/>
-                                        <Binding Path="Calculator.Difference" />
-                                    </MultiBinding>
-                                </TextBlock.Text>
-                            </TextBlock>
-                            <TextBlock Text="Currency" Grid.Row="5" VerticalAlignment="Center" FontWeight="Bold"/>
-                            <Separator Grid.Row="5" VerticalAlignment="Bottom" Grid.ColumnSpan="2"/>
-                            <TextBlock Text="Currency:" Grid.Row="6" VerticalAlignment="Center"/>
-                            <VirtualizingStackPanel Grid.Row="6" Grid.Column="1"
-                                    Orientation="Horizontal"
-                                    HorizontalAlignment="Left">
-                                <ComboBox Width="60" Height="25"
-                                      ItemsSource="{Binding Calculator.CurrencyList}"
-                                      SelectedIndex="{Binding Calculator.Currency1}"/>
-                                <Button Margin="10 0 10 0" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
-                                        Command="{Binding ChangeCommand}"
-                                        CommandParameter="{Binding Calculator}">
-                                    <materialDesign:PackIcon Kind="UnfoldMoreVertical"/>
-                                </Button>
-                                <ComboBox Width="60" Height="25"
-                                          ItemsSource="{Binding Calculator.CurrencyList}"
-                                          SelectedIndex="{Binding Calculator.Currency2}"/>
-                            </VirtualizingStackPanel>
-                            <TextBlock Text="Value:" Grid.Row="7" VerticalAlignment="Center"/>
-                            <VirtualizingStackPanel Grid.Row="7" Grid.Column="1" Orientation="Horizontal"
-                                                    HorizontalAlignment="Left" VerticalAlignment="Center">
-                                <TextBox x:Name="ValueTxt" Text="{Binding Calculator.Value}" Width="80" KeyDown="TextBox_KeyDown"
-                                         TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
-                                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5 0 5 0"/>
-                                <TextBox Width="80" IsReadOnly="True" Text="{Binding Calculator.Converted}" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
-                            </VirtualizingStackPanel>
-                        </Grid>
-                    </Border>
-                </Popup>
-                <Popup Grid.Column="2" x:Name="PopupNotification" StaysOpen="False" Width="270" MaxHeight="210" Placement="Bottom" HorizontalOffset="1018">
-                    <Border Background="{DynamicResource ElementBackground}" BorderThickness="0.5" BorderBrush="{DynamicResource Background}">
-                        <ListView Margin="5" ItemsSource="{Binding MainInfo.Notifications}" SelectedItem="{Binding Notification}">
-                            <ListView.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Width="220" TextWrapping="Wrap" Foreground="{Binding IsRead, Converter={StaticResource BooleanToColorConverter}}">
-                                        <TextBlock.Text>
-                                            <MultiBinding StringFormat="{}{0}&#x0a;{1}&#x0a;&#x0a;{2:dd MMM yyyy, hh:mm}">
-                                                <Binding Path="Title"/>
-                                                <Binding Path="Message"/>
-                                                <Binding Path="Date"/>
-                                            </MultiBinding>
-                                        </TextBlock.Text>
-                                    </TextBlock>
-                                </DataTemplate>
-                            </ListView.ItemTemplate>
-                        </ListView>
-                    </Border>
-                </Popup>
             </Grid>
             <!--body-->
             <ContentControl Grid.Row="1" x:Name="bodyContent" Content="{Binding}" Margin="10" />
-            <Border VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 25 0 0"
-                    Height="150" Width="500" Background="WhiteSmoke" Visibility="Hidden"
-                    BorderBrush="LightSlateGray" BorderThickness="0.5">
-            </Border>
             <!--footer-->
-            <Grid Grid.Row="2" VerticalAlignment="Center" DataContext="{Binding MainInfo}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition Width="25"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" VerticalAlignment="Center">
+            <Border Grid.Row="2" Background="{DynamicResource ElementBackground}" Margin="-10 0 -10 0"
+                    BorderThickness="0.5" BorderBrush="{DynamicResource Background}"/>
+            <Grid Grid.Row="2" VerticalAlignment="Center">
+                <TextBlock VerticalAlignment="Center">
                     <TextBlock.Text>
-                        <MultiBinding StringFormat="Balance: {0}{1} / {2}$">
-                            <Binding Path="Balance" />
-                            <Binding Path="CurrencySymbol" />
-                            <Binding Path="BalanceUsd" />
+                        <MultiBinding StringFormat="Steam Balance: {0}{1} / {2}$">
+                            <Binding Path="MainInfo.Balance" />
+                            <Binding Path="MainInfo.CurrencySymbol" />
+                            <Binding Path="MainInfo.BalanceUsd" />
                         </MultiBinding>
                     </TextBlock.Text>
                 </TextBlock>
-                <TextBlock Grid.Column="2" ToolTip="Steam Status" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <materialDesign:PackIcon Kind="{Binding StatusCommunity}"/>
-                </TextBlock>
+                <Popup HorizontalAlignment="Right" x:Name="PopupNotification" StaysOpen="False" Width="270" Height="659" HorizontalOffset="1018" Closed="PopupNotification_Closed">
+                    <Grid>
+                        <Border Background="{DynamicResource ElementBackground}" BorderThickness="0.5" BorderBrush="{DynamicResource Background}">
+                            <Grid Margin="5">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="32"/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="Notification Center" VerticalAlignment="Center" FontWeight="Bold" FontSize="14"/>
+                                <Separator VerticalAlignment="Bottom"/>
+                                <ListView Grid.Row="1" ItemsSource="{Binding MainInfo.Notifications}"
+                                          x:Name="listNotifications" SelectionMode="Single" VerticalAlignment="Bottom">
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Width="220" TextWrapping="Wrap" Foreground="{Binding IsRead, Converter={StaticResource BooleanToColorConverter}}">
+                                                <TextBlock.Text>
+                                                    <MultiBinding StringFormat="{}{0}&#x0a;{1}&#x0a;&#x0a;{2:dd MMM yyyy, hh:mm tt}">
+                                                        <Binding Path="Title"/>
+                                                        <Binding Path="Message"/>
+                                                        <Binding Path="Date"/>
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                            </Grid>
+                        </Border>
+                        <Grid Background="Transparent" Width="247" HorizontalAlignment="Left"/>
+                    </Grid>
+                </Popup>
+                <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
+                        ToolTip="Notifications" Click="Notification_Click" HorizontalAlignment="Right">
+                    <materialDesign:PackIcon Kind="{Binding MainInfo.IsNotification, Converter={StaticResource BooleanToNotificationIconConverter}}"/>
+                </Button>
             </Grid>
             <materialDesign:Snackbar x:Name="MyMessage" Grid.Row="1" MessageQueue="{Binding MainInfo.Message}"/>
         </Grid>

@@ -24,34 +24,19 @@ namespace ItemChecker.MVVM.Model
                 Directory.CreateDirectory(path);
             File.WriteAllText(path + $"Parser_{parserConfig.CheckedTime:dd.MM_hh.mm}_{parserConfig.ServiceOne}{parserConfig.ServiceTwo}.json", json.ToString());
         }
-        public List<DataParser> Import()
+        public List<DataParser> Import(string filePath)
         {
-            string file = OpenFileDialog("json");
-            if (String.IsNullOrEmpty(file))
+            if (!File.Exists(filePath))
                 return new();
-            JObject json = JObject.Parse(file);
+
+            string text = File.ReadAllText(filePath);
+            JObject json = JObject.Parse(text);
 
             ParserProperties.Default.ServiceOne = Convert.ToInt32(json["Service1"]);
             ParserProperties.Default.ServiceTwo = Convert.ToInt32(json["Service2"]);
             ParserCheckConfig.CheckedConfig = json["ParserCheckConfig"].ToObject<ParserCheckConfig>();
 
             List<DataParser> data = JsonConvert.DeserializeObject<List<DataParser>>(json["Items"].ToString());
-
-            if (ParserCheckConfig.CheckedConfig.ServiceOne < 2 || ParserCheckConfig.CheckedConfig.ServiceTwo < 2)// with comision
-                foreach (var item in data)
-                {
-                    var itemBase = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName).Steam;
-                    if (ParserCheckConfig.CheckedConfig.ServiceOne < 2)
-                    {
-                        itemBase.LowestSellOrder = item.Price1;
-                        itemBase.HighestBuyOrder = item.Price2;
-                    }
-                    if (ParserCheckConfig.CheckedConfig.ServiceTwo < 2)
-                    {
-                        itemBase.LowestSellOrder = item.Price3;
-                        itemBase.HighestBuyOrder = item.Price4;
-                    }
-                }
 
             return data;
         }
@@ -165,16 +150,14 @@ namespace ItemChecker.MVVM.Model
             }
             //Prices
             bool prices = true;
-            if (filterConfig.Price1 || filterConfig.Price2 || filterConfig.Price3 || filterConfig.Price4)
+            if (filterConfig.Price1 || filterConfig.Price2 || filterConfig.Price3)
             {
                 if (filterConfig.Price1)
-                    prices = filterConfig.Price1From < item.Price1 && filterConfig.Price1To > item.Price1;
+                    prices = filterConfig.Price1From < item.Purchase && filterConfig.Price1To > item.Purchase;
                 if (filterConfig.Price2 && prices)
-                    prices = filterConfig.Price2From < item.Price2 && filterConfig.Price2To > item.Price2;
+                    prices = filterConfig.Price2From < item.Price && filterConfig.Price2To > item.Price;
                 if (filterConfig.Price3 && prices)
-                    prices = filterConfig.Price3From < item.Price3 && filterConfig.Price3To > item.Price3;
-                if (filterConfig.Price4 && prices)
-                    prices = filterConfig.Price4From < item.Price4 && filterConfig.Price4To > item.Price4;
+                    prices = filterConfig.Price3From < item.Get && filterConfig.Price3To > item.Get;
             }
             //profit
             bool profit = true;

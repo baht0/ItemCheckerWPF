@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:view="clr-namespace:ItemChecker.MVVM.View"
         xmlns:viewmodel="clr-namespace:ItemChecker.MVVM.ViewModel"
-        mc:Ignorable="d"
+        mc:Ignorable="d" x:Name="whatsNewWindow"
         Title="What's New" Height="430" Width="475"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         d:DataContext="{d:DesignInstance Type=viewmodel:WhatsNewViewModel}"
@@ -22,6 +22,7 @@
                 <RowDefinition/>
                 <RowDefinition Height="15"/>
             </Grid.RowDefinitions>
+            <Grid Background="{DynamicResource WindowTopBackground}" Margin="-10 0 -10 0"/>
             <Grid Grid.Row="0" Background="Transparent" MouseLeftButtonDown="Window_DragMove">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="What's New" VerticalAlignment="Center" />

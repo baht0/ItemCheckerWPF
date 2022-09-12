@@ -11,11 +11,11 @@ namespace ItemChecker.Converter
             if (value is bool boolean)
             {
                 if (boolean)
-                    return "BellBadge";
+                    return "MessageReplyText";
                 else
-                    return "Bell";
+                    return "MessageReplyOutline";
             }
-            return "Bell";
+            return "MessageReplyOutline";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -23,11 +23,11 @@ namespace ItemChecker.Converter
             if (value is bool boolean)
             {
                 if (boolean)
-                    return "BellBadge";
+                    return "MessageReplyText";
                 else
-                    return "Bell";
+                    return "MessageReplyOutline";
             }
-            return "Bell";
+            return "MessageReplyOutline";
         }
     }
 }

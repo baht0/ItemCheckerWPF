@@ -14,11 +14,7 @@ namespace ItemChecker.MVVM.ViewModel
     {
         #region prop
         Timer TimerInfo = new(TimeSpan.FromMinutes(15).TotalMilliseconds);
-        Timer TimerWindow = new(500);
-
-        private MainInfo _mainInfo = new();
-        private Calculator _calculator = new();
-        private DataNotification _notification = new();
+        Timer TimerWindow = new(250);
 
         public MainInfo MainInfo
         {
@@ -29,25 +25,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        public Calculator Calculator
-        {
-            get { return _calculator; }
-            set
-            {
-                _calculator = value;
-                OnPropertyChanged();
-            }
-        }
-        public DataNotification Notification
-        {
-            get { return _notification; }
-            set
-            {
-                value.IsRead = true;
-                _notification = value;
-                OnPropertyChanged();
-            }
-        }
+        private MainInfo _mainInfo = new();
         #endregion
 
         public MainViewModel()
@@ -66,58 +44,26 @@ namespace ItemChecker.MVVM.ViewModel
                 Application.Current.Shutdown();
             });
 
-        //calculator
-        public ICommand ChangeCommand =>
+        //Notification
+        public ICommand ReadNotificationCommand =>
             new RelayCommand((obj) =>
             {
-                Calculator config = (Calculator)obj;
-                Calculator calculator = new();
-                calculator.Service = config.Service;
-                calculator.Price1 = config.Price1;
-                calculator.Price2 = config.Price2;
-                calculator.Precent = config.Precent;
-                calculator.Difference = config.Difference;
-                calculator.Result = config.Result;
-
-                calculator.Currency1 = config.Currency2;
-                calculator.Currency2 = config.Currency1;
-                calculator.Value = config.Converted;
-                calculator.Converted = config.Value;
-                Calculator = calculator;
+                foreach (var item in Main.Notifications)
+                    item.IsRead = true;
             });
 
         void UpdateInformation(Object sender, ElapsedEventArgs e)
         {
             try
             {
-                SteamBase.StatusCommunity = BaseService.StatusSteam();
-                if (SteamBase.StatusCommunity != "normal")
+                SteamAccount.GetBalance();
+                if (SteamMarket.StatusCommunity != "normal")
                 {
                     Main.Notifications.Add(new()
                     {
                         Title = "Steam Status",
                         Message = "There are problems with Steam servers. The program may not work correctly!"
                     });
-                }
-
-                SteamAccount.GetSteamBalance();
-                if (SteamAccount.BalanceStartUp > SteamAccount.Balance)
-                {
-                    Main.Notifications.Add(new()
-                    {
-                        Title = "Balance",
-                        Message = $"Your balance has decreased\n-{SteamAccount.BalanceStartUp - SteamAccount.Balance}."
-                    });
-                    SteamAccount.BalanceStartUp = SteamAccount.Balance;
-                }
-                else if (SteamAccount.BalanceStartUp < SteamAccount.Balance)
-                {
-                    Main.Notifications.Add(new()
-                    {
-                        Title = "Balance",
-                        Message = $"Your balance has increased\n+{SteamAccount.Balance - SteamAccount.BalanceStartUp}."
-                    });
-                    SteamAccount.BalanceStartUp = SteamAccount.Balance;
                 }
             }
             catch (Exception ex)
