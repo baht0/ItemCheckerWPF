@@ -221,7 +221,7 @@ namespace ItemChecker.MVVM.Model
             AccountName = htmlDoc.DocumentNode.SelectSingleNode("//span[@class='persona online']").InnerText.Trim();
             if (!SteamSignUp.AllowUser(AccountName))
             {
-                MessageBox.Show("User is not found.\n\nContact your administrator.", "Opps...", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("User is not found.", "Opps...", MessageBoxButton.OK, MessageBoxImage.Information);
                 Application.Current.Dispatcher.Invoke(() => {
                     if (Application.Current.MainWindow.DataContext is StartUpViewModel vw)
                         vw.ExitCommand.Execute(null);
