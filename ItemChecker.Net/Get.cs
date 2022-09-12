@@ -9,13 +9,6 @@ namespace ItemChecker.Net
 {
     public class Get
     {
-        public static Cookie SteamSessionId()
-        {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("https://steamcommunity.com/market/");
-            request.CookieContainer = new();
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();            
-            return response.Cookies["sessionid"];
-        }
 
         public static String Request(string url)
         {
@@ -33,14 +26,21 @@ namespace ItemChecker.Net
             return stream.ReadToEnd();
         }
         //steam
+        public static Cookie SteamSessionId()
+        {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("https://steamcommunity.com/market/");
+            request.CookieContainer = new();
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            return response.Cookies["sessionid"];
+        }
         public static JObject GameServersStatus(string steam_api_key)
         {
             string json = Request("https://api.steampowered.com/ICSGOServers_730/GetGameServersStatus/v1/?key=" + steam_api_key);
             return JObject.Parse(json);
         }
-        public static Tuple<Decimal, Decimal> PriceOverview(string market_hash_name)
+        public static Tuple<Decimal, Decimal> PriceOverview(string market_hash_name, int currencyId)
         {
-            string json = Request("https://steamcommunity.com/market/priceoverview/?country=RU&currency=1&appid=730&market_hash_name=" + market_hash_name);
+            string json = Request("https://steamcommunity.com/market/priceoverview/?country=RU&currency=" + currencyId + "&appid=730&market_hash_name=" + market_hash_name);
             JObject response = JObject.Parse(json);
             decimal lowest_price = response.ContainsKey("lowest_price") ? Edit.GetPrice(response["lowest_price"].ToString()) : 0m;
             decimal median_price = response.ContainsKey("median_price") ? Edit.GetPrice(response["median_price"].ToString()) : 0m;
@@ -50,11 +50,6 @@ namespace ItemChecker.Net
         public static JObject TradeOffers(string steam_api_key)
         {
             string json = Request(@"http://api.steampowered.com/IEconService/GetTradeOffers/v1/?key=" + steam_api_key + "&get_received_offers=1&active_only=100");
-            return JObject.Parse(json);
-        }
-        public static JObject ItemOrdersHistogram(int item_nameid)
-        {
-            string json = Request("https://steamcommunity.com/market/itemordershistogram?country=RU&language=english&currency=1&item_nameid=" + item_nameid + "&two_factor=0");
             return JObject.Parse(json);
         }
         public static JObject ItemOrdersHistogram(int item_nameid, int currencyId)

@@ -63,33 +63,33 @@ namespace ItemChecker.Net
 
             return (HttpWebResponse)response;
         }
-        public static HttpWebResponse CreateBuyOrder(CookieContainer cookies, string marketHashName, decimal highest_buy_order, int currencyId)
+        public static HttpWebResponse CreateBuyOrder(CookieContainer cookies, string market_hash_name, decimal highest_buy_order, int currencyId)
         {
             CookieCollection cookieCollection = cookies.GetAllCookies();
             Cookie sessionId = cookieCollection.FirstOrDefault(x => x.Name == "sessionid");
-            string body = $"sessionid={sessionId.Value}&currency={currencyId}&appid=730&market_hash_name={marketHashName}&price_total={(int)(highest_buy_order * 100 + 1)}&quantity=1&billing_state=&save_my_address=0";
+            string body = $"sessionid={sessionId.Value}&currency={currencyId}&appid=730&market_hash_name={market_hash_name}&price_total={(int)(highest_buy_order * 100 + 1)}&quantity=1&billing_state=&save_my_address=0";
             string url = "https://steamcommunity.com/market/createbuyorder/";
-            string referer = "https://steamcommunity.com/market/listings/730/" + marketHashName;
+            string referer = "https://steamcommunity.com/market/listings/730/" + market_hash_name;
 
             return SteamRequest(cookies, body, url, referer);
         }
-        public static HttpWebResponse CancelBuyOrder(CookieContainer cookies, string marketHashName, string buyOrderId)
+        public static HttpWebResponse CancelBuyOrder(CookieContainer cookies, string market_hash_name, string buyOrderId)
         {
             CookieCollection cookieCollection = cookies.GetAllCookies();
             Cookie sessionId = cookieCollection.FirstOrDefault(x => x.Name == "sessionid");
             string body = $"sessionid={sessionId.Value}&buy_orderid={buyOrderId}";
             string url = "https://steamcommunity.com/market/cancelbuyorder/";
-            string referer = "https://steamcommunity.com/market/listings/730/" + marketHashName;
+            string referer = "https://steamcommunity.com/market/listings/730/" + market_hash_name;
 
             return SteamRequest(cookies, body, url, referer);
         }
-        public static HttpWebResponse BuyListing(CookieContainer cookies, string marketHashName, string listingId, decimal fee, decimal subtotal, decimal total, int currencyId)
+        public static HttpWebResponse BuyListing(CookieContainer cookies, string market_hash_name, string listingId, decimal fee, decimal subtotal, decimal total, int currencyId)
         {
             CookieCollection cookieCollection = cookies.GetAllCookies();
             Cookie sessionId = cookieCollection.FirstOrDefault(x => x.Name == "sessionid");
             string body = $"sessionid={sessionId.Value}&currency={currencyId}&fee={(int)fee}&subtotal={(int)subtotal}&total={(int)total}&quantity=1&first_name=&last_name=&billing_address=&billing_address_two=&billing_country=&billing_city=&billing_state=&billing_postal_code=&save_my_address=1";
             string url = "https://steamcommunity.com/market/buylisting/" + listingId;
-            string referer = "https://steamcommunity.com/market/listings/730/" + marketHashName;
+            string referer = "https://steamcommunity.com/market/listings/730/" + market_hash_name;
 
             return SteamRequest(cookies, body, url, referer);
         }
@@ -112,38 +112,6 @@ namespace ItemChecker.Net
             string referer = "https://steamcommunity.com/id/baht0/inventory/";
 
             return SteamRequest(cookies, body, url, referer);
-        }
-        //cs.money
-        static HttpWebResponse CsmRequest(Cookie csmSc, string body, string url, string referer)
-        {
-            CookieContainer cookies = new();
-            cookies.Add(csmSc);
-
-            byte[] bytes = Encoding.UTF8.GetBytes(body);
-
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.CookieContainer = cookies;
-            request.Method = "POST";
-            request.ContentType = "application/json; charset=UTF-8";
-            request.Host = "cs.money";
-            request.UserAgent = "Mozilla / 5.0(Windows NT 10.0; Win64; x64) AppleWebKit / 537.36(KHTML, like Gecko) Chrome / 96.0.4664.110 Safari / 537.36";
-            request.Referer = referer;
-            request.ContentLength = bytes.Length;
-            Stream stream = request.GetRequestStream();
-            stream.Write(bytes, 0, bytes.Length);
-            stream.Close();
-            WebResponse response = request.GetResponse();
-
-            return (HttpWebResponse)response;
-        }
-        public static HttpWebResponse WithdrawSkins(Cookie csmSc, JObject json)
-        {
-            string body = json.ToString();
-
-            string url = "https://cs.money/2.0/withdraw_skins";
-            string referer = "https://cs.money/csgo/trade/";
-
-            return CsmRequest(csmSc, body, url, referer);
         }
 
         //dropbox
