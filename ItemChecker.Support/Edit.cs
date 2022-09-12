@@ -114,11 +114,16 @@ namespace ItemChecker.Support
         }
         public static Decimal Difference(decimal a, decimal b)
         {
-            return Math.Round((a - b), 2);
+            return Math.Round(a - b, 2);
         }
 
         //time
         public static DateTime ConvertFromUnixTimestamp(double timestamp)
+        {
+            DateTime origin = new(1970, 1, 1, 0, 0, 0, 0);
+            return origin.AddSeconds(timestamp).ToLocalTime();
+        }
+        public static DateTime ConvertFromUnixTimestampJava(double timestamp)
         {
             DateTime origin = new(1970, 1, 1, 0, 0, 0, 0);
             return origin.AddMilliseconds(timestamp).ToLocalTime();
