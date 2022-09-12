@@ -279,7 +279,8 @@
             </Grid>
             <!--loading-->
             <Grid Grid.Row="1" Margin="-10 0 -10 -10" Visibility="{Binding Details.Loading, Converter={StaticResource BooleanToVisibilityConverter}}"
-                  Background="Black" Opacity="0.7">                
+                  Background="Black" Opacity="0.7" Cursor="Wait">
+                <ProgressBar Style="{StaticResource MaterialDesignLinearProgressBar}" IsIndeterminate="True" Value="30" Maximum="100" Width="830" VerticalAlignment="Top"/>
                 <TextBlock Text="Loading..." VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="26" FontStyle="Normal" FontWeight="Normal" Foreground="#DDFFFFFF"/>
             </Grid>
             <materialDesign:Snackbar Grid.Row="1" MessageQueue="{Binding Message}"/>
