@@ -161,31 +161,50 @@ namespace ItemChecker.MVVM.ViewModel
                 switch (Convert.ToInt32(obj))
                 {
                     case 0:
-                        BaseModel.IsWorking = true;
-                        Task.Run(() => {
-                            OrderCheckService orderCheck = new();
-                            orderCheck.SteamOrders(true);
-                            HomeTable.OrderedGrid = new ObservableCollection<DataOrder>(SteamMarket.Orders);
-                            BaseModel.IsWorking = false;
-                            Main.Message.Enqueue("MyOrders update is complete.");
-                        });
-                        break;
-                    case 1:
-                        MessageBoxResult result = MessageBox.Show(
-                            "Do you really want to cancel all your orders?", "Question",
-                            MessageBoxButton.YesNo, MessageBoxImage.Question);
-                        if (result == MessageBoxResult.Yes)
+                        {
                             Task.Run(() => {
-                                BaseModel.IsWorking = true;
-                                List<DataOrder> orders = new(SteamMarket.Orders);
-                                foreach (DataOrder order in orders)
-                                    SteamMarket.Orders.Cancel(order);
-                                HomeTable.OrderedGrid = new ObservableCollection<DataOrder>(SteamMarket.Orders);
-                                SteamMarket.Orders.GetAvailableAmount();
-                                BaseModel.IsWorking = false;
-                                Main.Message.Enqueue("All MyOrders have been cancelled.");
+                                try
+                                {
+                                    BaseModel.IsWorking = true;
+                                    OrderCheckService orderCheck = new();
+                                    orderCheck.SteamOrders(true);
+                                    HomeTable.OrderedGrid = new(SteamMarket.Orders);
+                                    BaseModel.IsWorking = false;
+                                    Main.Message.Enqueue("MyOrders update is complete.");
+                                }
+                                catch (Exception ex)
+                                {
+                                    BaseModel.IsWorking = false;
+                                    BaseService.errorLog(ex, true);
+                                }
                             });
-                        break;
+                            break;
+                        }
+                    case 1:
+                        {
+                            MessageBoxResult result = MessageBox.Show(
+                                "Do you really want to cancel all your orders?", "Question",
+                                MessageBoxButton.YesNo, MessageBoxImage.Question);
+                            if (result == MessageBoxResult.Yes)
+                                Task.Run(() => {
+                                    try
+                                    {
+                                        BaseModel.IsWorking = true;
+                                        List<DataOrder> orders = new(SteamMarket.Orders);
+                                        foreach (DataOrder order in orders)
+                                            SteamMarket.Orders.Cancel(order);
+                                        HomeTable.OrderedGrid = new(SteamMarket.Orders);
+                                        BaseModel.IsWorking = false;
+                                        Main.Message.Enqueue("All MyOrders have been cancelled.");
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        BaseModel.IsWorking = false;
+                                        BaseService.errorLog(ex, true);
+                                    }
+                                });
+                            break;
+                        }
                 }
             }, (obj) => !BaseModel.IsWorking);
         public ICommand CancelOrderCommand =>
@@ -324,17 +343,22 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand UpdateInformationsCommand =>
             new RelayCommand((obj) =>
             {
-                BaseModel.IsWorking = true;
                 Task.Run(() =>
                 {
-                    InventoryService inventoryService = new();
-                    var items = inventoryService.CheckInventory(null);
-                    HomeInventoryInfo.Items = new(items);
-                    SelectedInventory = HomeInventoryInfo.Items.Any() ? HomeInventoryInfo.Items.First() : new();
-                    Main.Message.Enqueue("Steam Inventory updated.");
-                    BaseModel.IsWorking = false;
+                    try
+                    {
+                        InventoryService inventoryService = new();
+                        var items = inventoryService.CheckInventory(null);
+                        HomeInventoryInfo.Items = new(items);
+                        SelectedInventory = HomeInventoryInfo.Items.Any() ? HomeInventoryInfo.Items.First() : new();
+                        Main.Message.Enqueue("Steam Inventory updated.");
+                    }
+                    catch (Exception ex)
+                    {
+                        BaseService.errorLog(ex, true);
+                    }
                 });
-            }, (obj) => !BaseModel.IsWorking);
+            });
         public ICommand ShowInventoryItemCommand =>
             new RelayCommand((obj) =>
             {
