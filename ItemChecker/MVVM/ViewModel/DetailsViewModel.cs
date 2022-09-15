@@ -141,21 +141,28 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 Task.Run(() =>
                 {
-                    ItemBaseService baseService = new();
-                    baseService.UpdateSteamItem(itemName);
-                    baseService.UpdateCsm();
-                    baseService.UpdateLfm();
-                    baseService.UpdateBuffItem(itemName);
-
-                    Details.Prices = new();
-                    List<DetailsPrice> prices = new();
-                    for (int i = 0; i < Main.Services.Count; i++)
+                    try
                     {
-                        DetailsPrice price = new();
-                        prices.Add(price.Add(i, itemName));
+                        ItemBaseService baseService = new();
+                        baseService.UpdateSteamItem(itemName);
+                        baseService.UpdateCsm();
+                        baseService.UpdateLfm();
+                        baseService.UpdateBuffItem(itemName);
+
+                        Details.Prices = new();
+                        List<DetailsPrice> prices = new();
+                        for (int i = 0; i < Main.Services.Count; i++)
+                        {
+                            DetailsPrice price = new();
+                            prices.Add(price.Add(i, itemName));
+                        }
+                        Details.Prices = new(prices);
+                        Details.Loading = false;
                     }
-                    Details.Prices = new(prices);
-                    Details.Loading = false;
+                    catch (Exception ex)
+                    {
+                        BaseService.errorLog(ex, true);
+                    }
                 });
             }
         }

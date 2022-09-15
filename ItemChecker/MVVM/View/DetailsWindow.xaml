@@ -263,7 +263,7 @@
                                 <TextBlock Grid.Row="1" Text="{Binding Item.OrderCount, StringFormat='BuyOrder({0}):'}" VerticalAlignment="Center"/>
                                 <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Item.BuyOrder, StringFormat='{}{0}$'}" VerticalAlignment="Center"/>
                                 <TextBlock Grid.Row="2" Text="LastSale:" VerticalAlignment="Center"/>
-                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding LastSale, Converter={StaticResource TradeLockConverter}}" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding LastSale, Converter={StaticResource TradeLockConverter}, StringFormat='{}{0} Ago'}" VerticalAlignment="Center"/>
                             </Grid>
                             <DataGrid Grid.Row="2" ItemsSource="{Binding Item.History}" FontSize="11"
                                       AlternationCount="2" AlternatingRowBackground="{DynamicResource ElementBackground}" AutoGenerateColumns="False"

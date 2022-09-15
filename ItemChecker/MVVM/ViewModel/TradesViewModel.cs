@@ -78,20 +78,17 @@ namespace ItemChecker.MVVM.ViewModel
                         {
                             switch (item.ServiceId)
                             {
-                                case 0 or 1:
+                                case 0:
                                     Edit.OpenUrl("https://steamcommunity.com/market/listings/730/" + market_hash_name);
                                     break;
-                                case 2:
+                                case 1:
                                     Edit.OpenCsm(market_hash_name);
                                     break;
-                                case 3:
+                                case 2:
                                     Edit.OpenUrl("https://loot.farm/");
                                     break;
-                                case 4:
-                                    Edit.OpenUrl("https://buff.163.com/goods/" + SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id + "#tab=buying");
-                                    break;
-                                case 5:
-                                    Edit.OpenUrl("https://buff.163.com/goods/" + SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id);
+                                case 3:
+                                    Edit.OpenUrl("https://buff.163.com/market/csgo#tab=selling&page_num=1&search=" + market_hash_name);
                                     break;
                             }
                             break;
@@ -99,16 +96,16 @@ namespace ItemChecker.MVVM.ViewModel
                     case 3 or 4:
                         switch (item.ServiceId)
                         {
-                            case 0 or 1:
+                            case 0:
                                 Edit.OpenUrl("https://steamcommunity.com/market/");
                                 break;
-                            case 2:
+                            case 1:
                                 Edit.OpenUrl("https://cs.money/transactions/");
                                 break;
-                            case 3:
+                            case 2:
                                 Edit.OpenUrl("https://loot.farm/en/account.html");
                                 break;
-                            case 4 or 5:
+                            case 3:
                                 switch (item.Action)
                                 {
                                     case 0:

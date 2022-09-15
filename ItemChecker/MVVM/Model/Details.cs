@@ -106,8 +106,9 @@ namespace ItemChecker.MVVM.Model
                     break;
                 case 3:
                     item = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName).Lfm;
-                    this.Price = item.Price;
-                    this.Get = Math.Round(this.Price * Calculator.CommissionLf, 2);
+                    var price = item.Price;
+                    this.Price = Math.Round(price * 1.03m, 2);
+                    this.Get = Math.Round(price * Calculator.CommissionLf, 2);
                     this.Have = item.IsHave;
                     this.Available = !item.Unavailable && !item.Overstock;
                     break;

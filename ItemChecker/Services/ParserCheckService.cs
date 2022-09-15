@@ -42,7 +42,8 @@ namespace ItemChecker.MVVM.Model
                     }
                 case 3:
                     {
-                        data.Purchase = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == data.ItemName).Lfm.Price;
+                        var price = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == data.ItemName).Lfm.Price;
+                        data.Purchase = Math.Round(price * 1.03m, 2);
                         break;
                     }
                 case 4:
