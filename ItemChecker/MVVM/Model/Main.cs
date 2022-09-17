@@ -1,7 +1,5 @@
-﻿using ItemChecker.Core;
-using ItemChecker.Support;
+﻿using ItemChecker.Support;
 using MaterialDesignThemes.Wpf;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -10,6 +8,19 @@ namespace ItemChecker.MVVM.Model
 {
     public class Main
     {
+        public static List<string> ServicesShort
+        {
+            get
+            {
+                return new List<string>()
+                    {
+                        "SteamMarket",
+                        "Cs.Money",
+                        "Loot.Farm",
+                        "Buff163"
+                    };
+            }
+        }
         public static List<string> Services
         {
             get

@@ -58,25 +58,26 @@
                         <ColumnDefinition Width="85"/>
                         <ColumnDefinition/>
                         <ColumnDefinition Width="10"/>
-                        <ColumnDefinition Width="55"/>
+                        <ColumnDefinition Width="65"/>
                         <ColumnDefinition Width="20"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="Compare" Grid.Row="0" VerticalAlignment="Center" FontWeight="Bold" FontSize="13"/>
                     <Separator VerticalAlignment="Bottom" Grid.ColumnSpan="5"/>
 
                     <TextBlock Text="Purchase:" Grid.Row="1" VerticalAlignment="Center"/>
-                    <TextBox x:Name="price1" Grid.Row="1" Grid.Column="1" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"
-                             Text="{Binding Calculator.Purchase}" KeyDown="TextBox_KeyDown" TextInput="InputDecimal"/>
+                    <TextBox x:Name="purchaseTxt" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding Calculator.Purchase}"
+                             Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}" TextInput="InputDecimal" TextChanged="compare_TextChanged"/>
 
                     <TextBlock Text="Price:" Grid.Row="2" VerticalAlignment="Center"/>
-                    <TextBox x:Name="price2" Grid.Row="2" Grid.Column="1" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"
-                             Text="{Binding Calculator.Price}" KeyDown="TextBox_KeyDown" TextInput="InputDecimal"/>
+                    <TextBox x:Name="priceTxt" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding Calculator.Price}"
+                             Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}" TextInput="InputDecimal" TextChanged="compare_TextChanged"/>
                     
                     <TextBlock Text="Commission:" Grid.Row="3" VerticalAlignment="Center"/>
-                    <ComboBox Grid.Row="3" Grid.Column="1" SelectionChanged="Commission_SelectionChanged"
-                                          ItemsSource="{Binding Calculator.Services}" SelectedIndex="{Binding Calculator.Service}"/>
-                    <TextBox Grid.Row="3" Grid.Column="3" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"
-                             Text="{Binding Calculator.Commission}" KeyDown="TextBox_KeyDown" TextInput="InputDecimal"/>
+                    <ComboBox Grid.Row="3" Grid.Column="1" SelectionChanged="Commission_SelectionChanged" x:Name="commissionCmb" 
+                              ItemsSource="{Binding Calculator.Services}" SelectedIndex="{Binding Calculator.Service}"/>
+                    <TextBox x:Name="commissionTxt" Grid.Row="3" Grid.Column="3" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"
+                             ToolTip="Press 'Enter' to apply" Text="{Binding Calculator.Commission}"
+                             TextChanged="compare_TextChanged" TextInput="InputDecimal" KeyDown="commissionTxt_KeyDown"/>
                     <TextBlock Text="%" Grid.Row="3" Grid.Column="5" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                     
                     <GroupBox Header="Result:" Grid.Row="4" Style="{DynamicResource none}" BorderThickness="0.5" Grid.ColumnSpan="5">
@@ -129,10 +130,10 @@
 
                     <TextBlock Text="Value:" Grid.Row="2" VerticalAlignment="Center"/>
                     <TextBox Grid.Row="2" Grid.Column="1" x:Name="ValueTxt" Text="{Binding Calculator.Value}" VerticalAlignment="Center"
-                                         KeyDown="TextBox_KeyDown" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
+                             TextChanged="ValueTxt_TextChanged" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                     <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5 0 5 0"/>
-                    <TextBox Grid.Row="2" Grid.Column="3" IsReadOnly="True" Text="{Binding Calculator.Converted}" VerticalAlignment="Center"
-                                         TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
+                    <TextBox Grid.Row="2" Grid.Column="3" IsReadOnly="True" Text="{Binding Calculator.Converted}" VerticalAlignment="Center" x:Name="convertedTxt" Cursor="Hand"
+                             MouseLeftButtonDown="convertedTxt_MouseLeftButtonDown" ToolTip="Click to copy" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                 </Grid>
             </Grid>
         </Grid>

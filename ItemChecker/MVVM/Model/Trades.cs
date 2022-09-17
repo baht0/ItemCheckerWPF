@@ -75,13 +75,7 @@ namespace ItemChecker.MVVM.Model
         {
             get
             {
-                return new()
-                {
-                    "SteamMarket",
-                    "Cs.Money",
-                    "Loot.Farm",
-                    "Buff163"
-                };
+                return Main.ServicesShort;
             }
         }
         public List<string> Actions

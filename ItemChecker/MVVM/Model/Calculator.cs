@@ -1,5 +1,4 @@
 ﻿using ItemChecker.Core;
-using ItemChecker.Support;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +17,9 @@ namespace ItemChecker.MVVM.Model
         {
             get
             {
-                return Main.Services;
+                var services = Main.ServicesShort;
+                services.Add("Custom");
+                return services;
             }
         }
         public int Service { get; set; }
@@ -48,7 +49,6 @@ namespace ItemChecker.MVVM.Model
             {
                 _purchase = value;
                 OnPropertyChanged();
-                Compare();
             }
         }
         public decimal Price
@@ -58,7 +58,6 @@ namespace ItemChecker.MVVM.Model
             {
                 _price = value;
                 OnPropertyChanged();
-                Compare();
             }
         }
         public decimal Get
@@ -111,39 +110,8 @@ namespace ItemChecker.MVVM.Model
             set
             {
                 _value = value;
-                decimal dol = value;
-                decimal rub = SteamBase.CurrencyList.FirstOrDefault(x => x.Id == 5).Value;
-                decimal cny = SteamBase.CurrencyList.FirstOrDefault(x => x.Id == 23).Value;
-                switch (Currency1) //any -> dol
-                {
-                    case 1:
-                        dol = Edit.ConverterToUsd(value, rub);
-                        break;
-                    case 2:
-                        dol = Edit.ConverterToUsd(value, cny);
-                        break;
-                }
-                switch (Currency2)//dol -> any
-                {
-                    case 0:
-                        Converted = dol;
-                        break;
-                    case 1:
-                        Converted = Edit.ConverterFromUsd(dol, rub);
-                        break;
-                    case 2:
-                        Converted = Edit.ConverterFromUsd(dol, cny);
-                        break;
-                }
                 OnPropertyChanged();
             }
-        }
-
-        void Compare()
-        {
-            Get = Math.Round(Price * Commission, 2);
-            Precent = Edit.Precent(Purchase, Get);
-            Difference = Edit.Difference(Get, Purchase);
         }
     }
 }
