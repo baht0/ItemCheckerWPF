@@ -43,22 +43,21 @@ namespace ItemChecker.MVVM.View
             if (DataContext is CalculatorViewModel viewModel && viewModel.CommissionCommand.CanExecute(commissionTxt.Text))
                 viewModel.CommissionCommand.Execute(commissionTxt.Text);
         }
+        private void commissionTxt_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter || e.Key == Key.Space)
+                commissionCmb.Focus();
+        }
 
         private void ValueTxt_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (DataContext is CalculatorViewModel viewModel && viewModel.CurrencyConvertCommand.CanExecute(ValueTxt.Text))
                 viewModel.CurrencyConvertCommand.Execute(ValueTxt.Text);
         }
-        private void convertedTxt_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void convertedTxt_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (DataContext is CalculatorViewModel viewModel && viewModel.CopyConvertedValueCommand.CanExecute(null))
                 viewModel.CopyConvertedValueCommand.Execute(null);
-        }
-
-        private void commissionTxt_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter || e.Key == Key.Space)
-                commissionCmb.Focus();
         }
     }
 }

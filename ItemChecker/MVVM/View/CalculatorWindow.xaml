@@ -133,7 +133,7 @@
                              TextChanged="ValueTxt_TextChanged" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                     <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5 0 5 0"/>
                     <TextBox Grid.Row="2" Grid.Column="3" IsReadOnly="True" Text="{Binding Calculator.Converted}" VerticalAlignment="Center" x:Name="convertedTxt" Cursor="Hand"
-                             MouseLeftButtonDown="convertedTxt_MouseLeftButtonDown" ToolTip="Click to copy" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
+                             PreviewMouseDown="convertedTxt_PreviewMouseDown" ToolTip="Click to copy" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                 </Grid>
             </Grid>
         </Grid>
