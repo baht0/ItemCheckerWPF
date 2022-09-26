@@ -1,9 +1,10 @@
 ﻿using ItemChecker.MVVM.Model;
 using ItemChecker.Net;
+using ItemChecker.Properties;
 using ItemChecker.Support;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Web;
 
@@ -11,51 +12,24 @@ namespace ItemChecker.Services
 {
     public class ItemBaseService : BaseService
     {
-        List<Tuple<string, decimal>> GetSteamAvgPrice()
-        {
-            try
-            {
-                JObject csgobackpack = (JObject)JObject.Parse(Get.Request("https://csgobackpack.net/api/GetItemsList/v2/?no_details=true"))["items_list"];
-
-                List<Tuple<string, decimal>> prices = new();
-                foreach (var item in csgobackpack)
-                {
-                    string name = item.Key.Replace("&#39", "'");
-                    decimal stPrice = 0;
-                    if (item.Value["price"] != null)
-                    {
-                        if (item.Value["price"]["24_hours"] != null)
-                            stPrice = Convert.ToDecimal(item.Value["price"]["24_hours"]["average"]);
-                        else if (item.Value["price"]["7_days"] != null)
-                            stPrice = Convert.ToDecimal(item.Value["price"]["7_days"]["average"]);
-                        else if (item.Value["price"]["30_days"] != null)
-                            stPrice = Convert.ToDecimal(item.Value["price"]["30_days"]["average"]);
-                        else if (item.Value["price"]["all_time"] != null)
-                            stPrice = Convert.ToDecimal(item.Value["price"]["all_time"]["average"]);
-                    }
-                    prices.Add(Tuple.Create(name, stPrice));
-                }
-                return prices;
-            }
-            catch
-            {
-                return new();
-            }
-        }
-
         public void CreateItemsBase()
         {
-            JObject json = JObject.Parse(Get.DropboxRead("steamBase.json"));
+            JObject json = new();
+            string path = $"{ProjectInfo.DocumentPath}steamBase.json";
+            if (SettingsProperties.Default.UseLocalDb && File.Exists(path))
+            {
+                string file = File.ReadAllText(path);
+                json = JObject.Parse(file);
+            }
+            json = JObject.Parse(Get.DropboxRead("steamBase.json"));
             JArray skinsBase = JArray.Parse(json["Items"].ToString());
 
             SteamBase.Updated = Convert.ToDateTime(json["Updated"]);
-            List<Tuple<string, decimal>> stPrices = GetSteamAvgPrice();
+            JObject csgobackpack = (JObject)JObject.Parse(Get.Request("https://csgobackpack.net/api/GetItemsList/v2/?no_details=true"))["items_list"];
             foreach (JObject item in skinsBase)
             {
                 string itemName = item["itemName"].ToString();
-                int steamId = Convert.ToInt32(item["steamId"]);
 
-                decimal stPrice = stPrices.FirstOrDefault(x => x.Item1 == itemName) != null ? stPrices.FirstOrDefault(x => x.Item1 == itemName).Item2 : 0;
                 SteamBase.ItemList.Add(new()
                 {
                     ItemName = itemName,
@@ -64,8 +38,8 @@ namespace ItemChecker.Services
 
                     Steam = new()
                     {
-                        Id = steamId,
-                        AvgPrice = stPrice,
+                        Id = Convert.ToInt32(item["steamId"]),
+                        AvgPrice = Get.SteamAvgPrice(itemName, csgobackpack),
                     }
                 });
             }

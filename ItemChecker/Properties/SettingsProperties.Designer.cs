@@ -94,5 +94,17 @@ namespace ItemChecker.Properties {
                 this["ServiceId"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool UseLocalDb {
+            get {
+                return ((bool)(this["UseLocalDb"]));
+            }
+            set {
+                this["UseLocalDb"] = value;
+            }
+        }
     }
 }

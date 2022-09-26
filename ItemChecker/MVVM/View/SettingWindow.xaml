@@ -181,48 +181,51 @@
                                     <RowDefinition/>
                                     <RowDefinition/>
                                     <RowDefinition/>
+                                    <RowDefinition/>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="75"/>
                                     <ColumnDefinition/>
                                     <ColumnDefinition Width="30"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Row="0" Text="Steam:" Height="15"/>
-                                <TextBlock Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Text="{Binding StmCount, StringFormat='{}{0} items'}"/>
-                                <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Top" Text="{Binding StmUpdated, StringFormat='Updated: {0:dd MMM yyyy}'}"
+                                <CheckBox Content="Use local SteamBase" Grid.ColumnSpan="2" IsChecked="{Binding UseLocalDb}"/>
+
+                                <TextBlock Grid.Row="1" Text="Steam:" Height="15"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Text="{Binding StmCount, StringFormat='{}{0} items'}"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Top" Text="{Binding StmUpdated, StringFormat='Updated: {0:dd MMM yyyy}'}"
                                            FontSize="10"/>
 
-                                <TextBlock Grid.Row="2" Text="Cs.Money:" Height="15"/>
-                                <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Text="{Binding CsmCount, StringFormat='{}{0} items'}"/>
-                                <Button Grid.Row="2" Grid.Column="2" Height="25" ToolTip="Reset"
+                                <TextBlock Grid.Row="3" Text="Cs.Money:" Height="15"/>
+                                <TextBlock Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" Text="{Binding CsmCount, StringFormat='{}{0} items'}"/>
+                                <Button Grid.Row="3" Grid.Column="2" Height="25" ToolTip="Reset"
                                             Style="{StaticResource MaterialDesignToolForegroundButton}" 
                                             Command="{Binding DataContext.ResetBaseCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
                                         CommandParameter="2">
                                     <materialDesign:PackIcon Kind="Update"/>
                                 </Button>
-                                <TextBlock Grid.Row="3" Grid.Column="1" VerticalAlignment="Top" Text="{Binding CsmUpdated, StringFormat='Updated: {0} min ago'}"
+                                <TextBlock Grid.Row="4" Grid.Column="1" VerticalAlignment="Top" Text="{Binding CsmUpdated, StringFormat='Updated: {0} min ago'}"
                                            FontSize="10"/>
                                 
-                                <TextBlock Grid.Row="4" Text="Loot.Farm:" Height="15"/>
-                                <TextBlock Grid.Row="4" Grid.Column="1" VerticalAlignment="Center" Text="{Binding LfmCount, StringFormat='{}{0} items'}"/>
-                                <Button Grid.Row="4" Grid.Column="2" Height="25" ToolTip="Reset"
+                                <TextBlock Grid.Row="5" Text="Loot.Farm:" Height="15"/>
+                                <TextBlock Grid.Row="5" Grid.Column="1" VerticalAlignment="Center" Text="{Binding LfmCount, StringFormat='{}{0} items'}"/>
+                                <Button Grid.Row="5" Grid.Column="2" Height="25" ToolTip="Reset"
                                             Style="{StaticResource MaterialDesignToolForegroundButton}" 
                                             Command="{Binding DataContext.ResetBaseCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
                                         CommandParameter="3">
                                     <materialDesign:PackIcon Kind="Update"/>
                                 </Button>
-                                <TextBlock Grid.Row="5" Grid.Column="1" VerticalAlignment="Top" Text="{Binding LfmUpdated, StringFormat='Updated: {0} min ago'}"
+                                <TextBlock Grid.Row="6" Grid.Column="1" VerticalAlignment="Top" Text="{Binding LfmUpdated, StringFormat='Updated: {0} min ago'}"
                                            FontSize="10"/>
                                 
-                                <TextBlock Grid.Row="6" Text="Buff163:" Height="15"/>
-                                <TextBlock Grid.Row="6" Grid.Column="1" VerticalAlignment="Center" Text="{Binding BuffCount, StringFormat='{}{0} items'}"/>
-                                <Button Grid.Row="6" Grid.Column="2" Height="25" ToolTip="Reset"
+                                <TextBlock Grid.Row="7" Text="Buff163:" Height="15"/>
+                                <TextBlock Grid.Row="7" Grid.Column="1" VerticalAlignment="Center" Text="{Binding BuffCount, StringFormat='{}{0} items'}"/>
+                                <Button Grid.Row="7" Grid.Column="2" Height="25" ToolTip="Reset"
                                             Style="{StaticResource MaterialDesignToolForegroundButton}" 
                                             Command="{Binding DataContext.ResetBaseCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
                                         CommandParameter="4">
                                     <materialDesign:PackIcon Kind="Update"/>
                                 </Button>
-                                <TextBlock Grid.Row="7" Grid.Column="1" VerticalAlignment="Top" Text="{Binding BuffUpdated, StringFormat='Updated: {0} min ago'}"
+                                <TextBlock Grid.Row="8" Grid.Column="1" VerticalAlignment="Top" Text="{Binding BuffUpdated, StringFormat='Updated: {0} min ago'}"
                                            FontSize="10"/>
                             </Grid>
                         </GroupBox>

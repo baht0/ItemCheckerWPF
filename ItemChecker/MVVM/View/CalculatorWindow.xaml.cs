@@ -31,7 +31,7 @@ namespace ItemChecker.MVVM.View
         }
         private void compare_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string[] values = { purchaseTxt.Text, priceTxt.Text, commissionTxt.Text };
+            string[] values = { purchaseTxt.Text.Replace(",", "."), priceTxt.Text.Replace(",", "."), commissionTxt.Text };
 
             if (DataContext is CalculatorViewModel viewModel && viewModel.CompareCommand.CanExecute(values))
                 viewModel.CompareCommand.Execute(values);
@@ -51,8 +51,8 @@ namespace ItemChecker.MVVM.View
 
         private void ValueTxt_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (DataContext is CalculatorViewModel viewModel && viewModel.CurrencyConvertCommand.CanExecute(ValueTxt.Text))
-                viewModel.CurrencyConvertCommand.Execute(ValueTxt.Text);
+            if (DataContext is CalculatorViewModel viewModel && viewModel.CurrencyConvertCommand.CanExecute(ValueTxt.Text.Replace(",", ".")))
+                viewModel.CurrencyConvertCommand.Execute(ValueTxt.Text.Replace(",", "."));
         }
         private void convertedTxt_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {

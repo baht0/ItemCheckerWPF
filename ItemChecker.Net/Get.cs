@@ -71,6 +71,30 @@ namespace ItemChecker.Net
                 return 0;
             }
         }
+        public static Decimal SteamAvgPrice(string itemName, JObject items)
+        {
+            try
+            {
+                itemName = itemName.Replace("'", "&#39");
+                var item = items[itemName] as JObject;
+                if (item != null && item["price"] != null)
+                {
+                    if (item["price"]["24_hours"] != null)
+                        return Convert.ToDecimal(item["price"]["24_hours"]["average"]);
+                    else if (item["price"]["7_days"] != null)
+                        return Convert.ToDecimal(item["price"]["7_days"]["average"]);
+                    else if (item["price"]["30_days"] != null)
+                        return Convert.ToDecimal(item["price"]["30_days"]["average"]);
+                    else if (item["price"]["all_time"] != null)
+                        return Convert.ToDecimal(item["price"]["all_time"]["average"]);
+                }
+                return 0;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
 
         //dropbox
         public static String DropboxRead(string path)

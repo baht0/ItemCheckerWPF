@@ -185,6 +185,8 @@ namespace ItemChecker.MVVM.ViewModel
                 SettingsProperties.Default.MinPrecent = settings.MinPrecent;
                 SettingsProperties.Default.ServiceId = settings.ServiceId;
 
+                SettingsProperties.Default.UseLocalDb = settings.UseLocalDb;
+
                 SettingsProperties.Default.Save();
             }, (obj) => !BaseModel.IsWorking);
 

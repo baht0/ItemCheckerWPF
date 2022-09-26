@@ -114,6 +114,8 @@ namespace UpdateBase
                             SetSteamId();
                             break;
                     }
+                    if (Count > 0 && com != 11)
+                        SetSteamId();
                 }
             }
             catch (Exception ex)
@@ -259,6 +261,8 @@ namespace UpdateBase
             Check(new List<string>() { "music kit" }, "Music Kit");
             Check(new List<string>() { "collectable" }, "Collectable");
             Check(new List<string>() { "graffiti" }, "Graffiti");
+            if (Count > 0)
+                SetSteamId();
         }
         static void CheckWeapon(HtmlDocument htmlDoc, HtmlNode skin, string item)
         {

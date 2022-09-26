@@ -25,6 +25,7 @@ namespace ItemChecker.MVVM.Model
         public string Currency { get; set; } = SteamBase.CurrencyList.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Name;
 
         //Base
+        public bool UseLocalDb { get; set; } = SettingsProperties.Default.UseLocalDb;
         public int StmCount { get; set; } = SteamBase.ItemList.Count;
         public DateTime StmUpdated { get; set; } = SteamBase.Updated;
         public int CsmCount { get; set; } = SteamBase.ItemList.Where(x => x.Csm.Id != 0).Count();
