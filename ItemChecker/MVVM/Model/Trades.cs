@@ -71,24 +71,6 @@ namespace ItemChecker.MVVM.Model
                 return SteamBase.CurrencyList.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Symbol;
             }
         }
-        public List<string> Services
-        {
-            get
-            {
-                return Main.ServicesShort;
-            }
-        }
-        public List<string> Actions
-        {
-            get
-            {
-                return new()
-                {
-                    "Withdraw",
-                    "Deposit",
-                };
-            }
-        }
 
         public static Trades<DataTrade> MyTrades { get; set; } = ReadFile().ToObject<Trades<DataTrade>>();
         public static JArray ReadFile()
@@ -107,10 +89,11 @@ namespace ItemChecker.MVVM.Model
     public class DataTrade
     {
         public string ItemName { get; set; } = string.Empty;
-        public int ServiceId { get; set; }
-        public int Action { get; set; }
+        public decimal Purchase { get; set; }
+        public decimal Get { get; set; }
+        public decimal Precent { get; set; }
+        public decimal Difference { get; set; }
         public int Count { get; set; } = 1;
-        public decimal Price { get; set; }
         public DateTime Date { get; set; } = DateTime.Today;
     }
     public class Trades<T> : List<T>
@@ -135,8 +118,8 @@ namespace ItemChecker.MVVM.Model
 
             if (isAllow)
                 isAllow = !currentList.Any(x => x.ItemName == item.ItemName
-                && x.ServiceId == item.ServiceId
-                && x.Action == item.Action
+                && x.Purchase == item.Purchase
+                && x.Get == item.Get
                 && x.Count == item.Count
                 && x.Date == item.Date);
 
@@ -172,27 +155,6 @@ namespace ItemChecker.MVVM.Model
                 return Edit.ConverterToUsd(SteamAccount.Balance, SteamBase.CurrencyList.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Value);
             }
         }
-
-        public List<DataServiceAnalysis> Services
-        {
-            get { return _services; }
-            set
-            {
-                _services = value;
-                OnPropertyChanged();
-            }
-        }
-        List<DataServiceAnalysis> _services = new();
-        public DataServiceAnalysis SelectedService
-        {
-            get { return _selectedService; }
-            set
-            {
-                _selectedService = value;
-                OnPropertyChanged();
-            }
-        }
-        DataServiceAnalysis _selectedService = new();
 
         public List<string> Dateinterval
         {
@@ -244,16 +206,16 @@ namespace ItemChecker.MVVM.Model
         }
         DataAnalysisResult _result = new();
 
-        public List<DataTradeAnalysis> Balances
+        public List<DataTradeAnalysis> Changes
         {
-            get { return _balances; }
+            get { return _changes; }
             set
             {
-                _balances = value;
+                _changes = value;
                 OnPropertyChanged();
             }
         }
-        List<DataTradeAnalysis> _balances = new();
+        List<DataTradeAnalysis> _changes = new();
         public SeriesCollection Series
         {
             get { return _series; }
@@ -275,13 +237,7 @@ namespace ItemChecker.MVVM.Model
         }
         string[] _labels;
 
-        public decimal TotalStartBalance
-        {
-            get
-            {
-                return _services.Select(x => x.StartBalance).Sum();
-            }
-        }
+        public decimal StartBalance { get; set; }
     }
     public class DataServiceAnalysis
     {
@@ -292,7 +248,6 @@ namespace ItemChecker.MVVM.Model
     }
     public class DataTradeAnalysis
     {
-        string _date = string.Empty;
         public decimal Profit { get; set; }
         public decimal Balance { get; set; }
         public DateTime Date { get; set; }

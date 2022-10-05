@@ -17,7 +17,7 @@ namespace ItemChecker.MVVM.Model
         {
             if (!Directory.Exists(DocumentPath))
                 Directory.CreateDirectory(DocumentPath);
-            if (StartUpProperties.Default.CompletionUpdate)
+            if (MainProperties.Default.CompletionUpdate)
             {
                 if (Directory.Exists(AppPath + "\\update\\ItemChecker"))
                 {
@@ -37,10 +37,10 @@ namespace ItemChecker.MVVM.Model
                 HomeProperties.Default.Upgrade();
                 ParserProperties.Default.Upgrade();
                 RareProperties.Default.Upgrade();
-                StartUpProperties.Default.Upgrade();
+                MainProperties.Default.Upgrade();
 
-                StartUpProperties.Default.CompletionUpdate = false;
-                StartUpProperties.Default.Save();
+                MainProperties.Default.CompletionUpdate = false;
+                MainProperties.Default.Save();
             }
             CheckUpdate();
         }

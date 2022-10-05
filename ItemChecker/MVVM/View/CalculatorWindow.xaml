@@ -95,9 +95,12 @@
                             <TextBlock Grid.Row="1" Text="Precent:" VerticalAlignment="Center"/>
                             <TextBlock Grid.Row="2" Text="Difference:" VerticalAlignment="Center"/>
 
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Calculator.Get}" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Calculator.Precent, StringFormat='{}{0}%'}" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Calculator.Difference}" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Calculator.Get}" VerticalAlignment="Center"
+                                       PreviewMouseDown="copy_PreviewMouseDown" Cursor="Hand" ToolTip="Click to copy"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Calculator.Precent, StringFormat='{}{0}%'}" VerticalAlignment="Center"
+                                       PreviewMouseDown="copy_PreviewMouseDown" Cursor="Hand" ToolTip="Click to copy"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Calculator.Difference}" VerticalAlignment="Center"
+                                       PreviewMouseDown="copy_PreviewMouseDown" Cursor="Hand" ToolTip="Click to copy"/>
                         </Grid>
                     </GroupBox>
                 </Grid>
@@ -132,8 +135,8 @@
                     <TextBox Grid.Row="2" Grid.Column="1" x:Name="ValueTxt" Text="{Binding Calculator.Value}" VerticalAlignment="Center"
                              TextChanged="ValueTxt_TextChanged" TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                     <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5 0 5 0"/>
-                    <TextBox Grid.Row="2" Grid.Column="3" IsReadOnly="True" Text="{Binding Calculator.Converted}" VerticalAlignment="Center" x:Name="convertedTxt" Cursor="Hand"
-                             PreviewMouseDown="convertedTxt_PreviewMouseDown" ToolTip="Click to copy" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
+                    <TextBlock Grid.Row="2" Grid.Column="3" Text="{Binding Calculator.Converted}" VerticalAlignment="Center"
+                               PreviewMouseDown="copy_PreviewMouseDown" Cursor="Hand" ToolTip="Click to copy" FontWeight="Bold"/>
                 </Grid>
             </Grid>
         </Grid>

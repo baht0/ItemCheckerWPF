@@ -54,10 +54,10 @@ namespace ItemChecker.MVVM.View
             if (DataContext is CalculatorViewModel viewModel && viewModel.CurrencyConvertCommand.CanExecute(ValueTxt.Text.Replace(",", ".")))
                 viewModel.CurrencyConvertCommand.Execute(ValueTxt.Text.Replace(",", "."));
         }
-        private void convertedTxt_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        private void copy_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (DataContext is CalculatorViewModel viewModel && viewModel.CopyConvertedValueCommand.CanExecute(null))
-                viewModel.CopyConvertedValueCommand.Execute(null);
+            var item = sender as TextBlock;
+            Clipboard.SetText(item.Text);
         }
     }
 }

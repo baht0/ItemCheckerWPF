@@ -13,11 +13,11 @@ namespace ItemChecker.Properties {
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.2.0.0")]
-    internal sealed partial class StartUpProperties : global::System.Configuration.ApplicationSettingsBase {
+    internal sealed partial class MainProperties : global::System.Configuration.ApplicationSettingsBase {
         
-        private static StartUpProperties defaultInstance = ((StartUpProperties)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new StartUpProperties())));
+        private static MainProperties defaultInstance = ((MainProperties)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new MainProperties())));
         
-        public static StartUpProperties Default {
+        public static MainProperties Default {
             get {
                 return defaultInstance;
             }
@@ -49,6 +49,18 @@ namespace ItemChecker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SessionBuff {
+            get {
+                return ((string)(this["SessionBuff"]));
+            }
+            set {
+                this["SessionBuff"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
         public int SteamCurrencyId {
             get {
@@ -61,13 +73,13 @@ namespace ItemChecker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string SessionBuff {
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public decimal AnalysisStartBalance {
             get {
-                return ((string)(this["SessionBuff"]));
+                return ((decimal)(this["AnalysisStartBalance"]));
             }
             set {
-                this["SessionBuff"] = value;
+                this["AnalysisStartBalance"] = value;
             }
         }
     }

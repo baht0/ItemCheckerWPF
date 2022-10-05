@@ -118,7 +118,7 @@ namespace ItemChecker.MVVM.Model
         {
             bool showLogin = true;
             string url = "https://steamcommunity.com/login/home/?goto=my/profile";
-            string steamLoginSecure = StartUpProperties.Default.SteamLoginSecure.Replace("\r\n", "").Trim();
+            string steamLoginSecure = MainProperties.Default.SteamLoginSecure.Replace("\r\n", "").Trim();
 
             if (!String.IsNullOrEmpty(steamLoginSecure))
             {
@@ -164,7 +164,7 @@ namespace ItemChecker.MVVM.Model
                     code.SendKeys(SteamSignUp.SignUp.Code2AF[i-1].ToString());
                 }
 
-                StartUpProperties.Default.Save();
+                MainProperties.Default.Save();
                 Thread.Sleep(4000);
 
                 SteamSignUp.SignUp.IsLoggedIn = false;
@@ -183,7 +183,7 @@ namespace ItemChecker.MVVM.Model
                 System.Net.Cookie steamSessionId = Get.SteamSessionId();
                 string steamLoginSecure = Browser.Manage().Cookies.GetCookieNamed("steamLoginSecure").Value.ToString();
 
-                CurrencyId = StartUpProperties.Default.SteamCurrencyId;
+                CurrencyId = MainProperties.Default.SteamCurrencyId;
                 if (CurrencyId == 0)
                 {
                     string country = Browser.Manage().Cookies.GetCookieNamed("steamCountry").Value.ToString()[..2];
@@ -191,13 +191,13 @@ namespace ItemChecker.MVVM.Model
                     CurrencyId = currency != null ? currency.Id : 1;
                 }
 
-                StartUpProperties.Default.SteamCurrencyId = CurrencyId;
+                MainProperties.Default.SteamCurrencyId = CurrencyId;
                 SteamAccount.Cookies = new();
                 SteamAccount.Cookies.Add(steamSessionId);
                 SteamAccount.Cookies.Add(new System.Net.Cookie("steamLoginSecure", steamLoginSecure, "/", "steamcommunity.com"));
                 
-                StartUpProperties.Default.SteamLoginSecure = steamLoginSecure;
-                StartUpProperties.Default.Save();
+                MainProperties.Default.SteamLoginSecure = steamLoginSecure;
+                MainProperties.Default.Save();
                 Browser.Quit();
                 Browser = null;
 
@@ -245,7 +245,7 @@ namespace ItemChecker.MVVM.Model
 
         public static Boolean IsLogIn()
         {
-            Cookies.Add(new System.Net.Cookie("session", StartUpProperties.Default.SessionBuff, "/", "buff.163.com"));
+            Cookies.Add(new System.Net.Cookie("session", MainProperties.Default.SessionBuff, "/", "buff.163.com"));
             string html = Get.Request(Cookies, "https://buff.163.com/api/market/goods?game=csgo&page_num=2&use_suggestion=0&trigger=undefined_trigger&page_size=80");
 
             if (html.Contains("Login Required"))
@@ -272,8 +272,8 @@ namespace ItemChecker.MVVM.Model
                 string session = BaseModel.Browser.Manage().Cookies.GetCookieNamed("session").Value.ToString();
                 Cookies = new();
                 Cookies.Add(new System.Net.Cookie("session", session, "/", "buff.163.com"));
-                StartUpProperties.Default.SessionBuff = session;
-                StartUpProperties.Default.Save();
+                MainProperties.Default.SessionBuff = session;
+                MainProperties.Default.Save();
                 BaseModel.Browser.Quit();
                 BaseModel.Browser = null;
                 return true;

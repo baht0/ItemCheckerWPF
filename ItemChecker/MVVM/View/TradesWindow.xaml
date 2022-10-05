@@ -20,8 +20,6 @@
     <Window.Resources>
         <ControlTemplate x:Key="ValidError"/>
         <customConverter:ServiceIdToServiceNameConverter x:Key="ServiceIdToServiceNameConverter"/>
-        <customConverter:ActionIdToActionNameConverter x:Key="ActionIdToActionNameConverter"/>
-        <customConverter:ActionIdToColorConverter x:Key="ActionIdToColorConverter"/>
     </Window.Resources>
     <Border BorderBrush="Gray" BorderThickness="0.5">
         <Grid Margin="10 0 10 10">
@@ -36,11 +34,15 @@
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Text="Trades" VerticalAlignment="Center" />                
-                <Button Grid.Column="1" Margin="0 0 -10 0" HorizontalAlignment="Right" Click="Button_Close" VerticalAlignment="Center"
-                        Style="{StaticResource MaterialDesignFlatButton}">
-                    <materialDesign:PackIcon Kind="Close"/>
-                </Button>
+                <TextBlock Text="Trades" VerticalAlignment="Center"/>
+                <VirtualizingStackPanel Grid.Column="1" Margin="0 0 -10 0" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Click="Calculator_Click" VerticalAlignment="Center" Style="{StaticResource MaterialDesignToolForegroundButton}">
+                        <materialDesign:PackIcon Kind="Calculator"/>
+                    </Button>
+                    <Button Click="Button_Close" VerticalAlignment="Center" Style="{StaticResource MaterialDesignFlatButton}">
+                        <materialDesign:PackIcon Kind="Close"/>
+                    </Button>
+                </VirtualizingStackPanel>
             </Grid>
             <!--body-->
             <Grid Grid.Row="1">
@@ -82,12 +84,12 @@
                                       IsReadOnly="True" CanUserReorderColumns="False" CanUserResizeRows="False" CanUserResizeColumns="False">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Item" Binding="{Binding ItemName}" MinWidth="320"/>
-                                    <DataGridTextColumn Header="Service" Binding="{Binding ServiceId, Converter={StaticResource ServiceIdToServiceNameConverter}, ConverterParameter={x:Reference serviceCombobox}}" Width="auto"/>
-                                    <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat='{}{0:dd MMM yy}'}" Width="auto"/>
-                                    <DataGridTextColumn Header="Action" Width="auto" 
-                                                        Binding="{Binding Action, Converter={StaticResource ActionIdToActionNameConverter}, ConverterParameter={x:Reference actionCombobox}}"/>
-                                    <DataGridTextColumn Header="Price" Binding="{Binding Price}" Width="auto"/>
-                                    <DataGridTextColumn Header="Count" Binding="{Binding Count}" Width="auto"/>
+                                    <DataGridTextColumn Header="Deposite Date" Binding="{Binding Date, StringFormat='{}{0:dd MMM yy}'}" Width="auto"/>
+                                    <DataGridTextColumn Header="Purchase" Binding="{Binding Purchase}" Width="auto"/>
+                                    <DataGridTextColumn Header="Get" Binding="{Binding Get}" Width="auto"/>
+                                    <DataGridTextColumn Header="Precent" Binding="{Binding Precent}" Width="auto"/>
+                                    <DataGridTextColumn Header="Difference" Binding="{Binding Difference}" Width="auto"/>
+                                    <DataGridTextColumn Header="Count" Binding="{Binding Count, StringFormat='x{0}'}" Width="auto"/>
                                 </DataGrid.Columns>
                             </DataGrid>
                             <GroupBox Header="Add Trade" Grid.Row="2" Grid.ColumnSpan="3" Style="{DynamicResource none}" BorderThickness="0.5">
@@ -97,40 +99,33 @@
                                     </Grid.RowDefinitions>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition/>
-                                        <ColumnDefinition Width="115"/>
                                         <ColumnDefinition Width="80"/>
-                                        <ColumnDefinition Width="75"/>
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="80"/>
                                         <ColumnDefinition Width="10"/>
                                         <ColumnDefinition Width="50"/>
-                                        <ColumnDefinition Width="85"/>
-                                        <ColumnDefinition Width="35"/>
+                                        <ColumnDefinition Width="95"/>
                                         <ColumnDefinition Width="35"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBox Grid.Column="0" Margin="5 0 5 0" Grid.Row="1"
                                              Text="{Binding Trades.AddItem.ItemName}" VerticalAlignment="Center"
                                              ToolTip="ItemName" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
-                                    <ComboBox Grid.Column="1" Margin="5 0 5 0" Grid.Row="1"
-                                              ItemsSource="{Binding Trades.Services}" SelectedIndex="{Binding Trades.AddItem.ServiceId}"
-                                              ToolTip="Service" x:Name="serviceCombobox"/>
-                                    <ComboBox Grid.Column="2" Margin="5 0 5 0" Grid.Row="1"
-                                              ItemsSource="{Binding Trades.Actions}" SelectedIndex="{Binding Trades.AddItem.Action}"
-                                              ToolTip="Action" x:Name="actionCombobox"/>
-                                    <TextBox Grid.Column="3" Margin="5 0 5 0" Grid.Row="1" TextInput="InputDecimal"
-                                             Text="{Binding Trades.AddItem.Price}" VerticalAlignment="Center"
+                                    <TextBox Grid.Column="1" Margin="5 0 5 0" Grid.Row="1" TextInput="InputDecimal"
+                                             Text="{Binding Trades.AddItem.Purchase}" VerticalAlignment="Center"
                                              ToolTip="Purchase (USD)" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
+                                    <TextBlock Grid.Column="2" Text="$" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                    <TextBox Grid.Column="3" Margin="5 0 5 0" Grid.Row="1" TextInput="InputDecimal"
+                                             Text="{Binding Trades.AddItem.Get}" VerticalAlignment="Center"
+                                             ToolTip="Get (USD)" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                                     <TextBlock Grid.Column="4" Text="$" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                                     <TextBox Grid.Column="5" Margin="5 0 5 0" Grid.Row="1" TextInput="InputDecimal"
                                              Text="{Binding Trades.AddItem.Count}" VerticalAlignment="Center" TextAlignment="Center"
                                              ToolTip="Count" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
-                                    <DatePicker Grid.Column="6" Margin="5 0 5 0" SelectedDate="{Binding Trades.AddItem.Date}" ToolTip="Date"/>
+                                    <DatePicker Grid.Column="6" Margin="5 0 5 0" SelectedDate="{Binding Trades.AddItem.Date}" ToolTip="Deposite Date"/>
                                     <Button Grid.Column="7" Grid.Row="1" VerticalAlignment="Center" Margin="5 0 5 0"
                                             Style="{StaticResource MaterialDesignToolForegroundButton}" ToolTip="Add"
                                             Command="{Binding AddCommand}" CommandParameter="{Binding Trades.AddItem}">
                                         <materialDesign:PackIcon Kind="Add"/>
-                                    </Button>
-                                    <Button Grid.Column="8" Grid.Row="1" VerticalAlignment="Center" Margin="5 0 0 0"
-                                            Style="{StaticResource MaterialDesignToolForegroundButton}" ToolTip="Calculator" Click="Calculator_Click">
-                                        <materialDesign:PackIcon Kind="Calculator"/>
                                     </Button>
                                 </Grid>
                             </GroupBox>
@@ -144,7 +139,7 @@
                             <TextBlock VerticalAlignment="Center" FontWeight="Bold" FontSize="14"
                                            Text="{Binding Analysis.Result.Count, StringFormat='Count: {0}'}"/>
                             <Separator Grid.ColumnSpan="3" VerticalAlignment="Bottom"/>
-                            <Grid Grid.Row="1" Margin="5">
+                            <Grid Grid.Row="1" Margin="2">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="150"/>
                                     <ColumnDefinition/>
@@ -153,7 +148,7 @@
                                 <Grid Grid.Column="0">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="120"/>
-                                        <RowDefinition Height="110"/>
+                                        <RowDefinition Height="60"/>
                                         <RowDefinition Height="135"/>
                                         <RowDefinition/>
                                     </Grid.RowDefinitions>
@@ -170,18 +165,14 @@
                                             <DatePicker Grid.Row="2" x:Name="dateTo" ToolTip="To" SelectedDate="{Binding Analysis.DateTo}" SelectedDateChanged="dateInterval_SelectedDateChanged"/>
                                         </Grid>
                                     </GroupBox>
-                                    <GroupBox Grid.Row="1" Header="Services Balance" Style="{DynamicResource none}" BorderThickness="0.5">
+                                    <GroupBox Grid.Row="1" Header="Starting balance" Style="{DynamicResource none}" BorderThickness="0.5">
                                         <Grid Margin="5">
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition/>
-                                                <RowDefinition/>
-                                                <RowDefinition/>
-                                            </Grid.RowDefinitions>
-                                            <ComboBox Grid.Row="0" ItemsSource="{Binding Analysis.Services}" SelectedItem="{Binding Analysis.SelectedService}" SelectedIndex="0" VerticalAlignment="Center"
-                                                      DisplayMemberPath="Service" SelectedValuePath="Balance" x:Name="analysisServiceComboBox" SelectionChanged="analysisServiceComboBox_SelectionChanged"/>
-                                            <TextBlock Grid.Row="1" Text="Balance:" VerticalAlignment="Center"/>
-                                            <TextBox Grid.Row="2" Text="{Binding Analysis.SelectedService.Balance}" VerticalAlignment="Center"
-                                                     ToolTip="Balance USD ($)" x:Name="balanceTextBox" TextChanged="balanceTextBox_TextChanged"/>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition Width="15"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBox Text="{Binding Analysis.StartBalance}" VerticalAlignment="Center" x:Name="balanceTextBox"/>
+                                            <TextBlock Grid.Column="1" Text="$" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                                         </Grid>
                                     </GroupBox>
                                     <GroupBox Grid.Row="2" Header="Result" Style="{DynamicResource none}" BorderThickness="0.5">
@@ -206,7 +197,7 @@
                                 </Grid>
                                 <!--LiveChart-->
                                 <Grid Grid.Column="1" Margin="15 0 0 0" Background="{DynamicResource ElementBackground}">
-                                    <TextBlock Text="Order of execution.&#x0a;&#x0a;1. Select an interval.&#x0a;2. Write down the current balance for each service.&#x0a;3. Press down 'Apply'."
+                                    <TextBlock Text="Order of execution.&#x0a;&#x0a;1. Select an interval.&#x0a;2. Write down the starting balance.&#x0a;3. Press down 'Apply'."
                                                VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap" FontStyle="Italic" FontSize="14"/>
                                 </Grid>
                                 <Grid Grid.Column="1" Margin="15 0 0 0" Background="{DynamicResource ElementBackground}" Visibility="{Binding Analysis.Result.IsLiveChart, Converter={StaticResource BooleanToVisibilityConverter}}">

@@ -104,10 +104,5 @@ namespace ItemChecker.MVVM.ViewModel
                         break;
                 }
             });
-        public ICommand CopyConvertedValueCommand =>
-            new RelayCommand((obj) =>
-            {
-                Clipboard.SetText(Calculator.Converted.ToString());
-            });
     }
 }

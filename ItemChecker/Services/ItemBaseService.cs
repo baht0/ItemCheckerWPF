@@ -21,7 +21,9 @@ namespace ItemChecker.Services
                 string file = File.ReadAllText(path);
                 json = JObject.Parse(file);
             }
-            json = JObject.Parse(Get.DropboxRead("steamBase.json"));
+            else
+                json = JObject.Parse(Get.DropboxRead("steamBase.json"));
+
             JArray skinsBase = JArray.Parse(json["Items"].ToString());
 
             SteamBase.Updated = Convert.ToDateTime(json["Updated"]);

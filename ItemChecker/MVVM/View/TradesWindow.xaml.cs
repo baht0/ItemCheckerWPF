@@ -86,16 +86,6 @@ namespace ItemChecker.MVVM.View
             }
         }
 
-        private void balanceTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            var viewModel = (TradesViewModel)DataContext;
-            if (viewModel.StartBalanceCommand.CanExecute(balanceTextBox.Text))
-                viewModel.StartBalanceCommand.Execute(balanceTextBox.Text);
-        }
-        private void analysisServiceComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            balanceTextBox.IsReadOnly = analysisServiceComboBox.SelectedIndex == 0;
-        }
         private void dateintervalComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             int index = dateintervalComboBox.SelectedIndex;

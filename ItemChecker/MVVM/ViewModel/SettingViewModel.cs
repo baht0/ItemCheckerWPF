@@ -101,10 +101,11 @@ namespace ItemChecker.MVVM.ViewModel
                 if (result == MessageBoxResult.No)
                     return;
 
-                StartUpProperties.Default.SteamLoginSecure = string.Empty;
-                StartUpProperties.Default.SteamCurrencyId = 0;
-                StartUpProperties.Default.SessionBuff = string.Empty;
-                StartUpProperties.Default.Save();
+                MainProperties.Default.SteamLoginSecure = string.Empty;
+                MainProperties.Default.SteamCurrencyId = 0;
+                MainProperties.Default.SessionBuff = string.Empty;
+                MainProperties.Default.Save();
+                MainProperties.Default.Save();
 
                 string profilesDir = ProjectInfo.DocumentPath + "profile";
                 if (!Directory.Exists(profilesDir))
