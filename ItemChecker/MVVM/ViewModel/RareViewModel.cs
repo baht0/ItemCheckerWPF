@@ -183,7 +183,7 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand SwitchCurrencyCommand =>
             new RelayCommand((obj) =>
             {
-                Currency currency = SteamBase.CurrencyList.FirstOrDefault(x => x.Name == (string)obj);
+                Currency currency = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Name == (string)obj);
                 var items = RareTable.GridView.Cast<DataRare>().ToList();
                 if (RareTable.CurectCurrency.Id != 1)
                     foreach (var item in items)

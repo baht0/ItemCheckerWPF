@@ -16,11 +16,11 @@ namespace ItemChecker.MVVM.Model
 {
     public class SteamSignUp
     {
-        public bool IsLoggedIn { get; set; } = false;
         public string Login { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public bool Remember { get; set; } = false;
         public string Code2AF { get; set; } = string.Empty;
+        public bool IsLoggedIn { get; set; }
 
         public static SteamSignUp SignUp { get; set; } = new();
 
@@ -118,7 +118,7 @@ namespace ItemChecker.MVVM.Model
         {
             bool showLogin = true;
             string url = "https://steamcommunity.com/login/home/?goto=my/profile";
-            string steamLoginSecure = MainProperties.Default.SteamLoginSecure.Replace("\r\n", "").Trim();
+            string steamLoginSecure = MainProperties.Default.SteamLoginSecure.Replace("\r\n", string.Empty).Trim();
 
             if (!String.IsNullOrEmpty(steamLoginSecure))
             {
@@ -136,7 +136,7 @@ namespace ItemChecker.MVVM.Model
                 if (Browser == null)
                     BaseService.OpenBrowser();
                 Browser.Navigate().GoToUrl(url);
-                showLogin = !Browser.Url.Contains("id") & !Browser.Url.Contains("profiles") ? true : GetCookies();
+                showLogin = Browser.Url.Contains("id") || Browser.Url.Contains("profiles") ? GetCookies() : true;
             }
             return showLogin;
         }
@@ -168,7 +168,7 @@ namespace ItemChecker.MVVM.Model
                 Thread.Sleep(4000);
 
                 SteamSignUp.SignUp.IsLoggedIn = false;
-                return !Browser.Url.Contains("id") & !Browser.Url.Contains("profiles") ? true : GetCookies();
+                return Browser.Url.Contains("id") || Browser.Url.Contains("profiles") ? GetCookies() : true;
             }
             catch
             {
@@ -186,9 +186,21 @@ namespace ItemChecker.MVVM.Model
                 CurrencyId = MainProperties.Default.SteamCurrencyId;
                 if (CurrencyId == 0)
                 {
-                    string country = Browser.Manage().Cookies.GetCookieNamed("steamCountry").Value.ToString()[..2];
-                    var currency = SteamBase.CurrencyList.FirstOrDefault(x => x.Country == country);
-                    CurrencyId = currency != null ? currency.Id : 1;
+                    try
+                    {
+                        string country = Browser.Manage().Cookies.GetCookieNamed("steamCountry").Value.ToString()[..2];
+                        Currency currency = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Country == country);
+                        CurrencyId = currency != null ? currency.Id : 1;
+                    }
+                    catch
+                    {
+                        Application.Current.Dispatcher.Invoke(() => {
+                            var vm = Application.Current.MainWindow.DataContext as StartUpViewModel;
+                            vm.StartUp.IsCurrency = true;
+                        });
+                        while (CurrencyId == 0)
+                            Thread.Sleep(500);
+                    }
                 }
 
                 MainProperties.Default.SteamCurrencyId = CurrencyId;

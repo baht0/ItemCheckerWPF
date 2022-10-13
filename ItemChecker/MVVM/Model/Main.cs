@@ -42,8 +42,8 @@ namespace ItemChecker.MVVM.Model
     public class MainInfo
     {
         public decimal Balance { get; set; } = SteamAccount.Balance;
-        public string CurrencySymbol { get; set; } = SteamBase.CurrencyList.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Symbol;
-        public decimal BalanceUsd { get; set; } = Edit.ConverterToUsd(SteamAccount.Balance, SteamBase.CurrencyList.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Value);
+        public string CurrencySymbol { get; set; } = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Symbol;
+        public decimal BalanceUsd { get; set; } = Edit.ConverterToUsd(SteamAccount.Balance, SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Value);
 
         public SnackbarMessageQueue Message { get; set; } = Main.Message;
         public bool IsNotification { get; set; } = Main.Notifications.Any(x => !x.IsRead);

@@ -92,7 +92,7 @@ namespace ItemChecker.Services
             Tuple<decimal, decimal> steamPrices = Get.PriceOverview(market_hash_name, 1);
 
             decimal csmPrice = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName) != null ? SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName).Csm.Price : 0;
-            csmPrice = Edit.ConverterFromUsd(csmPrice, SteamBase.CurrencyList.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Value);
+            csmPrice = Edit.ConverterFromUsd(csmPrice, SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Value);
 
             switch (RareProperties.Default.CompareId)
             {

@@ -80,8 +80,8 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 bool isDecimal = !decimal.TryParse((string)obj, out decimal value);
                 decimal dol = value;
-                decimal rub = SteamBase.CurrencyList.FirstOrDefault(x => x.Id == 5).Value;
-                decimal cny = SteamBase.CurrencyList.FirstOrDefault(x => x.Id == 23).Value;
+                decimal rub = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == 5).Value;
+                decimal cny = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == 23).Value;
                 switch (Calculator.Currency1) //any -> dol
                 {
                     case 1:

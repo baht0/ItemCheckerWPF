@@ -19,12 +19,25 @@ namespace ItemChecker.MVVM.View
         }
         private void Close_Click(object sender, RoutedEventArgs e)
         {
-            MessageBoxResult result = MessageBox.Show("Are you sure you want to close?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            MessageBoxResult result = MessageBox.Show("Are you sure you want to close?", "Question",
+                MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.No)
                 return;
-            StartUpViewModel viewModel = (StartUpViewModel)DataContext;
-            if (viewModel.ExitCommand.CanExecute(null))
-                viewModel.ExitCommand.Execute(null);
+            if (DataContext is StartUpViewModel vm)
+                vm.ExitCommand.Execute(null);
+        }
+        private void Reset_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult result = MessageBox.Show(
+                "Are you sure you want to delete all saved account data?\n\nThe settings are saved.", "Question",
+                MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (result == MessageBoxResult.No)
+                return;
+            if (DataContext is StartUpViewModel vm)
+            {
+                vm.DeleteDataCommand.Execute(null);
+                vm.ExitCommand.Execute(null);
+            }
         }
 
         private void TextBox_KeyDown(object sender, KeyEventArgs e)

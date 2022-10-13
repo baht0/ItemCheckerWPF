@@ -28,7 +28,7 @@ namespace ItemChecker.MVVM.Model
             }
             set
             {
-                var currency = SteamBase.CurrencyList.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Value;
+                var currency = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Value;
                 if (ParserTable.CurectCurrency.Id != 1)
                     value = Edit.ConverterToUsd(value, ParserTable.CurectCurrency.Value);
                 value = Edit.ConverterFromUsd(value, currency);

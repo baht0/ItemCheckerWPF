@@ -9,20 +9,14 @@ using System.Globalization;
 using ItemChecker.Services;
 using System.Diagnostics;
 using System.Linq;
-using ItemChecker.Support;
+using ItemChecker.Properties;
 
 namespace ItemChecker.MVVM.ViewModel
 {
     public class StartUpViewModel : StartUp
     {
-        Task startTask { get; set; }
         public bool LoginSuccessful { get; set; }
-
-        private IView _view;
-        private StartUp _startUp = new();
-        private bool _showLogin = false;
-        private SteamSignUp _signUp = new();
-        private string _currencyApi = string.Empty;
+        IView _view;
 
         public StartUp StartUp
         {
@@ -33,6 +27,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+        StartUp _startUp = new();
         public bool ShowLogin
         {
             get { return _showLogin; }
@@ -42,6 +37,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+        bool _showLogin = false;
         public SteamSignUp SignUp
         {
             get { return _signUp; }
@@ -51,6 +47,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+        SteamSignUp _signUp = new();
         public string CurrencyApi
         {
             get { return _currencyApi; }
@@ -60,6 +57,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+        string _currencyApi = string.Empty;
 
         public StartUpViewModel(IView view)
         {
@@ -73,7 +71,7 @@ namespace ItemChecker.MVVM.ViewModel
                 Title = "Welcome!",
                 Message = "The program has been launched!"
             });
-            startTask = Task.Run(() => StartTask());
+            Task.Run(() => StartTask());
         }
         public ICommand ExitCommand =>
             new RelayCommand((obj) =>
@@ -82,12 +80,25 @@ namespace ItemChecker.MVVM.ViewModel
                     cts.Cancel();
                     StartUp.Progress = Tuple.Create(5, "Exit...");
                     ShowLogin = false;
-                    if (startTask != null)
-                        startTask.Wait(4000);
                     if (BaseModel.Browser != null)
                         BaseService.BrowserExit();
 
                     Application.Current.Dispatcher.Invoke(() => { Application.Current.Shutdown(); });
+                });
+            });
+        public ICommand DeleteDataCommand =>
+            new RelayCommand((obj) =>
+            {
+                Task.Run(() => {
+                    StartUp.Progress = Tuple.Create(5, "Reseting...");
+                    MainProperties.Default.SteamLoginSecure = string.Empty;
+                    MainProperties.Default.SteamCurrencyId = 0;
+                    MainProperties.Default.SessionBuff = string.Empty;
+                    MainProperties.Default.Save();
+
+                    string profilesDir = ProjectInfo.DocumentPath + "profile";
+                    if (Directory.Exists(profilesDir))
+                        Directory.Delete(profilesDir, true);
                 });
             });
         void Hide()
@@ -146,6 +157,7 @@ namespace ItemChecker.MVVM.ViewModel
             }
             catch (Exception exp)
             {
+                StartUp.IsReset = true;
                 BaseService.errorLog(exp, true);
 
                 if (!DataProjectInfo.IsUpdate)
@@ -206,16 +218,12 @@ namespace ItemChecker.MVVM.ViewModel
                     ShowLogin = false;
                 }
             }, (obj) => !SteamSignUp.SignUp.IsLoggedIn && !String.IsNullOrEmpty(SignUp.Login) && SignUp.Code2AF.Length == 5);
-        public ICommand GetCurrencyApiCommand
-        {
-            get
+        public ICommand SelectCurrencyCommand =>
+            new RelayCommand((obj) =>
             {
-                return new RelayCommand((obj) =>
-                {
-                    Edit.OpenUrl("https://free.currencyconverterapi.com/free-api-key");
-                    Edit.OpenUrl("https://openexchangerates.org/signup/free");
-                });
-            }
-        }
+                var currency = obj as Currency;
+                SteamAccount.CurrencyId = currency.Id;
+                StartUp.IsCurrency = false;
+            }, (obj) => StartUp.SelectedCurrency != null);
     }
 }

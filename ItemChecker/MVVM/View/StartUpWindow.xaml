@@ -57,6 +57,11 @@
                     <materialDesign:PackIcon Kind="Download" Foreground="White"/>
                 </Button>
                 <Button Height="25" Style="{DynamicResource MaterialDesignFlatButton}"
+                        Click="Reset_Click" ToolTip="Reset"
+                        Visibility="{Binding StartUp.IsReset, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <materialDesign:PackIcon Kind="FileRefreshOutline" Foreground="White"/>
+                </Button>
+                <Button Height="25" Style="{DynamicResource MaterialDesignFlatButton}"
                         Click="Close_Click">
                     <materialDesign:PackIcon Kind="Close" Foreground="White"/>
                 </Button>
@@ -130,24 +135,21 @@
                             <RowDefinition Height="40"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
+                            <ColumnDefinition Width="65"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Steam" FontSize="15" Grid.ColumnSpan="2"
+                        <TextBlock Text="Steam Account" FontSize="15" Grid.ColumnSpan="2" FontWeight="Bold"
                                HorizontalAlignment="Center" VerticalAlignment="Top"/>
-                        <TextBlock Text="Account Name:" Grid.Row="1" VerticalAlignment="Center"/>
-                        <TextBox Grid.Row="1" Grid.Column="1" Height="25"
-                             Text="{Binding SignUp.Login, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock Text="Login:" Grid.Row="1" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" Height="25" FontSize="13"
+                                 Text="{Binding SignUp.Login, UpdateSourceTrigger=PropertyChanged}"/>
                         <TextBlock Text="Password:" Grid.Row="2" VerticalAlignment="Center"/>
-                        <PasswordBox x:Name="passTextbox" Grid.Row="2" Grid.Column="1" Height="25"/>
+                        <PasswordBox x:Name="passTextbox" Grid.Row="2" Grid.Column="1" Height="25" FontSize="13"/>
                         <TextBlock Text="2AF Code:" Grid.Row="3" VerticalAlignment="Bottom"/>
                         <TextBox Grid.Row="4" Grid.ColumnSpan="2"
-                             VerticalAlignment="Center"
-                             MaxLength="5" FontSize="20"
-                             TextAlignment="Center"
-                             CharacterCasing="Upper"
-                             FontWeight="Bold"
-                             FontFamily="Consolas"
+                             VerticalAlignment="Center" MaxLength="5" FontSize="20"
+                             TextAlignment="Center" CharacterCasing="Upper"
+                             FontWeight="Bold" FontFamily="Consolas"
                              KeyDown="TextBox_KeyDown"
                              Text="{Binding SignUp.Code2AF, UpdateSourceTrigger=PropertyChanged}"/>
                         <Button Content="Sign In" Grid.ColumnSpan="2" Grid.Row="5"
@@ -155,6 +157,39 @@
                             HorizontalAlignment="Center"  VerticalAlignment="Bottom"
                             Command="{Binding LoginCommand}"
                             CommandParameter="{Binding ElementName=passTextbox}"/>
+                    </Grid>
+                </Grid>
+                <!--currency-->
+                <Grid Grid.Column="1" Visibility="{Binding StartUp.IsCurrency, Converter={StaticResource BooleanToVisibilityConverter}}"
+                      VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <Rectangle Width="235" Height="100" Fill="{StaticResource Background}" RadiusX="12" RadiusY="12">
+                        <Rectangle.Effect>
+                            <DropShadowEffect Color="DarkGray" Direction="360" BlurRadius="15" RenderingBias="Quality" ShadowDepth="1"/>
+                        </Rectangle.Effect>
+                    </Rectangle>
+                    <Grid Width="200" Height="55" Margin="0 -20 0 0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="65"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Account Currency" FontSize="15" Grid.ColumnSpan="2" FontWeight="Bold"
+                                   HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                        <TextBlock Text="Currency:" Grid.Row="1" VerticalAlignment="Center"/>
+                        <ComboBox Grid.Row="1" Grid.Column="1" Height="25" FontSize="13"
+                                  ItemsSource="{Binding StartUp.CurrencyList}" SelectedItem="{Binding StartUp.SelectedCurrency}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <Button Content="OK" Grid.ColumnSpan="2" Grid.Row="5"
+                                Width="100" Margin="0 0 0 -50" HorizontalAlignment="Center"  VerticalAlignment="Bottom"
+                                Command="{Binding SelectCurrencyCommand}" CommandParameter="{Binding StartUp.SelectedCurrency}"/>
                     </Grid>
                 </Grid>
             </Grid>

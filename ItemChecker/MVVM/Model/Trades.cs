@@ -1,4 +1,5 @@
 ﻿using ItemChecker.Core;
+using ItemChecker.Properties;
 using ItemChecker.Support;
 using LiveCharts;
 using Newtonsoft.Json.Linq;
@@ -60,15 +61,15 @@ namespace ItemChecker.MVVM.Model
         {
             get
             {
-                return SteamBase.CurrencyList.Select(x => x.Name).ToList();
+                return SteamBase.AllowCurrencys.Select(x => x.Name).ToList();
             }
         }
-        public static Currency CurectCurrency { get; set; } = SteamBase.CurrencyList.FirstOrDefault(x => x.Id == 1);
+        public static Currency CurectCurrency { get; set; } = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == 1);
         public string CurrencySymbolSteam
         {
             get
             {
-                return SteamBase.CurrencyList.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Symbol;
+                return SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Symbol;
             }
         }
 
@@ -152,7 +153,7 @@ namespace ItemChecker.MVVM.Model
         {
             get
             {
-                return Edit.ConverterToUsd(SteamAccount.Balance, SteamBase.CurrencyList.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Value);
+                return Edit.ConverterToUsd(SteamAccount.Balance, SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Value);
             }
         }
 
@@ -237,7 +238,7 @@ namespace ItemChecker.MVVM.Model
         }
         string[] _labels;
 
-        public decimal StartBalance { get; set; }
+        public decimal StartBalance { get; set; } = MainProperties.Default.AnalysisStartBalance;
     }
     public class DataServiceAnalysis
     {

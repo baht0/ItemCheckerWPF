@@ -89,12 +89,12 @@ namespace ItemChecker.MVVM.Model
         }
 
         //currency
-        public List<string> CurrencyList { get; set; } = SteamBase.CurrencyList.Select(x => x.Name).ToList();
+        public List<string> CurrencyList { get; set; } = SteamBase.AllowCurrencys.Select(x => x.Name).ToList();
         public int Currency1 { get; set; } = 0;
         public int Currency2 { get; set; } = 1;
 
         private decimal _value = 1;
-        private decimal _converted = Math.Round(SteamBase.CurrencyList.FirstOrDefault(x => x.Id == 5).Value, 2);
+        private decimal _converted = Math.Round(SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == 5).Value, 2);
         public decimal Converted
         {
             get { return _converted; }

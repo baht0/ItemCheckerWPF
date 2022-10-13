@@ -49,9 +49,10 @@
                     <ColumnDefinition Width="170"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Grid.Column="0">
-                    <Button x:Name="buttonItemChecker" ToolTip="ItemChecker" Height="26" Margin="1"
-                            Content="{StaticResource Icon}" Style="{StaticResource MaterialDesignToolForegroundButton}"
+                    <Button x:Name="buttonItemChecker" ToolTip="ItemChecker" VerticalAlignment="Center" Margin="1"
+                            Style="{StaticResource MaterialDesignToolForegroundButton}"
                             Click="buttonItemChecker_Click" ContextMenuService.IsEnabled="false">
+                        <materialDesign:PackIcon Kind="Menu"/>
                         <Button.ContextMenu>
                             <ContextMenu Style="{StaticResource MaterialDesignContextMenu}"
                                          FontSize="13" FontWeight="Bold" Background="{DynamicResource ElementBackground}">

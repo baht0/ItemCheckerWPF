@@ -34,27 +34,33 @@ namespace ItemChecker.MVVM.Model
     }
     public class DataProjectInfo
     {
-        public static List<string> FilesList { get; set; } = new()
+        public static List<string> FilesList
         {
-            "ItemChecker.exe",
-            "ItemChecker.dll",
-            "ItemChecker.runtimeconfig.json",
-            "ItemChecker.Net.dll",
-            "ItemChecker.Support.dll",
-            "ItemChecker.Updater.exe",
-            "ItemChecker.Updater.dll",
-            "ItemChecker.Updater.runtimeconfig.json",
-            "icon.ico",
-            "msedgedriver.exe",
-            "WebDriver.dll",
-            "WebDriver.Support.dll",
-            "Newtonsoft.Json.dll",
-            "HtmlAgilityPack.dll",
-            "MaterialDesignColors.dll",
-            "MaterialDesignThemes.Wpf.dll",
-            "LiveCharts.dll",
-            "LiveCharts.Wpf.dll"
-        };
+            get
+            {
+                return new()
+                {
+                    "ItemChecker.exe",
+                    "ItemChecker.dll",
+                    "ItemChecker.runtimeconfig.json",
+                    "ItemChecker.Net.dll",
+                    "ItemChecker.Support.dll",
+                    "ItemChecker.Updater.exe",
+                    "ItemChecker.Updater.dll",
+                    "ItemChecker.Updater.runtimeconfig.json",
+                    "icon.ico",
+                    "msedgedriver.exe",
+                    "WebDriver.dll",
+                    "WebDriver.Support.dll",
+                    "Newtonsoft.Json.dll",
+                    "HtmlAgilityPack.dll",
+                    "MaterialDesignColors.dll",
+                    "MaterialDesignThemes.Wpf.dll",
+                    "LiveCharts.dll",
+                    "LiveCharts.Wpf.dll"
+                };
+            }
+        }
         public static string CurrentVersion
         {
             get

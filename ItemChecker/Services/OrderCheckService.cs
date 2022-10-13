@@ -113,7 +113,7 @@ namespace ItemChecker.MVVM.Model
                     item.ServiceGive = Math.Round(itemBase.Buff.BuyOrder * Calculator.CommissionBuff, 2);
                     break;
             }
-            decimal currencyValue = SteamBase.CurrencyList.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Value;
+            decimal currencyValue = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Value;
             if (serviceId > 1)
             {
                 if (SteamAccount.CurrencyId != 1)

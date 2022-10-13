@@ -6,7 +6,7 @@ namespace ItemChecker.MVVM.Model
 {
     public class Home
     {
-        public string CurrencySymbol { get; set; } = SteamBase.CurrencyList.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Symbol;
+        public string CurrencySymbol { get; set; } = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Symbol;
     }
     public class HomeTable : ObservableObject
     {

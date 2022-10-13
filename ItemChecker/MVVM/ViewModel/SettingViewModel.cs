@@ -97,7 +97,8 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand LogoutCommand =>
             new RelayCommand((obj) =>
             {
-                MessageBoxResult result = MessageBox.Show("Are you sure you want to logout?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                MessageBoxResult result = MessageBox.Show("Are you sure you want to logout?", "Question",
+                    MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (result == MessageBoxResult.No)
                     return;
 

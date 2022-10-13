@@ -183,7 +183,7 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand SwitchCurrencyCommand =>
             new RelayCommand((obj) =>
             {
-                Currency currency = SteamBase.CurrencyList.FirstOrDefault(x => x.Name == (string)obj);
+                Currency currency = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Name == (string)obj);
                 List<DataParser> items = ParserTable.Items.ToList();
                 if (ParserTable.CurectCurrency.Id != 1)
                     foreach (DataParser item in items)

@@ -34,9 +34,9 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        public List<string> CurrencyList { get; set; } = SteamBase.CurrencyList.Select(x => x.Name).ToList();
-        public static Currency CurectCurrency { get; set; } = SteamBase.CurrencyList.FirstOrDefault(x => x.Id == 1);
-        public string CurrencySymbolSteam { get; set; } = SteamBase.CurrencyList.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Symbol;
+        public List<string> CurrencyList { get; set; } = SteamBase.AllowCurrencys.Select(x => x.Name).ToList();
+        public static Currency CurectCurrency { get; set; } = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == 1);
+        public string CurrencySymbolSteam { get; set; } = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Symbol;
         public List<string> Services { get; set; } = Main.Services;
 
         private string _itemName = "Unknown";

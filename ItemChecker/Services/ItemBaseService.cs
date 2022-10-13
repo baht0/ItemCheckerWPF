@@ -221,7 +221,7 @@ namespace ItemChecker.Services
             if (SteamBase.ItemList.Select(x => x.Buff.Updated).Max().AddMinutes(30) > DateTime.Now)
                 return;
 
-            decimal CNY = SteamBase.CurrencyList.FirstOrDefault(x => x.Id == 23).Value;
+            decimal CNY = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == 23).Value;
             string tab = isBuyOrder ? "/buying" : string.Empty;
             min = (int)Edit.ConverterFromUsd(min, CNY);
             max = (int)Edit.ConverterFromUsd(max, CNY);
@@ -270,7 +270,7 @@ namespace ItemChecker.Services
                 return;
 
             string market_hash_name = HttpUtility.UrlEncode(itemName);
-            decimal CNY = SteamBase.CurrencyList.FirstOrDefault(x => x.Id == 23).Value;
+            decimal CNY = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == 23).Value;
             int pages = int.MaxValue;
             string last_item = string.Empty;
             for (int i = 1; i <= pages; i++)
@@ -314,7 +314,7 @@ namespace ItemChecker.Services
             if (itemBase == null || itemBase.History.Any())
                 return;
 
-            decimal CNY = SteamBase.CurrencyList.FirstOrDefault(x => x.Id == 23).Value;
+            decimal CNY = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == 23).Value;
 
             string url = "https://buff.163.com/api/market/goods/bill_order?game=csgo&goods_id=" + itemBase.Id;
             JObject json = JObject.Parse(Get.Request(BuffAccount.Cookies, url));

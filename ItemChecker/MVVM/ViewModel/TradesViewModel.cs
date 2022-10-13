@@ -116,7 +116,7 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand SwitchCurrencyCommand =>
             new RelayCommand((obj) =>
             {
-                Currency currency = SteamBase.CurrencyList.FirstOrDefault(x => x.Name == (string)obj);
+                Currency currency = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Name == (string)obj);
                 List<DataTrade> trades = Trades.List.ToList();
                 if (Trades.CurectCurrency.Id != 1)
                     foreach (DataTrade trade in trades)

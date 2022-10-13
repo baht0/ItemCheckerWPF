@@ -23,18 +23,18 @@ namespace ItemChecker.Services
                     baseService.UpdateLfm();
                     break;
                 case 4:
-                    var currency = SteamBase.CurrencyList.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Value;
+                    var currency = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Value;
                     decimal valueUsd = Edit.ConverterToUsd(SteamMarket.Orders.Min(x => x.OrderPrice), currency);
                     int min = (int)(valueUsd * 0.5m);
-                    valueUsd = Edit.ConverterToUsd(SteamAccount.Balance, SteamBase.CurrencyList.FirstOrDefault(x => x.Id == 1).Value);
+                    valueUsd = Edit.ConverterToUsd(SteamAccount.Balance, SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == 1).Value);
                     int max = (int)(valueUsd * 2.0m);
                     baseService.UpdateBuff(true, min, max);
                     break;
                 case 5:
-                    currency = SteamBase.CurrencyList.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Value;
+                    currency = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Value;
                     valueUsd = Edit.ConverterToUsd(SteamMarket.Orders.Min(x => x.OrderPrice), currency);
                     min = (int)(valueUsd * 0.5m);
-                    valueUsd = Edit.ConverterToUsd(SteamAccount.Balance, SteamBase.CurrencyList.FirstOrDefault(x => x.Id == 1).Value);
+                    valueUsd = Edit.ConverterToUsd(SteamAccount.Balance, SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == 1).Value);
                     max = (int)(valueUsd * 2.0m);
                     baseService.UpdateBuff(false, min, max);
                     break;

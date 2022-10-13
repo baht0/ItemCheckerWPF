@@ -22,7 +22,7 @@ namespace ItemChecker.MVVM.Model
         public string AccountName { get; set; } = SteamAccount.AccountName;
         public string SteamId { get; set; } = SteamAccount.Id64;
         public string SteamMarket { get; set; } = SteamAccount.StatusMarket;
-        public string Currency { get; set; } = SteamBase.CurrencyList.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Name;
+        public string Currency { get; set; } = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Name;
 
         //Base
         public bool UseLocalDb { get; set; } = SettingsProperties.Default.UseLocalDb;

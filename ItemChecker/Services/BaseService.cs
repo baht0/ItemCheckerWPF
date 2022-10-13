@@ -27,18 +27,9 @@ namespace ItemChecker.Services
             List<int> allowCurrencyId = new() { 1, 5, 23 };//steamCurrencies ID
             foreach (var currency in currencies)
             {
-                if (allowCurrencyId.Any(x=> x == currency.Id))
-                {
-                    SteamBase.CurrencyList.Add(new()
-                    {
-                        Id = currency.Id,
-                        Code = currency.Code,
-                        Country = currency.Country,
-                        Symbol = currency.Symbol,
-                        Name = $"{currency.Code} ({currency.Symbol})",
-                        Value = Get.CurrencySteam(currency.Id, item_nameid, price_usd),
-                    });
-                }
+                currency.Value = Get.CurrencySteam(currency.Id, item_nameid, price_usd);
+                currency.IsAllow = allowCurrencyId.Any(x => x == currency.Id);
+                SteamBase.CurrencyList.Add(currency);
             }
         }
 
