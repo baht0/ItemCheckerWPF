@@ -26,7 +26,7 @@ namespace ItemChecker.MVVM.Model
 
         public static Boolean AllowUser(string login)
         {
-            JArray users = JArray.Parse(Get.DropboxRead("Users.json"));
+            JArray users = JArray.Parse(DropboxRequest.Get.Read("Users.json"));
             JObject user = (JObject)users.FirstOrDefault(x => x["Login"].ToString() == login);
             if (user != null)
             {
@@ -34,9 +34,9 @@ namespace ItemChecker.MVVM.Model
                 users[id]["LastLoggedIn"] = DateTime.Now;
                 users[id]["Version"] = DataProjectInfo.CurrentVersion;
 
-                Post.DropboxDelete("Users.json");
+                DropboxRequest.Post.Delete("Users.json");
                 Thread.Sleep(200);
-                Post.DropboxUpload("Users.json", users.ToString());
+                DropboxRequest.Post.Upload("Users.json", users.ToString());
                 return Convert.ToBoolean(user["Allowed"]);
             }
             return false;
@@ -90,9 +90,10 @@ namespace ItemChecker.MVVM.Model
         {
             get
             {
-                if (String.IsNullOrEmpty(_apiKey))
+                var cookies = Cookies.GetAllCookies();
+                if (String.IsNullOrEmpty(_apiKey) && cookies.Any(x => x.Name == "steamLoginSecure"))
                 {
-                    var html = Get.Request(SteamAccount.Cookies, "https://steamcommunity.com/dev/apikey");
+                    var html = HttpRequest.Request(Cookies, "https://steamcommunity.com/dev/apikey");
                     var htmlDoc = new HtmlDocument();
                     htmlDoc.LoadHtml(html);
                     _apiKey = htmlDoc.DocumentNode.SelectSingleNode("//div[@id='bodyContents_ex']/p").InnerText;
@@ -122,10 +123,9 @@ namespace ItemChecker.MVVM.Model
 
             if (!String.IsNullOrEmpty(steamLoginSecure))
             {
-                System.Net.Cookie steamSessionId = Get.SteamSessionId();
-                SteamAccount.Cookies.Add(steamSessionId);
-                SteamAccount.Cookies.Add(new System.Net.Cookie("steamLoginSecure", steamLoginSecure, "/", "steamcommunity.com"));
-                string html = Get.Request(SteamAccount.Cookies, url);
+                Cookies.Add(new System.Net.Cookie("steamLoginSecure", steamLoginSecure, "/", "steamcommunity.com"));
+                string html = HttpRequest.Request(Cookies, url);
+
                 HtmlDocument htmlDoc = new();
                 htmlDoc.LoadHtml(html);
                 string title = htmlDoc.DocumentNode.SelectSingleNode("html/head/title").InnerText;
@@ -180,33 +180,35 @@ namespace ItemChecker.MVVM.Model
         {
             try
             {
-                System.Net.Cookie steamSessionId = Get.SteamSessionId();
                 string steamLoginSecure = Browser.Manage().Cookies.GetCookieNamed("steamLoginSecure").Value.ToString();
 
                 CurrencyId = MainProperties.Default.SteamCurrencyId;
+                Currency currency = new();
                 if (CurrencyId == 0)
                 {
                     try
                     {
                         string country = Browser.Manage().Cookies.GetCookieNamed("steamCountry").Value.ToString()[..2];
-                        Currency currency = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Country == country);
+                        currency = SteamBase.CurrencyList.FirstOrDefault(x => x.Country == country);
                         CurrencyId = currency != null ? currency.Id : 1;
                     }
                     catch
                     {
                         Application.Current.Dispatcher.Invoke(() => {
                             var vm = Application.Current.MainWindow.DataContext as StartUpViewModel;
+                            vm.StartUp.CurrencyList = new(SteamBase.CurrencyList);
+                            vm.StartUp.SelectedCurrency = SteamBase.CurrencyList.FirstOrDefault();
                             vm.StartUp.IsCurrency = true;
                         });
                         while (CurrencyId == 0)
                             Thread.Sleep(500);
                     }
                 }
+                currency = SteamBase.CurrencyList.FirstOrDefault(x => x.Id == CurrencyId);
 
                 MainProperties.Default.SteamCurrencyId = CurrencyId;
-                SteamAccount.Cookies = new();
-                SteamAccount.Cookies.Add(steamSessionId);
-                SteamAccount.Cookies.Add(new System.Net.Cookie("steamLoginSecure", steamLoginSecure, "/", "steamcommunity.com"));
+                Cookies = new();
+                Cookies.Add(new System.Net.Cookie("steamLoginSecure", steamLoginSecure, "/", "steamcommunity.com"));
                 
                 MainProperties.Default.SteamLoginSecure = steamLoginSecure;
                 MainProperties.Default.Save();
@@ -226,7 +228,7 @@ namespace ItemChecker.MVVM.Model
         {
             System.Net.Cookie steamLoginSecure = SteamAccount.Cookies.GetAllCookies().FirstOrDefault(x => x.Name == "steamLoginSecure");
             Id64 = steamLoginSecure.Value[..17];
-            string html = Get.Request(SteamAccount.Cookies, "https://steamcommunity.com/market/");
+            string html = HttpRequest.Request(SteamAccount.Cookies, "https://steamcommunity.com/market/");
             HtmlDocument htmlDoc = new();
             htmlDoc.LoadHtml(html);
             UserName = htmlDoc.DocumentNode.SelectSingleNode("//span[@id='account_pulldown']").InnerText.Trim();
@@ -245,7 +247,7 @@ namespace ItemChecker.MVVM.Model
         }
         public static void GetBalance()
         {
-            var html = Get.Request(SteamAccount.Cookies, "https://steamcommunity.com/market/");
+            var html = HttpRequest.Request(SteamAccount.Cookies, "https://steamcommunity.com/market/");
             var htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(html);
             _balance = Edit.GetPrice(htmlDoc.DocumentNode.SelectSingleNode("//a[@id='header_wallet_balance']").InnerText);
@@ -258,7 +260,7 @@ namespace ItemChecker.MVVM.Model
         public static Boolean IsLogIn()
         {
             Cookies.Add(new System.Net.Cookie("session", MainProperties.Default.SessionBuff, "/", "buff.163.com"));
-            string html = Get.Request(Cookies, "https://buff.163.com/api/market/goods?game=csgo&page_num=2&use_suggestion=0&trigger=undefined_trigger&page_size=80");
+            string html = HttpRequest.Request(Cookies, "https://buff.163.com/api/market/goods?game=csgo&page_num=2&use_suggestion=0&trigger=undefined_trigger&page_size=80");
 
             if (html.Contains("Login Required"))
             {
