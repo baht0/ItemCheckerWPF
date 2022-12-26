@@ -11,7 +11,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>Resources\logo-taskbar.ico</ApplicationIcon>
     <AssemblyVersion>2.0.1.2</AssemblyVersion>
-    <FileVersion>2.0.1.1</FileVersion>
+    <FileVersion>2.0.1.2</FileVersion>
     <Win32Resource />
   </PropertyGroup>
 
