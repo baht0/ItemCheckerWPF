@@ -12,7 +12,7 @@ namespace ItemChecker.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.2.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.3.0.0")]
     internal sealed partial class HomeProperties : global::System.Configuration.ApplicationSettingsBase {
         
         private static HomeProperties defaultInstance = ((HomeProperties)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new HomeProperties())));
@@ -49,13 +49,25 @@ namespace ItemChecker.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool Unwanted {
+        [global::System.Configuration.DefaultSettingValueAttribute("20")]
+        public int MinPrecent {
             get {
-                return ((bool)(this["Unwanted"]));
+                return ((int)(this["MinPrecent"]));
             }
             set {
-                this["Unwanted"] = value;
+                this["MinPrecent"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int ServiceId {
+            get {
+                return ((int)(this["ServiceId"]));
+            }
+            set {
+                this["ServiceId"] = value;
             }
         }
     }

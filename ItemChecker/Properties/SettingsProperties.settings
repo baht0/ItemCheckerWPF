@@ -2,24 +2,6 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ItemChecker.Properties" GeneratedClassName="SettingsProperties">
   <Profiles />
   <Settings>
-    <Setting Name="Theme" Type="System.String" Scope="User">
-      <Value Profile="(Default)">Light</Value>
-    </Setting>
-    <Setting Name="SetHours" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
-    <Setting Name="TurnOn" Type="System.DateTime" Scope="User">
-      <Value Profile="(Default)">01/01/0001 17:30:00</Value>
-    </Setting>
-    <Setting Name="TurnOff" Type="System.DateTime" Scope="User">
-      <Value Profile="(Default)">01/01/0001 07:30:00</Value>
-    </Setting>
-    <Setting Name="MinPrecent" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">20</Value>
-    </Setting>
-    <Setting Name="ServiceId" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">0</Value>
-    </Setting>
     <Setting Name="UseLocalDb" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>

@@ -12,7 +12,7 @@ namespace ItemChecker.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.2.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.4.0.0")]
     internal sealed partial class SettingsProperties : global::System.Configuration.ApplicationSettingsBase {
         
         private static SettingsProperties defaultInstance = ((SettingsProperties)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new SettingsProperties())));
@@ -20,78 +20,6 @@ namespace ItemChecker.Properties {
         public static SettingsProperties Default {
             get {
                 return defaultInstance;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Light")]
-        public string Theme {
-            get {
-                return ((string)(this["Theme"]));
-            }
-            set {
-                this["Theme"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool SetHours {
-            get {
-                return ((bool)(this["SetHours"]));
-            }
-            set {
-                this["SetHours"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("01/01/0001 17:30:00")]
-        public global::System.DateTime TurnOn {
-            get {
-                return ((global::System.DateTime)(this["TurnOn"]));
-            }
-            set {
-                this["TurnOn"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("01/01/0001 07:30:00")]
-        public global::System.DateTime TurnOff {
-            get {
-                return ((global::System.DateTime)(this["TurnOff"]));
-            }
-            set {
-                this["TurnOff"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("20")]
-        public int MinPrecent {
-            get {
-                return ((int)(this["MinPrecent"]));
-            }
-            set {
-                this["MinPrecent"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int ServiceId {
-            get {
-                return ((int)(this["ServiceId"]));
-            }
-            set {
-                this["ServiceId"] = value;
             }
         }
         
