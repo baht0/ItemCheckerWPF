@@ -16,7 +16,7 @@ namespace UpdateBase
         {
             try
             {
-                JObject json = JObject.Parse(Get.DropboxRead("steamBase.json"));
+                JObject json = JObject.Parse(DropboxRequest.Get.Read("steamBase.json"));
                 Currency = JArray.Parse(json["Currency"].ToString());
                 Items = JArray.Parse(json["Items"].ToString()).ToObject<List<Items>>();
 
@@ -114,8 +114,6 @@ namespace UpdateBase
                             SetSteamId();
                             break;
                     }
-                    if (Count > 0 && com != 11)
-                        SetSteamId();
                 }
             }
             catch (Exception ex)
@@ -193,7 +191,7 @@ namespace UpdateBase
 
                     bool row = type == "Souvenir Package";
                     int rowId = row ? 6 : 5;
-                    string html = Get.Request(url);
+                    string html = HttpRequest.RequestGetAsync(url).Result;
                     HtmlDocument htmlDoc = new();
                     htmlDoc.LoadHtml(html);
                     HtmlNodeCollection skins = htmlDoc.DocumentNode.SelectNodes("//div[@class='container main-content']/div[@class='row'][" + rowId + "]/div[@class='col-lg-4 col-md-6 col-widen text-center']");
@@ -204,7 +202,7 @@ namespace UpdateBase
                         switch (type)
                         {
                             case "Weapon" or "Knife" or "Gloves" or "Sticker" or "Patch" or "Collectable" or "Graffiti":
-                                html = Get.Request(skin.SelectSingleNode(".//div[2]/p/a").Attributes["href"].Value);
+                                html = HttpRequest.RequestGetAsync(skin.SelectSingleNode(".//div[2]/p/a").Attributes["href"].Value).Result;
                                 htmlDoc = new();
                                 htmlDoc.LoadHtml(html);
                                 break;
@@ -467,7 +465,7 @@ namespace UpdateBase
         {
             try
             {
-                return Get.Request("https://steamcommunity.com/market/listings/730/" + HttpUtility.UrlPathEncode(itemName));
+                return HttpRequest.RequestGetAsync("https://steamcommunity.com/market/listings/730/" + HttpUtility.UrlPathEncode(itemName)).Result;
             }
             catch
             {
