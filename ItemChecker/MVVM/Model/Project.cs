@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -31,7 +32,19 @@ namespace ItemChecker.MVVM.Model
                 return path;
             }
         }
-        public static string Theme { get; set; } = "Light";
+        public static string Theme
+        {
+            get
+            {
+
+                RegistryKey registry = Registry.CurrentUser.OpenSubKey(
+                        @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+                if ((int)registry.GetValue("SystemUsesLightTheme") == 1)
+                    return "Light";
+                else
+                    return "Dark";
+            }
+        }
     }
     public class ProjectUpdates
     {
