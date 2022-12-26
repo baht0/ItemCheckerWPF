@@ -4,51 +4,49 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Drawing;
 using Forms = System.Windows.Forms;
-using Model = ItemChecker.MVVM.Model;
 using ItemChecker.MVVM.ViewModel;
 using ItemChecker.MVVM.View;
-using ItemChecker.Properties;
-using ItemChecker.MVVM.Model;
+using Microsoft.Win32;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 namespace ItemChecker
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : Application
     {
-        private readonly Forms.NotifyIcon notifyIcon = new();
+        public ResourceDictionary ThemeDictionary => Resources.MergedDictionaries[0];
+        readonly Forms.NotifyIcon notifyIcon = new();
 
         public App()
         {
-
+            SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
         }
-        public ResourceDictionary ThemeDictionary => Resources.MergedDictionaries[0];
-
-        public void ChangeTheme(Uri uri)
+        void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
         {
+            switch (e.Category)
+            {
+                case UserPreferenceCategory.General:
+                    {
+                        string theme = ThemeIsLight() ? "Light" : "Dark";
+                        ChangeTheme(theme);
+                        break;
+                    }
+            }
+        }
+        static bool ThemeIsLight()
+        {
+            RegistryKey registry = Registry.CurrentUser.OpenSubKey(
+                    @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+            return (int)registry.GetValue("SystemUsesLightTheme") == 1;
+        }
+        public void ChangeTheme(string theme)
+        {
+            Uri uri = new($"/Themes/{theme}.xaml", UriKind.RelativeOrAbsolute);
             ThemeDictionary.MergedDictionaries.Clear();
             ThemeDictionary.MergedDictionaries.Add(new ResourceDictionary() { Source = uri });
         }
-        public void AutoChangeTheme()
-        {
-            var now = DateTime.Now;
-            var turnOn = now.Date + SettingsProperties.Default.TurnOn.TimeOfDay;
-            var turnOff = now.Date + SettingsProperties.Default.TurnOff.TimeOfDay;
-            bool dark = turnOn < now & now < turnOff.AddDays(1);
-            bool light = turnOn > now & now > turnOff;
-            if (dark & Model.ProjectInfo.Theme == "Light")
-            {
-                Model.ProjectInfo.Theme = "Dark";
-                ChangeTheme(new("/Themes/Dark.xaml", UriKind.RelativeOrAbsolute));
-            }
-            if (light & Model.ProjectInfo.Theme == "Dark")
-            {
-                Model.ProjectInfo.Theme = "Light";
-                ChangeTheme(new("/Themes/Light.xaml", UriKind.RelativeOrAbsolute));
-            }
-        }
+
         protected override void OnStartup(StartupEventArgs e)
         {
             RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
@@ -65,23 +63,15 @@ namespace ItemChecker
         }
         private void ApplicationStart(object sender, StartupEventArgs e)
         {
-            if (SettingsProperties.Default.SetHours)
-                AutoChangeTheme();
-            else
+            if (Process.GetProcessesByName(Path.GetFileNameWithoutExtension(System.Reflection.Assembly.GetEntryAssembly().Location)).Count() > 1)
             {
-                switch (SettingsProperties.Default.Theme)
-                {
-                    case "Light":
-                        Model.ProjectInfo.Theme = "Light";
-                        ChangeTheme(new("/Themes/Light.xaml", UriKind.RelativeOrAbsolute));
-                        break;
-                    case "Dark":
-                        Model.ProjectInfo.Theme = "Dark";
-                        ChangeTheme(new("/Themes/Dark.xaml", UriKind.RelativeOrAbsolute));
-                        break;
-                }
+                MessageBox.Show("The program is already running!", "Warning",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                Process.GetCurrentProcess().Kill();
             }
 
+            string theme = ThemeIsLight() ? "Light" : "Dark";
+            ChangeTheme(theme);
 
             Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
             Window start = new StartWindow();
@@ -89,7 +79,7 @@ namespace ItemChecker
 
             if (start.DataContext is StartUpViewModel startVM)
             {
-                if (startVM.LoginSuccessful)
+                if (startVM.LaunchSuccessful)
                 {
                     Window main = new MainWindow();
                     Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
@@ -112,13 +102,12 @@ namespace ItemChecker
         }
         void ExitClicked(object sender, EventArgs e)
         {
-            MessageBoxResult result = MessageBox.Show("Are you sure you want to close?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (result == MessageBoxResult.No)
-                return;
-            else if (MainWindow.DataContext is StartUpViewModel startVM)
-                startVM.ExitCommand.Execute(null);
-            else if (MainWindow.DataContext is MainViewModel mainVM)
-                mainVM.ExitCommand.Execute(null);
+            MessageBoxResult result = MessageBox.Show(
+                "Are you sure you want to close?", "Question",
+                MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+                Current.Shutdown();
         }
     }
 }

@@ -49,66 +49,6 @@
             </Grid>
             <TabControl Grid.Row="1" Style="{StaticResource MaterialDesignNavigatilRailTabControl}"
                         DataContext="{Binding Settings}">
-                <TabItem Header="General" Height="67.5">
-                    <Grid Margin="3">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="115"/>
-                            <RowDefinition Height="70"/>
-                        </Grid.RowDefinitions>
-                        <GroupBox Header="Order" Grid.Row="0" Height="100" BorderThickness="0.5"
-                                  Style="{DynamicResource None}">
-                            <Grid Margin="5">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="80"/>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition Width="30"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Min. precent:" VerticalAlignment="Center"/>
-                                <TextBox Grid.Column="1" VerticalAlignment="Center" ToolTip="Cancel order less than"
-                                             Text="{Binding MinPrecent}" TextInput="Decimal_PreviewTextInput"
-                                          Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
-                                <TextBlock Grid.Column="2" Text="%" Height="15" VerticalAlignment="Center"/>
-                                <TextBlock Grid.Row="1" Text="ToService:" VerticalAlignment="Center"/>
-                                <ComboBox Grid.Row="1" Grid.Column="1" VerticalAlignment="Center"
-                                          ItemsSource="{Binding ServicesList}"
-                                          SelectedIndex="{Binding ServiceId}"/>
-                            </Grid>
-                        </GroupBox>
-                        <GroupBox Grid.Row="1" Style="{DynamicResource None}" BorderThickness="0.5">
-                            <GroupBox.Header>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="Theme:  "/>
-                                    <ToggleButton Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" ToolTip="Switch Theme"
-                                              IsChecked="{Binding DataContext.Theme, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource ThemeToBooleanConverter}}"
-                                              Command="{Binding DataContext.ThemeCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                              Style="{StaticResource MaterialDesignSwitchToggleButton}"
-                                              IsEnabled="{Binding SetHours, Converter={StaticResource BooleanReverseConverter}}">
-                                        <materialDesign:PackIcon Kind="{Binding DataContext.Theme, RelativeSource={RelativeSource AncestorType=Window}}"/>
-                                    </ToggleButton>
-                                </StackPanel>
-                            </GroupBox.Header>
-                            <Grid Margin="5">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="80"/>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition Width="10"/>
-                                    <ColumnDefinition/>
-                                </Grid.ColumnDefinitions>
-                                <CheckBox Grid.Row="1" Content="Set time"
-                                          ToolTip="Automatic dark theme change"
-                                          HorizontalAlignment="Left"
-                                          IsChecked="{Binding SetHours}">
-                                </CheckBox>
-                                <materialDesign:TimePicker Grid.Row="1" Grid.Column="1" SelectedTime="{Binding TurnOn}"/>
-                                <materialDesign:TimePicker Grid.Row="1" Grid.Column="3" SelectedTime="{Binding TurnOff}"/>
-                            </Grid>
-                        </GroupBox>
-                    </Grid>
-                </TabItem>
                 <TabItem Header="Steam" Height="67.5">
                     <Grid Margin="3">
                         <GroupBox Header="Information" Style="{DynamicResource None}" BorderThickness="0.5">
@@ -122,48 +62,34 @@
                                     <RowDefinition/>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="55"/>
+                                    <ColumnDefinition Width="58"/>
                                     <ColumnDefinition/>
                                     <ColumnDefinition Width="30"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="API Key:" Grid.Row="0" Height="15"/>
-                                <TextBox Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" IsReadOnly="True"
-                                         Text="{Binding SteamApiKey, UpdateSourceTrigger=PropertyChanged}"/>
-                                <Button Grid.Row="0" Grid.Column="2" Height="25" ToolTip="Reset API Key"
-                                        Style="{StaticResource MaterialDesignToolForegroundButton}" 
-                                        Command="{Binding DataContext.ResetSteamApiCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
-                                    <materialDesign:PackIcon Kind="Refresh"/>
-                                </Button>
-                                
-                                <TextBlock Grid.Row="1" Text="User:" Height="15"/>
-                                <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Text="{Binding UserName}"/>
-                                
-                                <TextBlock Grid.Row="2" Text="Account:" Height="15"/>
-                                <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Text="{Binding AccountName}"/>
-                                <Button Grid.Row="2" Grid.Column="2" Height="25" ToolTip="Logout"
-                                            Style="{StaticResource MaterialDesignToolForegroundButton}" 
-                                            Command="{Binding DataContext.LogoutCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
+
+                                <TextBlock Grid.Row="0" Text="Account:" Height="15"/>
+                                <TextBlock Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Text="{Binding AccountName}"/>
+                                <Button Grid.Row="0" Grid.Column="2" Height="25" ToolTip="Logout" Style="{StaticResource MaterialDesignToolForegroundButton}"
+                                        Command="{Binding DataContext.LogoutCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
                                     <materialDesign:PackIcon Kind="Logout"/>
                                 </Button>
                                 
-                                <TextBlock Grid.Row="3" Text="ID64:" Height="15"/>
-                                <TextBlock Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" Text="{Binding SteamId}"/>
-                                <Button Grid.Row="3" Grid.Column="2" Height="25" ToolTip="Copy ID"
-                                            Style="{StaticResource MaterialDesignToolForegroundButton}" 
-                                            Command="{Binding DataContext.CopyIdCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
+                                <TextBlock Text="API Key:" Grid.Row="1" Height="15"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Text="{Binding SteamApiKey}"/>
+                                <Button Grid.Row="1" Grid.Column="2" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}" 
+                                        Command="{Binding DataContext.CopyApiCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
                                     <materialDesign:PackIcon Kind="ContentCopy"/>
                                 </Button>
                                 
-                                <TextBlock Grid.Row="4" Text="Market:" Height="15"/>
-                                <TextBlock Grid.Row="4" Grid.Column="1" VerticalAlignment="Center" Text="{Binding SteamMarket}"/>
-                                <Button Grid.Row="4" Grid.Column="2" Height="25" ToolTip="Open FAQ"
-                                            Style="{StaticResource MaterialDesignToolForegroundButton}" 
-                                            Command="{Binding DataContext.OpenMarketCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
-                                    <materialDesign:PackIcon Kind="OpenInNew"/>
+                                <TextBlock Grid.Row="2" Text="ID64:" Height="15"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Text="{Binding SteamId}"/>
+                                <Button Grid.Row="2" Grid.Column="2" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
+                                        Command="{Binding DataContext.CopyIdCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
+                                    <materialDesign:PackIcon Kind="ContentCopy"/>
                                 </Button>
-                                
-                                <TextBlock Grid.Row="5" Text="Currency:" Height="15"/>
-                                <TextBlock Grid.Row="5" Grid.Column="1" VerticalAlignment="Center" Text="{Binding Currency}"/>
+
+                                <TextBlock Grid.Row="3" Text="Currency:" Height="15"/>
+                                <TextBlock Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" Text="{Binding Currency}"/>
                             </Grid>
                         </GroupBox>
                     </Grid>
@@ -256,23 +182,15 @@
                             <TextBlock Grid.Row="2" Text="Autor:" VerticalAlignment="Center"/>
                             <TextBlock Grid.Row="2" Grid.Column="1" Text="Rasim Bakhtiyarov" VerticalAlignment="Center"/>
 
-                            <TextBlock Grid.Row="3" Text="Current version:" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="3" Text="Version:" VerticalAlignment="Center"/>
                             <TextBlock Grid.Row="3" Grid.Column="1" VerticalAlignment="Center"
                                        Text="{Binding DataContext.About.CurrentVersion, RelativeSource={RelativeSource AncestorType=Window}}"/>
                             <Button Grid.Row="3" Grid.Column="2" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
-                                    Click="whatIsNewButton_Click" x:Name="whatIsNewButton">
+                                    Click="whatIsNewButton_Click" x:Name="whatIsNewButton" ToolTip="Patch notes">
                                 <materialDesign:PackIcon Kind="InfoOutline"/>
                             </Button>
-                            
-                            <TextBlock Grid.Row="4" Text="Latest version:" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="4" Grid.Column="1" VerticalAlignment="Center"
-                                       Text="{Binding DataContext.About.LatestVersion, RelativeSource={RelativeSource AncestorType=Window}}"/>
-                            <Button Grid.Row="4" Grid.Column="2" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
-                                Command="{Binding DataContext.UpdateCommand, RelativeSource={RelativeSource AncestorType=Window}}">
-                                <materialDesign:PackIcon Kind="{Binding DataContext.About.IsUpdate, RelativeSource={RelativeSource AncestorType=Window}}"/>
-                            </Button>
 
-                            <TextBlock Grid.Row="5" Text="© 2018-2022 baht0" VerticalAlignment="Bottom" Grid.ColumnSpan="3"/>
+                            <TextBlock Grid.Row="5" Text="© 2018-2023 baht0" VerticalAlignment="Bottom" Grid.ColumnSpan="3"/>
                             <Button Grid.Row="5" Grid.Column="2" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}" VerticalAlignment="Bottom"
                                     Visibility="{Binding DataContext.About.Admin, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}"
                                     Command="{Binding DataContext.CreateCurrentVersionCommand, RelativeSource={RelativeSource AncestorType=Window}}">
@@ -282,19 +200,10 @@
                     </GroupBox>
                 </TabItem>
             </TabControl>
-            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Height="25" Width="70" Style="{StaticResource MaterialDesignFlatButton}"
-                    Command="{Binding ApplyCommand}"
-                    CommandParameter="{Binding Settings}"
-                    Click="Button_Close">
-                    <TextBlock Text="OK"/>
-                </Button>
-                <Button Height="25" Width="70" Style="{StaticResource MaterialDesignFlatButton}"
-                    Command="{Binding ApplyCommand}"
-                    CommandParameter="{Binding Settings}">
-                    <TextBlock Text="Apply"/>
-                </Button>
-            </StackPanel>
+            <Button Grid.Row="2" HorizontalAlignment="Right" Height="25" Width="70" Style="{StaticResource MaterialDesignFlatButton}"
+                    Command="{Binding ApplyCommand}" CommandParameter="{Binding Settings}" Click="Button_Close">
+                <TextBlock Text="Apply"/>
+            </Button>
             <materialDesign:Snackbar Grid.Row="1" MessageQueue="{Binding Message}" />
         </Grid>
     </Border>

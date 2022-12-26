@@ -8,15 +8,13 @@ using System;
 using ItemChecker.Support;
 using MaterialDesignThemes.Wpf;
 using System.Threading.Tasks;
-using ItemChecker.MVVM.View;
 using System.Linq;
+using ItemChecker.Net;
 
 namespace ItemChecker.MVVM.ViewModel
 {
     public class SettingViewModel : ObservableObject
     {
-        private string _theme = ProjectInfo.Theme == "Light" ? "WhiteBalanceSunny" : "WeatherNight";
-
         public SnackbarMessageQueue Message
         {
             get { return _message; }
@@ -27,18 +25,6 @@ namespace ItemChecker.MVVM.ViewModel
             }
         }
         SnackbarMessageQueue _message = new();
-        public string Theme
-        {
-            get
-            {
-                return _theme;
-            }
-            set
-            {
-                _theme = value;
-                OnPropertyChanged();
-            }
-        }
         public Settings Settings
         {
             get
@@ -66,12 +52,6 @@ namespace ItemChecker.MVVM.ViewModel
         }
         private SettingsAbout _about = new();
 
-        public SettingViewModel()
-        {
-            About.LatestVersion = DataProjectInfo.LatestVersion;
-            if (DataProjectInfo.IsUpdate)
-                Message.Enqueue("Update available!");
-        }
         public ICommand GetCurrencyApiCommand
         {
             get
@@ -84,16 +64,6 @@ namespace ItemChecker.MVVM.ViewModel
             }
         }
         //steam
-        public ICommand ResetSteamApiCommand =>
-            new RelayCommand((obj) =>
-            {
-                SteamAccount.ApiKey = string.Empty;
-            });
-        public ICommand CopyIdCommand =>
-            new RelayCommand((obj) =>
-            {
-                Clipboard.SetText(SteamAccount.Id64);
-            });
         public ICommand LogoutCommand =>
             new RelayCommand((obj) =>
             {
@@ -102,23 +72,25 @@ namespace ItemChecker.MVVM.ViewModel
                 if (result == MessageBoxResult.No)
                     return;
 
-                MainProperties.Default.SteamLoginSecure = string.Empty;
-                MainProperties.Default.SteamCurrencyId = 0;
-                MainProperties.Default.SessionBuff = string.Empty;
-                MainProperties.Default.Save();
-                MainProperties.Default.Save();
+                string path = ProjectInfo.DocumentPath + "Net";
+                if (Directory.Exists(path))
+                    Directory.Delete(path, true);
 
-                string profilesDir = ProjectInfo.DocumentPath + "profile";
-                if (!Directory.Exists(profilesDir))
-                    Directory.Delete(profilesDir);
+                MainProperties.Default.SteamCurrencyId = 0;
+                MainProperties.Default.Save();
 
                 Application.Current.Shutdown();
             });
-        public ICommand OpenMarketCommand =>
+        public ICommand CopyApiCommand =>
             new RelayCommand((obj) =>
             {
-                Edit.OpenUrl("https://help.steampowered.com/en/faqs/view/71D3-35C2-AD96-AA3A");
-            }, (obj) => SteamAccount.StatusMarket == "Disabled");
+                Clipboard.SetText(SteamRequest.ApiKey);
+            });
+        public ICommand CopyIdCommand =>
+            new RelayCommand((obj) =>
+            {
+                Clipboard.SetText(SteamRequest.ID64);
+            });
         //base
         public ICommand ResetBaseCommand =>
             new RelayCommand((obj) =>
@@ -141,75 +113,26 @@ namespace ItemChecker.MVVM.ViewModel
                 }
             });
         //about
-        public ICommand UpdateCommand =>
-            new RelayCommand((obj) =>
-            {
-                if (DataProjectInfo.IsUpdate)
-                {
-                    MessageBoxResult result = MessageBox.Show($"Want to upgrade from {DataProjectInfo.CurrentVersion} to {DataProjectInfo.LatestVersion}?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                    if (result == MessageBoxResult.Yes)
-                        ProjectInfoService.Update();
-                }
-                else
-                {
-                    ProjectInfoService.CheckUpdate();
-                    About.IsUpdate = DataProjectInfo.IsUpdate ? "Download" : "Reload";
-                    About.LatestVersion = DataProjectInfo.LatestVersion;
-                }
-            });
         public ICommand CreateCurrentVersionCommand =>
             new RelayCommand((obj) =>
             {
-                BaseModel.IsWorking = true;
                 Task.Run(() => {
                     bool status = ProjectInfoService.UploadCurrentVersion();
                     string mess = status ? $"File upload was successful.\nVersion: {DataProjectInfo.CurrentVersion}" : "Something went wrong...";
-                    BaseModel.IsWorking = false;
                     Main.Notifications.Add(new()
                     {
                         Title = "Load Update.",
                         Message = mess
                     });
                 });
-            }, (obj) => About.Admin & !BaseModel.IsWorking);
+            }, (obj) => About.Admin);
 
         public ICommand ApplyCommand =>
             new RelayCommand((obj) =>
             {
                 Settings settings = obj as Settings;
 
-                Theme = ProjectInfo.Theme == "Light" ? "WhiteBalanceSunny" : "WeatherNight";
-
-                SettingsProperties.Default.SetHours = settings.SetHours;
-                SettingsProperties.Default.TurnOn = settings.TurnOn;
-                SettingsProperties.Default.TurnOff = settings.TurnOff;
-
-                SettingsProperties.Default.MinPrecent = settings.MinPrecent;
-                SettingsProperties.Default.ServiceId = settings.ServiceId;
-
                 SettingsProperties.Default.UseLocalDb = settings.UseLocalDb;
-
-                SettingsProperties.Default.Save();
-            }, (obj) => !BaseModel.IsWorking);
-
-        public ICommand ThemeCommand =>
-            new RelayCommand((obj) =>
-            {
-                SettingsProperties.Default.SetHours = false;
-                App app = (App)Application.Current;
-                if (ProjectInfo.Theme == "Light")
-                {
-                    Theme = "WeatherNight";
-                    app.ChangeTheme(new("/Themes/Dark.xaml", UriKind.RelativeOrAbsolute));
-                    ProjectInfo.Theme = "Dark";
-                }
-                else if (ProjectInfo.Theme == "Dark")
-                {
-                    Theme = "WhiteBalanceSunny";
-                    app.ChangeTheme(new("/Themes/Light.xaml", UriKind.RelativeOrAbsolute));
-                    ProjectInfo.Theme = "Light";
-                }
-                SettingsProperties.Default.Theme = ProjectInfo.Theme;
                 SettingsProperties.Default.Save();
             });
     }

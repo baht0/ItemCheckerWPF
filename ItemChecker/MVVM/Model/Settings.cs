@@ -1,28 +1,18 @@
 ﻿using ItemChecker.Core;
+using ItemChecker.Net;
 using ItemChecker.Properties;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace ItemChecker.MVVM.Model
 {
     public class Settings
     {
-        //general
-        public int MinPrecent { get; set; } = SettingsProperties.Default.MinPrecent;
-        public List<string> ServicesList { get; set; } = Main.Services;
-        public int ServiceId { get; set; } = SettingsProperties.Default.ServiceId;
-        public bool SetHours { get; set; } = SettingsProperties.Default.SetHours;
-        public DateTime TurnOn { get; set; } = SettingsProperties.Default.TurnOn;
-        public DateTime TurnOff { get; set; } = SettingsProperties.Default.TurnOff;
-
         //steam
-        public string SteamApiKey { get; set; } = SteamAccount.ApiKey;
-        public string UserName { get; set; } = SteamAccount.UserName;
+        public string SteamApiKey { get; set; } = SteamRequest.ApiKey;
         public string AccountName { get; set; } = SteamAccount.AccountName;
-        public string SteamId { get; set; } = SteamAccount.Id64;
-        public string SteamMarket { get; set; } = SteamAccount.StatusMarket;
-        public string Currency { get; set; } = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Name;
+        public string SteamId { get; set; } = SteamRequest.ID64;
+        public string Currency { get; set; } = SteamAccount.Currency.Name;
 
         //Base
         public bool UseLocalDb { get; set; } = SettingsProperties.Default.UseLocalDb;
@@ -37,10 +27,6 @@ namespace ItemChecker.MVVM.Model
     }
     public class SettingsAbout : ObservableObject
     {
-        private string _currentVersion = DataProjectInfo.CurrentVersion;
-        private string _latestVersion = DataProjectInfo.LatestVersion;
-        private string _isUpdate = DataProjectInfo.IsUpdate ? "Download" : "Reload";
-        private bool _admin = SteamAccount.AccountName == "bahtiarov116";
 
         public string CurrentVersion
         {
@@ -54,6 +40,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        private string _currentVersion = DataProjectInfo.CurrentVersion;
         public string LatestVersion
         {
             get
@@ -66,18 +53,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        public string IsUpdate
-        {
-            get
-            {
-                return _isUpdate;
-            }
-            set
-            {
-                _isUpdate = value;
-                OnPropertyChanged();
-            }
-        }
+        private string _latestVersion = DataProjectInfo.LatestVersion;
         public bool Admin
         {
             get
@@ -90,5 +66,6 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        private bool _admin = SteamAccount.AccountName == "bahtiarov116";
     }
 }
