@@ -14,20 +14,21 @@ namespace ItemChecker.Services
     {
         public void CreateItemsBase()
         {
-            JObject json = new();
+            JObject jobject = new();
             string path = $"{ProjectInfo.DocumentPath}steamBase.json";
             if (SettingsProperties.Default.UseLocalDb && File.Exists(path))
             {
                 string file = File.ReadAllText(path);
-                json = JObject.Parse(file);
+                jobject = JObject.Parse(file);
             }
             else
-                json = JObject.Parse(Get.DropboxRead("steamBase.json"));
+                jobject = JObject.Parse(DropboxRequest.Get.Read("steamBase.json"));
 
-            JArray skinsBase = JArray.Parse(json["Items"].ToString());
+            JArray skinsBase = JArray.Parse(jobject["Items"].ToString());
 
-            SteamBase.Updated = Convert.ToDateTime(json["Updated"]);
-            JObject csgobackpack = (JObject)JObject.Parse(Get.Request("https://csgobackpack.net/api/GetItemsList/v2/?no_details=true"))["items_list"];
+            SteamBase.Updated = Convert.ToDateTime(jobject["Updated"]);
+            string json = HttpRequest.RequestGetAsync("https://csgobackpack.net/api/GetItemsList/v2/?no_details=true").Result;
+            JObject csgobackpack = (JObject)JObject.Parse(json)["items_list"];
             foreach (JObject item in skinsBase)
             {
                 string itemName = item["itemName"].ToString();
@@ -41,7 +42,7 @@ namespace ItemChecker.Services
                     Steam = new()
                     {
                         Id = Convert.ToInt32(item["steamId"]),
-                        AvgPrice = Get.SteamAvgPrice(itemName, csgobackpack),
+                        AvgPrice = Edit.SteamAvgPrice(itemName, csgobackpack),
                     }
                 });
             }
@@ -51,9 +52,10 @@ namespace ItemChecker.Services
         {
             var itemBase = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName).Steam;
             if (itemBase.Updated.AddMinutes(30) > DateTime.Now)
-                return;
+                if (itemBase.CurrencyId == currencyId)
+                    return;
 
-            JObject json = Get.ItemOrdersHistogram(itemBase.Id, currencyId);
+            JObject json = SteamRequest.Get.ItemOrdersHistogram(itemName, itemBase.Id, currencyId);
 
             decimal high = !String.IsNullOrEmpty(json["highest_buy_order"].ToString()) ? Convert.ToDecimal(json["highest_buy_order"]) / 100 : 0;
             decimal low = !String.IsNullOrEmpty(json["lowest_sell_order"].ToString()) ? Convert.ToDecimal(json["lowest_sell_order"]) / 100 : 0;
@@ -68,7 +70,7 @@ namespace ItemChecker.Services
             if (itemBase == null || itemBase.History.Any())
                 return;
 
-            string json = Get.Request(SteamAccount.Cookies, "https://steamcommunity.com/market/pricehistory/?appid=730&market_hash_name=" + HttpUtility.UrlEncode(itemName));
+            string json = SteamRequest.Get.Request("https://steamcommunity.com/market/pricehistory/?appid=730&market_hash_name=" + Uri.EscapeDataString(itemName));
             JArray sales = JArray.Parse(JObject.Parse(json)["prices"].ToString());
             foreach (var sale in sales.Reverse())
             {
@@ -84,7 +86,9 @@ namespace ItemChecker.Services
         {
             if (SteamBase.ItemList.Select(x => x.Lfm.Updated).Max().AddMinutes(30) > DateTime.Now)
                 return;
-            JArray array = JArray.Parse(Get.Request("https://loot.farm/fullprice.json"));
+
+            string json = HttpRequest.RequestGetAsync("https://loot.farm/fullprice.json").Result;
+            JArray array = JArray.Parse(json);
             foreach (JToken item in array)
             {
                 string itemName = item["name"].ToString().Replace("(Holo-Foil)", "(Holo/Foil)").Replace("  ", " ");
@@ -111,53 +115,21 @@ namespace ItemChecker.Services
             }
         }
         //csm
-        public void UpdateCsm()
-        {
-            if (SteamBase.ItemList.Select(x => x.Csm.Updated).Max().AddMinutes(30) > DateTime.Now)
-                return;
-            JObject json = JObject.Parse(Get.Request("https://csm.auction/api/skins_base"));
-            JArray unavailable = JArray.Parse(Get.Request("https://cs.money/list_unavailable?appId=730"));
-            JArray overstock = JArray.Parse(Get.Request("https://cs.money/list_overstock?appId=730"));
-            foreach (var item in json)
-            {
-                string itemName = Convert.ToString(item.Value["m"]);
-                JToken overItem = overstock.FirstOrDefault(x => x["market_hash_name"].ToString() == itemName);
-                if (SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName) != null)
-                {
-                    SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName).Csm = new()
-                    {
-                        Updated = DateTime.Now,
-                        Id = Convert.ToInt32(item.Key),
-                        Price = Convert.ToDecimal(item.Value["a"]),
-                        OverstockDifference = overItem != null ? (Int32)overItem["overstock_difference"] : 0,
-                        Overstock = overItem != null,
-                        Unavailable = unavailable.FirstOrDefault(x => x["market_hash_name"].ToString() == itemName) != null,
-                    };
-                }
-            }
-        }
-        public void UpdateInventoryCsm(ParserCheckConfig parserConfig)
+        public void UpdateCsm(ParserCheckConfig parserConfig)
         {
             if (SteamBase.ItemList.Select(x => x.Csm.Inventory.Select(x => x.Updated).Max()).Max().AddMinutes(30) > DateTime.Now)
                 return;
 
             int offset = 0;
-            string price = $"maxPrice={parserConfig.MaxPrice}&minPrice={parserConfig.MinPrice}&";
-            string user = parserConfig.UserItems ? string.Empty : "isMarket=false&";
-
-            string tradeLock = parserConfig.WithoutLock ? "hasTradeLock=false&" : "hasTradeLock=false&hasTradeLock=true&tradeLockDays=1&tradeLockDays=2&tradeLockDays=3&tradeLockDays=4&tradeLockDays=5&tradeLockDays=6&tradeLockDays=7&tradeLockDays=0&";
-            string rare = parserConfig.RareItems ? "hasRareFloat=true&hasRarePattern=true&hasRareStickers=true&" : "hasRareFloat=false&hasRarePattern=false&hasRareStickers=false&";
-            string onlyDopp = parserConfig.SelectedOnly == 3 ? "phase=Phase%201&phase=Phase%202&phase=Phase%203&phase=Phase%204&phase=Emerald&phase=Sapphire&phase=Ruby&phase=Black%20Pearl&" : string.Empty;
 
             while (true)
             {
-                JObject json = JObject.Parse(Get.Request($"https://inventories.cs.money/5.0/load_bots_inventory/730?limit=60&offset={offset}&" + price + user + tradeLock + onlyDopp + rare + "&order=desc&priceWithBonus=40&sort=price&withStack=true"));
-                if (!json.ContainsKey("error"))
+                var items = ServicesRequest.CsMoney.Get.LoadBotsInventory(offset, parserConfig.MinPrice, parserConfig.MaxPrice, parserConfig.UserItems, parserConfig.WithoutLock, parserConfig.RareItems, parserConfig.SelectedOnly);
+                if (items != null)
                 {
-                    JArray items = json["items"] as JArray;
                     string itemName = items[0]["fullName"].ToString();
-                    var baseItem = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName).Csm;
-                    baseItem.Inventory.Clear();
+                    var itemBase = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName).Csm;
+                    itemBase.Inventory.Clear();
                     foreach (JObject item in items)
                     {
                         InventoryCsm newItem = new()
@@ -171,48 +143,75 @@ namespace ItemChecker.Services
                             User = item["userId"].Type != JTokenType.Null,
                             TradeLock = item.ContainsKey("tradeLock") ? Edit.ConvertFromUnixTimestamp(Convert.ToDouble(item["tradeLock"])) : new(),
                         };
-                        baseItem.Inventory.Add(newItem);
+                        itemBase.Inventory.Add(newItem);
                     }
-                    baseItem.IsHave = items.HasValues;
+                    itemBase.IsHave = items.HasValues;
                     offset += 60;
                 }
                 else
                     break;
             }
         }
-        public void UpdateInventoryCsmItem(string itemName)
+        public void UpdateCsmItem(string itemName, bool isInventory)
         {
-            var baseItem = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName).Csm;
-            if (baseItem.Inventory.Any() && baseItem.Inventory.Select(x => x.Updated).Max().AddMinutes(30) > DateTime.Now)
+            var itemBase = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName);
+            if (itemBase.Csm.Updated.AddMinutes(30) > DateTime.Now && !isInventory)
+                return;
+            if (itemBase.Csm.Inventory.Any() && itemBase.Csm.Inventory.Select(x => x.Updated).Max().AddMinutes(30) > DateTime.Now && isInventory)
                 return;
 
-            string market_hash_name = Edit.EncodeMarketHashName(itemName);
-            string stattrak = market_hash_name.Contains("StatTrak") ? "true" : "false";
-            string souvenir = market_hash_name.Contains("Souvenir") ? "true" : "false";
-
-            JObject json = JObject.Parse(Get.Request($"https://inventories.cs.money/5.0/load_bots_inventory/730?isSouvenir=" + souvenir + "&isStatTrak=" + stattrak + "&limit=60&name=" + market_hash_name + "&offset=0&order=asc&priceWithBonus=30&sort=price&withStack=true"));
-            if (!json.ContainsKey("error"))
+            var items = ServicesRequest.CsMoney.Get.LoadBotsInventoryItem(itemName);
+            var status = ServicesRequest.CsMoney.Get.ItemStatus(itemName);
+            if (items != null)
             {
-                JArray items = json["items"] as JArray;
-                baseItem.Inventory.Clear();
+                bool isAdded = false;
                 foreach (JObject item in items)
                 {
-                    if (item["fullName"].ToString() != itemName)
-                        continue;
-                    baseItem.Inventory.Add(new()
+                    string serviceItemName = item["fullName"].ToString();
+                    if (serviceItemName == itemName && !isAdded)
                     {
-                        NameId = Convert.ToInt32(item["nameId"]),
-                        StackSize = item.ContainsKey("stackSize") ? Convert.ToInt32(item["stackSize"]) : 1,
-                        Price = Convert.ToDecimal(item["price"]),
-                        Float = item["float"].Type != JTokenType.Null ? Convert.ToDecimal(item["float"]) : 0,
-                        Sticker = item["stickers"].Type != JTokenType.Null,
-                        RareItem = item["overpay"].Type != JTokenType.Null,
-                        User = item["userId"].Type != JTokenType.Null,
-                        TradeLock = item.ContainsKey("tradeLock") ? Edit.ConvertFromUnixTimestampJava(Convert.ToDouble(item["tradeLock"])) : new(),
-                        Updated = DateTime.Now,
-                    });
+                        itemBase.Csm = new()
+                        {
+                            Updated = DateTime.Now,
+                            Id = Convert.ToInt32(item["nameId"]),
+                            Price = Convert.ToInt32(ServicesRequest.CsMoney.Get.ItemInfo(item)["defaultPrice"]),
+                            OverstockDifference = Convert.ToInt32(status["overstockDiff"]),
+                            Overstock = Convert.ToInt32(status["status"]) == 1,
+                            Unavailable = Convert.ToInt32(status["status"]) == 0,
+                        };
+                        isAdded = true;
+                    }
+                    if (serviceItemName == itemName && isInventory)
+                    {
+                        itemBase.Csm.Inventory.Add(new()
+                        {
+                            NameId = Convert.ToInt32(item["nameId"]),
+                            StackSize = item.ContainsKey("stackSize") ? Convert.ToInt32(item["stackSize"]) : 1,
+                            Price = Convert.ToDecimal(item["price"]),
+                            Float = item["float"].Type != JTokenType.Null ? Convert.ToDecimal(item["float"]) : 0,
+                            Sticker = item["stickers"].Type != JTokenType.Null,
+                            RareItem = item["overpay"].Type != JTokenType.Null,
+                            User = item["userId"].Type != JTokenType.Null,
+                            TradeLock = item.ContainsKey("tradeLock") ? Edit.ConvertFromUnixTimestampJava(Convert.ToDouble(item["tradeLock"])) : new(),
+                            Updated = DateTime.Now,
+                        });
+                    }
+                    else if (!isInventory && !isAdded)
+                        continue;
+                    else if (!isInventory && isAdded)
+                        break;
                 }
-                baseItem.IsHave = items.HasValues;
+                itemBase.Csm.IsHave = items.HasValues;
+            }
+            else
+            {
+                itemBase.Csm = new()
+                {
+                    Updated = DateTime.Now,
+                    OverstockDifference = Convert.ToInt32(status["overstockDiff"]),
+                    Overstock = Convert.ToInt32(status["status"]) == 1,
+                    Unavailable = Convert.ToInt32(status["status"]) == 0,
+                };
             }
         }
         //buff
@@ -232,7 +231,7 @@ namespace ItemChecker.Services
                 try
                 {
                     string url = "https://buff.163.com/api/market/goods" + tab + "?game=csgo&page_num=" + i + "&min_price=" + min + "&max_price=" + max + "&sort_by=price.asc&page_size=80";
-                    JObject json = JObject.Parse(Get.Request(BuffAccount.Cookies, url));
+                    JObject json = JObject.Parse(ServicesRequest.Buff163.Get.Request(url));
 
                     pages = Convert.ToInt32(json["data"]["total_page"]);
                     JArray items = json["data"]["items"] as JArray;
@@ -278,14 +277,14 @@ namespace ItemChecker.Services
                 try
                 {
                     string url = "https://buff.163.com/api/market/goods/buying?game=csgo&page_num=" + i + "&search=" + market_hash_name + "&sort_by=price.asc&page_size=80";
-                    JObject json = JObject.Parse(Get.Request(BuffAccount.Cookies, url));
+                    JObject json = JObject.Parse(ServicesRequest.Buff163.Get.Request(url));
 
                     pages = Convert.ToInt32(json["data"]["total_page"]);
                     JArray items = json["data"]["items"] as JArray;
                     foreach (JObject item in items)
                     {
                         string serviceItemName = item["market_hash_name"].ToString();
-                        if (itemBase != null && serviceItemName == itemName && itemName != last_item)
+                        if (serviceItemName == itemName && itemName != last_item)
                         {
                             decimal price = Edit.ConverterToUsd(Convert.ToDecimal(item["sell_min_price"]), CNY);
                             itemBase.Buff = new()
@@ -317,7 +316,7 @@ namespace ItemChecker.Services
             decimal CNY = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == 23).Value;
 
             string url = "https://buff.163.com/api/market/goods/bill_order?game=csgo&goods_id=" + itemBase.Id;
-            JObject json = JObject.Parse(Get.Request(BuffAccount.Cookies, url));
+            JObject json = JObject.Parse(ServicesRequest.Buff163.Get.Request(url));
             JArray items = json["data"]["items"] as JArray;
             foreach (JObject item in items)
             {

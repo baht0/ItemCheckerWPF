@@ -23,13 +23,22 @@ namespace ItemChecker.MVVM.View
         {
             this.Close();
         }
-        private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void filesGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             object item = filesGrid.CurrentItem;
             if (!filesGrid.Items.IsEmpty && item != null)
             {
                 this.ReturnValue = ((Model.ImportFile)item).Path;
                 this.Close();
+            }
+        }
+        private void filesGrid_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (!filesGrid.Items.IsEmpty)
+            {
+                var viewModel = (ImportParserViewModel)DataContext;
+                if (e.Key == Key.Back && viewModel.DeleteCommand.CanExecute(filesGrid.CurrentItem))
+                    viewModel.DeleteCommand.Execute(filesGrid.CurrentItem);
             }
         }
     }

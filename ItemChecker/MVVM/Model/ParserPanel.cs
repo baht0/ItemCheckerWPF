@@ -1,29 +1,35 @@
 ﻿using ItemChecker.Core;
-using ItemChecker.Net;
-using ItemChecker.Properties;
-using ItemChecker.Support;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading;
-using System.Web;
 
 namespace ItemChecker.MVVM.Model
 {
-    public class ParserCheckConfig
+    public class ParserCheckConfig : ObservableObject
     {
         public DateTime CheckedTime { get; set; } = DateTime.Now;
-        public int MinPrice { get; set; } = ParserProperties.Default.MinPrice;
-        public int MaxPrice { get; set; } = ParserProperties.Default.MaxPrice;
+        public int MinPrice { get; set; }
+        public int MaxPrice
+        {
+            get
+            {
+                return _maxPrice;
+            }
+            set
+            {
+                _maxPrice = value;
+                OnPropertyChanged();
+            }
+        }
+        int _maxPrice;
 
-        public bool NotWeapon { get; set; } = ParserProperties.Default.NotWeapon;
-        public bool Normal { get; set; } = ParserProperties.Default.Normal;
-        public bool Souvenir { get; set; } = ParserProperties.Default.Souvenir;
-        public bool Stattrak { get; set; } = ParserProperties.Default.Stattrak;
-        public bool KnifeGlove { get; set; } = ParserProperties.Default.KnifeGlove;
-        public bool KnifeGloveStattrak { get; set; } = ParserProperties.Default.KnifeGloveStattrak;
+        public bool NotWeapon { get; set; }
+        public bool Normal { get; set; }
+        public bool Souvenir { get; set; }
+        public bool Stattrak { get; set; }
+        public bool KnifeGlove { get; set; }
+        public bool KnifeGloveStattrak { get; set; }
 
         public List<string> OnlyList
         {
@@ -37,15 +43,15 @@ namespace ItemChecker.MVVM.Model
                         };
             }
         }
-        public int SelectedOnly { get; set; } = ParserProperties.Default.SelectedOnly;
+        public int SelectedOnly { get; set; }
 
-        public bool WithoutLock { get; set; } = ParserProperties.Default.WithoutLock;
-        public bool RareItems { get; set; } = ParserProperties.Default.RareItems;
-        public bool UserItems { get; set; } = ParserProperties.Default.UserItems;
+        public bool WithoutLock { get; set; }
+        public bool RareItems { get; set; }
+        public bool UserItems { get; set; }
 
         public List<string> Services { get; set; } = Main.Services;
-        public int ServiceOne { get; set; } = ParserProperties.Default.ServiceOne;
-        public int ServiceTwo { get; set; } = ParserProperties.Default.ServiceTwo;
+        public int ServiceOne { get; set; }
+        public int ServiceTwo { get; set; }
 
         //last saved config
         public static ParserCheckConfig CheckedConfig { get; set; } = new();
@@ -57,10 +63,6 @@ namespace ItemChecker.MVVM.Model
     public class ParserCheckInfo : ObservableObject
     {
         //info
-        private bool _isVisible;
-        private string _service1 = "Service1";
-        private string _service2 = "Service2";
-        private DateTime _dateTime = DateTime.MinValue;
         public bool IsVisible
         {
             get
@@ -73,6 +75,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        bool _isVisible;
         public string Service1
         {
             get
@@ -85,6 +88,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        string _service1 = "Service1";
         public string Service2
         {
             get
@@ -97,6 +101,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        string _service2 = "Service2";
         public DateTime DateTime
         {
             get
@@ -109,14 +114,9 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        private DateTime _dateTime = DateTime.MinValue;
 
         //progress
-        private bool _isParser;
-        private int _countList = 0;
-        private int _currentProgress;
-        private int _maxProgress;
-        private string _status;
-        private bool _timerOn;
         public bool IsParser
         {
             get
@@ -129,6 +129,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        bool _isParser;
         public int CountList
         {
             get { return _countList; }
@@ -138,6 +139,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        int _countList = 0;
         public int CurrentProgress
         {
             get { return _currentProgress; }
@@ -147,6 +149,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        int _currentProgress;
         public int MaxProgress
         {
             get { return _maxProgress; }
@@ -156,6 +159,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        int _maxProgress;
         public string Status
         {
             get { return _status; }
@@ -165,6 +169,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        string _status;
         public bool TimerOn
         {
             get { return _timerOn; }
@@ -174,6 +179,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        bool _timerOn;
         public bool IsStoped { get; set; }
 
         //timer
@@ -184,7 +190,6 @@ namespace ItemChecker.MVVM.Model
     }
     public class ParserQueue : ObservableObject
     {
-        private ObservableCollection<DataQueue> _items = new();
         public ObservableCollection<DataQueue> Items
         {
             get
@@ -197,7 +202,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private DataQueue _selectedQueue;
+        ObservableCollection<DataQueue> _items = new();
         public DataQueue SelectedQueue
         {
             get
@@ -210,12 +215,8 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        DataQueue _selectedQueue;
 
-        private decimal _totalAllowed = 0;
-        private decimal _availableAmount = 0;
-        private decimal _orderAmout = 0;
-        private decimal _availableAmountPrecent = 0;
-        private decimal _remaining = 0;
         public decimal TotalAllowed
         {
             get
@@ -228,6 +229,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        decimal _totalAllowed = 0;
         public decimal AvailableAmount
         {
             get
@@ -240,6 +242,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        decimal _availableAmount = 0;
         public decimal OrderAmout
         {
             get
@@ -252,6 +255,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        decimal _orderAmout = 0;
         public decimal AvailableAmountPrecent
         {
             get
@@ -264,6 +268,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        decimal _availableAmountPrecent = 0;
         public decimal Remaining
         {
             get
@@ -276,9 +281,8 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        decimal _remaining = 0;
 
-        private int _currentProgress;
-        private int _maxProgress;
         public int CurrentProgress
         {
             get { return _currentProgress; }
@@ -288,6 +292,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        int _currentProgress;
         public int MaxProgress
         {
             get { return _maxProgress; }
@@ -297,6 +302,20 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        int _maxProgress;
+        public bool IsBusy
+        {
+            get
+            {
+                return _isBusy;
+            }
+            set
+            {
+                _isBusy = value;
+                OnPropertyChanged();
+            }
+        }
+        bool _isBusy;
 
         public static Queue<DataQueue> Queues { get; set; } = new();
     }

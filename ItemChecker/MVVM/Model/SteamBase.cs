@@ -12,7 +12,7 @@ namespace ItemChecker.MVVM.Model
         {
             get
             {
-                return CurrencyList.Where(x => x.IsAllow).ToList();
+                return CurrencyList.Where(x => x.Value > 0).ToList();
             }
         }
         public static List<Item> ItemList { get; set; } = new();
@@ -31,7 +31,6 @@ namespace ItemChecker.MVVM.Model
             }
         }
         public decimal Value { get; set; }
-        public bool IsAllow { get; set; }
     }
     public class Item
     {
@@ -48,6 +47,7 @@ namespace ItemChecker.MVVM.Model
         public DateTime Updated { get; set; } = DateTime.Now.AddHours(-1);
         public int Id { get; set; }
         public decimal AvgPrice { get; set; }
+        public int CurrencyId { get; set; }
         public decimal LowestSellOrder { get; set; }
         public decimal HighestBuyOrder { get; set; }
         public bool IsHave { get; set; }

@@ -1,57 +1,18 @@
 ﻿using HtmlAgilityPack;
-using ItemChecker.MVVM.ViewModel;
 using ItemChecker.Net;
 using ItemChecker.Properties;
 using ItemChecker.Services;
 using ItemChecker.Support;
-using Newtonsoft.Json.Linq;
-using OpenQA.Selenium;
 using System;
 using System.Linq;
-using System.Net;
-using System.Threading;
-using System.Windows;
 
 namespace ItemChecker.MVVM.Model
 {
-    public class SteamSignUp
-    {
-        public string Login { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-        public bool Remember { get; set; } = false;
-        public string Code2AF { get; set; } = string.Empty;
-        public bool IsLoggedIn { get; set; }
-
-        public static SteamSignUp SignUp { get; set; } = new();
-
-        public static Boolean AllowUser(string login)
-        {
-            JArray users = JArray.Parse(DropboxRequest.Get.Read("Users.json"));
-            JObject user = (JObject)users.FirstOrDefault(x => x["Login"].ToString() == login);
-            if (user != null)
-            {
-                int id = users.IndexOf(user);
-                users[id]["LastLoggedIn"] = DateTime.Now;
-                users[id]["Version"] = DataProjectInfo.CurrentVersion;
-
-                DropboxRequest.Post.Delete("Users.json");
-                Thread.Sleep(200);
-                DropboxRequest.Post.Upload("Users.json", users.ToString());
-                return Convert.ToBoolean(user["Allowed"]);
-            }
-            return false;
-        }
-    }
-    public class SteamAccount : BaseModel
+    public class SteamAccount
     {
         static decimal _balance = -1;
-        static string _apiKey = string.Empty;
-        public static CookieContainer Cookies { get; set; } = new();
-        public static string Id64 { get; set; } = string.Empty;
+        static Currency _currency;
         public static string AccountName { get; set; } = string.Empty;
-        public static string UserName { get; set; } = string.Empty;
-        public static string StatusMarket { get; set; } = "Enabled";
-        public static int CurrencyId { get; set; } = 5;
         public static decimal Balance
         {
             get
@@ -64,7 +25,7 @@ namespace ItemChecker.MVVM.Model
                 {
                     Main.Notifications.Add(new()
                     {
-                        Title = "Balance",
+                        Title = "Steam",
                         Message = $"Your balance has decreased\n-{_balance - value}."
                     });
                 }
@@ -72,229 +33,171 @@ namespace ItemChecker.MVVM.Model
                 {
                     Main.Notifications.Add(new()
                     {
-                        Title = "Balance",
+                        Title = "Steam",
                         Message = $"Your balance has increased\n+{value - _balance}."
                     });
                 }
                 _balance = value;
             }
         }
-        public static decimal MaxAmount
+        public static Currency Currency
         {
             get
             {
-                return Balance * 10;
-            }
-        }
-        public static string ApiKey
-        {
-            get
-            {
-                var cookies = Cookies.GetAllCookies();
-                if (String.IsNullOrEmpty(_apiKey) && cookies.Any(x => x.Name == "steamLoginSecure"))
-                {
-                    var html = HttpRequest.Request(Cookies, "https://steamcommunity.com/dev/apikey");
-                    var htmlDoc = new HtmlDocument();
-                    htmlDoc.LoadHtml(html);
-                    _apiKey = htmlDoc.DocumentNode.SelectSingleNode("//div[@id='bodyContents_ex']/p").InnerText;
-
-                    if (_apiKey.Contains("Key: "))
-                        _apiKey = _apiKey.Replace("Key: ", string.Empty);
-                    else
-                        Main.Notifications.Add(new()
-                        {
-                            Title = "Steam Account",
-                            Message = "Failed to get your API Key!\nSome features will not be available to you."
-                        });
-                }
-                return _apiKey;
+                return _currency;
             }
             set
             {
-                _apiKey = value;
-            }
-        }
-
-        public static Boolean NeedLogin()
-        {
-            bool showLogin = true;
-            string url = "https://steamcommunity.com/login/home/?goto=my/profile";
-            string steamLoginSecure = MainProperties.Default.SteamLoginSecure.Replace("\r\n", string.Empty).Trim();
-
-            if (!String.IsNullOrEmpty(steamLoginSecure))
-            {
-                Cookies.Add(new System.Net.Cookie("steamLoginSecure", steamLoginSecure, "/", "steamcommunity.com"));
-                string html = HttpRequest.Request(Cookies, url);
-
-                HtmlDocument htmlDoc = new();
-                htmlDoc.LoadHtml(html);
-                string title = htmlDoc.DocumentNode.SelectSingleNode("html/head/title").InnerText;
-                showLogin = title.Contains("Sign In");
-            }
-            if (showLogin)
-            {
-                if (Browser == null)
-                    BaseService.OpenBrowser();
-                Browser.Navigate().GoToUrl(url);
-                showLogin = Browser.Url.Contains("id") || Browser.Url.Contains("profiles") ? GetCookies() : true;
-            }
-            return showLogin;
-        }
-        public static Boolean Login()
-        {
-            try
-            {
-                Browser.Navigate().GoToUrl("https://steamcommunity.com/login/home/?goto=my/profile");
-
-                IWebElement username = WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@class='newlogindialog_TextInput_2eKVn'][1]")));
-                IWebElement password = WebDriverWait.Until(e => e.FindElement(By.XPath("//*[@id='responsive_page_template_content']/div[1]/div[1]/div/div/div/div[2]/div/form/div[2]/input")));
-
-                IWebElement signin = WebDriverWait.Until(e => e.FindElement(By.XPath("//*[@id='responsive_page_template_content']/div[1]/div[1]/div/div/div/div[2]/div/form/div[4]/button")));
-
-                while (!SteamSignUp.SignUp.IsLoggedIn)
-                    Thread.Sleep(500);
-                username.SendKeys(SteamSignUp.SignUp.Login);
-                password.SendKeys(SteamSignUp.SignUp.Password);
-                signin.Click();
-
-                Thread.Sleep(2000);
-                for (int i = 1; i <= 5; i++)
+                _currency = value;
+                if (_currency != null)
                 {
-                    IWebElement code = WebDriverWait.Until(e => e.FindElement(By.XPath($"//*[@id='responsive_page_template_content']/div[1]/div[1]/div/div/div/div[2]/form/div/div[2]/div/input[{i}]")));
-                    code.SendKeys(SteamSignUp.SignUp.Code2AF[i-1].ToString());
+                    MainProperties.Default.SteamCurrencyId = _currency.Id;
+                    MainProperties.Default.Save();
                 }
-
-                MainProperties.Default.Save();
-                Thread.Sleep(4000);
-
-                SteamSignUp.SignUp.IsLoggedIn = false;
-                return Browser.Url.Contains("id") || Browser.Url.Contains("profiles") ? GetCookies() : true;
-            }
-            catch
-            {
-                SteamSignUp.SignUp.IsLoggedIn = false;
-                return true;
-            }
-        }
-        static Boolean GetCookies()
-        {
-            try
-            {
-                string steamLoginSecure = Browser.Manage().Cookies.GetCookieNamed("steamLoginSecure").Value.ToString();
-
-                CurrencyId = MainProperties.Default.SteamCurrencyId;
-                Currency currency = new();
-                if (CurrencyId == 0)
-                {
-                    try
-                    {
-                        string country = Browser.Manage().Cookies.GetCookieNamed("steamCountry").Value.ToString()[..2];
-                        currency = SteamBase.CurrencyList.FirstOrDefault(x => x.Country == country);
-                        CurrencyId = currency != null ? currency.Id : 1;
-                    }
-                    catch
-                    {
-                        Application.Current.Dispatcher.Invoke(() => {
-                            var vm = Application.Current.MainWindow.DataContext as StartUpViewModel;
-                            vm.StartUp.CurrencyList = new(SteamBase.CurrencyList);
-                            vm.StartUp.SelectedCurrency = SteamBase.CurrencyList.FirstOrDefault();
-                            vm.StartUp.IsCurrency = true;
-                        });
-                        while (CurrencyId == 0)
-                            Thread.Sleep(500);
-                    }
-                }
-                currency = SteamBase.CurrencyList.FirstOrDefault(x => x.Id == CurrencyId);
-
-                MainProperties.Default.SteamCurrencyId = CurrencyId;
-                Cookies = new();
-                Cookies.Add(new System.Net.Cookie("steamLoginSecure", steamLoginSecure, "/", "steamcommunity.com"));
-                
-                MainProperties.Default.SteamLoginSecure = steamLoginSecure;
-                MainProperties.Default.Save();
-                Browser.Quit();
-                Browser = null;
-
-                return false;
-            }
-            catch (Exception ex)
-            {
-                BaseService.errorLog(ex, false);
-                return true;
             }
         }
 
         public static void GetAccount()
         {
-            System.Net.Cookie steamLoginSecure = SteamAccount.Cookies.GetAllCookies().FirstOrDefault(x => x.Name == "steamLoginSecure");
-            Id64 = steamLoginSecure.Value[..17];
-            string html = HttpRequest.Request(SteamAccount.Cookies, "https://steamcommunity.com/market/");
+            string html = SteamRequest.Get.Request("https://steamcommunity.com/market/");
             HtmlDocument htmlDoc = new();
             htmlDoc.LoadHtml(html);
-            UserName = htmlDoc.DocumentNode.SelectSingleNode("//span[@id='account_pulldown']").InnerText.Trim();
-            AccountName = htmlDoc.DocumentNode.SelectSingleNode("//span[@class='persona online']").InnerText.Trim();
-            if (!SteamSignUp.AllowUser(AccountName))
-            {
-                MessageBox.Show("User is not found.", "Opps...", MessageBoxButton.OK, MessageBoxImage.Information);
-                Application.Current.Dispatcher.Invoke(() => {
-                    if (Application.Current.MainWindow.DataContext is StartUpViewModel vw)
-                        vw.ExitCommand.Execute(null);
-                });
-            }
 
             var nodes = htmlDoc.DocumentNode.Descendants().Where(n => n.Attributes.Any(a => a.Value.Contains("market_headertip_container market_headertip_container_warning")));
-            GetBalance();
+            if (nodes.Any())
+            {
+                Edit.OpenUrl("https://help.steampowered.com/en/faqs/view/71D3-35C2-AD96-AA3A");
+                throw new Exception("Your user accounts are limited.");
+            }
+            if (String.IsNullOrEmpty(SteamRequest.ApiKey))
+            {
+                Edit.OpenUrl("https://steamcommunity.com/dev/apikey");
+                throw new Exception("Make sure you have register Steam Web API Key.");
+            }
+            AccountName = htmlDoc.DocumentNode.SelectSingleNode("//span[@class='persona online']").InnerText.Trim();
+
+            Currency ??= SteamBase.CurrencyList.FirstOrDefault(x => x.Id == MainProperties.Default.SteamCurrencyId);
+            Currency.Value = !SteamBase.AllowCurrencys.Any(x => x.Id == Currency.Id) ? BaseService.GetCurrency(Currency.Id) : SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == Currency.Id).Value;
+
+            Balance = Edit.GetPrice(htmlDoc.DocumentNode.SelectSingleNode("//a[@id='header_wallet_balance']").InnerText);
         }
-        public static void GetBalance()
-        {
-            var html = HttpRequest.Request(SteamAccount.Cookies, "https://steamcommunity.com/market/");
-            var htmlDoc = new HtmlDocument();
-            htmlDoc.LoadHtml(html);
-            _balance = Edit.GetPrice(htmlDoc.DocumentNode.SelectSingleNode("//a[@id='header_wallet_balance']").InnerText);
-        }
+        public static void GetBalance() => Balance = SteamRequest.Get.Balance();
     }
-    public class BuffAccount
+    public class ServiceAccount
     {
-        public static CookieContainer Cookies { get; set; } = new();
-
-        public static Boolean IsLogIn()
+        public static void SignInToServices()
         {
-            Cookies.Add(new System.Net.Cookie("session", MainProperties.Default.SessionBuff, "/", "buff.163.com"));
-            string html = HttpRequest.Request(Cookies, "https://buff.163.com/api/market/goods?game=csgo&page_num=2&use_suggestion=0&trigger=undefined_trigger&page_size=80");
-
-            if (html.Contains("Login Required"))
-            {
-                if (BaseModel.Browser == null)
-                    BaseService.OpenBrowser();
-
-                BaseModel.Browser.Navigate().GoToUrl("https://buff.163.com/user-center/asset/recharge/"); 
-                if (BaseModel.Browser.Title == "Login")
-                {
-                    BaseModel.Browser.Navigate().GoToUrl("https://buff.163.com/account/login/steam?back_url=/market/csgo");
-                    IWebElement signins = BaseModel.WebDriverWait.Until(e => e.FindElement(By.XPath("//input[@class='btn_green_white_innerfade']")));
-                    signins.Click();
-                    Thread.Sleep(500);
-                }
-                return GetCookies();
-            }
-            return true;
+            ServicesRequest.CsMoney.Post.SignIn();
+            ServicesRequest.LootFarm.Post.SignIn();
+            ServicesRequest.Buff163.Post.SignIn();
         }
-        static Boolean GetCookies()
+        public static void GetBalances()
         {
-            try
+            Csm.GetBalance();
+            Lfm.GetBalance();
+            Buff.GetBalance();
+        }
+        public class Csm
+        {
+            static decimal _balance = -1;
+            public static decimal Balance
             {
-                string session = BaseModel.Browser.Manage().Cookies.GetCookieNamed("session").Value.ToString();
-                Cookies = new();
-                Cookies.Add(new System.Net.Cookie("session", session, "/", "buff.163.com"));
-                MainProperties.Default.SessionBuff = session;
-                MainProperties.Default.Save();
-                BaseModel.Browser.Quit();
-                BaseModel.Browser = null;
-                return true;
+                get
+                {
+                    return _balance;
+                }
+                set
+                {
+                    if (_balance > value && _balance != -1)
+                    {
+                        Main.Notifications.Add(new()
+                        {
+                            Title = "Cs.Money",
+                            Message = $"Your balance has decreased\n-{_balance - value}."
+                        });
+                    }
+                    else if (_balance < value && _balance != -1)
+                    {
+                        Main.Notifications.Add(new()
+                        {
+                            Title = "Cs.Money",
+                            Message = $"Your balance has increased\n+{value - _balance}."
+                        });
+                    }
+                    _balance = value;
+                }
             }
-            catch
+
+            public static void GetBalance() => Balance = ServicesRequest.CsMoney.Get.Balance();
+        }
+        public class Lfm
+        {
+            static decimal _balance = -1;
+            public static decimal Balance
             {
-                return false;
+                get
+                {
+                    return _balance;
+                }
+                set
+                {
+                    if (_balance > value && _balance != -1)
+                    {
+                        Main.Notifications.Add(new()
+                        {
+                            Title = "Loot.Farm",
+                            Message = $"Your balance has decreased\n-{_balance - value}."
+                        });
+                    }
+                    else if (_balance < value && _balance != -1)
+                    {
+                        Main.Notifications.Add(new()
+                        {
+                            Title = "Loot.Farm",
+                            Message = $"Your balance has increased\n+{value - _balance}."
+                        });
+                    }
+                    _balance = value;
+                }
+            }
+
+            public static void GetBalance() => Balance = ServicesRequest.LootFarm.Get.Balance();
+        }
+        public class Buff
+        {
+            static decimal _balance = -1;
+            public static decimal Balance
+            {
+                get
+                {
+                    return _balance;
+                }
+                set
+                {
+                    if (_balance > value && _balance != -1)
+                    {
+                        Main.Notifications.Add(new()
+                        {
+                            Title = "Buff163",
+                            Message = $"Your balance has decreased\n-{_balance - value}."
+                        });
+                    }
+                    else if (_balance < value && _balance != -1)
+                    {
+                        Main.Notifications.Add(new()
+                        {
+                            Title = "Buff163",
+                            Message = $"Your balance has increased\n+{value - _balance}."
+                        });
+                    }
+                    _balance = value;
+                }
+            }
+
+            public static void GetBalance()
+            {
+                var balanceInCny = ServicesRequest.Buff163.Get.Balance();
+                Balance = Edit.ConverterToUsd(balanceInCny, SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == 23).Value);
             }
         }
     }

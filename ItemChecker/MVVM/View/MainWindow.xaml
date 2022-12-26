@@ -6,8 +6,7 @@
         xmlns:view="clr-namespace:ItemChecker.MVVM.View"
         xmlns:viewModel="clr-namespace:ItemChecker.MVVM.ViewModel"
         xmlns:customConverter="clr-namespace:ItemChecker.Converter"
-        mc:Ignorable="d"
-        x:Name="mainWindow"
+        mc:Ignorable="d" x:Name="mainWindow"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         d:DataContext="{d:DesignInstance Type=viewModel:MainViewModel}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
@@ -33,15 +32,21 @@
         <customConverter:BooleanToColorConverter x:Key="BooleanToColorConverter"/>
         <customConverter:BooleanToNotificationIconConverter x:Key="BooleanToNotificationIconConverter"/>
     </Window.Resources>
+    <Window.InputBindings>
+        <KeyBinding Key="H" Modifiers="Shift" Command="{Binding MenuCommand}" CommandParameter="History"/>
+        <KeyBinding Key="D" Modifiers="Shift" Command="{Binding MenuCommand}" CommandParameter="Details"/>
+        <KeyBinding Key="C" Modifiers="Shift" Command="{Binding MenuCommand}" CommandParameter="Calculator"/>
+        <KeyBinding Key="Esc" Command="{Binding MenuCommand}" CommandParameter="Exit"/>
+    </Window.InputBindings>
     <Border BorderBrush="DimGray" BorderThickness="0.5">
-        <Grid Margin="10 0 10 0">
+        <Grid Margin="5 0 5 0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="26"/>
                 <RowDefinition/>
                 <RowDefinition Height="25"/>
             </Grid.RowDefinitions>
             <!--top-->
-            <Grid Background="{DynamicResource WindowTopBackground}" Margin="-10 0 -10 0"/>
+            <Grid Background="{DynamicResource WindowTopBackground}" Margin="-5 0 -5 0"/>
             <Grid Grid.Row="0" Background="Transparent" MouseLeftButtonDown="Window_DragMove">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="235"/>
@@ -49,19 +54,27 @@
                     <ColumnDefinition Width="170"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Grid.Column="0">
-                    <Button x:Name="buttonItemChecker" ToolTip="ItemChecker" VerticalAlignment="Center" Margin="1"
+                    <Button x:Name="buttonItemChecker" ToolTip="Menu" VerticalAlignment="Center" Margin="1"
                             Style="{StaticResource MaterialDesignToolForegroundButton}"
                             Click="buttonItemChecker_Click" ContextMenuService.IsEnabled="false">
                         <materialDesign:PackIcon Kind="Menu"/>
                         <Button.ContextMenu>
                             <ContextMenu Style="{StaticResource MaterialDesignContextMenu}"
-                                         FontSize="13" FontWeight="Bold" Background="{DynamicResource ElementBackground}">
-                                <MenuItem Header="Trades" Click="MenuItem_Click">
+                                         FontSize="13" FontWeight="DemiBold" Background="{DynamicResource ElementBackground}">
+                                <MenuItem Header="History" Command="{Binding MenuCommand}"
+                                          CommandParameter="History" InputGestureText="Shift+H">
                                     <MenuItem.Icon>
-                                        <materialDesign:PackIcon Kind="SwapHorizontal"/>
+                                        <materialDesign:PackIcon Kind="ChartBar"/>
                                     </MenuItem.Icon>
                                 </MenuItem>
-                                <MenuItem Header="Calculator" Click="MenuItem_Click">
+                                <MenuItem Header="Details" Command="{Binding MenuCommand}"
+                                          CommandParameter="Details" InputGestureText="Shift+D">
+                                    <MenuItem.Icon>
+                                        <materialDesign:PackIcon Kind="Magnify"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="Calculator" Command="{Binding MenuCommand}"
+                                          CommandParameter="Calculator" InputGestureText="Shift+C">
                                     <MenuItem.Icon>
                                         <materialDesign:PackIcon Kind="Calculator"/>
                                     </MenuItem.Icon>
@@ -70,20 +83,27 @@
                                     <MenuItem.Icon>
                                         <materialDesign:PackIcon Kind="Link"/>
                                     </MenuItem.Icon>
-                                    <MenuItem Header="SteamMarket" Click="MenuItem_Click"/>
-                                    <MenuItem Header="MyInventory" Click="MenuItem_Click"/>
+                                    <MenuItem Header="SteamMarket" Command="{Binding MenuCommand}"
+                                              CommandParameter="SteamMarket"/>
+                                    <MenuItem Header="MyInventory" Command="{Binding MenuCommand}"
+                                              CommandParameter="MyInventory"/>
                                     <Separator/>
-                                    <MenuItem Header="Cs.Money" Click="MenuItem_Click"/>
-                                    <MenuItem Header="Loot.Farm" Click="MenuItem_Click"/>
-                                    <MenuItem Header="Buff163" Click="MenuItem_Click"/>
+                                    <MenuItem Header="Cs.Money" Command="{Binding MenuCommand}"
+                                              CommandParameter="Cs.Money"/>
+                                    <MenuItem Header="Loot.Farm" Command="{Binding MenuCommand}"
+                                              CommandParameter="Loot.Farm"/>
+                                    <MenuItem Header="Buff163" Command="{Binding MenuCommand}"
+                                              CommandParameter="Buff163"/>
                                 </MenuItem>
                                 <Separator/>
-                                <MenuItem Header="Settings" Click="MenuItem_Click">
+                                <MenuItem Header="Settings" Command="{Binding MenuCommand}"
+                                          CommandParameter="Settings">
                                     <MenuItem.Icon>
                                         <materialDesign:PackIcon Kind="Settings"/>
                                     </MenuItem.Icon>
                                 </MenuItem>
-                                <MenuItem Header="Exit" Click="MenuItem_Click">
+                                <MenuItem Header="Exit" Command="{Binding MenuCommand}"
+                                          CommandParameter="Exit" InputGestureText="Esc">
                                     <MenuItem.Icon>
                                         <materialDesign:PackIcon Kind="ExitToApp"/>
                                     </MenuItem.Icon>
@@ -101,7 +121,7 @@
                         <TextBlock Text="Rare"/>
                     </Button>
                 </StackPanel>
-                <StackPanel Grid.Column="2" Margin="0 0 -10 0" HorizontalAlignment="Right" Orientation="Horizontal">
+                <StackPanel Grid.Column="2" Margin="0 0 -5 0" HorizontalAlignment="Right" Orientation="Horizontal">
                     <Button Style="{StaticResource MaterialDesignFlatButton}" Click="MinWin_Click" VerticalAlignment="Center">
                         <materialDesign:PackIcon Kind="Minus"/>
                     </Button>
@@ -111,6 +131,7 @@
                 </StackPanel>
             </Grid>
             <!--body-->
+            <Separator Grid.Row="1" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Width="1" HorizontalAlignment="Right" Margin="0 0 265 0"/>
             <ContentControl Grid.Row="1" x:Name="bodyContent" Content="{Binding}" Margin="10" />
             <!--footer-->
             <Border Grid.Row="2" Background="{DynamicResource ElementBackground}" Margin="-10 0 -10 0"
@@ -141,7 +162,7 @@
                                         <DataTemplate>
                                             <TextBlock Width="220" TextWrapping="Wrap" Foreground="{Binding IsRead, Converter={StaticResource BooleanToColorConverter}}">
                                                 <TextBlock.Text>
-                                                    <MultiBinding StringFormat="{}{0}&#x0a;{1}&#x0a;&#x0a;{2:dd MMM yyyy, hh:mm tt}">
+                                                    <MultiBinding StringFormat="&#x0a;{0}&#x0a;{1}&#x0a;&#x0a;{2:dd MMM yyyy, hh:mm tt}">
                                                         <Binding Path="Title"/>
                                                         <Binding Path="Message"/>
                                                         <Binding Path="Date"/>
@@ -150,10 +171,14 @@
                                             </TextBlock>
                                         </DataTemplate>
                                     </ListView.ItemTemplate>
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem">
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
                                 </ListView>
                             </Grid>
                         </Border>
-                        <Grid Background="Transparent" Width="247" HorizontalAlignment="Left"/>
                     </Grid>
                 </Popup>
                 <Button Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"

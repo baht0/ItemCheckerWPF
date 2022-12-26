@@ -31,17 +31,19 @@ namespace ItemChecker.MVVM.View
             if (!parserGrid.Items.IsEmpty)
             {
                 ParserViewModel viewModel = (ParserViewModel)DataContext;
-                if (e.Key == Key.Insert && viewModel.AddQueueCommand.CanExecute(null))
-                    viewModel.AddQueueCommand.Execute(viewModel.ParserTable.SelectedItem);
-                if (e.Key == Key.F && Keyboard.IsKeyDown(Key.LeftCtrl) && viewModel.RemoveFavoriteCommand.CanExecute(null))
-                    viewModel.RemoveFavoriteCommand.Execute(((ParserViewModel)DataContext).ParserTable.SelectedItem.ItemName);
-                else if (e.Key == Key.F && viewModel.AddFavoriteCommand.CanExecute(null))
-                    viewModel.AddFavoriteCommand.Execute(((ParserViewModel)DataContext).ParserTable.SelectedItem.ItemName);
-                if (e.Key == Key.F1)
+                var item = viewModel.ParserTable.SelectedItem;
+                if (e.Key == Key.Insert && viewModel.AddQueueCommand.CanExecute(item))
                 {
-                    DetailsWindow detailsWindow = new(viewModel.ParserTable.SelectedItem.ItemName);
-                    detailsWindow.Show();
+                    viewModel.AddQueueCommand.Execute(item);
+                    checkTab.IsChecked = false;
+                    queueTab.IsChecked = true;
                 }
+                if (e.Key == Key.F && Keyboard.IsKeyDown(Key.LeftCtrl) && viewModel.RemoveFavoriteCommand.CanExecute(item.ItemName))
+                    viewModel.RemoveFavoriteCommand.Execute(item.ItemName);
+                else if (e.Key == Key.F && viewModel.AddFavoriteCommand.CanExecute(item.ItemName))
+                    viewModel.AddFavoriteCommand.Execute(item.ItemName);
+                if (e.Key == Key.F1)
+                    MainWindow.OpenDetailsItem(item.ItemName);
             }
         }
         private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -62,7 +64,11 @@ namespace ItemChecker.MVVM.View
 
         private void ComboBoxSer1_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            csmGroup.IsEnabled = service1.SelectedIndex == 2;
+            int id = service1.SelectedIndex;
+            csmGroup.IsEnabled = id == 2;
+            maxPriceTxt.IsReadOnly = true;
+            if (DataContext is ParserViewModel viewModel && viewModel.MaxPriceCommand.CanExecute(id))
+                viewModel.MaxPriceCommand.Execute(id);
         }
         private void Import_Click(object sender, System.Windows.RoutedEventArgs e)
         {
@@ -81,13 +87,11 @@ namespace ItemChecker.MVVM.View
             if (!queueListBox.Items.IsEmpty)
             {
                 ParserViewModel viewModel = (ParserViewModel)DataContext;
-                if (e.Key == Key.Back && viewModel.RemoveQueueCommand.CanExecute(viewModel.ParserQueue.SelectedQueue))
-                    viewModel.RemoveQueueCommand.Execute(viewModel.ParserQueue.SelectedQueue);
+                var item = viewModel.ParserQueue.SelectedQueue;
+                if (e.Key == Key.Back && viewModel.RemoveQueueCommand.CanExecute(item))
+                    viewModel.RemoveQueueCommand.Execute(item);
                 if (e.Key == Key.F1)
-                {
-                    DetailsWindow detailsWindow = new(viewModel.ParserQueue.SelectedQueue.ItemName);
-                    detailsWindow.Show();
-                }
+                    MainWindow.OpenDetailsItem(item.ItemName);
             }
         }
         private void queueListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -102,6 +106,11 @@ namespace ItemChecker.MVVM.View
                     parserGrid.ScrollIntoView(selectedItem);
                 }
             }
+        }
+
+        private void maxPriceTxt_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            maxPriceTxt.IsReadOnly = false;
         }
     }
 }

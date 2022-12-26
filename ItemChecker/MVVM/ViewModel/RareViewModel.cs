@@ -20,10 +20,6 @@ namespace ItemChecker.MVVM.ViewModel
         #region prop
         System.Timers.Timer TimerView = new(500);
 
-        private RareTable _rareTable = new();
-        private DataRare _selectedItem = new();
-        private RareFilter _filterConfig = new();
-        private string _searchString;
         public RareTable RareTable
         {
             get
@@ -36,6 +32,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+        RareTable _rareTable = new();
         public DataRare SelectedItem
         {
             get
@@ -51,6 +48,7 @@ namespace ItemChecker.MVVM.ViewModel
                 RareInfo.Data = value;
             }
         }
+        DataRare _selectedItem = new();
         public RareFilter FilterConfig
         {
             get
@@ -63,6 +61,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+        RareFilter _filterConfig = new();
         public string SearchString
         {
             get
@@ -81,11 +80,8 @@ namespace ItemChecker.MVVM.ViewModel
                     };
             }
         }
+        string _searchString;
 
-        private RareCheckConfig _rareCheckConfig = new();
-        private RareCheckStatus _rareCheckStatus = new();
-        private RareInfo _rareInfo = new();
-        private string _addItem = string.Empty;
         public RareCheckConfig RareCheckConfig
         {
             get
@@ -98,6 +94,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+        RareCheckConfig _rareCheckConfig = new();
         public RareCheckStatus RareCheckStatus
         {
             get
@@ -110,6 +107,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+        RareCheckStatus _rareCheckStatus = new();
         public RareInfo RareInfo
         {
             get
@@ -122,6 +120,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+        RareInfo _rareInfo = new();
         public string AddItem
         {
             get
@@ -134,8 +133,10 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+        string _addItem = string.Empty;
 
         #endregion
+
         public RareViewModel()
         {
             TimerView.Elapsed += UpdateView;
@@ -153,12 +154,13 @@ namespace ItemChecker.MVVM.ViewModel
                 BaseService.errorLog(ex, false);
             }
         }
-        //table
+
+        #region table
         public ICommand OpenItemOutCommand =>
             new RelayCommand((obj) =>
             {
                 var item = SelectedItem;
-                string market_hash_name = Edit.EncodeMarketHashName(item.ItemName);
+                string market_hash_name = Uri.EscapeDataString(item.ItemName);
                 switch ((Int32)obj)
                 {
                     case 1 or 2 or 3:
@@ -177,7 +179,7 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand OpenStickerOutCommand =>
             new RelayCommand((obj) =>
             {
-                string market_hash_name = Edit.EncodeMarketHashName((string)obj);
+                string market_hash_name = Uri.EscapeDataString((string)obj);
                 Edit.OpenUrl("https://steamcommunity.com/market/listings/730/" + market_hash_name);
             });
         public ICommand SwitchCurrencyCommand =>
@@ -202,7 +204,7 @@ namespace ItemChecker.MVVM.ViewModel
                 RareTable.CurectCurrency = currency;
                 RareTable.GridView = CollectionViewSource.GetDefaultView(items);
             }, (obj) => RareTable.GridView != null);
-        //filter
+
         public ICommand ClearSearchCommand =>
             new RelayCommand((obj) =>
             {
@@ -227,7 +229,9 @@ namespace ItemChecker.MVVM.ViewModel
                 RareTable.GridView.Filter = null;
                 RareFilter.FilterConfig = new();
             }, (obj) => RareTable.Items.Any());
-        //Check
+        #endregion
+
+        #region Check
         public ICommand ClearCheckedCommand =>
             new RelayCommand((obj) =>
             {
@@ -262,37 +266,18 @@ namespace ItemChecker.MVVM.ViewModel
                     RareCheckStatus.TimerTick = 0;
                     RareCheckStatus.Timer.Elapsed -= timerTick;
                 }
-            }, (obj) => ItemsList.Rare.Any());
+            }, (obj) => ItemsList.Rare.Any() && RareCheckConfig.MinPrecent < 0 && RareCheckConfig.Time > 0);
         void SaveConfig(RareCheckConfig config)
         {
             RareProperties.Default.Time = config.Time;
             RareProperties.Default.MinPrecent = config.MinPrecent;
             RareProperties.Default.CompareId = config.CompareId;
-            RareProperties.Default.ParameterId = config.ParameterId;
 
             RareProperties.Default.maxFloatValue_FN = config.FactoryNew;
             RareProperties.Default.maxFloatValue_MW = config.MinimalWear;
             RareProperties.Default.maxFloatValue_FT = config.FieldTested;
             RareProperties.Default.maxFloatValue_WW = config.WellWorn;
             RareProperties.Default.maxFloatValue_BS = config.BattleScarred;
-
-            RareProperties.Default.IsNormal = config.Normal;
-            RareProperties.Default.IsHolo = config.Holo;
-            RareProperties.Default.IsGlitter = config.Glitter;
-            RareProperties.Default.IsFoil = config.Foil;
-            RareProperties.Default.IsGold = config.Gold;
-            RareProperties.Default.IsContraband = config.Contraband;
-            RareProperties.Default.StickerCount = config.StickerCount;
-            RareProperties.Default.NameContains = config.NameContains;
-
-            RareProperties.Default.Phase1 = config.Phase1;
-            RareProperties.Default.Phase2 = config.Phase2;
-            RareProperties.Default.Phase3 = config.Phase3;
-            RareProperties.Default.Phase4 = config.Phase4;
-            RareProperties.Default.Ruby = config.Ruby;
-            RareProperties.Default.Sapphire = config.Sapphire;
-            RareProperties.Default.BlackPearl = config.BlackPearl;
-            RareProperties.Default.Emerald = config.Emerald;
 
             RareCheckConfig.CheckedConfig = (RareCheckConfig)config.Clone();
             RareProperties.Default.Save();
@@ -374,7 +359,7 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 RareCheckStatus.TimerTick = 1;
             }, (obj) => RareCheckStatus.IsService);
-        //info
+
         public ICommand BuyItemCommand =>
             new RelayCommand((obj) =>
             {
@@ -383,14 +368,14 @@ namespace ItemChecker.MVVM.ViewModel
                         MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result == MessageBoxResult.No)
                     return;
+
+                RareInfo.IsBusy = true;
                 Task.Run(() =>
                 {
                     try
                     {
-                        BaseModel.IsWorking = true;
                         var data = (DataRare)obj;
-                        string marketHashName = Edit.EncodeMarketHashName(data.ItemName);
-                        var response = Post.BuyListing(SteamAccount.Cookies, marketHashName, data.DataBuy.ListingId, data.DataBuy.Fee, data.DataBuy.Subtotal, data.DataBuy.Total, SteamAccount.CurrencyId);
+                        var response = SteamRequest.Post.BuyListing(data.ItemName, data.DataBuy.ListingId, data.DataBuy.Fee, data.DataBuy.Subtotal, data.DataBuy.Total, SteamAccount.Currency.Id);
                         string message = response.StatusCode == System.Net.HttpStatusCode.OK ? $"{data.ItemName}\nWas bought." : "Something went wrong...";
                         Main.Message.Enqueue(message);
                     }
@@ -400,10 +385,11 @@ namespace ItemChecker.MVVM.ViewModel
                     }
                     finally
                     {
-                        BaseModel.IsWorking = false;
+                        RareInfo.IsBusy = false;
                     }
                 });
                 
-            }, (obj) => SelectedItem != null && !String.IsNullOrEmpty(SelectedItem.Link));
+            }, (obj) => SelectedItem != null && !String.IsNullOrEmpty(SelectedItem.Link) && !RareInfo.IsBusy);
+        #endregion
     }
 }

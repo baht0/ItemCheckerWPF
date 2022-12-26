@@ -15,11 +15,11 @@ namespace ItemChecker.MVVM.Model
                 ItemName = itemName,
             };
 
+            ItemBaseService itemBaseService = new();
             switch (serOneId)
             {
                 case 0:
                     {
-                        ItemBaseService itemBaseService = new();
                         itemBaseService.UpdateSteamItem(itemName);
                         var Item = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == data.ItemName).Steam;
                         data.Purchase = Item.HighestBuyOrder;
@@ -28,7 +28,6 @@ namespace ItemChecker.MVVM.Model
                     }
                 case 1:
                     {
-                        ItemBaseService itemBaseService = new();
                         itemBaseService.UpdateSteamItem(itemName);
                         var Item = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == data.ItemName).Steam;
                         data.Purchase = Item.LowestSellOrder;
@@ -63,7 +62,6 @@ namespace ItemChecker.MVVM.Model
             {
                 case 0:
                     {
-                        ItemBaseService itemBaseService = new();
                         itemBaseService.UpdateSteamItem(itemName);
                         var Item = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == data.ItemName).Steam;
                         data.Price = Item.HighestBuyOrder;
@@ -72,7 +70,6 @@ namespace ItemChecker.MVVM.Model
                     }
                 case 1:
                     {
-                        ItemBaseService itemBaseService = new();
                         itemBaseService.UpdateSteamItem(itemName);
                         var Item = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == data.ItemName).Steam;
                         data.Price = Item.LowestSellOrder;
@@ -81,6 +78,7 @@ namespace ItemChecker.MVVM.Model
                     }
                 case 2:
                     {
+                        itemBaseService.UpdateCsmItem(itemName, false);
                         var Item = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == data.ItemName).Csm;
                         data.Price = Item.Price;
                         data.Get = Math.Round(data.Price * Calculator.CommissionCsm, 2);
@@ -88,22 +86,24 @@ namespace ItemChecker.MVVM.Model
                     }
                 case 3:
                     {
-                        var LfItem = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == data.ItemName).Lfm;
-                        data.Price = LfItem.Price;
+                        var Item = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == data.ItemName).Lfm;
+                        data.Price = Item.Price;
                         data.Get = Math.Round(data.Price * Calculator.CommissionLf, 2);
                         break;
                     }
                 case 4:
                     {
-                        var buff = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == data.ItemName).Buff;
-                        data.Price = buff.BuyOrder;
+                        itemBaseService.UpdateBuffItem(itemName);
+                        var Item = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == data.ItemName).Buff;
+                        data.Price = Item.BuyOrder;
                         data.Get = Math.Round(data.Price * Calculator.CommissionBuff, 2);
                         break;
                     }
                 case 5:
                     {
-                        var buff = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == data.ItemName).Buff;
-                        data.Price = buff.Price;
+                        itemBaseService.UpdateBuffItem(itemName);
+                        var Item = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == data.ItemName).Buff;
+                        data.Price = Item.Price;
                         data.Get = Math.Round(data.Price * Calculator.CommissionBuff, 2);
                         break;
                     }
@@ -116,19 +116,19 @@ namespace ItemChecker.MVVM.Model
         }
 
         //List, 
-        public static List<string> ApplyConfig(ParserCheckConfig config)
+        public static List<string> ApplyConfig(ParserCheckConfig config, List<DataParser> checkedList)
         {
             List<string> list = new();
             foreach (var item in SteamBase.ItemList)
             {
                 string itemName = item.ItemName;
                 //standart
-                if (list.Any(x => x == itemName) || ((config.ServiceOne < 2 | config.ServiceTwo < 2) && item.Steam.Id == 0))
+                if (list.Any(x => x == itemName) || item.Steam.Id == 0)
                     continue;
-                if (itemName.Contains("Doppler") || SteamMarket.Orders.Any(x => x.ItemName == itemName))
+                if (itemName.Contains("Doppler") || SteamMarket.Orders.Any(x => x.ItemName == itemName) || checkedList.Any(x => x.ItemName == itemName))
                     continue;
                 //have
-                if ((config.ServiceOne == 2 && !item.Csm.Inventory.Any()) || (config.ServiceOne == 3 && !item.Lfm.IsHave) || (config.ServiceOne == 4 && !item.Buff.IsHave) || (config.ServiceOne == 5 && !item.Buff.IsHave))
+                if ((config.ServiceOne == 1 && !item.Steam.IsHave) || (config.ServiceOne == 2 && !item.Csm.Inventory.Any()) || (config.ServiceOne == 3 && !item.Lfm.IsHave) || (config.ServiceOne == 4 && !item.Buff.IsHave) || (config.ServiceOne == 5 && !item.Buff.IsHave))
                     continue;
                 //only
                 if (config.SelectedOnly != 0)

@@ -1,4 +1,5 @@
-﻿using ItemChecker.MVVM.ViewModel;
+﻿using ItemChecker.MVVM.Model;
+using ItemChecker.MVVM.ViewModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -27,14 +28,11 @@ namespace ItemChecker.MVVM.View
         {
             if (!ordersGrid.Items.IsEmpty)
             {
-                HomeViewModel viewModel = (HomeViewModel)DataContext;
-                if (e.Key == Key.Back && viewModel.CancelOrderCommand.CanExecute(viewModel.HomeTable.SelectedOrderItem))
-                    viewModel.CancelOrderCommand.Execute(viewModel.HomeTable.SelectedOrderItem);
+                HomeViewModel vm = (HomeViewModel)DataContext;
+                if (e.Key == Key.Back && vm.CancelOrderCommand.CanExecute(vm.HomeTable.SelectedOrderItem))
+                    vm.CancelOrderCommand.Execute(vm.HomeTable.SelectedOrderItem);
                 if (e.Key == Key.F1)
-                {
-                    DetailsWindow detailsWindow = new(viewModel.HomeTable.SelectedOrderItem.ItemName);
-                    detailsWindow.Show();
-                }
+                    MainWindow.OpenDetailsItem(vm.HomeTable.SelectedOrderItem.ItemName);
             }
         }
         private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -50,10 +48,10 @@ namespace ItemChecker.MVVM.View
 
         private void TimerPush_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (DataContext is HomeViewModel vm && vm.TimerCommand.CanExecute(null))
-                vm.TimerCommand.Execute(0);
+            if (DataContext is HomeViewModel vm && vm.ResetTimerCommand.CanExecute(null))
+                vm.ResetTimerCommand.Execute(0);
         }
-        private void ListShow_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void ListShow_Click(object sender, RoutedEventArgs e)
         {
             if (!MainWindow.IsWindowOpen<Window>("showListWindow"))
             {
@@ -67,14 +65,12 @@ namespace ItemChecker.MVVM.View
             }
         }
 
+        #region inventory
         private void inventoryListBox_KeyDown(object sender, KeyEventArgs e)
         {
-            var viewModel = (HomeViewModel)DataContext;
+            HomeViewModel vm = (HomeViewModel)DataContext;
             if (e.Key == Key.F1)
-            {
-                DetailsWindow detailsWindow = new(viewModel.SelectedInventory.ItemName);
-                detailsWindow.Show();
-            }
+                MainWindow.OpenDetailsItem(vm.SelectedInventory.ItemName);
         }
         private void inventoryListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
@@ -87,7 +83,22 @@ namespace ItemChecker.MVVM.View
         }
         private void inventComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            sellGroup.IsEnabled = invenTasks.SelectedIndex == 1;
+            inventoryGrid.Height = invenTasks.SelectedIndex == 1 && inventoryGrid.Visibility == Visibility.Visible ? 400 : 510;
+            sellGroup.Visibility = invenTasks.SelectedIndex == 1 && inventoryGrid.Visibility == Visibility.Visible ? Visibility.Visible : Visibility.Hidden;
         }
+
+        private void priceCombox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            sellPrice.IsEnabled = priceCombox.SelectedIndex == 2 && (bool)selectedOnly.IsChecked;
+        }
+        private void selectedOnly_Checked(object sender, RoutedEventArgs e)
+        {
+            sellPrice.IsEnabled = (bool)selectedOnly.IsChecked && priceCombox.SelectedIndex == 2;
+        }
+        private void allAvailable_Checked(object sender, RoutedEventArgs e)
+        {
+            sellPrice.IsEnabled = (bool)selectedOnly.IsChecked && priceCombox.SelectedIndex == 2;
+        }
+        #endregion
     }
 }

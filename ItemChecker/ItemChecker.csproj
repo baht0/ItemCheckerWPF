@@ -1,12 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup Label="Globals">
+    <WebView2UseWinRT>False</WebView2UseWinRT>
+  </PropertyGroup>
+
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net7.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>Resources\logo-taskbar.ico</ApplicationIcon>
-    <AssemblyVersion>2.0.1.1</AssemblyVersion>
+    <AssemblyVersion>2.0.1.2</AssemblyVersion>
     <FileVersion>2.0.1.1</FileVersion>
     <Win32Resource />
   </PropertyGroup>
@@ -23,17 +27,15 @@
 
   <ItemGroup>
     <PackageReference Include="HtmlAgilityPack" Version="1.11.46" />
-    <PackageReference Include="LiveCharts.Wpf" Version="0.9.7" />
     <PackageReference Include="MaterialDesignColors" Version="2.0.9" />
     <PackageReference Include="MaterialDesignThemes" Version="4.6.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="Selenium.Support" Version="4.5.0" />
-    <PackageReference Include="Selenium.WebDriver" Version="4.5.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ItemChecker.Net\ItemChecker.Net.csproj" />
     <ProjectReference Include="..\ItemChecker.Support\ItemChecker.Support.csproj" />
+    <ProjectReference Include="..\ItemChecker.Updater\ItemChecker.Updater.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -52,11 +54,6 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
       <DependentUpon>SettingsProperties.settings</DependentUpon>
-    </Compile>
-    <Compile Update="Properties\ParserProperties.Designer.cs">
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>ParserProperties.settings</DependentUpon>
     </Compile>
     <Compile Update="Properties\MainProperties.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -78,10 +75,6 @@
     <None Update="Properties\SettingsProperties.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>SettingsProperties.Designer.cs</LastGenOutput>
-    </None>
-    <None Update="Properties\ParserProperties.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>ParserProperties.Designer.cs</LastGenOutput>
     </None>
     <None Update="Properties\MainProperties.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

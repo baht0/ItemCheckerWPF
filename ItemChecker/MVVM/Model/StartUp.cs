@@ -1,17 +1,135 @@
 ﻿using ItemChecker.Core;
+using ItemChecker.Net;
 using MaterialDesignThemes.Wpf;
+using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
-using System.Threading;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Timers;
 
 namespace ItemChecker.MVVM.Model
 {
+    public class SignInData
+    {
+        public string AccountName { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string Code2AF { get; set; } = string.Empty;
+
+        public bool IsCorrect { get; set; }
+
+        public static Timer Timer { get; set; } = new(1000);
+        public static int TimerTick { get; set; } = 300;
+
+        public static Boolean AllowUser(string login)
+        {
+            JArray users = JArray.Parse(DropboxRequest.Get.Read("Users.json"));
+            JObject user = (JObject)users.FirstOrDefault(x => x["Login"].ToString() == login);
+            if (user != null)
+            {
+                int id = users.IndexOf(user);
+                users[id]["LastLoggedIn"] = DateTime.Now;
+                users[id]["Version"] = DataProjectInfo.CurrentVersion;
+
+                DropboxRequest.Post.Delete("Users.json");
+                System.Threading.Thread.Sleep(200);
+                DropboxRequest.Post.Upload("Users.json", users.ToString());
+                return Convert.ToBoolean(user["Allowed"]);
+            }
+            return false;
+        }
+    }
     public class StartUp : ObservableObject
     {
-        public static CancellationTokenSource cts { get; set; } = new();
-        public static CancellationToken token { get; set; } = cts.Token;
-
-        public List<Currency> CurrencyList { get; set; } = SteamBase.CurrencyList;
+        public bool IsSignInShow
+        {
+            get { return _isSignInShow; }
+            set
+            {
+                _isSignInShow = value;
+                OnPropertyChanged();
+            }
+        }
+        bool _isSignInShow;
+        public bool IsSubmitShow
+        {
+            get { return _isSubmitShow; }
+            set
+            {
+                _isSubmitShow = value;
+                OnPropertyChanged();
+            }
+        }
+        bool _isSubmitShow;
+        public bool IsSubmitEnabled
+        {
+            get { return _isSubmitEnabled; }
+            set
+            {
+                _isSubmitEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+        bool _isSubmitEnabled = true;
+        public bool IsErrorShow
+        {
+            get { return _isErrorShow; }
+            set
+            {
+                _isErrorShow = value;
+                OnPropertyChanged();
+            }
+        }
+        bool _isErrorShow;
+        public bool IsExpiredShow
+        {
+            get { return _isExpiredShow; }
+            set
+            {
+                _isExpiredShow = value;
+                OnPropertyChanged();
+            }
+        }
+        bool _isExpiredShow;
+        public bool IsConfirmationShow
+        {
+            get { return _isConfirmationShow; }
+            set
+            {
+                _isConfirmationShow = value;
+                OnPropertyChanged();
+            }
+        }
+        bool _isConfirmationShow;
+        public bool IsCodeEnabled
+        {
+            get { return _isCodeEnabled; }
+            set
+            {
+                _isCodeEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+        bool _isCodeEnabled = true;
+        public bool IsCurrencyShow
+        {
+            get { return _isCurrencyShow; }
+            set
+            {
+                _isCurrencyShow = value;
+                OnPropertyChanged();
+            }
+        }
+        bool _isCurrencyShow;
+        public ObservableCollection<Currency> CurrencyList
+        {
+            get { return _currencyList; }
+            set
+            {
+                _currencyList = value;
+                OnPropertyChanged();
+            }
+        }
+        ObservableCollection<Currency> _currencyList = new();
         public Currency SelectedCurrency
         {
             get { return _selectedCurrency; }
@@ -21,17 +139,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        Currency _selectedCurrency;
-        public bool IsCurrency
-        {
-            get { return _isCurrency; }
-            set
-            {
-                _isCurrency = value;
-                OnPropertyChanged();
-            }
-        }
-        bool _isCurrency;
+        Currency _selectedCurrency = new();
 
         public bool IsReset
         {
@@ -43,16 +151,6 @@ namespace ItemChecker.MVVM.Model
             }
         }
         bool _isReset;
-        public bool IsUpdate
-        {
-            get { return _isUpdate; }
-            set
-            {
-                _isUpdate = value;
-                OnPropertyChanged();
-            }
-        }
-        bool _isUpdate = DataProjectInfo.IsUpdate;
         public string Version
         {
             get { return _version; }

@@ -1,8 +1,6 @@
-﻿using ItemChecker.Properties;
-using ItemChecker.Services;
+﻿using ItemChecker.Services;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,7 +9,7 @@ namespace ItemChecker.MVVM.Model
 {
     public class ParserService : ItemBaseService
     {
-        public void Export(List<DataParser> parserGrid, ParserCheckConfig parserConfig)
+        public static void Export(List<DataParser> parserGrid, ParserCheckConfig parserConfig)
         {
             string items = JsonConvert.SerializeObject(parserGrid, Formatting.Indented);
             JObject json = new(
@@ -24,7 +22,7 @@ namespace ItemChecker.MVVM.Model
                 Directory.CreateDirectory(path);
             File.WriteAllText(path + $"Parser_{parserConfig.CheckedTime:dd.MM_hh.mm}_{parserConfig.ServiceOne}{parserConfig.ServiceTwo}.json", json.ToString());
         }
-        public List<DataParser> Import(string filePath)
+        public static List<DataParser> Import(string filePath)
         {
             if (!File.Exists(filePath))
                 return new();
@@ -32,8 +30,6 @@ namespace ItemChecker.MVVM.Model
             string text = File.ReadAllText(filePath);
             JObject json = JObject.Parse(text);
 
-            ParserProperties.Default.ServiceOne = Convert.ToInt32(json["Service1"]);
-            ParserProperties.Default.ServiceTwo = Convert.ToInt32(json["Service2"]);
             ParserCheckConfig.CheckedConfig = json["ParserCheckConfig"].ToObject<ParserCheckConfig>();
 
             List<DataParser> data = JsonConvert.DeserializeObject<List<DataParser>>(json["Items"].ToString());
@@ -65,12 +61,13 @@ namespace ItemChecker.MVVM.Model
             }
             //other
             bool other = true;
-            if (filterConfig.Have || filterConfig.SelectedWeapon != "Any")
+            if (filterConfig.SelectedWeapon != "Any" || filterConfig.HidePlaced)
             {
-                if (filterConfig.Have)
-                    other = item.Have;
-                if (filterConfig.SelectedWeapon != "Any" && other)
+                other = false;
+                if (filterConfig.SelectedWeapon != "Any")
                     other = item.ItemName.Contains(filterConfig.SelectedWeapon);
+                if (filterConfig.HidePlaced && !other)
+                    other = !SteamMarket.Orders.Any(x => x.ItemName == item.ItemName);
             }
             //exterior
             bool exterior = true;

@@ -1,9 +1,4 @@
-﻿using ItemChecker.Core;
-using ItemChecker.MVVM.Model;
-using ItemChecker.Properties;
-using ItemChecker.Services;
-using ItemChecker.Support;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -12,13 +7,19 @@ using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Input;
+using ItemChecker.Core;
+using ItemChecker.MVVM.Model;
+using ItemChecker.Net;
+using ItemChecker.Properties;
+using ItemChecker.Services;
+using ItemChecker.Support;
 
 namespace ItemChecker.MVVM.ViewModel
 {
     public class HomeViewModel : ObservableObject
     {
         #region Properties
-        System.Timers.Timer TimerView = new(500);
+        readonly System.Timers.Timer TimerView = new(500);
 
         //homeView
         public Home Home
@@ -33,7 +34,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        private Home _home = new();
+        Home _home = new();
         public HomeTable HomeTable
         {
             get
@@ -46,9 +47,9 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        private HomeTable _homeTable = new();
+        HomeTable _homeTable = new();
 
-        //tools
+        //orders
         public HomePush HomePush
         {
             get
@@ -61,7 +62,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        private HomePush _homePush = new();
+        HomePush _homePush = new();
         //inventory
         public HomeInventoryConfig HomeInventoryConfig
         {
@@ -75,7 +76,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        private HomeInventoryConfig _homeInventoryConfig = new();
+        HomeInventoryConfig _homeInventoryConfig = new();
         public HomeInventoryInfo HomeInventoryInfo
         {
             get
@@ -88,11 +89,13 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        private HomeInventoryInfo _homeInventoryInfo = new();
+        HomeInventoryInfo _homeInventoryInfo = new();
         public DataInventory SelectedInventory
         {
             get
             {
+                if (_selectedInventory == null)
+                    return HomeInventoryInfo.Items.FirstOrDefault();
                 return _selectedInventory;
             }
             set
@@ -101,11 +104,16 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        private DataInventory _selectedInventory = new();
+        DataInventory _selectedInventory = new();
         #endregion
 
         public HomeViewModel()
         {
+            Task.Run(() => { 
+                OrderCheckService.SteamOrders(true);
+                HomeTable.IsBusy = false;
+            });
+
             TimerView.Elapsed += UpdateView;
             TimerView.Enabled = true;
         }
@@ -121,26 +129,26 @@ namespace ItemChecker.MVVM.ViewModel
             }
         }
 
-        //table
+        #region table
         public ICommand OpenItemOutCommand =>
             new RelayCommand((obj) =>
             {
                 var item = HomeTable.SelectedOrderItem;
                 string itemName = item.ItemName.Replace("(Holo/Foil)", "(Holo-Foil)");
-                string market_hash_name = Edit.EncodeMarketHashName(itemName);
+                string market_hash_name = Uri.EscapeDataString(itemName);
                 switch ((Int32)obj)
                 {
-                    case 1 or 2:
+                    case 1:
                         Edit.OpenUrl("https://steamcommunity.com/market/listings/730/" + market_hash_name);
                         break;
-                    case 3 or 4:
-                        switch (SettingsProperties.Default.ServiceId)
+                    case 2 or 3:
+                        switch (HomeProperties.Default.ServiceId)
                         {
                             case 0 or 1:
                                 Edit.OpenUrl("https://steamcommunity.com/market/listings/730/" + market_hash_name);
                                 break;
                             case 2:
-                                Edit.OpenCsm(market_hash_name);
+                                Edit.OpenCsm(itemName);
                                 break;
                             case 3:
                                 Edit.OpenUrl("https://loot.farm/");
@@ -158,6 +166,7 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand OrdersCommand =>
             new RelayCommand((obj) =>
             {
+                HomeTable.IsBusy = true;
                 switch (Convert.ToInt32(obj))
                 {
                     case 0:
@@ -165,9 +174,7 @@ namespace ItemChecker.MVVM.ViewModel
                             Task.Run(() => {
                                 try
                                 {
-                                    BaseModel.IsWorking = true;
-                                    OrderCheckService orderCheck = new();
-                                    orderCheck.SteamOrders(true);
+                                    OrderCheckService.SteamOrders(true);
                                     HomeTable.OrderedGrid = new(SteamMarket.Orders);
                                     Main.Message.Enqueue("MyOrders update is complete.");
                                 }
@@ -177,7 +184,7 @@ namespace ItemChecker.MVVM.ViewModel
                                 }
                                 finally
                                 {
-                                    BaseModel.IsWorking = false;
+                                    HomeTable.IsBusy = false;
                                 }
                             });
                             break;
@@ -191,7 +198,6 @@ namespace ItemChecker.MVVM.ViewModel
                                 Task.Run(() => {
                                     try
                                     {
-                                        BaseModel.IsWorking = true;
                                         List<DataOrder> orders = new(SteamMarket.Orders);
                                         foreach (DataOrder order in orders)
                                             SteamMarket.Orders.Cancel(order);
@@ -204,13 +210,13 @@ namespace ItemChecker.MVVM.ViewModel
                                     }
                                     finally
                                     {
-                                        BaseModel.IsWorking = false;
+                                        HomeTable.IsBusy = false;
                                     }
                                 });
                             break;
                         }
                 }
-            }, (obj) => !BaseModel.IsWorking);
+            }, (obj) => !HomeTable.IsBusy);
         public ICommand CancelOrderCommand =>
             new RelayCommand((obj) =>
             {
@@ -226,8 +232,9 @@ namespace ItemChecker.MVVM.ViewModel
                     Main.Message.Enqueue($"{item.ItemName}\nOrder has been canceled.");
                 }
             });
+        #endregion
 
-        #region tools
+        #region order
         public ICommand PushCommand =>
             new RelayCommand((obj) =>
             {
@@ -235,9 +242,10 @@ namespace ItemChecker.MVVM.ViewModel
                 {
                     HomePush.IsService = true;
                     HomePush config = obj as HomePush;
+                    HomeProperties.Default.ServiceId = config.ServiceId;
+                    HomeProperties.Default.MinPrecent = config.MinPrecent;
                     HomeProperties.Default.TimePush = config.Time;
                     HomeProperties.Default.Reserve = config.Reserve;
-                    HomeProperties.Default.Unwanted = config.Unwanted;
                     HomeProperties.Default.Save();
 
                     HomePush.Timer.Elapsed += timerPushTick;
@@ -247,13 +255,13 @@ namespace ItemChecker.MVVM.ViewModel
                 else
                 {
                     HomePush.cts.Cancel();
-                    HomePush.Status = "Off";
+                    HomePush.Status = string.Empty;
                     HomePush.IsService = false;
                     HomePush.Timer.Enabled = false;
                     HomePush.TimerTick = 0;
                     HomePush.Timer.Elapsed -= timerPushTick;
                 }
-            }, (obj) => SteamMarket.Orders.Any());
+            }, (obj) => SteamMarket.Orders.Any() && HomePush.Time > 0 && HomePush.MinPrecent >= 0 && HomePush.Reserve >= 0);
         void timerPushTick(Object sender, ElapsedEventArgs e)
         {
             HomePush.TimerTick--;
@@ -275,8 +283,7 @@ namespace ItemChecker.MVVM.ViewModel
             try
             {
                 SteamAccount.GetBalance();
-                OrderCheckService orderCheck = new();
-                orderCheck.SteamOrders(false);
+                OrderCheckService.SteamOrders(false);
 
                 HomePush.Status = "Pushing...";
                 HomePush.MaxProgress = SteamMarket.Orders.Count;
@@ -300,12 +307,12 @@ namespace ItemChecker.MVVM.ViewModel
                 HomePush.Status = "Update...";
                 if (HomePush.Check % 5 == 4)//every 5 check
                 {
-                    orderCheck.SteamOrders(true);//update service info
+                    OrderCheckService.SteamOrders(true);//update service info
 
-                    if (SteamMarket.Orders.GetAvailableAmount() >= SteamAccount.MaxAmount * 0.15m)//order fav items
+                    if (SteamMarket.Orders.GetAvailableAmount() >= SteamMarket.MaxAmount * 0.15m)//order fav items
                     {
                         FavoriteService favorite = new();
-                        favorite.Check();
+                        FavoriteService.Check();
                     }
                 }
                 HomeTable.OrderedGrid = new(SteamMarket.Orders);
@@ -314,7 +321,7 @@ namespace ItemChecker.MVVM.ViewModel
             catch (Exception exp)
             {
                 HomePush.cts.Cancel();
-                HomePush.Status = "Off";
+                HomePush.Status = string.Empty;
                 HomePush.IsService = false;
                 HomePush.Timer.Enabled = false;
                 HomePush.TimerTick = 0;
@@ -331,19 +338,14 @@ namespace ItemChecker.MVVM.ViewModel
                 }
             }
         }
-        public ICommand TimerCommand =>
+        public ICommand ResetTimerCommand =>
             new RelayCommand((obj) =>
             {
-            switch ((int)obj)
-                {
-                    case 0:
-                        HomePush.TimerTick = 1;
-                        break;
-                }
+                HomePush.TimerTick = (int)obj == 0 ? 1 : HomePush.TimerTick;
             }, (obj) => HomePush.IsService);
         #endregion
 
-        //inventory
+        # region inventory
         public ICommand UpdateInformationsCommand =>
             new RelayCommand((obj) =>
             {
@@ -351,12 +353,11 @@ namespace ItemChecker.MVVM.ViewModel
                 {
                     try
                     {
-                        BaseModel.IsWorking = true;
+                        HomeInventoryInfo.IsBusy = true;
                         InventoryService inventoryService = new();
-                        var items = inventoryService.CheckInventory(null);
+                        var items = InventoryService.CheckInventory(null);
                         HomeInventoryInfo.Items = new(items);
-                        SelectedInventory = HomeInventoryInfo.Items.Any() ? HomeInventoryInfo.Items.First() : new();
-                        Main.Message.Enqueue("Steam Inventory updated.");
+                        SelectedInventory = HomeInventoryInfo.Items.FirstOrDefault();
                     }
                     catch (Exception ex)
                     {
@@ -364,16 +365,18 @@ namespace ItemChecker.MVVM.ViewModel
                     }
                     finally
                     {
-                        BaseModel.IsWorking = false;
+                        HomeInventoryInfo.IsBusy = false;
+                        HomeInventoryConfig.TaskId = 0;
+                        Main.Message.Enqueue("Steam Inventory updated.");
                     }
                 });
-            }, (obj) => !BaseModel.IsWorking);
+            }, (obj) => !HomeInventoryInfo.IsBusy);
         public ICommand ShowInventoryItemCommand =>
             new RelayCommand((obj) =>
             {
                 var item = (DataInventory)obj;
 
-                Edit.OpenUrl("https://steamcommunity.com/my/inventory/#730_2_" + item.AssetId);
+                Edit.OpenUrl("https://steamcommunity.com/my/inventory/#730_2_" + item.Data.FirstOrDefault().AssetId);
 
             }, (obj) => HomeInventoryInfo.Items.Any() && SelectedInventory != null);
         public ICommand InventoryTaskCommand =>
@@ -386,7 +389,7 @@ namespace ItemChecker.MVVM.ViewModel
                     HomeInventoryInfo.cts = new();
                     HomeInventoryInfo.token = HomeInventoryInfo.cts.Token;
 
-                    switch (config.TasksId)
+                    switch (config.TaskId)
                     {
                         case 0:
                             Task.Run(() => TradeOffer());
@@ -401,22 +404,24 @@ namespace ItemChecker.MVVM.ViewModel
                     HomeInventoryInfo.cts.Cancel();
                     HomeInventoryInfo.IsService = false;
                 }
-            }, (obj) => (HomeInventoryConfig.TasksId == 0 && !String.IsNullOrEmpty(SteamAccount.ApiKey)) || (HomeInventoryConfig.TasksId == 1 && ((HomeInventoryConfig.SelectedOnly && SelectedInventory.ItemName != "Unknown") || HomeInventoryConfig.AllAvailable)) || (HomeInventoryConfig.TasksId == 2 && !BaseModel.IsBrowser));
+            }, (obj) => HomeInventoryConfig.TaskId == 0
+                            || (HomeInventoryConfig.TaskId == 1
+                                && ((HomeInventoryConfig.AllAvailable && HomeInventoryConfig.SellingPriceId != 2)
+                                    || (HomeInventoryConfig.SelectedOnly && SelectedInventory != null
+                                        && (HomeInventoryConfig.SellingPriceId < 2 || (HomeInventoryConfig.SellingPriceId == 2 && HomeInventoryConfig.Price != 0))))));
         void TradeOffer()
         {
             try
             {
-                InventoryService tradeOffer = new();
                 do
                 {
                     HomeInventoryInfo.Progress = 0;
                     HomeInventoryInfo.MaxProgress = DataTradeOffer.Offers.Count;
-                    HomeInventoryInfo.Count += DataTradeOffer.Offers.Count;
                     foreach (DataTradeOffer offer in DataTradeOffer.Offers)
                     {
                         try
                         {
-                            tradeOffer.AcceptTrade(offer.TradeOfferId, offer.PartnerId);
+                            SteamRequest.Post.AcceptTrade(offer.TradeOfferId, offer.PartnerId);
                         }
                         catch (Exception exp)
                         {
@@ -425,12 +430,13 @@ namespace ItemChecker.MVVM.ViewModel
                         finally
                         {
                             HomeInventoryInfo.Progress++;
+                            Thread.Sleep(1000);
                         }
                         if (HomeInventoryInfo.token.IsCancellationRequested)
                             break;
                     }
                 }
-                while (tradeOffer.CheckOffer());
+                while (InventoryService.CheckOffer());
             }
             catch (Exception exp)
             {
@@ -447,25 +453,17 @@ namespace ItemChecker.MVVM.ViewModel
         {
             try
             {
-                InventoryService service = new();
-
-                string itemName = string.Empty;
-                if (config.SelectedOnly)
-                    itemName = SelectedInventory.ItemName;
-                List<DataInventory> items = service.CheckInventory(itemName);
+                List<DataInventory> items = config.SelectedOnly ? InventoryService.CheckInventory(SelectedInventory) : InventoryService.CheckInventory();
 
                 HomeInventoryInfo.Items = !config.SelectedOnly ? new(items) : HomeInventoryInfo.Items;
                 HomeInventoryInfo.Progress = 0;
                 HomeInventoryInfo.MaxProgress = items.Count;
-                HomeInventoryInfo.Count = items.Count;
 
                 foreach (var item in items)
                 {
                     try
                     {
-                        service.SellItem(item, config);
-                        decimal sum = config.SellingPriceId == 0 ? items.Sum(s => s.LowestSellOrder) : items.Sum(s => s.HighestBuyOrder);
-                        HomeInventoryInfo.Sum = Math.Round(sum * Calculator.CommissionSteam, 2);
+                        InventoryService.SellItem(item, config);
                     }
                     catch (Exception exp)
                     {
@@ -492,5 +490,6 @@ namespace ItemChecker.MVVM.ViewModel
                 Main.Message.Enqueue("Quick sell items has finished.");
             }
         }
+        #endregion
     }
 }

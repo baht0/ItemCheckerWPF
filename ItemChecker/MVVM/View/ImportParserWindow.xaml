@@ -63,8 +63,10 @@
                     <Separator Grid.ColumnSpan="3" VerticalAlignment="Bottom"/>
                     <DataGrid Grid.Row="1" Grid.ColumnSpan="3" AlternationCount="2" AlternatingRowBackground="{DynamicResource ElementBackground}"
                               AutoGenerateColumns="False" IsReadOnly="True" x:Name="filesGrid" SelectionMode="Single"
+                              ToolTip="'Double Click' to load&#x0a;Press 'Backspace' to delete"
+                              KeyDown="filesGrid_KeyDown" MouseDoubleClick="filesGrid_MouseDoubleClick"
                               ItemsSource="{Binding ImportParser.List, UpdateSourceTrigger=PropertyChanged}"
-                              SelectedItem="{Binding ImportParser.Selected}" MouseDoubleClick="DataGrid_MouseDoubleClick">
+                              SelectedItem="{Binding ImportParser.Selected}">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Date" Binding="{Binding CheckedTime, StringFormat='{}{0:dd MMM hh:mm tt}'}" CanUserResize="False" Width="140"/>
                             <DataGridTextColumn Header="From" Binding="{Binding ServiceOne, Converter={StaticResource ServiceIdToServiceNameConverter}}" CanUserResize="False" Width="auto"/>

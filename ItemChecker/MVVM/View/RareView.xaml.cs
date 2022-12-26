@@ -3,17 +3,16 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows;
 using System.Linq;
+using System;
 
 namespace ItemChecker.MVVM.View
 {
-    /// <summary>
-    /// Interaction logic for RareView.xaml
-    /// </summary>
     public partial class RareView : UserControl
     {
         public RareView()
         {
             InitializeComponent();
+            qualityChb.IsEnabled = false;
         }
         private void InputDecimal(object sender, TextCompositionEventArgs e)
         {
@@ -53,11 +52,9 @@ namespace ItemChecker.MVVM.View
             if (!rareGrid.Items.IsEmpty)
             {
                 var viewModel = (RareViewModel)DataContext;
+                var item = viewModel.SelectedItem;
                 if (e.Key == Key.F1)
-                {
-                    DetailsWindow detailsWindow = new(viewModel.SelectedItem.ItemName);
-                    detailsWindow.Show();
-                }
+                    MainWindow.OpenDetailsItem(item.ItemName);
             }
         }
         private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -83,6 +80,26 @@ namespace ItemChecker.MVVM.View
                 Window wnd = Application.Current.Windows.OfType<Window>().Where(w => w.Name.Equals("showListWindow")).FirstOrDefault();
                 wnd.Activate();
             }
+        }
+
+        private void stickerQuality_Checked(object sender, RoutedEventArgs e)
+        {
+            qualityChb.IsEnabled = StickerQuality();
+        }
+
+        private void stickerQuality_Unchecked(object sender, RoutedEventArgs e)
+        {
+            qualityChb.IsEnabled = StickerQuality();
+        }
+        Boolean StickerQuality()
+        {
+            return (bool)stickerNormal.IsChecked
+                || (bool)stickerHolo.IsChecked
+                || (bool)stickerGlitter.IsChecked
+                || (bool)stickerFoil.IsChecked
+                || (bool)stickerLenticular.IsChecked
+                || (bool)stickerGold.IsChecked
+                || (bool)stickerContraband.IsChecked;
         }
     }
 }

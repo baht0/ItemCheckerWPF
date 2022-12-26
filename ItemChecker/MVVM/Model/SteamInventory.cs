@@ -1,15 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ItemChecker.MVVM.Model
 {
-    internal class SteamInventory
-    {
-
-    }
     public class DataTradeOffer
     {
         public string TradeOfferId { get; set; }
@@ -20,6 +13,10 @@ namespace ItemChecker.MVVM.Model
     public class DataInventory
     {
         public string ItemName { get; set; } = "Unknown";
+        public List<DataInventoryItem> Data { get; set; } = new();
+    }
+    public class DataInventoryItem
+    {
         public string AssetId { get; set; } = string.Empty;
         public string ClassId { get; set; } = string.Empty;
         public string InstanceId { get; set; } = string.Empty;
@@ -28,7 +25,5 @@ namespace ItemChecker.MVVM.Model
         public bool Marketable { get; set; }
         public bool Stickers { get; set; }
         public bool NameTag { get; set; }
-        public decimal LowestSellOrder { get; set; }
-        public decimal HighestBuyOrder { get; set; }
     }
 }

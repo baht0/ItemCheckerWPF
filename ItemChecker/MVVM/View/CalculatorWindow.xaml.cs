@@ -38,7 +38,8 @@ namespace ItemChecker.MVVM.View
         }
         private void Commission_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            commissionTxt.IsEnabled = commissionCmb.SelectedItem != "Custom";
+            commissionTxt.IsEnabled = commissionCmb.SelectedItem == "Custom";
+            commissionTxt.Text = "0";
 
             if (DataContext is CalculatorViewModel viewModel && viewModel.CommissionCommand.CanExecute(commissionTxt.Text))
                 viewModel.CommissionCommand.Execute(commissionTxt.Text);

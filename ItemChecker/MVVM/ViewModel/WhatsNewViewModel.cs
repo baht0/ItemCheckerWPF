@@ -73,7 +73,7 @@ namespace ItemChecker.MVVM.ViewModel
         }
         void GetUpdateNotes()
         {
-            JArray json = JArray.Parse(Get.DropboxRead("Updates.json"));
+            JArray json = JArray.Parse(DropboxRequest.Get.Read("Updates.json"));
             foreach (JObject update in json)
             {
                 Updates.Add(new()

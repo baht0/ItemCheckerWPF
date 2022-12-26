@@ -55,46 +55,47 @@ namespace ItemChecker.Services
             if (filterConfig.NormalS || filterConfig.Holo || filterConfig.Glitter || filterConfig.Foil || filterConfig.Gold || filterConfig.ContrabandS)
             {
                 qualityS = false;
-                if (item.Stickers.Any() && (filterConfig.CountStickers == 0 || filterConfig.CountStickers == item.Stickers.Count))
+                if (!filterConfig.Quality)
                 {
-                    if (!filterConfig.AllSticker)
-                    {
-                        if (filterConfig.NormalS)
-                            qualityS = !item.Stickers.Any(x => x.Contains("(Holo)")) &&
-                                !item.Stickers.Any(x => x.Contains("(Glitter)")) &&
-                                !item.Stickers.Any(x => x.Contains("(Foil)")) &&
-                                !item.Stickers.Any(x => x.Contains("(Gold)")) &&
-                                !item.Stickers.Any(x => x == "Sticker | Howling Dawn");
-                        if (filterConfig.Holo && !qualityS)
-                            qualityS = item.Stickers.Any(x => x.Contains("(Holo)"));
-                        if (filterConfig.Glitter && !qualityS)
-                            qualityS = item.Stickers.Any(x => x.Contains("(Glitter)"));
-                        if (filterConfig.Foil && !qualityS)
-                            qualityS = item.Stickers.Any(x => x.Contains("(Foil)"));
-                        if (filterConfig.Gold && !qualityS)
-                            qualityS = item.Stickers.Any(x => x.Contains("(Gold)"));
-                        if (filterConfig.ContrabandS && !qualityS)
-                            qualityS = item.Stickers.Any(x => x == "Sticker | Howling Dawn");
-                    }
-                    else if (filterConfig.AllSticker)
-                    {
-                        if (filterConfig.NormalS)
-                            qualityS = !item.Stickers.All(x => x.Contains("(Holo)")) &&
-                                !item.Stickers.All(x => x.Contains("(Glitter)")) &&
-                                !item.Stickers.All(x => x.Contains("(Foil)")) &&
-                                !item.Stickers.All(x => x.Contains("(Gold)")) &&
-                                !item.Stickers.All(x => x == "Sticker | Howling Dawn");
-                        if (filterConfig.Holo && !qualityS)
-                            qualityS = item.Stickers.All(x => x.Contains("(Holo)"));
-                        if (filterConfig.Glitter && !qualityS)
-                            qualityS = item.Stickers.All(x => x.Contains("(Glitter)"));
-                        if (filterConfig.Foil && !qualityS)
-                            qualityS = item.Stickers.All(x => x.Contains("(Foil)"));
-                        if (filterConfig.Gold && !qualityS)
-                            qualityS = item.Stickers.All(x => x.Contains("(Gold)"));
-                        if (filterConfig.ContrabandS && !qualityS)
-                            qualityS = item.Stickers.All(x => x == "Sticker | Howling Dawn");
-                    }
+                    if (filterConfig.NormalS)
+                        qualityS = !item.Stickers.Any(x => x.Contains("(Holo)")) &&
+                            !item.Stickers.Any(x => x.Contains("(Glitter)")) &&
+                            !item.Stickers.Any(x => x.Contains("(Foil)")) &&
+                            !item.Stickers.Any(x => x.Contains("(Gold)")) &&
+                            !item.Stickers.Any(x => x == "Sticker | Howling Dawn");
+                    if (filterConfig.Holo && !qualityS)
+                        qualityS = item.Stickers.Any(x => x.Contains("(Holo)"));
+                    if (filterConfig.Glitter && !qualityS)
+                        qualityS = item.Stickers.Any(x => x.Contains("(Glitter)"));
+                    if (filterConfig.Foil && !qualityS)
+                        qualityS = item.Stickers.Any(x => x.Contains("(Foil)"));
+                    if (filterConfig.Lenticular && !qualityS)
+                        qualityS = item.Stickers.Any(x => x.Contains("(Lenticular)"));
+                    if (filterConfig.Gold && !qualityS)
+                        qualityS = item.Stickers.Any(x => x.Contains("(Gold)"));
+                    if (filterConfig.ContrabandS && !qualityS)
+                        qualityS = item.Stickers.Any(x => x == "Sticker | Howling Dawn");
+                }
+                else if (filterConfig.Quality)
+                {
+                    if (filterConfig.NormalS)
+                        qualityS = !item.Stickers.All(x => x.Contains("(Holo)")) &&
+                            !item.Stickers.All(x => x.Contains("(Glitter)")) &&
+                            !item.Stickers.All(x => x.Contains("(Foil)")) &&
+                            !item.Stickers.All(x => x.Contains("(Gold)")) &&
+                            !item.Stickers.All(x => x == "Sticker | Howling Dawn");
+                    if (filterConfig.Holo && !qualityS)
+                        qualityS = item.Stickers.All(x => x.Contains("(Holo)"));
+                    if (filterConfig.Glitter && !qualityS)
+                        qualityS = item.Stickers.All(x => x.Contains("(Glitter)"));
+                    if (filterConfig.Foil && !qualityS)
+                        qualityS = item.Stickers.All(x => x.Contains("(Foil)"));
+                    if (filterConfig.Lenticular && !qualityS)
+                        qualityS = item.Stickers.All(x => x.Contains("(Lenticular)"));
+                    if (filterConfig.Gold && !qualityS)
+                        qualityS = item.Stickers.All(x => x.Contains("(Gold)"));
+                    if (filterConfig.ContrabandS && !qualityS)
+                        qualityS = item.Stickers.All(x => x == "Sticker | Howling Dawn");
                 }
             }
             //Quality
@@ -159,8 +160,16 @@ namespace ItemChecker.Services
                 if (filterConfig.DifferenceTo != 0 && profit)
                     profit = filterConfig.DifferenceTo > item.Difference;
             }
+            //other
+            bool other = true;
+            if (item.Stickers.Any() && filterConfig.MinStickerCount != 0)
+            {
+                other = false;
+                if (item.Stickers.Any())
+                    other = filterConfig.MinStickerCount <= item.Stickers.Count;
+            }
 
-            bool isShow = category && exterior && quality && qualityS && prices && profit;
+            bool isShow = category && exterior && quality && qualityS && prices && profit && other;
             return isShow;
         }
     }

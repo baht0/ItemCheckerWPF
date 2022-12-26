@@ -16,13 +16,10 @@ namespace ItemChecker.Services
         {
             List<DataRare> items = new();
             itemName = Edit.RemoveDoppler(itemName);
-            string market_hash_name = Edit.EncodeMarketHashName(itemName);
-            decimal priceCompare = SetPrice(itemName, market_hash_name);
+            decimal priceCompare = SetPrice(itemName);
 
-            var json = Get.Request("https://steamcommunity.com/market/listings/730/" + market_hash_name + "/render?start=0&count=100&currency=1&language=english&format=json");
-            JObject obj = JObject.Parse(json);
-            var attributes = obj["listinginfo"].ToList<JToken>();
-
+            var json = SteamRequest.Get.ItemListings(itemName);
+            var attributes = json["listinginfo"].ToList<JToken>();
             foreach (JToken attribute in attributes)
             {
                 try
@@ -38,9 +35,9 @@ namespace ItemChecker.Services
                     var jProperty = attribute.ToObject<JProperty>();
                     data.DataBuy.ListingId = jProperty.Name;
 
-                    data.DataBuy.Subtotal = Convert.ToDecimal(obj["listinginfo"][data.DataBuy.ListingId]["converted_price"]);
-                    decimal fee_steam = Convert.ToDecimal(obj["listinginfo"][data.DataBuy.ListingId]["converted_steam_fee"]);
-                    decimal fee_csgo = Convert.ToDecimal(obj["listinginfo"][data.DataBuy.ListingId]["converted_publisher_fee"]);
+                    data.DataBuy.Subtotal = Convert.ToDecimal(json["listinginfo"][data.DataBuy.ListingId]["converted_price"]);
+                    decimal fee_steam = Convert.ToDecimal(json["listinginfo"][data.DataBuy.ListingId]["converted_steam_fee"]);
+                    decimal fee_csgo = Convert.ToDecimal(json["listinginfo"][data.DataBuy.ListingId]["converted_publisher_fee"]);
                     data.DataBuy.Fee = fee_steam + fee_csgo;
                     data.DataBuy.Total = data.DataBuy.Subtotal + data.DataBuy.Fee;
                     data.Price = data.DataBuy.Total / 100;
@@ -50,11 +47,11 @@ namespace ItemChecker.Services
                         break;
 
                     data.Difference = Edit.Difference(data.Price, data.PriceCompare);
-                    string ass_id = obj["listinginfo"][data.DataBuy.ListingId]["asset"]["id"].ToString();
+                    string ass_id = json["listinginfo"][data.DataBuy.ListingId]["asset"]["id"].ToString();
 
-                    data.Stickers = GetStickers(obj, ass_id);
+                    data.Stickers = GetStickers(json, ass_id);
 
-                    string link = obj["listinginfo"][data.DataBuy.ListingId]["asset"]["market_actions"][0]["link"].ToString();
+                    string link = json["listinginfo"][data.DataBuy.ListingId]["asset"]["market_actions"][0]["link"].ToString();
                     link = link.Replace("%listingid%", data.DataBuy.ListingId);
                     link = link.Replace("%assetid%", ass_id);
                     data.Link = link;
@@ -64,15 +61,15 @@ namespace ItemChecker.Services
 
                     switch (RareCheckConfig.CheckedConfig.ParameterId)
                     {
-                        case 0:
+                        case 0://float
                             if (data.FloatValue < maxFloat)
                                 items.Add(data);
                             break;
-                        case 1:
+                        case 1://sticker
                             if (CheckStickers(data))
                                 items.Add(data);
                             break;
-                        case 2:
+                        case 2://doppler
 
                             break;
                     }
@@ -87,21 +84,19 @@ namespace ItemChecker.Services
             return items;
         }
 
-        Decimal SetPrice(string itemName, string market_hash_name)
+        Decimal SetPrice(string itemName)
         {
-            Tuple<decimal, decimal> steamPrices = Get.PriceOverview(market_hash_name, 1);
+            JObject steamPrices = SteamRequest.Get.PriceOverview(itemName, 1);
 
-            decimal csmPrice = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName) != null ? SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName).Csm.Price : 0;
-            csmPrice = Edit.ConverterFromUsd(csmPrice, SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Value);
+            decimal lowest_price = steamPrices.ContainsKey("lowest_price") ? Edit.GetPrice(steamPrices["lowest_price"].ToString()) : 0m;
+            decimal median_price = steamPrices.ContainsKey("median_price") ? Edit.GetPrice(steamPrices["median_price"].ToString()) : 0m;
 
             switch (RareProperties.Default.CompareId)
             {
                 case 0:
-                    return steamPrices.Item1;
+                    return lowest_price;
                 case 1:
-                    return steamPrices.Item2;
-                case 2:
-                    return csmPrice;
+                    return median_price;
                 default:
                     return 0;
             }
@@ -121,7 +116,7 @@ namespace ItemChecker.Services
         {
             try
             {
-                var json = Get.Request(@"https://api.csgofloat.com/?url=" + link);
+                string json = HttpRequest.RequestGetAsync(@"https://api.csgofloat.com/?url=" + link).Result;
 
                 return Convert.ToDecimal(JObject.Parse(json)["iteminfo"]["floatvalue"].ToString());
             }
@@ -154,7 +149,7 @@ namespace ItemChecker.Services
         {
             if (!String.IsNullOrEmpty(RareCheckConfig.CheckedConfig.NameContains) && !data.Stickers.Any(x => x.Contains(RareCheckConfig.CheckedConfig.NameContains)))
                 return false;
-            if (data.Stickers.Count >= RareCheckConfig.CheckedConfig.StickerCount)
+            if (data.Stickers.Count >= RareCheckConfig.CheckedConfig.MinSticker)
             {
                 foreach (var sticker in data.Stickers)
                 {

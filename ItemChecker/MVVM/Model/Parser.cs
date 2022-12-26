@@ -7,8 +7,6 @@ namespace ItemChecker.MVVM.Model
 {
     public class ParserTable : ObservableObject
     {
-        private string _currencySymbol = "$";
-        private int _currencyId = 0;
         public int CurrencyId
         {
             get
@@ -21,6 +19,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        int _currencyId = 0;
         public string CurrencySymbol
         {
             get
@@ -33,14 +32,14 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        string _currencySymbol = "$";
 
-        public string CurrencySymbolSteam { get; set; } = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Symbol;
+        public string CurrencySymbolSteam { get; set; } = SteamAccount.Currency.Symbol;
         public List<string> CurrencyList { get; set; } = SteamBase.AllowCurrencys.Select(x => x.Name).ToList();
         public static Currency CurectCurrency { get; set; } = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == 1);
 
         public List<DataParser> Items { get; set; } = new();
 
-        private ICollectionView _gridView;
         public ICollectionView GridView
         {
             get
@@ -53,7 +52,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private DataParser _selectedItem;
+        ICollectionView _gridView;
         public DataParser SelectedItem
         {
             get
@@ -66,8 +65,8 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        DataParser _selectedItem;
 
-        private int _count = 0;
         public int Count
         {
             get
@@ -80,6 +79,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        int _count = 0;
     }
     public class ParserFilter
     {
@@ -92,7 +92,6 @@ namespace ItemChecker.MVVM.Model
         public bool KnifeGlove { get; set; }
         public bool KnifeGloveStattrak { get; set; }
         //other
-        public bool Have { get; set; }
         public List<string> Weapons { get; set; } = new()
         {
             "Any",
@@ -151,6 +150,7 @@ namespace ItemChecker.MVVM.Model
             "Ursus Knife",
         };
         public string SelectedWeapon { get; set; } = "Any";
+        public bool HidePlaced { get; set; }
         //exterior
         public bool NotPainted { get; set; }
         public bool BattleScarred { get; set; }

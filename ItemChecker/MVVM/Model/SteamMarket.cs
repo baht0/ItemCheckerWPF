@@ -4,7 +4,6 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 
 namespace ItemChecker.MVVM.Model
 {
@@ -16,9 +15,7 @@ namespace ItemChecker.MVVM.Model
             {
                 try
                 {
-                    if (String.IsNullOrEmpty(SteamAccount.ApiKey))
-                        return string.Empty;
-                    JObject res = Get.GameServersStatus(SteamAccount.ApiKey);
+                    JObject res = SteamRequest.Get.GameServersStatus();
                     return res["result"]["services"]["SteamCommunity"].ToString();
                 }
                 catch
@@ -27,13 +24,19 @@ namespace ItemChecker.MVVM.Model
                 }
             }
         }
+        public static decimal MaxAmount
+        {
+            get
+            {
+                return SteamAccount.Balance * 10;
+            }
+        }
         public static Order<DataOrder> Orders { get; set; } = new();
     }
     public class DataOrder
     {
         public string ItemName { get; set; }
         public string Id { get; set; }
-        public decimal SteamPrice { get; set; }
         public decimal OrderPrice { get; set; }
         public decimal ServicePrice { get; set; }
         public decimal ServiceGive { get; set; }
@@ -47,7 +50,7 @@ namespace ItemChecker.MVVM.Model
             var currentList = this as Order<DataOrder>;
             decimal availableAmount = GetAvailableAmount();
 
-            if (availableAmount < (SteamAccount.MaxAmount * 0.01m))
+            if (availableAmount < (SteamMarket.MaxAmount * 0.01m))
             {
                 currentList.Cancel(currentList.FirstOrDefault(x => x.Precent == currentList.Min(x => x.Precent)));
                 return true;
@@ -59,24 +62,25 @@ namespace ItemChecker.MVVM.Model
             var currentList = this as Order<DataOrder>;
 
             if (currentList.Any())
-                return Math.Round(SteamAccount.MaxAmount - currentList.Sum(s => s.OrderPrice), 2);
-            return SteamAccount.MaxAmount;
+                return Math.Round(SteamMarket.MaxAmount - currentList.Sum(s => s.OrderPrice), 2);
+            return SteamMarket.MaxAmount;
         }
         public void Cancel(T order)
         {
             var itemOrder = order as DataOrder;
-            string market_hash_name = HttpUtility.UrlEncode(itemOrder.ItemName);
-            Post.CancelBuyOrder(SteamAccount.Cookies, market_hash_name, itemOrder.Id);
+            SteamRequest.Post.CancelBuyOrder(itemOrder.ItemName, itemOrder.Id);
             base.Remove(order);
         }
-        public new Boolean Add(T item)
+        public new Boolean Add(T order)
         {
-            if (IsAllow(item))
+            if (IsAllow(order))
             {
-                base.Add(item);
+                base.Add(order);
+                var item = order as DataOrder;
+                ItemsList.Favorite.Add(new(item.ItemName, HomeProperties.Default.ServiceId));
                 return true;
             }
-            Cancel(item);
+            Cancel(order);
             return false;
         }
         Boolean IsAllow(T order)
@@ -88,10 +92,10 @@ namespace ItemChecker.MVVM.Model
             if (isAllow)
                 isAllow = SteamAccount.Balance > itemOrder.OrderPrice;
             if (isAllow)
-                isAllow = SettingsProperties.Default.ServiceId != 0 && SettingsProperties.Default.MinPrecent < itemOrder.Precent;
+                isAllow = HomeProperties.Default.ServiceId == 0 || (HomeProperties.Default.ServiceId != 0 && HomeProperties.Default.MinPrecent < itemOrder.Precent);
             if (isAllow)
             {
-                switch (SettingsProperties.Default.ServiceId)
+                switch (HomeProperties.Default.ServiceId)
                 {
                     case 2:
                         isAllow = !item.Csm.Overstock && !item.Csm.Unavailable;

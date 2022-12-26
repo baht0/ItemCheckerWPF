@@ -28,7 +28,7 @@ namespace ItemChecker.MVVM.Model
             }
             set
             {
-                var currency = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == SteamAccount.CurrencyId).Value;
+                var currency = SteamAccount.Currency.Value;
                 if (ParserTable.CurectCurrency.Id != 1)
                     value = Edit.ConverterToUsd(value, ParserTable.CurectCurrency.Value);
                 value = Edit.ConverterFromUsd(value, currency);
@@ -70,7 +70,7 @@ namespace ItemChecker.MVVM.Model
             if (isAllow)
                 isAllow = item.OrderPrice < SteamAccount.Balance;
             if (isAllow)
-                isAllow = item.Precent > SettingsProperties.Default.MinPrecent;
+                isAllow = item.Precent > HomeProperties.Default.MinPrecent;
 
             return isAllow;
         }

@@ -1,6 +1,10 @@
 ﻿using ItemChecker.Core;
+using ItemChecker.MVVM.Model;
 using ItemChecker.MVVM.ViewModel;
+using ItemChecker.Properties;
+using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace ItemChecker.MVVM.View
@@ -23,8 +27,7 @@ namespace ItemChecker.MVVM.View
                 MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.No)
                 return;
-            if (DataContext is StartUpViewModel vm)
-                vm.ExitCommand.Execute(null);
+            Application.Current.Shutdown();
         }
         private void Reset_Click(object sender, RoutedEventArgs e)
         {
@@ -33,20 +36,33 @@ namespace ItemChecker.MVVM.View
                 MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (result == MessageBoxResult.No)
                 return;
-            if (DataContext is StartUpViewModel vm)
-            {
-                vm.DeleteDataCommand.Execute(null);
-                vm.ExitCommand.Execute(null);
-            }
+
+            string path = ProjectInfo.DocumentPath + "Net";
+            if (Directory.Exists(path))
+                Directory.Delete(path, true);
+
+            MainProperties.Default.SteamCurrencyId = 0;
+            MainProperties.Default.Save();
+
+            Application.Current.Shutdown();
         }
 
-        private void TextBox_KeyDown(object sender, KeyEventArgs e)
+        private void passTextbox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
                 StartUpViewModel viewModel = (StartUpViewModel)DataContext;
-                if (viewModel.LoginCommand.CanExecute(null))
-                    viewModel.LoginCommand.Execute(passTextbox);
+                if (viewModel.SignInCommand.CanExecute(null))
+                    viewModel.SignInCommand.Execute(passTextbox);
+            }
+        }
+        private void code2FA_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (code2FA.Text.Length == 5)
+            {
+                StartUpViewModel viewModel = (StartUpViewModel)DataContext;
+                if (viewModel.SubmitCodeCommand.CanExecute(null))
+                    viewModel.SubmitCodeCommand.Execute(code2FA.Text);
             }
         }
     }

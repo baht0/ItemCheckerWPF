@@ -14,6 +14,13 @@ namespace ItemChecker.MVVM.Model
                 return AppDomain.CurrentDomain.BaseDirectory;
             }
         }
+        public static string UpdateFolder
+        {
+            get
+            {
+                return AppDomain.CurrentDomain.BaseDirectory + @"\update";
+            }
+        }
         public static string DocumentPath
         {
             get
@@ -49,15 +56,10 @@ namespace ItemChecker.MVVM.Model
                     "ItemChecker.Updater.dll",
                     "ItemChecker.Updater.runtimeconfig.json",
                     "icon.ico",
-                    "msedgedriver.exe",
-                    "WebDriver.dll",
-                    "WebDriver.Support.dll",
                     "Newtonsoft.Json.dll",
                     "HtmlAgilityPack.dll",
                     "MaterialDesignColors.dll",
                     "MaterialDesignThemes.Wpf.dll",
-                    "LiveCharts.dll",
-                    "LiveCharts.Wpf.dll"
                 };
             }
         }
@@ -69,6 +71,5 @@ namespace ItemChecker.MVVM.Model
             }
         }
         public static string LatestVersion { get; set; } = string.Empty;
-        public static bool IsUpdate { get; set; }
     }
 }

@@ -51,11 +51,6 @@
             </Path>
             <!--Title-->
             <StackPanel Grid.Row="0" Height="25" HorizontalAlignment="Right" Orientation="Horizontal" Grid.Column="1">
-                <Button Height="25" Style="{DynamicResource MaterialDesignFlatButton}" ToolTip="Update"
-                        Visibility="{Binding StartUp.IsUpdate, Converter={StaticResource BooleanToVisibilityConverter}}"
-                        Command="{Binding UpdateCommand}">
-                    <materialDesign:PackIcon Kind="Download" Foreground="White"/>
-                </Button>
                 <Button Height="25" Style="{DynamicResource MaterialDesignFlatButton}"
                         Click="Reset_Click" ToolTip="Reset"
                         Visibility="{Binding StartUp.IsReset, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -105,7 +100,7 @@
                     </Border>
                     
                     <TextBlock Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Bottom"
-                               Text="© 2018-2022 baht0" Grid.ColumnSpan="2" Margin="15 0 0 0"
+                               Text="© 2018-2023 baht0" Grid.ColumnSpan="2" Margin="15 0 0 0"
                                FontSize="11" Foreground="White"/>
                     <TextBlock Grid.Row="2" Grid.Column="0" HorizontalAlignment="Left"
                                Text="{Binding StartUp.Version, StringFormat='Version: {0}'}"
@@ -113,56 +108,76 @@
                                FontSize="10" Foreground="White"/>
                 </Grid>
                 <!--Login-->
-                <Grid Grid.Column="1" Visibility="{Binding ShowLogin, Converter={StaticResource BooleanToVisibilityConverter}}"
-                      VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <Rectangle Width="235" Height="205"
-                           Fill="{StaticResource Background}"
-                           RadiusX="12" RadiusY="12">
+                <Grid Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center"
+                      Visibility="{Binding StartUp.IsSignInShow, Converter={StaticResource BooleanToVisibilityConverter}}">                    
+                    <Rectangle Width="235" Height="160" Fill="{DynamicResource Background}" RadiusX="12" RadiusY="12">
                         <Rectangle.Effect>
-                            <DropShadowEffect Color="DarkGray" 
-                                      Direction="360"
-                                      BlurRadius="15"
-                                      RenderingBias="Quality"
-                                      ShadowDepth="1"/>
+                            <DropShadowEffect Color="DarkGray" Direction="360" BlurRadius="15"
+                                              RenderingBias="Quality" ShadowDepth="1"/>
                         </Rectangle.Effect>
                     </Rectangle>
-                    <Grid Width="200" Height="155" Margin="0 -20 0 0">
+                    <Grid Width="200" Height="135" Margin="0 -10 0 0">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="15"/>
                             <RowDefinition/>
-                            <RowDefinition/>
-                            <RowDefinition Height="25"/>
-                            <RowDefinition Height="40"/>
                         </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="65"/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="Steam Account" FontSize="15" Grid.ColumnSpan="2" FontWeight="Bold"
+                        <TextBlock Text="Steam" FontSize="15" Grid.ColumnSpan="2" FontWeight="Bold"
                                HorizontalAlignment="Center" VerticalAlignment="Top"/>
-                        <TextBlock Text="Login:" Grid.Row="1" VerticalAlignment="Center"/>
-                        <TextBox Grid.Row="1" Grid.Column="1" Height="25" FontSize="13"
-                                 Text="{Binding SignUp.Login, UpdateSourceTrigger=PropertyChanged}"/>
-                        <TextBlock Text="Password:" Grid.Row="2" VerticalAlignment="Center"/>
-                        <PasswordBox x:Name="passTextbox" Grid.Row="2" Grid.Column="1" Height="25" FontSize="13"/>
-                        <TextBlock Text="2AF Code:" Grid.Row="3" VerticalAlignment="Bottom"/>
-                        <TextBox Grid.Row="4" Grid.ColumnSpan="2"
-                             VerticalAlignment="Center" MaxLength="5" FontSize="20"
-                             TextAlignment="Center" CharacterCasing="Upper"
-                             FontWeight="Bold" FontFamily="Consolas"
-                             KeyDown="TextBox_KeyDown"
-                             Text="{Binding SignUp.Code2AF, UpdateSourceTrigger=PropertyChanged}"/>
-                        <Button Content="Sign In" Grid.ColumnSpan="2" Grid.Row="5"
-                            Width="100" Margin="0 0 0 -55"
-                            HorizontalAlignment="Center"  VerticalAlignment="Bottom"
-                            Command="{Binding LoginCommand}"
-                            CommandParameter="{Binding ElementName=passTextbox}"/>
+                        <!--IsSubmit-->
+                        <Grid Grid.Row="1" Visibility="{Binding StartUp.IsSubmitShow, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="Account Name:" VerticalAlignment="Bottom"/>
+                            <TextBox Grid.Row="1" FontSize="13" VerticalAlignment="Center" IsEnabled="{Binding StartUp.IsSubmitEnabled}"
+                                     Text="{Binding SignInData.AccountName, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock Text="Password:" Grid.Row="2" VerticalAlignment="Bottom"/>
+                            <PasswordBox x:Name="passTextbox" Grid.Row="3" FontSize="13" VerticalAlignment="Center" KeyDown="passTextbox_KeyDown"
+                                         IsEnabled="{Binding StartUp.IsSubmitEnabled}"/>
+
+                            <TextBlock Text="Invalid account name or password." Grid.Row="4" VerticalAlignment="Center" Foreground="Red" FontStyle="Italic"
+                                       Visibility="{Binding StartUp.IsErrorShow, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                            <Button Content="Sign In" Grid.Row="5" Width="100" Margin="0 0 0 -32" HorizontalAlignment="Center" VerticalAlignment="Bottom" IsEnabled="{Binding StartUp.IsSubmitEnabled}"
+                                    Command="{Binding SignInCommand}" CommandParameter="{Binding ElementName=passTextbox}" Style="{StaticResource MaterialDesignRaisedButton}"/>
+                        </Grid>
+                        <!--IsConfirmation-->
+                        <Grid Grid.Row="1" Visibility="{Binding StartUp.IsConfirmationShow, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition/>
+                                <RowDefinition Height="15"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="Use the Steam Mobile App to confirm your sign in..." TextWrapping="Wrap" VerticalAlignment="Center"/>
+                            <TextBlock Text="Or enter the code instead:" Grid.Row="1" VerticalAlignment="Bottom"/>
+                            <TextBox Grid.Row="2" VerticalAlignment="Center" MaxLength="5" FontSize="20" x:Name="code2FA"
+                                     TextAlignment="Center" CharacterCasing="Upper" FontWeight="Bold" FontFamily="Consolas"
+                                     TextChanged="code2FA_TextChanged" Text="{Binding SignInData.Code2AF, UpdateSourceTrigger=PropertyChanged}"
+                                     IsEnabled="{Binding StartUp.IsCodeEnabled}"/>
+                            <TextBlock Text="Invalid Code2FA." Grid.Row="3" VerticalAlignment="Bottom" Foreground="Red" FontStyle="Italic"
+                                       Visibility="{Binding StartUp.IsErrorShow, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        </Grid>
+                        <!--IsExpired-->
+                        <Grid Grid.Row="1" Visibility="{Binding StartUp.IsExpiredShow, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition Height="50"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="The sign in request has expired." Grid.Row="0" VerticalAlignment="Bottom" FontSize="14"/>
+                            <TextBlock Text="Restart to login." Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14"/>
+                            <Button Content="Exit" Grid.Row="2" Width="100" VerticalAlignment="Bottom" Command="{Binding ExitCommand}"/>
+                        </Grid>
                     </Grid>
                 </Grid>
                 <!--currency-->
-                <Grid Grid.Column="1" Visibility="{Binding StartUp.IsCurrency, Converter={StaticResource BooleanToVisibilityConverter}}"
+                <Grid Grid.Column="1" Visibility="{Binding StartUp.IsCurrencyShow, Converter={StaticResource BooleanToVisibilityConverter}}"
                       VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <Rectangle Width="235" Height="100" Fill="{StaticResource Background}" RadiusX="12" RadiusY="12">
+                    <Rectangle Width="235" Height="100" Fill="{DynamicResource Background}" RadiusX="12" RadiusY="12">
                         <Rectangle.Effect>
                             <DropShadowEffect Color="DarkGray" Direction="360" BlurRadius="15" RenderingBias="Quality" ShadowDepth="1"/>
                         </Rectangle.Effect>

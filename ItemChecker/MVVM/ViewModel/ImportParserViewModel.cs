@@ -51,13 +51,27 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 MessageBoxResult result = MessageBox.Show(
                     "Are you sure you want to delete all files?",
-                    "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    "Question", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (result == MessageBoxResult.No)
                     return;
 
                 string folder = ProjectInfo.DocumentPath + "extract";
                 Directory.Delete(folder, true);
                 ImportParser = new();
+
+            }, (obj) => ImportParser.List.Any());
+        public ICommand DeleteCommand =>
+            new RelayCommand((obj) =>
+            {
+                MessageBoxResult result = MessageBox.Show(
+                    "Are you sure you want to delete?",
+                    "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.No)
+                    return;
+
+                var file = obj as ImportFile;
+                File.Delete(file.Path);
+                ImportParser.List.Remove(file);
 
             }, (obj) => ImportParser.List.Any());
     }

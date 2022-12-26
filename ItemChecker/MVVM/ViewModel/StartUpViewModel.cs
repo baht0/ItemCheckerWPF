@@ -1,21 +1,22 @@
-﻿using ItemChecker.Core;
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using System.Windows.Input;
-using ItemChecker.MVVM.Model;
-using System.Windows;
-using System.Globalization;
-using ItemChecker.Services;
-using System.Diagnostics;
+﻿using System;
 using System.Linq;
+using System.Timers;
+using System.Windows;
+using System.Windows.Input;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Globalization;
+using ItemChecker.Core;
+using ItemChecker.Net;
+using ItemChecker.MVVM.Model;
+using ItemChecker.Services;
 using ItemChecker.Properties;
 
 namespace ItemChecker.MVVM.ViewModel
 {
     public class StartUpViewModel : StartUp
     {
-        public bool LoginSuccessful { get; set; }
+        public bool LaunchSuccessful { get; set; }
         IView _view;
 
         public StartUp StartUp
@@ -28,36 +29,16 @@ namespace ItemChecker.MVVM.ViewModel
             }
         }
         StartUp _startUp = new();
-        public bool ShowLogin
+        public SignInData SignInData
         {
-            get { return _showLogin; }
+            get { return _signInData; }
             set
             {
-                _showLogin = value;
+                _signInData = value;
                 OnPropertyChanged();
             }
         }
-        bool _showLogin = false;
-        public SteamSignUp SignUp
-        {
-            get { return _signUp; }
-            set
-            {
-                _signUp = value;
-                OnPropertyChanged();
-            }
-        }
-        SteamSignUp _signUp = new();
-        public string CurrencyApi
-        {
-            get { return _currencyApi; }
-            set
-            {
-                _currencyApi = value;
-                OnPropertyChanged();
-            }
-        }
-        string _currencyApi = string.Empty;
+        SignInData _signInData = new();
 
         public StartUpViewModel(IView view)
         {
@@ -71,36 +52,8 @@ namespace ItemChecker.MVVM.ViewModel
                 Title = "Welcome!",
                 Message = "The program has been launched!"
             });
-            Task.Run(() => StartTask());
+            Task.Run(StartTask);
         }
-        public ICommand ExitCommand =>
-            new RelayCommand((obj) =>
-            {
-                Task.Run(() => {
-                    cts.Cancel();
-                    StartUp.Progress = Tuple.Create(5, "Exit...");
-                    ShowLogin = false;
-                    if (BaseModel.Browser != null)
-                        BaseService.BrowserExit();
-
-                    Application.Current.Dispatcher.Invoke(() => { Application.Current.Shutdown(); });
-                });
-            });
-        public ICommand DeleteDataCommand =>
-            new RelayCommand((obj) =>
-            {
-                Task.Run(() => {
-                    StartUp.Progress = Tuple.Create(5, "Reseting...");
-                    MainProperties.Default.SteamLoginSecure = string.Empty;
-                    MainProperties.Default.SteamCurrencyId = 0;
-                    MainProperties.Default.SessionBuff = string.Empty;
-                    MainProperties.Default.Save();
-
-                    string profilesDir = ProjectInfo.DocumentPath + "profile";
-                    if (Directory.Exists(profilesDir))
-                        Directory.Delete(profilesDir, true);
-                });
-            });
         void Hide()
         {
             _view.Close();
@@ -109,121 +62,133 @@ namespace ItemChecker.MVVM.ViewModel
         {
             try
             {
-                if (token.IsCancellationRequested)
-                    return;
-                StartUp.Progress = Tuple.Create(1, "Check Update...");
-                ProjectInfoService.AppCheck();
-                StartUp.IsUpdate = DataProjectInfo.IsUpdate;
-                if (DataProjectInfo.IsUpdate)
-                    StartUp.Message.Enqueue($"Update {DataProjectInfo.LatestVersion} is available.");
-                BaseService.GetCurrency();
-
-                if (token.IsCancellationRequested)
-                    return;
-                StartUp.Progress = Tuple.Create(2, "Signing In...");
-                KillProccess();
-                ShowLogin = SteamAccount.NeedLogin();
-                StartUp.Progress = ShowLogin ? Tuple.Create(2, "Please, Signing In...") : Tuple.Create(3, "Get Account...");
-                while (ShowLogin)
+                StartUp.Progress = Tuple.Create(1, "Checking Update...");
+                bool isUpdate = ProjectInfoService.AppCheck();
+                if (isUpdate)
                 {
-                    if (token.IsCancellationRequested)
-                        break;
-                    ShowLogin = SteamAccount.Login();
-                    StartUp.Progress = ShowLogin ? Tuple.Create(2, "Failed to login...") : Tuple.Create(3, "Get Account...");
-                    SignUp.Code2AF = string.Empty;
+                    StartUp.Progress = Tuple.Create(1, "Updating...");
+                    ProjectInfoService.Update();
                 }
-                if (token.IsCancellationRequested)
-                    return;
-                SteamAccount.GetAccount();
-                while (!BuffAccount.IsLogIn())
-                    System.Threading.Thread.Sleep(200);
+                StartUp.Progress = Tuple.Create(2, "Preparation...");
+                BaseService.GetCurrencyList();
 
-                if (token.IsCancellationRequested)
-                    return;
-                StartUp.Progress = Tuple.Create(4, "Preparation...");
+                StartUp.Progress = Tuple.Create(3, "Signing In...");
+                if (!SteamRequest.Session.IsAuthorized())
+                {
+                    StartUp.IsSignInShow = true;
+                    SignIn();
+                }
+                ServiceAccount.SignInToServices();
+
+                StartUp.Progress = Tuple.Create(4, "Get Account...");
+                SteamAccount.GetAccount();
+
+                StartUp.Progress = Tuple.Create(5, "Creation ItemBase...");
                 ItemBaseService itemBase = new();
                 itemBase.CreateItemsBase();
 
-                if (token.IsCancellationRequested)
-                    return;
-                StartUp.Progress = Tuple.Create(5, "Check MyOrders...");
-                OrderCheckService order = new();
-                order.SteamOrders(true);
-
-                if (token.IsCancellationRequested)
-                    return;
-                LoginSuccessful = true;
-                Application.Current.Dispatcher.Invoke(() => { Hide(); });
+                LaunchSuccessful = true;
+                Application.Current.Dispatcher.Invoke(Hide);
             }
             catch (Exception exp)
             {
                 StartUp.IsReset = true;
                 BaseService.errorLog(exp, true);
-
-                if (!DataProjectInfo.IsUpdate)
-                {
-                    Application.Current.Dispatcher.Invoke(() => {
-                        if (Application.Current.MainWindow.DataContext is StartUpViewModel vw)
-                            vw.ExitCommand.Execute(null);
-                    });
-                }
+                Application.Current.Dispatcher.Invoke(Application.Current.Shutdown);
             }
         }
-        void KillProccess()
+        void SignIn()
         {
-            if (Process.GetProcessesByName(Path.GetFileNameWithoutExtension(System.Reflection.Assembly.GetEntryAssembly().Location)).Count() > 1)
-            {
-                MessageBox.Show(
-                    "The program is already running!",
-                    "Warning",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-                Process.GetCurrentProcess().Kill();
-            }
-            BaseModel.Browser = null;
-            foreach (Process proc in Process.GetProcessesByName("msedge")) proc.Kill();
-            foreach (Process proc in Process.GetProcessesByName("msedgedriver")) proc.Kill();
-            foreach (Process proc in Process.GetProcessesByName("conhost"))
-            {
-                try
+            StartUp.Progress = Tuple.Create(3, "Please, Signing In...");
+            SignInData = new();
+            StartUp.IsSubmitShow = true;
+
+            while (!SignInData.IsCorrect) Thread.Sleep(100);
+
+            bool isSetToken = false;
+            Task.Run(() => {
+                while (!isSetToken)
                 {
-                    proc.Kill();
+                    isSetToken = SteamRequest.Session.CheckAuthStatus();
+                    if (!StartUp.IsCodeEnabled && !isSetToken)
+                    {
+                        StartUp.IsCodeEnabled = true;
+                        StartUp.IsErrorShow = true;
+                    }
+                    Thread.Sleep(5000);
                 }
-                catch
-                {
-                    continue;
-                }
+            });
+            while (!isSetToken) Thread.Sleep(100);
+            StartUp.IsSignInShow = false;
+
+            StartUp.CurrencyList = new(SteamBase.CurrencyList);
+            StartUp.SelectedCurrency = SteamBase.CurrencyList.FirstOrDefault();
+            StartUp.IsCurrencyShow = true;
+            while (StartUp.IsCurrencyShow) Thread.Sleep(100);
+            StartUp.Progress = Tuple.Create(3, "Signing In...");
+        }
+        void SessionTimerTick(Object sender, ElapsedEventArgs e)
+        {
+            SignInData.TimerTick--;
+            if (SignInData.TimerTick <= 0)
+            {
+                StartUp.Progress = Tuple.Create(5, "Failed to login...");
+                StartUp.IsConfirmationShow = false;
+                StartUp.IsExpiredShow = true;
+                SignInData.Timer.Enabled = false;
+                SignInData.Timer.Elapsed -= SessionTimerTick;
             }
         }
-        public ICommand UpdateCommand =>
+        public ICommand SignInCommand =>
             new RelayCommand((obj) =>
             {
-                MessageBoxResult result = MessageBox.Show(
-                    $"Want to upgrade from {DataProjectInfo.CurrentVersion} to {DataProjectInfo.LatestVersion}?", "Question",
-                    MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if (result == MessageBoxResult.Yes)
-                    ProjectInfoService.Update();
-
-            }, (obj) => DataProjectInfo.IsUpdate);
-        public ICommand LoginCommand =>
-            new RelayCommand((obj) =>
-            {
-                var propertyInfo = obj.GetType().GetProperty("Password");
-                SignUp.Password = (string)propertyInfo.GetValue(obj, null);
-                if (!String.IsNullOrEmpty(SignUp.Password))
+                Task.Run(() =>
                 {
-                    SteamSignUp.SignUp = SignUp;
-                    SteamSignUp.SignUp.IsLoggedIn = true;
-                    StartUp.Progress = Tuple.Create(2, "Signing In...");
-                    ShowLogin = false;
-                }
-            }, (obj) => !SteamSignUp.SignUp.IsLoggedIn && !String.IsNullOrEmpty(SignUp.Login) && SignUp.Code2AF.Length == 5);
+                    StartUp.IsSubmitEnabled = false;
+                    StartUp.IsErrorShow = false;
+                    var propertyInfo = obj.GetType().GetProperty("Password");
+                    SignInData.Password = (string)propertyInfo.GetValue(obj, null);
+                    if (!String.IsNullOrEmpty(SignInData.Password))
+                    {
+                        if (SignInData.AllowUser(SignInData.AccountName))
+                        {
+                            SignInData.IsCorrect = SteamRequest.Session.SubmitSignIn(SignInData.AccountName, SignInData.Password);
+                            if (SignInData.IsCorrect)
+                            {
+                                SignInData.Timer.Elapsed += SessionTimerTick;
+                                SignInData.Timer.Enabled = true;
+                                StartUp.IsErrorShow = false;
+                                StartUp.IsSubmitShow = false;
+                                StartUp.IsConfirmationShow = true;
+                            }
+                            else
+                                StartUp.IsErrorShow = true;
+                        }
+                        else
+                            StartUp.IsErrorShow = true;
+                    }
+                    else
+                        StartUp.IsErrorShow = true;
+                    StartUp.IsSubmitEnabled = true;
+                });
+            }, (obj) => !String.IsNullOrEmpty(SignInData.AccountName));
+        public ICommand SubmitCodeCommand =>
+            new RelayCommand((obj) =>
+            {
+                StartUp.IsErrorShow = false;
+                Task.Run(() => SteamRequest.Session.SubmitCode(SignInData.Code2AF));
+                StartUp.IsCodeEnabled = false;
+            }, (obj) => !String.IsNullOrEmpty(SignInData.Code2AF) && SignInData.IsCorrect);
         public ICommand SelectCurrencyCommand =>
             new RelayCommand((obj) =>
             {
                 var currency = obj as Currency;
-                SteamAccount.CurrencyId = currency.Id;
-                StartUp.IsCurrency = false;
+                SteamAccount.Currency = currency;
+                StartUp.IsCurrencyShow = false;
+
+                MainProperties.Default.SteamCurrencyId = currency.Id;
+                MainProperties.Default.Save();
+
             }, (obj) => StartUp.SelectedCurrency != null);
     }
 }

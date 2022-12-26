@@ -1,5 +1,5 @@
-﻿using ItemChecker.MVVM.ViewModel;
-using ItemChecker.Support;
+﻿using ItemChecker.MVVM.Model;
+using ItemChecker.MVVM.ViewModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -9,15 +9,33 @@ namespace ItemChecker.MVVM.View
 {
     public partial class MainWindow : Window
     {
-        HomeViewModel homeViewModel = new();
-        ParserViewModel parserViewModel = new();
-        RareViewModel rareViewModel = new();
+        readonly HomeViewModel homeViewModel = new();
+        readonly ParserViewModel parserViewModel = new();
+        readonly RareViewModel rareViewModel = new();
 
         public static bool IsWindowOpen<T>(string name = "") where T : Window
         {
             return string.IsNullOrEmpty(name)
                ? Application.Current.Windows.OfType<T>().Any()
                : Application.Current.Windows.OfType<T>().Any(w => w.Name.Equals(name));
+        }
+        public static void OpenDetailsItem(string itemName)
+        {
+            if (!string.IsNullOrEmpty(itemName))
+            {
+                Details.Items.Add(itemName);
+                Details.Item = Details.Items.FirstOrDefault(x => x.ItemName == itemName);
+            }
+            if (!IsWindowOpen<Window>("detailsWindow"))
+            {
+                DetailsWindow window = new(itemName);
+                window.Show();
+            }
+            else
+            {
+                Window window = Application.Current.Windows.OfType<Window>().Where(w => w.Name.Equals("detailsWindow")).FirstOrDefault();
+                window.Activate();
+            }
         }
 
         public MainWindow()
@@ -53,80 +71,6 @@ namespace ItemChecker.MVVM.View
             contextMenu.PlacementTarget = btn;
             contextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
             contextMenu.IsOpen = true;
-        }
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            var obj = sender as MenuItem;
-            switch (obj.Header)
-            {
-                case "Trades":
-                    {
-                        if (!MainWindow.IsWindowOpen<Window>("tradesWindow"))
-                        {
-                            TradesWindow window = new();
-                            window.Show();
-                        }
-                        else
-                        {
-                            Window window = Application.Current.Windows.OfType<Window>().Where(w => w.Name.Equals("tradesWindow")).FirstOrDefault();
-                            window.Activate();
-                        }
-                        break;
-                    }
-                case "Calculator":
-                    {
-                        if (!MainWindow.IsWindowOpen<Window>("calculatorWindow"))
-                        {
-                            CalculatorWindow window = new();
-                            window.Show();
-                        }
-                        else
-                        {
-                            Window window = Application.Current.Windows.OfType<Window>().Where(w => w.Name.Equals("calculatorWindow")).FirstOrDefault();
-                            window.WindowState = WindowState.Normal;
-                            window.Activate();
-                        }
-                        break;
-                    }
-                case "SteamMarket":
-                    {
-                        Edit.OpenUrl("https://steamcommunity.com/market/");
-                        break;
-                    }
-                case "MyInventory":
-                    {
-                        Edit.OpenUrl("https://steamcommunity.com/my/inventory/");
-                        break;
-                    }
-                case "Cs.Money":
-                    {
-                        Edit.OpenUrl("https://cs.money/");
-                        break;
-                    }
-                case "Loot.Farm":
-                    {
-                        Edit.OpenUrl("https://loot.farm/");
-                        break;
-                    }
-                case "Buff163":
-                    {
-                        Edit.OpenUrl("https://buff.163.com/");
-                        break;
-                    }
-                case "Settings":
-                    {
-                        SettingWindow window = new();
-                        window.ShowDialog();
-                        break;
-                    }
-                case "Exit":
-                    {
-                        MessageBoxResult result = MessageBox.Show("Are you sure you want to close?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                        if (result == MessageBoxResult.Yes && DataContext is MainViewModel viewModel && viewModel.ExitCommand.CanExecute(null))
-                            viewModel.ExitCommand.Execute(null);
-                        break;
-                    }
-            }
         }
         private void Home_Click(object sender, RoutedEventArgs e)
         {

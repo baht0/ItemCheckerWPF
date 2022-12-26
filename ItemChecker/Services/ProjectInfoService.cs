@@ -1,76 +1,71 @@
 ﻿using System;
-using ItemChecker.Net;
+using System.Linq;
 using System.Diagnostics;
 using System.Windows;
 using System.IO;
+using System.IO.Compression;
+using System.Threading;
+using Newtonsoft.Json.Linq;
+using ItemChecker.Net;
 using ItemChecker.Properties;
 using ItemChecker.Services;
-using Newtonsoft.Json.Linq;
-using System.Threading;
-using System.Linq;
 
 namespace ItemChecker.MVVM.Model
 {
     public class ProjectInfoService : ProjectInfo
     {
-        public static void AppCheck()
+        static DirectoryInfo DirInfo { get; set; } = new(UpdateFolder);
+        public static bool AppCheck()
         {
-            if (!Directory.Exists(DocumentPath))
-                Directory.CreateDirectory(DocumentPath);
             if (MainProperties.Default.CompletionUpdate)
             {
-                if (Directory.Exists(AppPath + "\\update\\ItemChecker"))
-                {
-                    DirectoryInfo info = new(AppPath + "\\update\\ItemChecker");
-                    FileInfo[] Files = info.GetFiles();
-                    foreach (FileInfo file in Files)
-                    {
-                        if (file.Name.Contains("ItemChecker.Updater"))
-                        {
-                            string newPath = AppDomain.CurrentDomain.BaseDirectory + "\\" + file.Name;
-                            File.Move(file.FullName, newPath, true);
-                        }
-                    }
-                    info.Delete(true);
-                }
                 SettingsProperties.Default.Upgrade();
                 HomeProperties.Default.Upgrade();
-                ParserProperties.Default.Upgrade();
                 RareProperties.Default.Upgrade();
                 MainProperties.Default.Upgrade();
-
-                MainProperties.Default.CompletionUpdate = false;
-                MainProperties.Default.Save();
             }
-            CheckUpdate();
+            return CheckUpdate();
         }
-        public static void CheckUpdate()
+        static bool CheckUpdate()
         {
-            JArray json = JArray.Parse(Get.DropboxRead("Updates.json"));
+            JArray json = JArray.Parse(DropboxRequest.Get.Read("Updates.json"));
 
-            DataProjectInfo.LatestVersion = (string)(json.LastOrDefault()["version"]);
+            DataProjectInfo.LatestVersion = (string)json.LastOrDefault()["version"];
             int latest = Convert.ToInt32(DataProjectInfo.LatestVersion.Replace(".", string.Empty));
             int current = Convert.ToInt32(DataProjectInfo.CurrentVersion.Replace(".", string.Empty));
-            DataProjectInfo.IsUpdate = latest > current;
-            if (DataProjectInfo.IsUpdate)
-            {
-                Main.Notifications.Add(new()
-                {
-                    Title = "Update available!",
-                    Message = $"Latest version: {DataProjectInfo.LatestVersion}"
-                });
-                Main.Message.Enqueue("Update available!");
-            }
+            return latest > current;
         }
         public static void Update()
         {
-            ProcessStartInfo updater = new();
-            updater.FileName = AppPath + "ItemChecker.Updater.exe";
-            updater.Arguments = "1";
+            string pathZip = UpdateFolder + "\\ItemChecker.zip";
+
+            if (Directory.Exists(UpdateFolder))
+                DirInfo.Delete(true);
+            DirInfo.Create();
+            DirInfo.Attributes = FileAttributes.Hidden;
+
+            DropboxRequest.Post.DownloadZip(pathZip);
+
+            ZipFile.ExtractToDirectory(pathZip, UpdateFolder);
+
+            DirectoryInfo info = new(UpdateFolder + "\\ItemChecker\\");
+            FileInfo[] Files = info.GetFiles();
+            foreach (FileInfo file in Files)
+            {
+                if (file.Name.Contains("ItemChecker.Updater"))
+                {
+                    string newPath = $"{AppPath}\\{file.Name}";
+                    File.Move(file.FullName, newPath, true);
+                }
+            }
+            ProcessStartInfo updater = new()
+            {
+                FileName = AppPath + "ItemChecker.Updater.exe",
+                Arguments = "1"
+            };
             Process.Start(updater);
 
-            BaseService.BrowserExit();
-            Application.Current.Shutdown();
+            Application.Current.Dispatcher.Invoke(Application.Current.Shutdown);
         }
 
         public static Boolean UploadCurrentVersion()
@@ -81,16 +76,16 @@ namespace ItemChecker.MVVM.Model
                 if (!String.IsNullOrEmpty(text))
                 {
                     //upload file
-                    Post.DropboxDelete("ItemChecker");
+                    DropboxRequest.Post.Delete("ItemChecker");
                     Thread.Sleep(200);
-                    Post.DropboxFolder("ItemChecker");
+                    DropboxRequest.Post.Folder("ItemChecker");
                     foreach (var file in DataProjectInfo.FilesList)
                     {
                         Thread.Sleep(200);
-                        Post.DropboxUploadFile("ItemChecker/" + file, AppPath + file);
+                        DropboxRequest.Post.UploadFile("ItemChecker/" + file, AppPath + file);
                     }
                     //ver file
-                    JArray updates = JArray.Parse(Get.DropboxRead("Updates.json"));
+                    JArray updates = JArray.Parse(DropboxRequest.Get.Read("Updates.json"));
                     JObject obj = (JObject)updates.FirstOrDefault(x => (string)x["version"] == DataProjectInfo.CurrentVersion);
 
                     if (obj != null)
@@ -107,9 +102,9 @@ namespace ItemChecker.MVVM.Model
                     }
 
                     updates = new JArray(updates.OrderBy(obj => (DateTime)obj["date"]));
-                    Post.DropboxDelete("Updates.json");
+                    DropboxRequest.Post.Delete("Updates.json");
                     Thread.Sleep(200);
-                    Post.DropboxUpload("Updates.json", updates.ToString());
+                    DropboxRequest.Post.Upload("Updates.json", updates.ToString());
 
                     return true;
                 }
