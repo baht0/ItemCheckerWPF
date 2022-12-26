@@ -1,53 +1,13 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Diagnostics;
 using System.Globalization;
-using System.Web;
+using System.Text.RegularExpressions;
 
 namespace ItemChecker.Support
 {
     public class Edit
     {
-        //url
-        public static String Decode(string itemName)
-        {
-            if (itemName.Contains("&#39"))
-                itemName = itemName.Replace("&#39", "&#39;");
-            return HttpUtility.HtmlDecode(itemName);
-        }
-        public static String ToUnicodeEncode(string itemName)
-        {
-            itemName = itemName.Replace("'", "&#39");
-            itemName = itemName.Replace("★", @"\u2605");
-            itemName = itemName.Replace("™", @"\u2122");
-            itemName = itemName.Replace("ö", @"\u00f6");
-            itemName = itemName.Replace("壱", @"\u58f1");
-            itemName = itemName.Replace("弐", @"\u5f10");
-            itemName = itemName.Replace("龍王", @"\u9f8d\u738b");
-
-            return itemName;
-        }
-        public static String EncodeMarketHashName(string name)
-        {
-            name = name.Replace("★", "%E2%98%85");
-            name = name.Replace("™", "%E2%84%A2");
-            name = name.Replace(" ", "%20");
-            name = name.Replace("|", "%7C");
-            name = name.Replace("(", "%28");
-            name = name.Replace(")", "%29");
-
-            return name;
-        }
-        public static String DecodeMarketHashName(string name)
-        {
-            name = name.Replace("%E2%98%85", "★");
-            name = name.Replace("%E2%84%A2", "™");
-            name = name.Replace("%20", " ");
-            name = name.Replace("%7C", "|");
-            name = name.Replace("%28", "(");
-            name = name.Replace("%29", ")");
-
-            return name;
-        }
         public static void OpenUrl(string url)
         {
             var psi = new ProcessStartInfo(url)
@@ -57,8 +17,9 @@ namespace ItemChecker.Support
             };
             Process.Start(psi);
         }
-        public static void OpenCsm(string market_hash_name)
+        public static void OpenCsm(string itemName)
         {
+            string market_hash_name = Uri.EscapeDataString(itemName);
             string stattrak = "false";
             string souvenir = "false";
             if (market_hash_name.Contains("StatTrak"))
@@ -74,12 +35,32 @@ namespace ItemChecker.Support
         //remove
         public static Decimal GetPrice(string str)
         {
-            str = str.Replace(",", ".");
-            str = str.Replace(" pуб.", "");
-            str = str.Replace("$", "");
-            str = str.Replace(" USD", "");
-
-            return Convert.ToDecimal(str, CultureInfo.InvariantCulture);
+            var mat = Regex.Match(str, @"(\d+(\.\d+)?)|(\.\d+)").Value;
+            return Convert.ToDecimal(mat, CultureInfo.InvariantCulture);
+        }
+        public static Decimal SteamAvgPrice(string itemName, JObject items)
+        {
+            try
+            {
+                itemName = itemName.Replace("'", "&#39");
+                var item = items[itemName] as JObject;
+                if (item != null && item["price"] != null)
+                {
+                    if (item["price"]["24_hours"] != null)
+                        return Convert.ToDecimal(item["price"]["24_hours"]["average"]);
+                    else if (item["price"]["7_days"] != null)
+                        return Convert.ToDecimal(item["price"]["7_days"]["average"]);
+                    else if (item["price"]["30_days"] != null)
+                        return Convert.ToDecimal(item["price"]["30_days"]["average"]);
+                    else if (item["price"]["all_time"] != null)
+                        return Convert.ToDecimal(item["price"]["all_time"]["average"]);
+                }
+                return 0;
+            }
+            catch
+            {
+                return 0;
+            }
         }
         public static String RemoveDoppler(string itemName)
         {
