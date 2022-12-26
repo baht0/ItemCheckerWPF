@@ -4,7 +4,6 @@ using ItemChecker.Support;
 using MaterialDesignThemes.Wpf;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
 
@@ -36,17 +35,6 @@ namespace ItemChecker.MVVM.ViewModel
         }
         private History _history = new();
 
-        public HistoryViewModel()
-        {
-            History.List = new(History.HistoryRecords.OrderByDescending(d => d.Date));
-
-            History.Result = new DataResult()
-            {
-                AvgBalance = Math.Round(Queryable.Average(History.HistoryRecords.Select(x => x.Total).AsQueryable()), 2),
-                StartBalance = History.HistoryRecords.FirstOrDefault().Total,
-                EndBalance = History.HistoryRecords.LastOrDefault().Total,
-            };
-        }
         public ICommand SwitchCurrencyCommand =>
             new RelayCommand((obj) =>
             {
@@ -77,38 +65,22 @@ namespace ItemChecker.MVVM.ViewModel
             new RelayCommand((obj) =>
             {
                 var index = (int)obj;
-
-                ObservableCollection<DataHistory> list;
-                switch (index)
+                List<DataHistory> list = index switch
                 {
-                    case 1:
-                        list = new(History.HistoryRecords.Where(x => x.Date >= DateTime.Today.AddDays(-1)));
-                        break;
-                    case 2:
-                        list = new(History.HistoryRecords.Where(x => x.Date >= DateTime.Today.AddDays(-7)));
-                        break;
-                    case 3:
-                        list = new(History.HistoryRecords.Where(x => x.Date >= DateTime.Today.AddDays(-30)));
-                        break;
-                    case 4:
-                        list = new(History.HistoryRecords.Where(x => x.Date >= DateTime.Today.AddMonths(-3)));
-                        break;
-                    case 5:
-                        list = new(History.HistoryRecords.Where(x => x.Date >= DateTime.Today.AddMonths(-6)));
-                        break;
-                    case 6:
-                        list = new(History.HistoryRecords.Where(x => x.Date >= DateTime.Today.AddYears(-1)));
-                        break;
-                    default:
-                        list = new(History.HistoryRecords);
-                        break;
-                }
-                History.List = list ?? (new());
+                    1 => History.HistoryRecords.Where(x => x.Date >= DateTime.Today.AddDays(-1)).ToList(),
+                    2 => History.HistoryRecords.Where(x => x.Date >= DateTime.Today.AddDays(-7)).ToList(),
+                    3 => History.HistoryRecords.Where(x => x.Date >= DateTime.Today.AddDays(-30)).ToList(),
+                    4 => History.HistoryRecords.Where(x => x.Date >= DateTime.Today.AddMonths(-3)).ToList(),
+                    5 => History.HistoryRecords.Where(x => x.Date >= DateTime.Today.AddMonths(-6)).ToList(),
+                    6 => History.HistoryRecords.Where(x => x.Date >= DateTime.Today.AddYears(-1)).ToList(),
+                    _ => History.HistoryRecords,
+                };
+                History.List = new(list.OrderByDescending(d => d.Date));
                 if (list.Any())
                 {
                     History.Result = new DataResult()
                     {
-                        AvgBalance = Queryable.Average(list.Select(x => x.Total).AsQueryable()),
+                        AvgBalance = Math.Round(Queryable.Average(History.HistoryRecords.Select(x => x.Total).AsQueryable()), 2),
                         StartBalance = list.FirstOrDefault().Total,
                         EndBalance = list.LastOrDefault().Total,
                     };

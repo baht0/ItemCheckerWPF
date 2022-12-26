@@ -121,18 +121,17 @@ namespace ItemChecker.MVVM.Model
         {
             var currentList = this as Records<DataHistory>;
 
-            bool isAllow = true;
+            bool isAllow = !currentList.Any(x => x.Date == item.Date);
 
             if (isAllow)
-                isAllow = !currentList.Any(x
-                    => x.Date == item.Date
-                    && (int)x.Total == (int)item.Total
+                return !currentList.Any(x
+                    => (int)x.Total == (int)item.Total
                     && (int)x.Steam == (int)item.Steam
                     && (int)x.CsMoney == (int)item.CsMoney
                     && (int)x.LootFarm == (int)item.LootFarm
                     && (int)x.Buff163 == (int)item.Buff163);
 
-            return isAllow;
+            return false;
         }
         void Save()
         {

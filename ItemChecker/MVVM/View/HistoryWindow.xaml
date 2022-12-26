@@ -54,7 +54,7 @@
                           ItemsSource="{Binding History.CurrencyList}" SelectedIndex="{Binding History.CurrencyId}" SelectionChanged="currency_SelectionChanged"/>
                 <Separator Grid.ColumnSpan="3" VerticalAlignment="Bottom"/>
                 <!--config-->
-                <Grid Grid.Row="1" Height="210" VerticalAlignment="Top">
+                <Grid Grid.Row="1" >
                     <Grid.RowDefinitions>
                         <RowDefinition Height="55"/>
                         <RowDefinition/>
@@ -68,7 +68,7 @@
                         <ComboBox Grid.Row="1" ItemsSource="{Binding History.Interval}" SelectedIndex="0"
                                   VerticalAlignment="Center" x:Name="dateintervalComboBox" SelectionChanged="dateintervalComboBox_SelectionChanged"/>
                     </Grid>
-                    <GroupBox Grid.Row="1" Header="Result" Style="{DynamicResource none}" BorderThickness="0.5">
+                    <GroupBox Grid.Row="1" Height="180" VerticalAlignment="Top" Header="Result" Style="{DynamicResource none}" BorderThickness="0.5">
                         <Grid Margin="5">
                             <Grid.RowDefinitions>
                                 <RowDefinition/>
@@ -77,9 +77,9 @@
                                 <RowDefinition/>
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" Text="{Binding History.Result.AvgBalance, StringFormat='Balance avg: {0}$'}" TextWrapping="Wrap" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="1" Text="{Binding History.Result.StartBalance, StringFormat='Balance start: {0}$'}" TextWrapping="Wrap" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="2" Text="{Binding History.Result.EndBalance, StringFormat='Balance end: {0}$'}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="0" Text="{Binding History.Result.AvgBalance, StringFormat='Avg: {0}$'}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="1" Text="{Binding History.Result.StartBalance, StringFormat='Start: {0}$'}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="2" Text="{Binding History.Result.EndBalance, StringFormat='End: {0}$'}" TextWrapping="Wrap" VerticalAlignment="Center"/>
                             <TextBlock Grid.Row="3" Text="{Binding History.Result.Difference, StringFormat='Difference: {0}$'}" TextWrapping="Wrap" VerticalAlignment="Center"/>
                             <TextBlock Grid.Row="4" Text="{Binding History.Result.Precent, StringFormat='Precent: {0}%'}" TextWrapping="Wrap" VerticalAlignment="Center"/>
                         </Grid>
