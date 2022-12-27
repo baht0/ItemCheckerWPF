@@ -229,7 +229,7 @@ namespace ItemChecker.Net
                 };
 
                 string url = "https://steamcommunity.com/tradeoffer/" + tradeOfferId + "/accept";
-                string referer = "https://steamcommunity.com/my/inventory/";
+                string referer = "https://steamcommunity.com/tradeoffer/" + tradeOfferId;
 
                 return Request(url, referer, args);
             }

@@ -413,11 +413,12 @@ namespace ItemChecker.MVVM.ViewModel
         {
             try
             {
-                do
+                var trades = InventoryService.CheckOffer();
+                while (trades.Any())
                 {
                     HomeInventoryInfo.Progress = 0;
-                    HomeInventoryInfo.MaxProgress = DataTradeOffer.Offers.Count;
-                    foreach (DataTradeOffer offer in DataTradeOffer.Offers)
+                    HomeInventoryInfo.MaxProgress = trades.Count;
+                    foreach (var offer in trades)
                     {
                         try
                         {
@@ -436,7 +437,6 @@ namespace ItemChecker.MVVM.ViewModel
                             break;
                     }
                 }
-                while (InventoryService.CheckOffer());
             }
             catch (Exception exp)
             {
@@ -485,7 +485,7 @@ namespace ItemChecker.MVVM.ViewModel
             }
             finally
             {
-                SelectedInventory = new();
+                SelectedInventory = HomeInventoryInfo.Items.Any() ? HomeInventoryInfo.Items.FirstOrDefault() : new();
                 HomeInventoryInfo.IsService = false;
                 Main.Message.Enqueue("Quick sell items has finished.");
             }

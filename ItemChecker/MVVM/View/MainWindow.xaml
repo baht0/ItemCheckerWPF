@@ -146,7 +146,7 @@
                         </MultiBinding>
                     </TextBlock.Text>
                 </TextBlock>
-                <Popup HorizontalAlignment="Right" x:Name="PopupNotification" StaysOpen="False" Width="270" Height="659" HorizontalOffset="1018" Closed="PopupNotification_Closed">
+                <Popup HorizontalAlignment="Right" x:Name="PopupNotification" StaysOpen="False" Width="270" Height="659" HorizontalOffset="1023" Closed="PopupNotification_Closed">
                     <Grid>
                         <Border Background="{DynamicResource ElementBackground}" BorderThickness="0.5" BorderBrush="{DynamicResource Background}">
                             <Grid Margin="5">

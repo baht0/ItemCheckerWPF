@@ -60,33 +60,25 @@ namespace ItemChecker.Services
             return inventory;
         }
 
-        public static Boolean CheckOffer()
+        public static List<DataTradeOffer> CheckOffer()
         {
-            try
+            var offers = new List<DataTradeOffer>();
+            var json = SteamRequest.Get.TradeOffers();
+            var trades = (JArray)json["response"]["trade_offers_received"];
+            foreach (var trade in trades)
             {
-                DataTradeOffer.Offers = new();
-                JObject json = SteamRequest.Get.TradeOffers();
-                JArray trades = (JArray)json["response"]["trade_offers_received"];
-                foreach (var trade in trades)
+                if (trade["trade_offer_state"].ToString() == "2")
                 {
-                    var trade_status = trade["trade_offer_state"].ToString();
-                    if (trade_status == "2")
+                    offers.Add(new()
                     {
-                        DataTradeOffer.Offers.Add(new()
-                        {
-                            TradeOfferId = trade["tradeofferid"].ToString(),
-                            PartnerId = trade["accountid_other"].ToString()
-                        });
-                    }
-                    else
-                        continue;
+                        TradeOfferId = trade["tradeofferid"].ToString(),
+                        PartnerId = trade["accountid_other"].ToString()
+                    });
                 }
-                return DataTradeOffer.Offers.Any();
+                else
+                    continue;
             }
-            catch
-            {
-                return false;
-            }
+            return offers;
         }
         public static void SellItem(DataInventory inventoryItem, HomeInventoryConfig config)
         {

@@ -174,8 +174,8 @@ namespace ItemChecker.MVVM.Model
     //inventory
     public class HomeInventoryConfig : ObservableObject
     {
-        public bool AllAvailable { get; set; } = true;
-        public bool SelectedOnly { get; set; }
+        public bool AllAvailable { get; set; }
+        public bool SelectedOnly { get; set; } = true;
         public List<string> SellingPrice { get; set; } = new()
         {
             "LowestSellOrder",

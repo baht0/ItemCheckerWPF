@@ -88,7 +88,7 @@
                 <!--table-->
                 <DataGrid Grid.Row="1" Grid.Column="1" Margin="10 0 0 0" AlternationCount="2" AlternatingRowBackground="{DynamicResource ElementBackground}"
                           AutoGenerateColumns="False" x:Name="itemsGrid" SelectionMode="Single" FontSize="12"
-                          ItemsSource="{Binding History.List, UpdateSourceTrigger=PropertyChanged}"
+                          ItemsSource="{Binding History.List, UpdateSourceTrigger=PropertyChanged}" CanUserSortColumns="False"
                           IsReadOnly="True" CanUserReorderColumns="False" CanUserResizeRows="False" CanUserResizeColumns="False">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat='{}{0:dd MMM yy}'}" Width="auto" FontWeight="Bold"/>
