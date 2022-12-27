@@ -66,7 +66,7 @@ namespace ItemChecker.MVVM.Model
     }
     public class DetailItem : ObservableObject
     {
-        public string ItemName { get; set; }
+        public string ItemName { get; set; } = "Unknown";
         public ObservableCollection<DetailItemPrice> Prices
         {
             get { return _prices; }

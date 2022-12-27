@@ -47,8 +47,7 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 _selectedItem = value;
 
-                string itemName = _selectedItem.ItemName;
-                if (_selectedItem.Price == null || _selectedItem.Prices.Any() || itemName == "New")
+                if (_selectedItem == null || _selectedItem.ItemName == "Unknown" || _selectedItem.Price == null || _selectedItem.Prices.Any())
                     return;
 
                 _selectedItem.Price.IsBusy = true;
@@ -56,6 +55,7 @@ namespace ItemChecker.MVVM.ViewModel
                 {
                     try
                     {
+                        string itemName = _selectedItem.ItemName;
                         ItemBaseService baseService = new();
                         baseService.UpdateSteamItem(itemName);
                         baseService.UpdateCsmItem(itemName, false);
@@ -90,7 +90,7 @@ namespace ItemChecker.MVVM.ViewModel
             Timer.Enabled = true;
 
             Details.ItemsView = new(Details.Items);
-            SelectedItem = Details.Items.LastOrDefault();
+            SelectedItem = Details.Items.Any() ? Details.Items.LastOrDefault() : new();
         }
         void UpdateWindow(Object sender, ElapsedEventArgs e)
         {
@@ -139,8 +139,9 @@ namespace ItemChecker.MVVM.ViewModel
                 if (result == MessageBoxResult.Yes)
                 {
                     Details.Items.Clear();
-                    Details.ItemsView = new();
+                    Details = new();
                     Details.IsSearch = true;
+                    SelectedItem = new();
                 }
             }, (obj) => !SelectedItem.Price.IsBusy && !SelectedItem.Info.IsBusy);
         public ICommand SwitchCurrencyCommand =>
@@ -204,6 +205,6 @@ namespace ItemChecker.MVVM.ViewModel
                     SelectedItem.Compare.Precent = Edit.Precent(SelectedItem.Prices[SelectedItem.Compare.Service1].Price, SelectedItem.Prices[SelectedItem.Compare.Service2].Get);
                     SelectedItem.Compare.Difference = Edit.Difference(SelectedItem.Prices[SelectedItem.Compare.Service2].Get, SelectedItem.Prices[SelectedItem.Compare.Service1].Price);
                 }
-            }, (obj) => SelectedItem.Prices != null && SelectedItem.Prices.Any());
+            }, (obj) => SelectedItem != null && SelectedItem.ItemName != "Unknown" && SelectedItem.Prices != null && SelectedItem.Prices.Any());
     }
 }

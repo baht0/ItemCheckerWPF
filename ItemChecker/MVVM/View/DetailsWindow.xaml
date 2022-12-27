@@ -87,10 +87,10 @@
                                   ItemsSource="{Binding Details.CurrencyList}" SelectedIndex="{Binding SelectedItem.CurrencyId}"/>
                         <Separator Grid.ColumnSpan="4" VerticalAlignment="Bottom"/>
                         <DataGrid Grid.Row="1" Grid.ColumnSpan="4" AlternationCount="2" AlternatingRowBackground="{DynamicResource ElementBackground}"
-                              AutoGenerateColumns="False" IsReadOnly="True" x:Name="pricesGrid" SelectionMode="Single"
+                              AutoGenerateColumns="False" IsReadOnly="True" x:Name="pricesGrid" SelectionMode="Single" CanUserSortColumns="False"
                               ItemsSource="{Binding SelectedItem.Prices}" SelectedItem="{Binding SelectedItem.Price}" MouseDoubleClick="DataGrid_MouseDoubleClick">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Service" Binding="{Binding Service}" CanUserResize="False" Width="auto" CanUserSort="False"/>
+                                <DataGridTextColumn Header="Service" Binding="{Binding Service}" CanUserResize="False" Width="auto"/>
                                 <DataGridTextColumn Header="Price" Binding="{Binding Price}" CanUserResize="False" Width="auto"/>
                                 <DataGridTextColumn Header="Get" Binding="{Binding Get}" CanUserResize="False" Width="auto"/>
                                 <DataGridTextColumn Header="Have" Binding="{Binding Have, Converter={StaticResource BooleanToYesNoConverter}}" CanUserResize="False" Width="auto"/>
