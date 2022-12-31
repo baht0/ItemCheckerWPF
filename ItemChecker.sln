@@ -11,8 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ItemChecker.Support", "Item
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ItemChecker.Updater", "ItemChecker.Updater\ItemChecker.Updater.csproj", "{E307A14A-FE58-4A19-9795-3FAA70E7489B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UpdateBase", "UpdateBase\UpdateBase.csproj", "{47E57ED0-430A-4572-B2FE-A52D604213B0}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		All|Any CPU = All|Any CPU
@@ -44,12 +42,6 @@ Global
 		{E307A14A-FE58-4A19-9795-3FAA70E7489B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E307A14A-FE58-4A19-9795-3FAA70E7489B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E307A14A-FE58-4A19-9795-3FAA70E7489B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{47E57ED0-430A-4572-B2FE-A52D604213B0}.All|Any CPU.ActiveCfg = Release|Any CPU
-		{47E57ED0-430A-4572-B2FE-A52D604213B0}.All|Any CPU.Build.0 = Release|Any CPU
-		{47E57ED0-430A-4572-B2FE-A52D604213B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{47E57ED0-430A-4572-B2FE-A52D604213B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{47E57ED0-430A-4572-B2FE-A52D604213B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{47E57ED0-430A-4572-B2FE-A52D604213B0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
