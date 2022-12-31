@@ -125,11 +125,7 @@ namespace ItemChecker.MVVM.Model
 
             if (isAllow)
                 return !currentList.Any(x
-                    => (int)x.Total == (int)item.Total
-                    && (int)x.Steam == (int)item.Steam
-                    && (int)x.CsMoney == (int)item.CsMoney
-                    && (int)x.LootFarm == (int)item.LootFarm
-                    && (int)x.Buff163 == (int)item.Buff163);
+                    => (int)x.Total == (int)item.Total);
 
             return false;
         }

@@ -190,11 +190,11 @@ namespace UpdateBase
                     }
 
                     bool row = type == "Souvenir Package";
-                    int rowId = row ? 6 : 5;
+                    int rowId = row ? 5 : 4;
                     string html = HttpRequest.RequestGetAsync(url).Result;
                     HtmlDocument htmlDoc = new();
                     htmlDoc.LoadHtml(html);
-                    HtmlNodeCollection skins = htmlDoc.DocumentNode.SelectNodes("//div[@class='container main-content']/div[@class='row'][" + rowId + "]/div[@class='col-lg-4 col-md-6 col-widen text-center']");
+                    HtmlNodeCollection skins = htmlDoc.DocumentNode.SelectNodes($"//div[@class='container main-content']/div[@class='row'][{rowId}]/div[@class='col-lg-4 col-md-6 col-widen text-center']");
 
                     pages = CountPages(htmlDoc, row);
                     foreach (HtmlNode skin in skins)
