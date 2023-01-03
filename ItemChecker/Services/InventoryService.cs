@@ -9,7 +9,9 @@ namespace ItemChecker.Services
 {
     public class InventoryService
     {
-        public static List<DataInventory> CheckInventory(DataInventory selectedItem = null)
+        static List<DataInventory> inventory = new();
+        static decimal sumOfItems = 0;
+        public static List<DataInventory> CheckInventory()
         {
             var json = SteamRequest.Get.Request("http://steamcommunity.com/my/inventory/json/730/2");
             JObject rgInventory = (JObject)JObject.Parse(json)["rgInventory"];
@@ -25,9 +27,6 @@ namespace ItemChecker.Services
                 JObject jsonItem = (JObject)rgDescriptions[$"{classid}_{instanceid}"];
 
                 string name = jsonItem["market_name"].ToString();
-                if (selectedItem != null && selectedItem.ItemName != name)
-                    continue;
-
                 bool marketable = (int)jsonItem["marketable"] != 0;
                 if (!marketable) continue;
                 bool tradable = (int)jsonItem["tradable"] != 0;
@@ -58,6 +57,31 @@ namespace ItemChecker.Services
                     inventory.Add(item);
             }
             return inventory;
+        }
+        public static decimal GetSumOfItems(List<DataInventory> items = null)
+        {
+            items ??= CheckInventory();
+
+            bool same = inventory.Count == items.Count
+                && inventory.Select(x => x.ItemName).ToHashSet().SetEquals(items.Select(x => x.ItemName))
+                && inventory.Select(x => x.Data.Count).ToHashSet().SetEquals(items.Select(x => x.Data.Count));
+
+            if (!same)
+            {
+                sumOfItems = 0;
+                inventory = items;
+                foreach (var item in items)
+                {
+                    if (item.Data.Any(x => x.Marketable))
+                    {
+                        var baseItem = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName);
+                        var json = SteamRequest.Get.ItemOrdersHistogram(baseItem.ItemName, baseItem.Steam.Id, 1);
+                        var price = Convert.ToDecimal(json["highest_buy_order"]) / 100;
+                        sumOfItems += price * item.Data.Count;
+                    }
+                }
+            }
+            return sumOfItems;
         }
 
         public static List<DataTradeOffer> CheckOffer()

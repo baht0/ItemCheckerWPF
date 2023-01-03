@@ -69,10 +69,10 @@ namespace ItemChecker.MVVM.Model
         {
             get
             {
-                return SteamBase.AllowCurrencys.Select(x => x.Name).ToList();
+                return Currencies.Allow.Select(x => x.Name).ToList();
             }
         }
-        public static Currency CurectCurrency { get; set; } = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == 1);
+        public static DataCurrency CurectCurrency { get; set; } = Currencies.Allow.FirstOrDefault();
         public string CurrencySymbolSteam
         {
             get
@@ -81,7 +81,7 @@ namespace ItemChecker.MVVM.Model
             }
         }
 
-        public static Records<DataHistory> HistoryRecords { get; set; } = ReadFile().ToObject<Records<DataHistory>>();
+        public static Records<DataHistory> Records { get; set; } = ReadFile().ToObject<Records<DataHistory>>();
         public static JArray ReadFile()
         {
             string path = ProjectInfo.DocumentPath + "History.json";
@@ -108,8 +108,7 @@ namespace ItemChecker.MVVM.Model
     {
         public new Boolean Add(T item)
         {
-            var currentItem = item as DataHistory;
-            if (IsAllow(currentItem))
+            if (IsAllow(item))
             {
                 base.Add(item);
                 Save();
@@ -117,16 +116,19 @@ namespace ItemChecker.MVVM.Model
             }
             return false;
         }
-        Boolean IsAllow(DataHistory item)
+        Boolean IsAllow(T item)
         {
+            var currentItem = item as DataHistory;
             var currentList = this as Records<DataHistory>;
 
-            bool isAllow = !currentList.Any(x => x.Date == item.Date);
-
-            if (isAllow)
-                return !currentList.Any(x
-                    => (int)x.Total == (int)item.Total);
-
+            var haveItem = currentList.FirstOrDefault(x => x.Date == currentItem.Date);
+            if (haveItem != null)
+            {
+                currentList.Remove(haveItem);
+                return true;
+            }
+            else if ((int)currentList.LastOrDefault().Total != (int)currentItem.Total)
+                return true;
             return false;
         }
         void Save()

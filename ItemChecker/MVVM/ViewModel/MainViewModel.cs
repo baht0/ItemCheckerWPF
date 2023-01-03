@@ -16,8 +16,8 @@ namespace ItemChecker.MVVM.ViewModel
     public class MainViewModel : ObservableObject
     {
         #region prop
-        Timer TimerInfo = new(TimeSpan.FromMinutes(15).TotalMilliseconds);
-        Timer TimerWindow = new(250);
+        readonly Timer TimerInfo = new(TimeSpan.FromMinutes(15).TotalMilliseconds);
+        readonly Timer TimerWindow = new(250);
 
         public MainInfo MainInfo
         {
@@ -46,7 +46,6 @@ namespace ItemChecker.MVVM.ViewModel
                 MainProperties.Default.CompletionUpdate = false;
                 MainProperties.Default.Save();
             }
-
             Task.Run(Main.CheckBalance);
         }
         public ICommand MenuCommand =>
@@ -127,19 +126,17 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 Application.Current.Shutdown();
             });
-
-        //Notification
         public ICommand ReadNotificationCommand =>
             new RelayCommand((obj) =>
             {
                 foreach (var item in Main.Notifications)
                     item.IsRead = true;
             });
+
         void UpdateInformation(Object sender, ElapsedEventArgs e)
         {
             try
             {
-                SteamAccount.GetBalance();
                 Main.CheckBalance();
 
                 if (SteamMarket.StatusCommunity != "normal")
@@ -156,17 +153,9 @@ namespace ItemChecker.MVVM.ViewModel
                 BaseService.errorLog(ex, false);
             }
         }
-
         void UpdateWindow(Object sender, ElapsedEventArgs e)
         {
-            try
-            {
-                MainInfo = new();
-            }
-            catch (Exception ex)
-            {
-                BaseService.errorLog(ex, false);
-            }
+            MainInfo = new();
         }
     }
 }

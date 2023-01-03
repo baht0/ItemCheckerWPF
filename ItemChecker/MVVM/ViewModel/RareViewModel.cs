@@ -185,20 +185,20 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand SwitchCurrencyCommand =>
             new RelayCommand((obj) =>
             {
-                Currency currency = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Name == (string)obj);
+                var currency = Currencies.Allow.FirstOrDefault(x => x.Name == (string)obj);
                 var items = RareTable.GridView.Cast<DataRare>().ToList();
                 if (RareTable.CurectCurrency.Id != 1)
                     foreach (var item in items)
                     {
-                        item.Price = Edit.ConverterToUsd(item.Price, RareTable.CurectCurrency.Value);
-                        item.PriceCompare = Edit.ConverterToUsd(item.PriceCompare, RareTable.CurectCurrency.Value);
-                        item.Difference = Edit.ConverterToUsd(item.Difference, RareTable.CurectCurrency.Value);
+                        item.Price = Currency.ConverterToUsd(item.Price, RareTable.CurectCurrency.Id);
+                        item.PriceCompare = Currency.ConverterToUsd(item.PriceCompare, RareTable.CurectCurrency.Id);
+                        item.Difference = Currency.ConverterToUsd(item.Difference, RareTable.CurectCurrency.Id);
                     }
                 foreach (var item in items)
                 {
-                    item.Price = Edit.ConverterFromUsd(item.Price, currency.Value);
-                    item.PriceCompare = Edit.ConverterFromUsd(item.PriceCompare, currency.Value);
-                    item.Difference = Edit.ConverterFromUsd(item.Difference, currency.Value);
+                    item.Price = Currency.ConverterFromUsd(item.Price, currency.Id);
+                    item.PriceCompare = Currency.ConverterFromUsd(item.PriceCompare, currency.Id);
+                    item.Difference = Currency.ConverterFromUsd(item.Difference, currency.Id);
                 }
                 RareTable.CurrencySymbol = currency.Symbol;
                 RareTable.CurectCurrency = currency;

@@ -14,8 +14,8 @@ namespace ItemChecker.MVVM.Model
         public static DetailsItemList<DetailItem> Items { get; set; } = new();
         public static DetailItem Item { get; set; } = new();
 
-        public List<string> CurrencyList { get; set; } = SteamBase.AllowCurrencys.Select(x => x.Name).ToList();
-        public static Currency CurectCurrency { get; set; } = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == 1);
+        public List<string> CurrencyList { get; set; } = Currencies.Allow.Select(x => x.Name).ToList();
+        public static DataCurrency CurectCurrency { get; set; } = Currencies.Allow.FirstOrDefault(x => x.Id == 1);
         public string CurrencySymbolSteam { get; set; } = SteamAccount.Currency.Symbol;
         public List<string> Services { get; set; } = Main.Services;
 
@@ -120,8 +120,8 @@ namespace ItemChecker.MVVM.Model
                             {
                                 var data = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == ItemName).Steam;
 
-                                data.LowestSellOrder = Edit.ConverterFromUsd(data.LowestSellOrder, ParserTable.CurectCurrency.Value);
-                                data.HighestBuyOrder = Edit.ConverterFromUsd(data.HighestBuyOrder, ParserTable.CurectCurrency.Value);
+                                data.LowestSellOrder = Currency.ConverterFromUsd(data.LowestSellOrder, ParserTable.CurectCurrency.Id);
+                                data.HighestBuyOrder = Currency.ConverterFromUsd(data.HighestBuyOrder, ParserTable.CurectCurrency.Id);
 
                                 baseService.UpdateSteamItemHistory(ItemName);
                                 Info.SteamInfo.LastSale = data.History.FirstOrDefault().Date;

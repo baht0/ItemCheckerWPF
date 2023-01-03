@@ -19,7 +19,6 @@ namespace ItemChecker.MVVM.ViewModel
     public class HomeViewModel : ObservableObject
     {
         #region Properties
-        readonly System.Timers.Timer TimerView = new(500);
 
         //homeView
         public Home Home
@@ -112,21 +111,8 @@ namespace ItemChecker.MVVM.ViewModel
             Task.Run(() => { 
                 OrderCheckService.SteamOrders(true);
                 HomeTable.IsBusy = false;
+                OnPropertyChanged(nameof(HomeTable));
             });
-
-            TimerView.Elapsed += UpdateView;
-            TimerView.Enabled = true;
-        }
-        void UpdateView(Object sender, ElapsedEventArgs e)
-        {
-            try
-            {
-
-            }
-            catch (Exception ex)
-            {
-                BaseService.errorLog(ex, false);
-            }
         }
 
         #region table
@@ -354,9 +340,9 @@ namespace ItemChecker.MVVM.ViewModel
                     try
                     {
                         HomeInventoryInfo.IsBusy = true;
-                        InventoryService inventoryService = new();
-                        var items = InventoryService.CheckInventory(null);
+                        var items = InventoryService.CheckInventory();
                         HomeInventoryInfo.Items = new(items);
+                        HomeInventoryInfo.SumOfItems = InventoryService.GetSumOfItems(items);
                         SelectedInventory = HomeInventoryInfo.Items.FirstOrDefault();
                     }
                     catch (Exception ex)
@@ -405,7 +391,7 @@ namespace ItemChecker.MVVM.ViewModel
                     HomeInventoryInfo.IsService = false;
                 }
             }, (obj) => HomeInventoryConfig.TaskId == 0
-                            || (HomeInventoryConfig.TaskId == 1
+                            || (HomeInventoryConfig.TaskId == 1 && HomeInventoryInfo.Items.Any()
                                 && ((HomeInventoryConfig.AllAvailable && HomeInventoryConfig.SellingPriceId != 2)
                                     || (HomeInventoryConfig.SelectedOnly && SelectedInventory != null
                                         && (HomeInventoryConfig.SellingPriceId < 2 || (HomeInventoryConfig.SellingPriceId == 2 && HomeInventoryConfig.Price != 0))))));
@@ -436,6 +422,7 @@ namespace ItemChecker.MVVM.ViewModel
                         if (HomeInventoryInfo.token.IsCancellationRequested)
                             break;
                     }
+                    trades = InventoryService.CheckOffer();
                 }
             }
             catch (Exception exp)
@@ -453,9 +440,10 @@ namespace ItemChecker.MVVM.ViewModel
         {
             try
             {
-                List<DataInventory> items = config.SelectedOnly ? InventoryService.CheckInventory(SelectedInventory) : InventoryService.CheckInventory();
+                var items = InventoryService.CheckInventory();
+                HomeInventoryInfo.Items = new(items);
 
-                HomeInventoryInfo.Items = !config.SelectedOnly ? new(items) : HomeInventoryInfo.Items;
+                items = config.SelectedOnly ? items.Where(x => x.ItemName != SelectedInventory.ItemName).ToList() : items;
                 HomeInventoryInfo.Progress = 0;
                 HomeInventoryInfo.MaxProgress = items.Count;
 

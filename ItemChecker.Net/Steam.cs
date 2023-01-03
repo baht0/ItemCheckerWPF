@@ -1,6 +1,5 @@
 ﻿using HtmlAgilityPack;
 using ItemChecker.Net.Session;
-using ItemChecker.Support;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -73,7 +72,7 @@ namespace ItemChecker.Net
                 var html = Request("https://steamcommunity.com/market/");
                 var htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(html);
-                return Edit.GetPrice(htmlDoc.DocumentNode.SelectSingleNode("//a[@id='header_wallet_balance']").InnerText);
+                return GetDecimal(htmlDoc.DocumentNode.SelectSingleNode("//a[@id='header_wallet_balance']").InnerText);
             }
             public static JObject GameServersStatus()
             {
@@ -93,7 +92,7 @@ namespace ItemChecker.Net
                 headers.Add("User-Agent", UserAgent);
                 headers.Add("Referer", "https://steamcommunity.com/market/listings/730/" + market_hash_name);
                 headers.Add("Origin", "https://steamcommunity.com/");
-                headers.IfModifiedSince = ifModifiedSince.AddSeconds(-5);
+                headers.IfModifiedSince = ifModifiedSince.AddMilliseconds(-7000);
                 headers.Add("sec-ch-ua", "Google Chrome\";v=\"107\", \"Chromium\";v=\"107\", \"Not=A?Brand\";v=\"24");
                 headers.Add("sec-ch-ua-mobile", "ooooo");
                 headers.Add("sec-ch-ua-platform", "Windows");

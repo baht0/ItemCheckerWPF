@@ -11,6 +11,7 @@ using ItemChecker.Net;
 using ItemChecker.MVVM.Model;
 using ItemChecker.Services;
 using ItemChecker.Properties;
+using ItemChecker.Support;
 
 namespace ItemChecker.MVVM.ViewModel
 {
@@ -70,7 +71,7 @@ namespace ItemChecker.MVVM.ViewModel
                     ProjectInfoService.Update();
                 }
                 StartUp.Progress = Tuple.Create(2, "Preparation...");
-                BaseService.GetCurrencyList();
+                Currencies.GetSteamCurrencies();
 
                 StartUp.Progress = Tuple.Create(3, "Signing In...");
                 if (!SteamRequest.Session.IsAuthorized())
@@ -121,8 +122,8 @@ namespace ItemChecker.MVVM.ViewModel
             while (!isSetToken) Thread.Sleep(100);
             StartUp.IsSignInShow = false;
 
-            StartUp.CurrencyList = new(SteamBase.CurrencyList);
-            StartUp.SelectedCurrency = SteamBase.CurrencyList.FirstOrDefault();
+            StartUp.CurrencyList = new(Currencies.Steam);
+            StartUp.SelectedCurrency = Currencies.Steam.FirstOrDefault();
             StartUp.IsCurrencyShow = true;
             while (StartUp.IsCurrencyShow) Thread.Sleep(100);
             StartUp.Progress = Tuple.Create(3, "Signing In...");
@@ -182,7 +183,7 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand SelectCurrencyCommand =>
             new RelayCommand((obj) =>
             {
-                var currency = obj as Currency;
+                var currency = obj as DataCurrency;
                 SteamAccount.Currency = currency;
                 StartUp.IsCurrencyShow = false;
 

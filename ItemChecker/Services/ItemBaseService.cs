@@ -15,14 +15,14 @@ namespace ItemChecker.Services
         public void CreateItemsBase()
         {
             JObject jobject = new();
-            string path = $"{ProjectInfo.DocumentPath}steamBase.json";
+            string path = $"{ProjectInfo.DocumentPath}SteamItemsBase.json";
             if (SettingsProperties.Default.UseLocalDb && File.Exists(path))
             {
                 string file = File.ReadAllText(path);
                 jobject = JObject.Parse(file);
             }
             else
-                jobject = JObject.Parse(DropboxRequest.Get.Read("steamBase.json"));
+                jobject = JObject.Parse(DropboxRequest.Get.Read("SteamItemsBase.json"));
 
             JArray skinsBase = JArray.Parse(jobject["Items"].ToString());
 
@@ -220,10 +220,9 @@ namespace ItemChecker.Services
             if (SteamBase.ItemList.Select(x => x.Buff.Updated).Max().AddMinutes(30) > DateTime.Now)
                 return;
 
-            decimal CNY = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == 23).Value;
             string tab = isBuyOrder ? "/buying" : string.Empty;
-            min = (int)Edit.ConverterFromUsd(min, CNY);
-            max = (int)Edit.ConverterFromUsd(max, CNY);
+            min = (int)Currency.ConverterFromUsd(min, 23);
+            max = (int)Currency.ConverterFromUsd(max, 23);
             int pages = int.MaxValue;
             string last_item = string.Empty;
             for (int i = 1; i <= pages; i++)
@@ -241,14 +240,14 @@ namespace ItemChecker.Services
                         var itemBase = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName);
                         if (itemBase != null && itemName != last_item)
                         {
-                            decimal price = Edit.ConverterToUsd(Convert.ToDecimal(item["sell_min_price"]), CNY);
+                            decimal price = Currency.ConverterToUsd(Convert.ToDecimal(item["sell_min_price"]), 23);
                             itemBase.Buff = new()
                             {
                                 Updated = DateTime.Now,
                                 Id = Convert.ToInt32(item["id"]),
                                 Price = price,
                                 Count = Convert.ToInt32(item["sell_num"]),
-                                BuyOrder = Edit.ConverterToUsd(Convert.ToDecimal(item["buy_max_price"]), CNY),
+                                BuyOrder = Currency.ConverterToUsd(Convert.ToDecimal(item["buy_max_price"]), 23),
                                 OrderCount = Convert.ToInt32(item["buy_num"]),
                                 IsHave = price > 0,
                             };
@@ -269,7 +268,6 @@ namespace ItemChecker.Services
                 return;
 
             string market_hash_name = HttpUtility.UrlEncode(itemName);
-            decimal CNY = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == 23).Value;
             int pages = int.MaxValue;
             string last_item = string.Empty;
             for (int i = 1; i <= pages; i++)
@@ -286,14 +284,14 @@ namespace ItemChecker.Services
                         string serviceItemName = item["market_hash_name"].ToString();
                         if (serviceItemName == itemName && itemName != last_item)
                         {
-                            decimal price = Edit.ConverterToUsd(Convert.ToDecimal(item["sell_min_price"]), CNY);
+                            decimal price = Currency.ConverterToUsd(Convert.ToDecimal(item["sell_min_price"]), 23);
                             itemBase.Buff = new()
                             {
                                 Updated = DateTime.Now,
                                 Id = Convert.ToInt32(item["id"]),
                                 Price = price,
                                 Count = Convert.ToInt32(item["sell_num"]),
-                                BuyOrder = Edit.ConverterToUsd(Convert.ToDecimal(item["buy_max_price"]), CNY),
+                                BuyOrder = Currency.ConverterToUsd(Convert.ToDecimal(item["buy_max_price"]), 23),
                                 OrderCount = Convert.ToInt32(item["buy_num"]),
                                 IsHave = price > 0,
                             };
@@ -313,8 +311,6 @@ namespace ItemChecker.Services
             if (itemBase == null || itemBase.History.Any())
                 return;
 
-            decimal CNY = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == 23).Value;
-
             string url = "https://buff.163.com/api/market/goods/bill_order?game=csgo&goods_id=" + itemBase.Id;
             JObject json = JObject.Parse(ServicesRequest.Buff163.Get.Request(url));
             JArray items = json["data"]["items"] as JArray;
@@ -322,7 +318,7 @@ namespace ItemChecker.Services
             {
                 double time = Convert.ToDouble(item["buyer_pay_time"]);
                 DateTime date = Edit.ConvertFromUnixTimestamp(time);
-                decimal price = Edit.ConverterToUsd(Convert.ToDecimal(item["price"]), CNY);
+                decimal price = Currency.ConverterToUsd(Convert.ToDecimal(item["price"]), 23);
                 itemBase.History.Add(new(date, price, 1));
             }
         }

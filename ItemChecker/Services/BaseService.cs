@@ -1,10 +1,8 @@
-﻿using ItemChecker.Core;
-using ItemChecker.MVVM.Model;
+﻿using ItemChecker.MVVM.Model;
 using ItemChecker.Net;
 using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -13,27 +11,6 @@ namespace ItemChecker.Services
 {
     public class BaseService
     {
-        static decimal price_dol;
-        public static void GetCurrencyList()
-        {
-            JObject json = JObject.Parse(DropboxRequest.Get.Read("steamBase.json"));
-            SteamBase.CurrencyList = JArray.Parse(json["Currency"].ToString()).ToObject<List<Currency>>();
-
-            foreach (var currency in SteamBase.CurrencyList.Where(x => x.Id == 1 || x.Id == 5 || x.Id == 23).ToList())
-                currency.Value = GetCurrency(currency.Id);
-        }
-        public static Decimal GetCurrency(int id)
-        {
-            int item_nameid = 1548540;
-            string itemName = "StatTrak™ AK-47 | Fire Serpent (Field-Tested)";
-
-            var json = SteamRequest.Get.ItemOrdersHistogram(itemName, item_nameid, id);
-            decimal price = Convert.ToDecimal(json["highest_buy_order"]);
-            price_dol = id == 1 ? price : price_dol;
-
-            return price / price_dol;
-        }
-
         public static void errorLog(Exception exp, bool isShow)
         {
             try

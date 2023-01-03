@@ -46,7 +46,7 @@ namespace ItemChecker.MVVM.Model
             string itemName = item.SelectSingleNode(".//div[4]/span/a").InnerText.Trim();
             string order_id = item.Attributes["id"].Value;
             string order_price = item.SelectSingleNode(".//div[2]/span/span[@class='market_listing_price']").InnerText.Trim();
-            decimal orderPrice = Edit.GetPrice(order_price[3..].Trim());
+            decimal orderPrice = Edit.GetDecimal(order_price[3..].Trim());
 
             DataOrder data = new()
             {
@@ -120,10 +120,10 @@ namespace ItemChecker.MVVM.Model
             {
                 if (SteamAccount.Currency.Id != 1)
                 {
-                    decimal currencyValue = SteamAccount.Currency.Value;
-                    data.ServicePrice = Edit.ConverterFromUsd(data.ServicePrice, currencyValue);
-                    data.ServiceGive = Edit.ConverterFromUsd(data.ServiceGive, currencyValue);
-                    data.Difference = Edit.ConverterFromUsd(data.Difference, currencyValue);
+                    var id = SteamAccount.Currency.Id;
+                    data.ServicePrice = Currency.ConverterFromUsd(data.ServicePrice, id);
+                    data.ServiceGive = Currency.ConverterFromUsd(data.ServiceGive, id);
+                    data.Difference = Currency.ConverterFromUsd(data.Difference, id);
                 }
                 data.Precent = Edit.Precent(data.OrderPrice, data.ServiceGive);
                 data.Difference = Edit.Difference(data.ServiceGive, data.OrderPrice);

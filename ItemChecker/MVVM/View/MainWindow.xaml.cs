@@ -28,7 +28,7 @@ namespace ItemChecker.MVVM.View
             }
             if (!IsWindowOpen<Window>("detailsWindow"))
             {
-                DetailsWindow window = new(itemName);
+                DetailsWindow window = new(string.IsNullOrEmpty(itemName));
                 window.Show();
             }
             else

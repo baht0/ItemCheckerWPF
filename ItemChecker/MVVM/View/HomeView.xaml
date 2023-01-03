@@ -164,11 +164,13 @@
                         <Grid Grid.Row="1" Visibility="{Binding HomeInventoryInfo.Items.Count, Converter={StaticResource IntToVisibilityConverter}}"
                               x:Name="inventoryGrid" Height="510" VerticalAlignment="Top">
                             <Grid.RowDefinitions>
+                                <RowDefinition Height="20"/>
                                 <RowDefinition Height="105"/>
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
                             <!--info-->
-                            <GroupBox Grid.Row="0" Style="{x:Null}" BorderThickness="0.5" Margin="5">
+                            <TextBlock Text="{Binding HomeInventoryInfo.SumOfItems, StringFormat='Sum of items: {0}$'}" VerticalAlignment="Center"/>
+                            <GroupBox Grid.Row="1" Style="{x:Null}" BorderThickness="0.5" Margin="5">
                                 <GroupBox.Header>
                                     <TextBlock Text="{Binding SelectedInventory.Data.Count, StringFormat='Item x{0}'}"/>
                                 </GroupBox.Header>
@@ -182,7 +184,7 @@
                                                Text="{Binding SelectedInventory.Data[0].TradeLock, StringFormat='TradeLock: {0}', Converter={StaticResource TradeLockConverter}}"/>
                                 </Grid>
                             </GroupBox>
-                            <ListBox Grid.Row="1" KeyDown="inventoryListBox_KeyDown" Background="{DynamicResource ElementBackground}"
+                            <ListBox Grid.Row="2" KeyDown="inventoryListBox_KeyDown" Background="{DynamicResource ElementBackground}"
                                      ItemsSource="{Binding HomeInventoryInfo.Items}" SelectedItem="{Binding SelectedInventory}"
                                      x:Name="inventoryListBox" MouseDoubleClick="inventoryListBox_MouseDoubleClick" ToolTip="'Double Click' to show item in inventory">
                                 <ListBox.ItemTemplate>

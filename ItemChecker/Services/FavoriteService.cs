@@ -21,10 +21,10 @@ namespace ItemChecker.Services
                 case 4 or 5:
                     if (SteamBase.ItemList.Count / 80 < SteamMarket.Orders.Count)
                     {
-                        var currency = SteamAccount.Currency.Value;
-                        decimal valueUsd = Edit.ConverterToUsd(SteamMarket.Orders.Min(x => x.OrderPrice), currency);
+                        var currency = SteamAccount.Currency.Id;
+                        decimal valueUsd = Currency.ConverterToUsd(SteamMarket.Orders.Min(x => x.OrderPrice), currency);
                         int min = (int)(valueUsd * 0.5m);
-                        valueUsd = Edit.ConverterToUsd(SteamAccount.Balance, SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == 1).Value);
+                        valueUsd = Currency.ConverterToUsd(SteamAccount.Balance, currency);
                         int max = (int)(valueUsd * 2.0m);
                         baseService.UpdateBuff(HomeProperties.Default.ServiceId == 4, min, max);
                     }

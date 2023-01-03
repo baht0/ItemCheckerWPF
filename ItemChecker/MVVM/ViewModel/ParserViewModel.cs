@@ -184,22 +184,22 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand SwitchCurrencyCommand =>
             new RelayCommand((obj) =>
             {
-                Currency currency = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Name == (string)obj);
-                List<DataParser> items = ParserTable.Items.ToList();
+                var currency = Currencies.Allow.FirstOrDefault(x => x.Name == (string)obj);
+                var items = ParserTable.Items.ToList();
                 if (ParserTable.CurectCurrency.Id != 1)
-                    foreach (DataParser item in items)
+                    foreach (var item in items)
                     {
-                        item.Purchase = Edit.ConverterToUsd(item.Purchase, ParserTable.CurectCurrency.Value);
-                        item.Price = Edit.ConverterToUsd(item.Price, ParserTable.CurectCurrency.Value);
-                        item.Get = Edit.ConverterToUsd(item.Get, ParserTable.CurectCurrency.Value);
-                        item.Difference = Edit.ConverterToUsd(item.Difference, ParserTable.CurectCurrency.Value);
+                        item.Purchase = Currency.ConverterToUsd(item.Purchase, ParserTable.CurectCurrency.Id);
+                        item.Price = Currency.ConverterToUsd(item.Price, ParserTable.CurectCurrency.Id);
+                        item.Get = Currency.ConverterToUsd(item.Get, ParserTable.CurectCurrency.Id);
+                        item.Difference = Currency.ConverterToUsd(item.Difference, ParserTable.CurectCurrency.Id);
                     }
-                foreach (DataParser item in items)
+                foreach (var item in items)
                 {
-                    item.Purchase = Edit.ConverterFromUsd(item.Purchase, currency.Value);
-                    item.Price = Edit.ConverterFromUsd(item.Price, currency.Value);
-                    item.Get = Edit.ConverterFromUsd(item.Get, currency.Value);
-                    item.Difference = Edit.ConverterFromUsd(item.Difference, currency.Value);
+                    item.Purchase = Currency.ConverterFromUsd(item.Purchase, currency.Id);
+                    item.Price = Currency.ConverterFromUsd(item.Price, currency.Id);
+                    item.Get = Currency.ConverterFromUsd(item.Get, currency.Id);
+                    item.Difference = Currency.ConverterFromUsd(item.Difference, currency.Id);
                 }
                 ParserTable.CurrencySymbol = currency.Symbol;
                 ParserTable.CurectCurrency = currency;
@@ -241,7 +241,7 @@ namespace ItemChecker.MVVM.ViewModel
                 switch ((int)obj)
                 {
                     case 0 or 1:
-                        var steamUsd = Edit.ConverterToUsd(SteamAccount.Balance, SteamAccount.Currency.Value);
+                        var steamUsd = Currency.ConverterToUsd(SteamAccount.Balance, SteamAccount.Currency.Id);
                         ParserCheckConfig.MaxPrice = (int)Math.Ceiling(steamUsd);
                         break;
                     case 2:

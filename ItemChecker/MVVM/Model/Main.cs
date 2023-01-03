@@ -1,4 +1,6 @@
-﻿using ItemChecker.Support;
+﻿using ItemChecker.Core;
+using ItemChecker.Services;
+using ItemChecker.Support;
 using MaterialDesignThemes.Wpf;
 using System;
 using System.Collections.Generic;
@@ -39,29 +41,83 @@ namespace ItemChecker.MVVM.Model
         }
         public static SnackbarMessageQueue Message { get; set; } = new();
         public static List<DataNotification> Notifications { get; set; } = new();
+        internal static decimal AllIn { get; set; }
+
         public static void CheckBalance()
         {
+            SteamAccount.GetBalance();
             ServiceAccount.GetBalances();
-            var steamUsd = Edit.ConverterToUsd(SteamAccount.Balance, SteamAccount.Currency.Value);
-            History.HistoryRecords.Add(new()
+
+            var steam = Currency.ConverterToUsd(SteamAccount.Balance, SteamAccount.Currency.Id) + InventoryService.GetSumOfItems();
+            var csm = ServiceAccount.Csm.Balance + ServiceAccount.Csm.GetSumOfItems();
+            var lfm = ServiceAccount.Lfm.Balance + ServiceAccount.Lfm.GetSumOfItems();
+
+            decimal total = steam + csm + lfm + ServiceAccount.Buff.Balance;
+            History.Records.Add(new()
             {
-                Total = steamUsd + ServiceAccount.Csm.Balance + ServiceAccount.Lfm.Balance + ServiceAccount.Buff.Balance,
-                Steam = steamUsd,
-                CsMoney = ServiceAccount.Csm.Balance,
-                LootFarm = ServiceAccount.Lfm.Balance,
+                Total = total,
+                Steam = steam,
+                CsMoney = csm,
+                LootFarm = lfm,
                 Buff163 = ServiceAccount.Buff.Balance,
             });
+            AllIn = total;
         }
     }
-    public class MainInfo
+    public class MainInfo : ObservableObject
     {
-        public decimal Balance { get; set; } = SteamAccount.Balance;
-        public string CurrencySymbol { get; set; } = SteamAccount.Currency.Symbol;
-        public decimal BalanceUsd { get; set; } = Edit.ConverterToUsd(SteamAccount.Balance, SteamAccount.Currency.Value);
-
-        public SnackbarMessageQueue Message { get; set; } = Main.Message;
-        public bool IsNotification { get; set; } = Main.Notifications.Any(x => !x.IsRead);
-        public ObservableCollection<DataNotification> Notifications { get; set; } = new(Main.Notifications.OrderByDescending(x => x.Date));
+        public decimal AllIn
+        {
+            get
+            {
+                return _allIn;
+            }
+            set
+            {
+                _allIn = value;
+                OnPropertyChanged();
+            }
+        }
+        public decimal _allIn = Main.AllIn;
+        public SnackbarMessageQueue Message
+        {
+            get
+            {
+                return _message;
+            }
+            set
+            {
+                _message = value;
+                OnPropertyChanged();
+            }
+        }
+        public SnackbarMessageQueue _message = Main.Message;
+        public bool IsNotification
+        {
+            get
+            {
+                return _isNotification;
+            }
+            set
+            {
+                _isNotification = value;
+                OnPropertyChanged();
+            }
+        }
+        public bool _isNotification = Main.Notifications.Any(x => !x.IsRead);
+        public ObservableCollection<DataNotification> Notifications
+        {
+            get
+            {
+                return _notifications;
+            }
+            set
+            {
+                _notifications = value;
+                OnPropertyChanged();
+            }
+        }
+        ObservableCollection<DataNotification> _notifications = new(Main.Notifications.OrderByDescending(x => x.Date));
     }
     public class DataNotification
     {

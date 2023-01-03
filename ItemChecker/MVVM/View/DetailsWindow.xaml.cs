@@ -10,12 +10,10 @@ namespace ItemChecker.MVVM.View
     public partial class DetailsWindow : Window
     {
         bool isSelectedItem;
-        public DetailsWindow(string itemName)
+        public DetailsWindow(bool isMenu)
         {
             InitializeComponent();
-            DataContext = new DetailsViewModel();
-            if (string.IsNullOrEmpty(itemName) && DataContext is DetailsViewModel vm && vm.ShowSearchCommand.CanExecute(null))
-                vm.ShowSearchCommand.Execute(null);
+            DataContext = new DetailsViewModel(isMenu);
         }
         private void Window_DragMove(object sender, MouseButtonEventArgs e)
         {

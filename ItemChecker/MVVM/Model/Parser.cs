@@ -1,4 +1,5 @@
 ﻿using ItemChecker.Core;
+using ItemChecker.Support;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -35,8 +36,8 @@ namespace ItemChecker.MVVM.Model
         string _currencySymbol = "$";
 
         public string CurrencySymbolSteam { get; set; } = SteamAccount.Currency.Symbol;
-        public List<string> CurrencyList { get; set; } = SteamBase.AllowCurrencys.Select(x => x.Name).ToList();
-        public static Currency CurectCurrency { get; set; } = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == 1);
+        public List<string> CurrencyList { get; set; } = Currencies.Allow.Select(x => x.Name).ToList();
+        public static DataCurrency CurectCurrency { get; set; } = Currencies.Allow.FirstOrDefault(x => x.Id == 1);
 
         public List<DataParser> Items { get; set; } = new();
 

@@ -84,8 +84,10 @@ namespace ItemChecker.MVVM.ViewModel
         }
         DetailItem _selectedItem = new();
 
-        public DetailsViewModel()
+        public DetailsViewModel(bool isMenu)
         {
+            Details.IsSearch = isMenu && !Details.Items.Any();
+
             Timer.Elapsed += UpdateWindow;
             Timer.Enabled = true;
 
@@ -147,25 +149,25 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand SwitchCurrencyCommand =>
             new RelayCommand((obj) =>
             {
-                Currency currency = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Name == (string)obj);
-                List<DetailItemPrice> prices = SelectedItem.Prices.ToList();
+                var currency = Currencies.Allow.FirstOrDefault(x => x.Name == (string)obj);
+                var prices = SelectedItem.Prices.ToList();
                 if (Details.CurectCurrency.Id != 1)
                 {
-                    foreach (DetailItemPrice price in prices)
+                    foreach (var price in prices)
                     {
-                        price.Price = Edit.ConverterToUsd(price.Price, Details.CurectCurrency.Value);
-                        price.Get = Edit.ConverterToUsd(price.Get, Details.CurectCurrency.Value);
+                        price.Price = Currency.ConverterToUsd(price.Price, Details.CurectCurrency.Id);
+                        price.Get = Currency.ConverterToUsd(price.Get, Details.CurectCurrency.Id);
                     }
-                    SelectedItem.Compare.Get = Edit.ConverterToUsd(SelectedItem.Compare.Get, Details.CurectCurrency.Value);
-                    SelectedItem.Compare.Difference = Edit.ConverterToUsd(SelectedItem.Compare.Difference, Details.CurectCurrency.Value);
+                    SelectedItem.Compare.Get = Currency.ConverterToUsd(SelectedItem.Compare.Get, Details.CurectCurrency.Id);
+                    SelectedItem.Compare.Difference = Currency.ConverterToUsd(SelectedItem.Compare.Difference, Details.CurectCurrency.Id);
                 }
-                foreach (DetailItemPrice price in prices)
+                foreach (var price in prices)
                 {
-                    price.Price = Edit.ConverterFromUsd(price.Price, currency.Value);
-                    price.Get = Edit.ConverterFromUsd(price.Get, currency.Value);
+                    price.Price = Currency.ConverterFromUsd(price.Price, currency.Id);
+                    price.Get = Currency.ConverterFromUsd(price.Get, currency.Id);
                 }
-                SelectedItem.Compare.Get = Edit.ConverterFromUsd(SelectedItem.Compare.Get, currency.Value);
-                SelectedItem.Compare.Difference = Edit.ConverterFromUsd(SelectedItem.Compare.Difference, currency.Value);
+                SelectedItem.Compare.Get = Currency.ConverterFromUsd(SelectedItem.Compare.Get, currency.Id);
+                SelectedItem.Compare.Difference = Currency.ConverterFromUsd(SelectedItem.Compare.Difference, currency.Id);
 
                 Details.CurectCurrency = currency;
                 SelectedItem.Prices = new(prices);

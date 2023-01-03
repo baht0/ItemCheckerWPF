@@ -223,6 +223,19 @@ namespace ItemChecker.MVVM.Model
         }
         ObservableCollection<DataInventory> _items = new();
 
+        public decimal SumOfItems
+        {
+            get
+            {
+                return _sumOfItems;
+            }
+            set
+            {
+                _sumOfItems = value;
+                OnPropertyChanged();
+            }
+        }
+        decimal _sumOfItems;
         public bool IsService
         {
             get

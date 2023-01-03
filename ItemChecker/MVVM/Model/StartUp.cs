@@ -1,5 +1,6 @@
 ﻿using ItemChecker.Core;
 using ItemChecker.Net;
+using ItemChecker.Support;
 using MaterialDesignThemes.Wpf;
 using Newtonsoft.Json.Linq;
 using System;
@@ -120,7 +121,7 @@ namespace ItemChecker.MVVM.Model
             }
         }
         bool _isCurrencyShow;
-        public ObservableCollection<Currency> CurrencyList
+        public ObservableCollection<DataCurrency> CurrencyList
         {
             get { return _currencyList; }
             set
@@ -129,8 +130,8 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        ObservableCollection<Currency> _currencyList = new();
-        public Currency SelectedCurrency
+        ObservableCollection<DataCurrency> _currencyList = new();
+        public DataCurrency SelectedCurrency
         {
             get { return _selectedCurrency; }
             set
@@ -139,7 +140,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        Currency _selectedCurrency = new();
+        DataCurrency _selectedCurrency = new();
 
         public bool IsReset
         {

@@ -1,5 +1,4 @@
 ﻿using HtmlAgilityPack;
-using ItemChecker.Support;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -79,6 +78,13 @@ namespace ItemChecker.Net
                     return JObject.Parse(json)["items"] as JArray;
                 }
 
+                public static JArray InventoryItems()
+                {
+                    string json = Request("https://cs.money/3.0/load_user_inventory/730?isPrime=false&limit=60&noCache=true&offset=0&order=desc&sort=price&withStack=true");
+                    var obj = JObject.Parse(json);
+                    return obj.ContainsKey("items") ? JArray.Parse(obj["items"].ToString()) : new();
+                }
+
                 public static decimal Balance()
                 {
                     HtmlDocument htmlDoc = new();
@@ -89,7 +95,7 @@ namespace ItemChecker.Net
                     htmlDoc.LoadHtml(html);
                     string market = htmlDoc.DocumentNode.SelectSingleNode("//*[@id='layout-page-header']/div[1]/div/div[6]/div[1]/div[1]/div/div[1]/span[2]").InnerText;
 
-                    return Edit.GetPrice(market) + Edit.GetPrice(trade);
+                    return GetDecimal(market) + GetDecimal(trade);
                 }
                 internal static bool IsAuthorized()
                 {
@@ -122,6 +128,12 @@ namespace ItemChecker.Net
                 public static string Request(string url)
                 {
                     return RequestGetAsync(url, Cookies).Result;
+                }
+                public static JObject InventoryItems()
+                {
+                    string json = Request("https://loot.farm/getReserves.php");
+                    var obj = JObject.Parse(json);
+                    return obj["result"] as JObject;
                 }
 
                 public static decimal Balance()

@@ -28,10 +28,10 @@ namespace ItemChecker.MVVM.Model
             }
             set
             {
-                var currency = SteamAccount.Currency.Value;
+                var currency = SteamAccount.Currency.Id;
                 if (ParserTable.CurectCurrency.Id != 1)
-                    value = Edit.ConverterToUsd(value, ParserTable.CurectCurrency.Value);
-                value = Edit.ConverterFromUsd(value, currency);
+                    value = Currency.ConverterToUsd(value, ParserTable.CurectCurrency.Id);
+                value = Currency.ConverterFromUsd(value, currency);
                 _orderPrice = value;
             }
         }

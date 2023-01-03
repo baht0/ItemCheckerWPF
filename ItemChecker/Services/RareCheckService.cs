@@ -84,12 +84,12 @@ namespace ItemChecker.Services
             return items;
         }
 
-        Decimal SetPrice(string itemName)
+        decimal SetPrice(string itemName)
         {
             JObject steamPrices = SteamRequest.Get.PriceOverview(itemName, 1);
 
-            decimal lowest_price = steamPrices.ContainsKey("lowest_price") ? Edit.GetPrice(steamPrices["lowest_price"].ToString()) : 0m;
-            decimal median_price = steamPrices.ContainsKey("median_price") ? Edit.GetPrice(steamPrices["median_price"].ToString()) : 0m;
+            decimal lowest_price = steamPrices.ContainsKey("lowest_price") ? Edit.GetDecimal(steamPrices["lowest_price"].ToString()) : 0m;
+            decimal median_price = steamPrices.ContainsKey("median_price") ? Edit.GetDecimal(steamPrices["median_price"].ToString()) : 0m;
 
             switch (RareProperties.Default.CompareId)
             {
@@ -101,7 +101,7 @@ namespace ItemChecker.Services
                     return 0;
             }
         }
-        Decimal SetMaxFloat(string itemName)
+        decimal SetMaxFloat(string itemName)
         {
             decimal maxFloat = 0;
             if (itemName.Contains("Factory New")) maxFloat = RareProperties.Default.maxFloatValue_FN;
@@ -112,7 +112,7 @@ namespace ItemChecker.Services
 
             return maxFloat;
         }
-        Decimal SetFloatValue(string link)
+        decimal SetFloatValue(string link)
         {
             try
             {
@@ -145,7 +145,7 @@ namespace ItemChecker.Services
             return stickers;
         }
 
-        Boolean CheckStickers(DataRare data)
+        bool CheckStickers(DataRare data)
         {
             if (!String.IsNullOrEmpty(RareCheckConfig.CheckedConfig.NameContains) && !data.Stickers.Any(x => x.Contains(RareCheckConfig.CheckedConfig.NameContains)))
                 return false;

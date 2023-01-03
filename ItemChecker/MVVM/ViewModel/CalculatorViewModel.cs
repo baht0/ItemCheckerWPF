@@ -3,7 +3,6 @@ using ItemChecker.MVVM.Model;
 using ItemChecker.Support;
 using System;
 using System.Linq;
-using System.Windows;
 using System.Windows.Input;
 
 namespace ItemChecker.MVVM.ViewModel
@@ -80,15 +79,13 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 bool isDecimal = !decimal.TryParse((string)obj, out decimal value);
                 decimal dol = value;
-                decimal rub = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == 5).Value;
-                decimal cny = SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == 23).Value;
                 switch (Calculator.Currency1) //any -> dol
                 {
                     case 1:
-                        dol = Edit.ConverterToUsd(value, rub);
+                        dol = Currency.ConverterToUsd(value, 5);
                         break;
                     case 2:
-                        dol = Edit.ConverterToUsd(value, cny);
+                        dol = Currency.ConverterToUsd(value, 23);
                         break;
                 }
                 switch (Calculator.Currency2)//dol -> any
@@ -97,10 +94,10 @@ namespace ItemChecker.MVVM.ViewModel
                         Calculator.Converted = dol;
                         break;
                     case 1:
-                        Calculator.Converted = Edit.ConverterFromUsd(dol, rub);
+                        Calculator.Converted = Currency.ConverterFromUsd(dol, 5);
                         break;
                     case 2:
-                        Calculator.Converted = Edit.ConverterFromUsd(dol, cny);
+                        Calculator.Converted = Currency.ConverterFromUsd(dol, 23);
                         break;
                 }
             });

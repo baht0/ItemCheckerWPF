@@ -1,36 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace ItemChecker.MVVM.Model
 {
     public class SteamBase
     {
         public static DateTime Updated { get; set; } = new();
-        public static List<Currency> CurrencyList { get; set; } = new();
-        public static List<Currency> AllowCurrencys
-        {
-            get
-            {
-                return CurrencyList.Where(x => x.Value > 0).ToList();
-            }
-        }
         public static List<Item> ItemList { get; set; } = new();
-    }
-    public class Currency
-    {
-        public int Id { get; set; }
-        public string Code { get; set; } = string.Empty;
-        public string Country { get; set; } = string.Empty;
-        public string Symbol { get; set; } = string.Empty;
-        public string Name
-        {
-            get
-            {
-                return $"{Code} ({Symbol})";
-            }
-        }
-        public decimal Value { get; set; }
     }
     public class Item
     {

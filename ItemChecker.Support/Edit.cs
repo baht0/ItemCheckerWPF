@@ -33,7 +33,7 @@ namespace ItemChecker.Support
         }
 
         //remove
-        public static Decimal GetPrice(string str)
+        public static Decimal GetDecimal(string str)
         {
             var mat = Regex.Match(str, @"(\d+(\.\d+)?)|(\.\d+)").Value;
             return Convert.ToDecimal(mat, CultureInfo.InvariantCulture);
@@ -78,14 +78,6 @@ namespace ItemChecker.Support
             return itemName;
         }
 
-        public static Decimal ConverterFromUsd(decimal value, decimal currency)
-        {
-            return Math.Round(value * currency, 2);
-        }
-        public static Decimal ConverterToUsd(decimal value, decimal currency)
-        {
-            return Math.Round(value / currency, 2);
-        }
         public static Decimal Precent(decimal a, decimal b) //from A to B
         {
             if (a != 0)

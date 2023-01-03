@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace ItemChecker.Net
@@ -87,6 +89,12 @@ namespace ItemChecker.Net
             cookieContainer.Add(cookieCollection);
 
             return cookieContainer;
+        }
+
+        internal static decimal GetDecimal(string str)
+        {
+            var mat = Regex.Match(str, @"(\d+(\.\d+)?)|(\.\d+)").Value;
+            return Convert.ToDecimal(mat, CultureInfo.InvariantCulture);
         }
     }
 }

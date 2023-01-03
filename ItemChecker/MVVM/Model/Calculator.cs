@@ -1,4 +1,5 @@
 ﻿using ItemChecker.Core;
+using ItemChecker.Support;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,12 +25,6 @@ namespace ItemChecker.MVVM.Model
         }
         public int Service { get; set; }
 
-        private decimal _commission = 0;
-        private decimal _purchase = 0;
-        private decimal _price = 0;
-        private decimal _get = 0;
-        private decimal _precent = 0;
-        private decimal _difference = 0;
         public decimal Commission
         {
             get { return _commission; }
@@ -42,6 +37,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        decimal _commission;
         public decimal Purchase
         {
             get { return _purchase; }
@@ -51,6 +47,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        decimal _purchase;
         public decimal Price
         {
             get { return _price; }
@@ -60,6 +57,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        decimal _price;
         public decimal Get
         {
             get { return _get; }
@@ -69,6 +67,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        decimal _get;
         public decimal Precent
         {
             get { return _precent; }
@@ -78,6 +77,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        decimal _precent;
         public decimal Difference
         {
             get { return _difference; }
@@ -87,14 +87,13 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        decimal _difference;
 
         //currency
-        public List<string> CurrencyList { get; set; } = SteamBase.AllowCurrencys.Select(x => x.Name).ToList();
+        public List<string> CurrencyList { get; set; } = Currencies.Allow.Select(x => x.Name).ToList();
         public int Currency1 { get; set; } = 0;
         public int Currency2 { get; set; } = 1;
 
-        private decimal _value = 1;
-        private decimal _converted = Math.Round(SteamBase.AllowCurrencys.FirstOrDefault(x => x.Id == 5).Value, 2);
         public decimal Converted
         {
             get { return _converted; }
@@ -104,6 +103,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        decimal _converted = Math.Round(Currencies.Allow.FirstOrDefault(x => x.Id == 5).Value, 2);
         public decimal Value
         {
             get { return _value; }
@@ -113,5 +113,6 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        decimal _value = 1;
     }
 }

@@ -139,10 +139,8 @@
             <Grid Grid.Row="2" VerticalAlignment="Center">
                 <TextBlock VerticalAlignment="Center">
                     <TextBlock.Text>
-                        <MultiBinding StringFormat="Steam Balance: {0}{1} / {2}$">
-                            <Binding Path="MainInfo.Balance" />
-                            <Binding Path="MainInfo.CurrencySymbol" />
-                            <Binding Path="MainInfo.BalanceUsd" />
+                        <MultiBinding StringFormat="All in: {0}$">
+                            <Binding Path="MainInfo.AllIn" />
                         </MultiBinding>
                     </TextBlock.Text>
                 </TextBlock>
