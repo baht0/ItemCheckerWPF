@@ -75,16 +75,6 @@ namespace ItemChecker.MVVM.Model
                 string text = BaseService.OpenFileDialog("txt");
                 if (!String.IsNullOrEmpty(text))
                 {
-                    //upload file
-                    DropboxRequest.Post.Delete("ItemChecker");
-                    Thread.Sleep(200);
-                    DropboxRequest.Post.Folder("ItemChecker");
-                    foreach (var file in DataProjectInfo.FilesList)
-                    {
-                        Thread.Sleep(200);
-                        DropboxRequest.Post.UploadFile("ItemChecker/" + file, AppPath + file);
-                    }
-                    //ver file
                     JArray updates = JArray.Parse(DropboxRequest.Get.Read("Updates.json"));
                     JObject obj = (JObject)updates.FirstOrDefault(x => (string)x["version"] == DataProjectInfo.CurrentVersion);
 
@@ -105,10 +95,17 @@ namespace ItemChecker.MVVM.Model
                     DropboxRequest.Post.Delete("Updates.json");
                     Thread.Sleep(200);
                     DropboxRequest.Post.Upload("Updates.json", updates.ToString());
-
-                    return true;
                 }
-                return false;
+
+                DropboxRequest.Post.Delete("ItemChecker");
+                Thread.Sleep(200);
+                DropboxRequest.Post.Folder("ItemChecker");
+                foreach (var file in DataProjectInfo.FilesList)
+                {
+                    Thread.Sleep(200);
+                    DropboxRequest.Post.UploadFile("ItemChecker/" + file, AppPath + file);
+                }
+                return true;
             }
             catch (Exception ex)
             {
