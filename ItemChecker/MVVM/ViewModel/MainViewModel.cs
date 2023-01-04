@@ -46,7 +46,7 @@ namespace ItemChecker.MVVM.ViewModel
                 MainProperties.Default.CompletionUpdate = false;
                 MainProperties.Default.Save();
             }
-            Task.Run(Main.CheckBalance);
+            Task.Run(Main.CreateHistoryRecords);
         }
         public ICommand MenuCommand =>
             new RelayCommand((obj) =>
@@ -129,7 +129,7 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand ReadNotificationCommand =>
             new RelayCommand((obj) =>
             {
-                foreach (var item in Main.Notifications)
+                foreach (var item in Main.Notifications.Where(x => x.IsRead == false))
                     item.IsRead = true;
             });
 
@@ -137,7 +137,7 @@ namespace ItemChecker.MVVM.ViewModel
         {
             try
             {
-                Main.CheckBalance();
+                Main.CreateHistoryRecords();
 
                 if (SteamMarket.StatusCommunity != "normal")
                 {

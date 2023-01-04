@@ -2,10 +2,12 @@
 using ItemChecker.Services;
 using ItemChecker.Support;
 using MaterialDesignThemes.Wpf;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Media;
 
 namespace ItemChecker.MVVM.Model
 {
@@ -40,10 +42,18 @@ namespace ItemChecker.MVVM.Model
             }
         }
         public static SnackbarMessageQueue Message { get; set; } = new();
-        public static List<DataNotification> Notifications { get; set; } = new();
+        public static Notification<DataNotification> Notifications { get; set; } = new()
+        {
+            new DataNotification()
+            {
+                IsRead = true,
+                Title = "Welcome!",
+                Message = "The program has been launched!"
+            }
+        };
         internal static decimal AllIn { get; set; }
 
-        public static void CheckBalance()
+        public static void CreateHistoryRecords()
         {
             SteamAccount.GetBalance();
             ServiceAccount.GetBalances();
@@ -125,5 +135,39 @@ namespace ItemChecker.MVVM.Model
         public string Title { get; set; } = string.Empty;
         public string Message { get; set; } = string.Empty;
         public DateTime Date { get; set; } = DateTime.Now;
+    }
+    public class Notification<T> : List<T>
+    {
+        public new void Add(T notification)
+        {
+            base.Add(notification);
+            var data = notification as DataNotification;
+            if (data.Title != "Welcome!")
+                PlayNotificationSound();
+        }
+        void PlayNotificationSound()
+        {
+            bool found = false;
+            try
+            {
+                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"AppEvents\Schemes\Apps\.Default\Notification.Reminder\.Current"))
+                {
+                    if (key != null)
+                    {
+                        Object o = key.GetValue(null); // pass null to get (Default)
+                        if (o != null)
+                        {
+                            SoundPlayer theSound = new SoundPlayer((String)o);
+                            theSound.Play();
+                            found = true;
+                        }
+                    }
+                }
+            }
+            catch
+            { }
+            if (!found)
+                SystemSounds.Beep.Play(); // consolation prize
+        }
     }
 }

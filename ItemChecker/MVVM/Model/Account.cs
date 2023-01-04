@@ -8,6 +8,28 @@ using System.Linq;
 
 namespace ItemChecker.MVVM.Model
 {
+    public class Account
+    {
+        internal static void CheckBalance(decimal _balance, decimal value, string title)
+        {
+            if (_balance > value && _balance != -1)
+            {
+                Main.Notifications.Add(new()
+                {
+                    Title = title,
+                    Message = $"Your balance has decreased.\n-{_balance - value}$"
+                });
+            }
+            else if (_balance < value && _balance != -1)
+            {
+                Main.Notifications.Add(new()
+                {
+                    Title = title,
+                    Message = $"Your balance has increased.\n+{value - _balance}$"
+                });
+            }
+        }
+    }
     public class SteamAccount
     {
         static decimal _balance = -1;
@@ -21,22 +43,7 @@ namespace ItemChecker.MVVM.Model
             }
             set
             {
-                if (_balance > value && _balance != -1)
-                {
-                    Main.Notifications.Add(new()
-                    {
-                        Title = "Steam",
-                        Message = $"Your balance has decreased\n-{_balance - value} {Currency.Symbol}."
-                    });
-                }
-                else if (_balance < value && _balance != -1)
-                {
-                    Main.Notifications.Add(new()
-                    {
-                        Title = "Steam",
-                        Message = $"Your balance has increased\n+{value - _balance} {Currency.Symbol}."
-                    });
-                }
+                Account.CheckBalance(_balance, value, "Steam");
                 _balance = value;
             }
         }
@@ -109,22 +116,7 @@ namespace ItemChecker.MVVM.Model
                 }
                 set
                 {
-                    if (_balance > value && _balance != -1)
-                    {
-                        Main.Notifications.Add(new()
-                        {
-                            Title = "Cs.Money",
-                            Message = $"Your balance has decreased\n-{_balance - value} $."
-                        });
-                    }
-                    else if (_balance < value && _balance != -1)
-                    {
-                        Main.Notifications.Add(new()
-                        {
-                            Title = "Cs.Money",
-                            Message = $"Your balance has increased\n+{value - _balance} $."
-                        });
-                    }
+                    Account.CheckBalance(_balance, value, "Cs.Money");
                     _balance = value;
                 }
             }
@@ -154,22 +146,7 @@ namespace ItemChecker.MVVM.Model
                 }
                 set
                 {
-                    if (_balance > value && _balance != -1)
-                    {
-                        Main.Notifications.Add(new()
-                        {
-                            Title = "Loot.Farm",
-                            Message = $"Your balance has decreased\n-{_balance - value} $."
-                        });
-                    }
-                    else if (_balance < value && _balance != -1)
-                    {
-                        Main.Notifications.Add(new()
-                        {
-                            Title = "Loot.Farm",
-                            Message = $"Your balance has increased\n+{value - _balance} $."
-                        });
-                    }
+                    Account.CheckBalance(_balance, value, "Loot.Farm");
                     _balance = value;
                 }
             }
@@ -196,22 +173,7 @@ namespace ItemChecker.MVVM.Model
                 }
                 set
                 {
-                    if (_balance > value && _balance != -1)
-                    {
-                        Main.Notifications.Add(new()
-                        {
-                            Title = "Buff163",
-                            Message = $"Your balance has decreased\n-{_balance - value} $."
-                        });
-                    }
-                    else if (_balance < value && _balance != -1)
-                    {
-                        Main.Notifications.Add(new()
-                        {
-                            Title = "Buff163",
-                            Message = $"Your balance has increased\n+{value - _balance} $."
-                        });
-                    }
+                    Account.CheckBalance(_balance, value, "Buff163");
                     _balance = value;
                 }
             }

@@ -47,12 +47,6 @@ namespace ItemChecker.MVVM.ViewModel
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.CreateSpecificCulture("en-Us");
             CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.CreateSpecificCulture("en-Us");
 
-            Main.Notifications.Add(new()
-            {
-                IsRead = true,
-                Title = "Welcome!",
-                Message = "The program has been launched!"
-            });
             Task.Run(StartTask);
         }
         void Hide()
