@@ -152,7 +152,7 @@
                                     <RowDefinition Height="32"/>
                                     <RowDefinition/>
                                 </Grid.RowDefinitions>
-                                <TextBlock Text="Notification Center" VerticalAlignment="Center" FontWeight="Bold" FontSize="14"/>
+                                <TextBlock Margin="5 0 0 0" Text="Notification Center" VerticalAlignment="Center" FontWeight="Bold" FontSize="14"/>
                                 <Separator VerticalAlignment="Bottom"/>
                                 <ListView Grid.Row="1" ItemsSource="{Binding MainInfo.Notifications}"
                                           x:Name="listNotifications" SelectionMode="Single" VerticalAlignment="Bottom">

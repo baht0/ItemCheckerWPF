@@ -76,7 +76,7 @@ namespace ItemChecker.MVVM.View
         {
             if (bodyContent.Content != homeViewModel)
             {
-                Title = "Home - ItemChecker";
+                Title = "ItemChecker - Home";
                 bodyContent.Content = homeViewModel;
                 Home.IsEnabled = false;
                 Parser.IsEnabled = true;
@@ -87,7 +87,7 @@ namespace ItemChecker.MVVM.View
         {
             if (bodyContent.Content != parserViewModel)
             {
-                Title = "Parser - ItemChecker";
+                Title = "ItemChecker - Parser";
                 bodyContent.Content = parserViewModel;
                 Home.IsEnabled = true;
                 Parser.IsEnabled = false;
@@ -98,7 +98,7 @@ namespace ItemChecker.MVVM.View
         {
             if (bodyContent.Content != rareViewModel)
             {
-                Title = "Rare - ItemChecker";
+                Title = "ItemChecker - Rare";
                 bodyContent.Content = rareViewModel;
                 Home.IsEnabled = true;
                 Parser.IsEnabled = true;

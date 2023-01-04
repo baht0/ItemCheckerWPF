@@ -47,9 +47,8 @@
                     </Button>
                 </StackPanel>
             </Grid>
-            <TabControl Grid.Row="1" Style="{StaticResource MaterialDesignNavigatilRailTabControl}"
-                        DataContext="{Binding Settings}">
-                <TabItem Header="Steam" Height="67.5">
+            <TabControl Grid.Row="1" Style="{StaticResource MaterialDesignNavigatilRailTabControl}">
+                <TabItem Header="Steam" Height="90">
                     <Grid Margin="3">
                         <GroupBox Header="Information" Style="{DynamicResource None}" BorderThickness="0.5">
                             <Grid Margin="5">
@@ -68,23 +67,23 @@
                                 </Grid.ColumnDefinitions>
 
                                 <TextBlock Grid.Row="0" Text="Account:" Height="15"/>
-                                <TextBlock Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Text="{Binding AccountName}"/>
+                                <TextBlock Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Text="{Binding Settings.AccountName}"/>
                                 <Button Grid.Row="0" Grid.Column="2" Height="25" ToolTip="Logout" Style="{StaticResource MaterialDesignToolForegroundButton}"
-                                        Command="{Binding DataContext.LogoutCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
+                                        Command="{Binding LogoutCommand}">
                                     <materialDesign:PackIcon Kind="Logout"/>
                                 </Button>
                                 
                                 <TextBlock Text="API Key:" Grid.Row="1" Height="15"/>
-                                <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Text="{Binding SteamApiKey}"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Text="{Binding Settings.SteamApiKey}"/>
                                 <Button Grid.Row="1" Grid.Column="2" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}" 
-                                        Command="{Binding DataContext.CopyApiCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
+                                        Command="{Binding CopyApiCommand}">
                                     <materialDesign:PackIcon Kind="ContentCopy"/>
                                 </Button>
                                 
                                 <TextBlock Grid.Row="2" Text="ID64:" Height="15"/>
-                                <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Text="{Binding SteamId}"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Text="{Binding Settings.SteamId}"/>
                                 <Button Grid.Row="2" Grid.Column="2" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
-                                        Command="{Binding DataContext.CopyIdCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}">
+                                        Command="{Binding CopyIdCommand}">
                                     <materialDesign:PackIcon Kind="ContentCopy"/>
                                 </Button>
 
@@ -94,7 +93,7 @@
                         </GroupBox>
                     </Grid>
                 </TabItem>
-                <TabItem Header="Base" Height="67.5">
+                <TabItem Header="Base" Height="90">
                     <Grid Margin="3">
                         <GroupBox Header="Information" Style="{DynamicResource None}" BorderThickness="0.5">
                             <Grid Margin="5">
@@ -114,50 +113,44 @@
                                     <ColumnDefinition/>
                                     <ColumnDefinition Width="30"/>
                                 </Grid.ColumnDefinitions>
-                                <CheckBox Content="Use local SteamBase" Grid.ColumnSpan="2" IsChecked="{Binding UseLocalDb}"/>
+                                <CheckBox Content="Use local SteamBase" Grid.ColumnSpan="2" IsChecked="{Binding Settings.UseLocalDb}"/>
 
                                 <TextBlock Grid.Row="1" Text="Steam:" Height="15"/>
-                                <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Text="{Binding StmCount, StringFormat='{}{0} items'}"/>
-                                <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Top" Text="{Binding StmUpdated, StringFormat='Updated: {0:dd MMM yyyy}'}"
+                                <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Text="{Binding Settings.StmCount, StringFormat='{}{0} items'}"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Top" Text="{Binding Settings.StmUpdated, StringFormat='Updated: {0:dd MMM yyyy}'}"
                                            FontSize="10"/>
 
                                 <TextBlock Grid.Row="3" Text="Cs.Money:" Height="15"/>
-                                <TextBlock Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" Text="{Binding CsmCount, StringFormat='{}{0} items'}"/>
-                                <Button Grid.Row="3" Grid.Column="2" Height="25" ToolTip="Reset"
-                                            Style="{StaticResource MaterialDesignToolForegroundButton}" 
-                                            Command="{Binding DataContext.ResetBaseCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
-                                        CommandParameter="2">
+                                <TextBlock Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" Text="{Binding Settings.CsmCount, StringFormat='{}{0} items'}"/>
+                                <Button Grid.Row="3" Grid.Column="2" Height="25" ToolTip="Reset" Style="{StaticResource MaterialDesignToolForegroundButton}"
+                                        Command="{Binding ResetBaseCommand}" CommandParameter="2">
                                     <materialDesign:PackIcon Kind="Update"/>
                                 </Button>
-                                <TextBlock Grid.Row="4" Grid.Column="1" VerticalAlignment="Top" Text="{Binding CsmUpdated, StringFormat='Updated: {0} min ago'}"
+                                <TextBlock Grid.Row="4" Grid.Column="1" VerticalAlignment="Top" Text="{Binding Settings.CsmUpdated, StringFormat='Updated: {0} min ago'}"
                                            FontSize="10"/>
                                 
                                 <TextBlock Grid.Row="5" Text="Loot.Farm:" Height="15"/>
-                                <TextBlock Grid.Row="5" Grid.Column="1" VerticalAlignment="Center" Text="{Binding LfmCount, StringFormat='{}{0} items'}"/>
-                                <Button Grid.Row="5" Grid.Column="2" Height="25" ToolTip="Reset"
-                                            Style="{StaticResource MaterialDesignToolForegroundButton}" 
-                                            Command="{Binding DataContext.ResetBaseCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
-                                        CommandParameter="3">
+                                <TextBlock Grid.Row="5" Grid.Column="1" VerticalAlignment="Center" Text="{Binding Settings.LfmCount, StringFormat='{}{0} items'}"/>
+                                <Button Grid.Row="5" Grid.Column="2" Height="25" ToolTip="Reset" Style="{StaticResource MaterialDesignToolForegroundButton}"
+                                        Command="{Binding ResetBaseCommand}" CommandParameter="3">
                                     <materialDesign:PackIcon Kind="Update"/>
                                 </Button>
-                                <TextBlock Grid.Row="6" Grid.Column="1" VerticalAlignment="Top" Text="{Binding LfmUpdated, StringFormat='Updated: {0} min ago'}"
+                                <TextBlock Grid.Row="6" Grid.Column="1" VerticalAlignment="Top" Text="{Binding Settings.LfmUpdated, StringFormat='Updated: {0} min ago'}"
                                            FontSize="10"/>
                                 
                                 <TextBlock Grid.Row="7" Text="Buff163:" Height="15"/>
-                                <TextBlock Grid.Row="7" Grid.Column="1" VerticalAlignment="Center" Text="{Binding BuffCount, StringFormat='{}{0} items'}"/>
-                                <Button Grid.Row="7" Grid.Column="2" Height="25" ToolTip="Reset"
-                                            Style="{StaticResource MaterialDesignToolForegroundButton}" 
-                                            Command="{Binding DataContext.ResetBaseCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
-                                        CommandParameter="4">
+                                <TextBlock Grid.Row="7" Grid.Column="1" VerticalAlignment="Center" Text="{Binding Settings.BuffCount, StringFormat='{}{0} items'}"/>
+                                <Button Grid.Row="7" Grid.Column="2" Height="25" ToolTip="Reset" Style="{StaticResource MaterialDesignToolForegroundButton}"
+                                        Command="{Binding ResetBaseCommand}" CommandParameter="4">
                                     <materialDesign:PackIcon Kind="Update"/>
                                 </Button>
-                                <TextBlock Grid.Row="8" Grid.Column="1" VerticalAlignment="Top" Text="{Binding BuffUpdated, StringFormat='Updated: {0} min ago'}"
+                                <TextBlock Grid.Row="8" Grid.Column="1" VerticalAlignment="Top" Text="{Binding Settings.BuffUpdated, StringFormat='Updated: {0} min ago'}"
                                            FontSize="10"/>
                             </Grid>
                         </GroupBox>
                     </Grid>
                 </TabItem>
-                <TabItem Header="About" Height="67.5">
+                <TabItem Header="About" Height="90">
                     <GroupBox Margin="3" Style="{DynamicResource None}" Header="About" BorderThickness="0.5">
                         <Grid Margin="5">
                             <Grid.RowDefinitions>
@@ -183,8 +176,7 @@
                             <TextBlock Grid.Row="2" Grid.Column="1" Text="Rasim Bakhtiyarov" VerticalAlignment="Center"/>
 
                             <TextBlock Grid.Row="3" Text="Version:" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="3" Grid.Column="1" VerticalAlignment="Center"
-                                       Text="{Binding DataContext.About.CurrentVersion, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" Text="{Binding About.CurrentVersion}"/>
                             <Button Grid.Row="3" Grid.Column="2" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}"
                                     Click="whatIsNewButton_Click" x:Name="whatIsNewButton" ToolTip="Patch notes">
                                 <materialDesign:PackIcon Kind="InfoOutline"/>
@@ -192,8 +184,8 @@
 
                             <TextBlock Grid.Row="5" Text="© 2018-2023 baht0" VerticalAlignment="Bottom" Grid.ColumnSpan="3"/>
                             <Button Grid.Row="5" Grid.Column="2" Height="25" Style="{StaticResource MaterialDesignToolForegroundButton}" VerticalAlignment="Bottom"
-                                    Visibility="{Binding DataContext.About.Admin, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                    Command="{Binding DataContext.CreateCurrentVersionCommand, RelativeSource={RelativeSource AncestorType=Window}}">
+                                    Visibility="{Binding About.Admin, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    Command="{Binding CreateCurrentVersionCommand}">
                                 <materialDesign:PackIcon Kind="Upload"/>
                             </Button>
                         </Grid>
