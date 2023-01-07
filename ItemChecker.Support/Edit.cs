@@ -62,21 +62,6 @@ namespace ItemChecker.Support
                 return 0;
             }
         }
-        public static String RemoveDoppler(string itemName)
-        {
-            if (itemName.Contains("★") & itemName.Contains("Doppler"))
-            {
-                itemName = itemName.Replace(" Phase 1", string.Empty);
-                itemName = itemName.Replace(" Phase 2", string.Empty);
-                itemName = itemName.Replace(" Phase 3", string.Empty);
-                itemName = itemName.Replace(" Phase 4", string.Empty);
-                itemName = itemName.Replace(" Ruby", string.Empty);
-                itemName = itemName.Replace(" Sapphire", string.Empty);
-                itemName = itemName.Replace(" Black Pearl", string.Empty);
-                itemName = itemName.Replace(" Emerald", string.Empty);
-            }
-            return itemName;
-        }
 
         public static Decimal Precent(decimal a, decimal b) //from A to B
         {
