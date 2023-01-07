@@ -8,6 +8,13 @@ namespace ItemChecker.Net
 {
     public class ServicesRequest : HttpRequest
     {
+        public static JObject InspectLinkDetails(string link)
+        {
+            string json = RequestGetAsync(@"https://api.csgofloat.com/?url=" + link).Result;
+
+            return JObject.Parse(json)["iteminfo"] as JObject;
+        }
+
         static Dictionary<string, string> OpenIdParams(string html)
         {
             HtmlDocument htmlDoc = new();

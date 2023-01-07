@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace ItemChecker.Net
 {
@@ -85,14 +86,13 @@ namespace ItemChecker.Net
                 return JObject.Parse(json);
             }
 
-            static string MarketRequest(string url, string market_hash_name)
+            static HttpRequestHeaders MarketHeaders(string market_hash_name)
             {
                 var headers = new HttpClient().DefaultRequestHeaders;
                 headers.Add("Accept", "*/*");
                 headers.Add("User-Agent", UserAgent);
                 headers.Add("Referer", "https://steamcommunity.com/market/listings/730/" + market_hash_name);
                 headers.Add("Origin", "https://steamcommunity.com/");
-                headers.IfModifiedSince = ifModifiedSince.AddMilliseconds(-7000);
                 headers.Add("sec-ch-ua", "Google Chrome\";v=\"107\", \"Chromium\";v=\"107\", \"Not=A?Brand\";v=\"24");
                 headers.Add("sec-ch-ua-mobile", "ooooo");
                 headers.Add("sec-ch-ua-platform", "Windows");
@@ -100,27 +100,31 @@ namespace ItemChecker.Net
                 headers.Add("Sec-Fetch-Mode", "cors");
                 headers.Add("Sec-Fetch-Site", "same-origin");
 
-                return RequestGetAsync(url, headers).Result;
+                return headers;
             }
             public static JObject ItemListings(string itemName)
             {
                 string market_hash_name = Uri.EscapeDataString(itemName);
                 string url = "https://steamcommunity.com/market/listings/730/" + market_hash_name + "/render?start=0&count=100&currency=1&language=english&format=json";
-                var json = MarketRequest(url, market_hash_name);
+                var headers = MarketHeaders(market_hash_name);
+                var json = RequestGetAsync(url, headers).Result;
                 return JObject.Parse(json);
             }
             public static JObject PriceOverview(string itemName, int currencyId)
             {
                 string market_hash_name = Uri.EscapeDataString(itemName);
                 string url = "https://steamcommunity.com/market/priceoverview/?country=RU&currency=" + currencyId + "&appid=730&market_hash_name=" + market_hash_name;
-                var json = MarketRequest(url, market_hash_name);
+                var headers = MarketHeaders(market_hash_name);
+                var json = RequestGetAsync(url, headers).Result;
                 return JObject.Parse(json);
             }
             public static JObject ItemOrdersHistogram(string itemName, int item_nameid, int currencyId)
             {
                 string market_hash_name = Uri.EscapeDataString(itemName);
                 string url = "https://steamcommunity.com/market/itemordershistogram?country=RU&language=english&currency=" + currencyId + "&item_nameid=" + item_nameid + "&two_factor=0";
-                var json = MarketRequest(url, market_hash_name);
+                var headers = MarketHeaders(market_hash_name);
+                headers.IfModifiedSince = ifModifiedSince.AddMilliseconds(-7000);
+                var json = RequestGetAsync(url, headers).Result;
                 return JObject.Parse(json);
             }
         }
