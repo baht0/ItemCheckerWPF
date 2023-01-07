@@ -8,10 +8,23 @@ using System.Threading;
 
 namespace ItemChecker.MVVM.Model
 {
+    public class Rare
+    {
+        public static List<string> Services
+        {
+            get
+            {
+                return new()
+                {
+                    "Float",
+                    "Sticker",
+                    "Doppler"
+                };
+            }
+        }
+    }
     public class RareTable : ObservableObject
     {
-        private string _currencySymbol = "$";
-        private int _currencyId = 0;
         public int CurrencyId
         {
             get
@@ -24,6 +37,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        int _currencyId = 0;
         public string CurrencySymbol
         {
             get
@@ -36,13 +50,13 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        string _currencySymbol = "$";
         public string CurrencySymbolSteam { get; set; } = SteamAccount.Currency.Symbol;
         public List<string> CurrencyList { get; set; } = Currencies.Allow.Select(x => x.Name).ToList();
         public static DataCurrency CurectCurrency { get; set; } = Currencies.Allow.FirstOrDefault(x => x.Id == 1);
 
         public List<DataRare> Items { get; set; } = new();
 
-        private ICollectionView _gridView;
         public ICollectionView GridView
         {
             get
@@ -55,8 +69,8 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        ICollectionView _gridView;
 
-        private int _count = 0;
         public int Count
         {
             get
@@ -69,6 +83,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        int _count = 0;
     }
     public class RareFilter
     {
@@ -140,7 +155,7 @@ namespace ItemChecker.MVVM.Model
     public class RareCheckConfig
     {
         public int Time { get; set; } = RareProperties.Default.Time;
-        public int MinPrecent { get; set; } = RareProperties.Default.MinPrecent;
+        public int MinPrecent { get; set; } = -7;
         public List<string> ComparePrices
         {
             get
@@ -152,17 +167,12 @@ namespace ItemChecker.MVVM.Model
                 };
             }
         }
-        public int CompareId { get; set; } = RareProperties.Default.CompareId;
+        public int CompareId { get; set; }
         public List<string> Parameters
         {
             get
             {
-                return new()
-                {
-                    "Float",
-                    "Sticker",
-                    "Doppler (Soon)"
-                };
+                return Rare.Services;
             }
         }
         public int ParameterId { get; set; }

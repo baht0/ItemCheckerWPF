@@ -98,8 +98,7 @@ namespace ItemChecker.MVVM.Model
             }
         }
         private int _minPrecent = HomeProperties.Default.MinPrecent;
-        public int Time { get; set; } = HomeProperties.Default.TimePush;
-        public int Reserve { get; set; } = HomeProperties.Default.Reserve;
+        public int Time { get; set; } = HomeProperties.Default.Time;
 
         public bool IsService
         {

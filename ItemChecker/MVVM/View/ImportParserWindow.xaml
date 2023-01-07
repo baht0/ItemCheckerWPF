@@ -62,7 +62,7 @@
                     </Button>
                     <Separator Grid.ColumnSpan="3" VerticalAlignment="Bottom"/>
                     <DataGrid Grid.Row="1" Grid.ColumnSpan="3" AlternationCount="2" AlternatingRowBackground="{DynamicResource ElementBackground}"
-                              AutoGenerateColumns="False" IsReadOnly="True" x:Name="filesGrid" SelectionMode="Single"
+                              AutoGenerateColumns="False" IsReadOnly="True" x:Name="filesGrid" SelectionMode="Single" CanUserSortColumns="False"
                               ToolTip="'Double Click' to load&#x0a;Press 'Backspace' to delete"
                               KeyDown="filesGrid_KeyDown" MouseDoubleClick="filesGrid_MouseDoubleClick"
                               ItemsSource="{Binding ImportParser.List, UpdateSourceTrigger=PropertyChanged}"

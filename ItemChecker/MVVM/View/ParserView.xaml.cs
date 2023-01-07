@@ -38,10 +38,10 @@ namespace ItemChecker.MVVM.View
                     checkTab.IsChecked = false;
                     queueTab.IsChecked = true;
                 }
-                if (e.Key == Key.F && Keyboard.IsKeyDown(Key.LeftCtrl) && viewModel.RemoveFavoriteCommand.CanExecute(item.ItemName))
-                    viewModel.RemoveFavoriteCommand.Execute(item.ItemName);
-                else if (e.Key == Key.F && viewModel.AddFavoriteCommand.CanExecute(item.ItemName))
-                    viewModel.AddFavoriteCommand.Execute(item.ItemName);
+                if (e.Key == Key.F && Keyboard.IsKeyDown(Key.LeftCtrl) && viewModel.RemoveReserveCommand.CanExecute(item.ItemName))
+                    viewModel.RemoveReserveCommand.Execute(item.ItemName);
+                else if (e.Key == Key.F && viewModel.AddReserveCommand.CanExecute(item.ItemName))
+                    viewModel.AddReserveCommand.Execute(item.ItemName);
                 if (e.Key == Key.F1)
                     MainWindow.OpenDetailsItem(item.ItemName);
             }

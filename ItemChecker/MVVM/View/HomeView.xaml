@@ -48,7 +48,11 @@
                       IsReadOnly="True" CanUserReorderColumns="False" CanUserResizeRows="False" CanUserResizeColumns="False">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Item" Binding="{Binding ItemName}" CanUserResize="False" Width="auto" MaxWidth="400" MinWidth="320"/>
-                    <DataGridTextColumn Header="BuyOrder" Binding="{Binding OrderPrice}" CanUserResize="False" Width="auto" FontWeight="Bold"/>
+                    <DataGridTextColumn Binding="{Binding OrderPrice}" CanUserResize="False" Width="auto" FontWeight="Bold">
+                        <DataGridTextColumn.Header>
+                            <TextBlock Text="{Binding DataContext.Home.CurrencySymbol, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat='BuyOrder ({0})'}"/>
+                        </DataGridTextColumn.Header>
+                    </DataGridTextColumn>
                     <DataGridTextColumn Header="Price" Binding="{Binding ServicePrice}" CanUserResize="False" Width="auto"/>
                     <DataGridTextColumn Header="Get" Binding="{Binding ServiceGive}" CanUserResize="False" Width="auto"/>
                     <DataGridTextColumn Header="Precent" Binding="{Binding Precent}" CanUserResize="False" Width="auto"/>
@@ -67,28 +71,34 @@
             </Grid.RowDefinitions>
             <materialDesign:ColorZone Background="Transparent" Grid.Row="0">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="orderTab" Width="124" Margin="1" Content="Order" IsChecked="True"/>
+                    <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="pushTab" Width="124" Margin="1" Content="Push" IsChecked="True"/>
                     <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="inventoryTab" Width="124" Margin="1" Content="Inventory"/>
                 </StackPanel>
             </materialDesign:ColorZone>
             <Border Grid.Row="1" BorderBrush="{StaticResource PrimaryHueMidBrush}" Margin="5">
                 <Grid>
-                    <!--order-->
-                    <Grid Visibility="{Binding IsChecked, ElementName=orderTab, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <!--push-->
+                    <Grid Visibility="{Binding IsChecked, ElementName=pushTab, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="32"/>
-                            <RowDefinition Height="130"/>
+                            <RowDefinition Height="95"/>
                             <RowDefinition/>
                         </Grid.RowDefinitions>
-                        <TextBlock Text="{Binding HomePush.Check, StringFormat='Check: {0}'}" VerticalAlignment="Center" FontWeight="Bold" Grid.ColumnSpan="2"/>
-                        <Button ToolTip="Favorite Items" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignToolForegroundButton}" Click="ListShow_Click">
+                        <TextBlock VerticalAlignment="Center" FontWeight="Bold" Grid.ColumnSpan="2">
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="Check: {0} | Pushed: {1}">
+                                    <Binding Path="HomePush.Check"/>
+                                    <Binding Path="HomePush.Push"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                        <Button ToolTip="Reserve items" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignToolForegroundButton}" Click="ListShow_Click">
                             <materialDesign:PackIcon Kind="FormatListBulleted"/>
                         </Button>
                         <Separator Grid.ColumnSpan="2" VerticalAlignment="Bottom" Height="3"/>
                         <!--body-->
                         <Grid Grid.Row="1" Margin="2">
                             <Grid.RowDefinitions>
-                                <RowDefinition/>
                                 <RowDefinition/>
                                 <RowDefinition/>
                                 <RowDefinition/>
@@ -108,13 +118,8 @@
                                      Text="{Binding HomePush.MinPrecent}" TextInput="Decimal_PreviewTextInput" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                             <TextBlock Grid.Row="1" Grid.Column="2" Text="%" Height="15" VerticalAlignment="Center"/>
 
-                            <TextBlock Grid.Row="2" Text="Reserve:" VerticalAlignment="Center"/>
-                            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding HomePush.Reserve}" PreviewTextInput="Number_PreviewTextInput"
-                                     VerticalAlignment="Center" ToolTip="This value is added to the min. percent (Favorite Items)"/>
-                            <TextBlock Grid.Row="2" Grid.Column="2" Text="%" VerticalAlignment="Center"/>
-
-                            <TextBlock Grid.Row="3" Text="Pushed:" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding HomePush.Push}" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="2" Grid.ColumnSpan="3" Text="Every 5th check the program will place an order from the Reserve list."
+                                       TextWrapping="Wrap" FontStyle="Italic" VerticalAlignment="Bottom"/>
                         </Grid>
                         <!--bottom-->
                         <Grid Grid.Row="2" VerticalAlignment="Bottom">
@@ -149,7 +154,14 @@
                             <RowDefinition/>
                             <RowDefinition Height="32"/>
                         </Grid.RowDefinitions>
-                        <TextBlock Text="{Binding HomeInventoryInfo.Items.Count, StringFormat='Steam Inventory: {0}'}" VerticalAlignment="Center" FontWeight="Bold"/>
+                        <TextBlock VerticalAlignment="Center" FontWeight="Bold">
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="Items: {0} | {1}$">
+                                    <Binding Path="HomeInventoryInfo.Items.Count"/>
+                                    <Binding Path="HomeInventoryInfo.SumOfItems"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
                         <Button ToolTip="Refresh Inventory" HorizontalAlignment="Right"
                                 Style="{StaticResource MaterialDesignToolForegroundButton}"
                                 Command="{Binding UpdateInformationsCommand}">
@@ -164,15 +176,13 @@
                         <Grid Grid.Row="1" Visibility="{Binding HomeInventoryInfo.Items.Count, Converter={StaticResource IntToVisibilityConverter}}"
                               x:Name="inventoryGrid" Height="510" VerticalAlignment="Top">
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="20"/>
                                 <RowDefinition Height="105"/>
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
                             <!--info-->
-                            <TextBlock Text="{Binding HomeInventoryInfo.SumOfItems, StringFormat='Sum of items: {0}$'}" VerticalAlignment="Center"/>
-                            <GroupBox Grid.Row="1" Style="{x:Null}" BorderThickness="0.5" Margin="5">
+                            <GroupBox Grid.Row="0" Style="{x:Null}" BorderThickness="0.5" Margin="5">
                                 <GroupBox.Header>
-                                    <TextBlock Text="{Binding SelectedInventory.Data.Count, StringFormat='Item x{0}'}"/>
+                                    <TextBlock Text="{Binding SelectedInventory.Data.Count, StringFormat='Count: {0}'}"/>
                                 </GroupBox.Header>
                                 <Grid Margin="1">
                                     <Grid.RowDefinitions>
@@ -180,11 +190,11 @@
                                         <RowDefinition Height="25"/>
                                     </Grid.RowDefinitions>
                                     <TextBlock Grid.Row="0" VerticalAlignment="Center" TextWrapping="Wrap" Text="{Binding SelectedInventory.ItemName}"/>
-                                    <TextBlock Grid.Row="1" VerticalAlignment="Center"
+                                    <TextBlock Grid.Row="1" VerticalAlignment="Center" FontWeight="Bold"
                                                Text="{Binding SelectedInventory.Data[0].TradeLock, StringFormat='TradeLock: {0}', Converter={StaticResource TradeLockConverter}}"/>
                                 </Grid>
                             </GroupBox>
-                            <ListBox Grid.Row="2" KeyDown="inventoryListBox_KeyDown" Background="{DynamicResource ElementBackground}"
+                            <ListBox Grid.Row="1" KeyDown="inventoryListBox_KeyDown" Background="{DynamicResource ElementBackground}"
                                      ItemsSource="{Binding HomeInventoryInfo.Items}" SelectedItem="{Binding SelectedInventory}"
                                      x:Name="inventoryListBox" MouseDoubleClick="inventoryListBox_MouseDoubleClick" ToolTip="'Double Click' to show item in inventory">
                                 <ListBox.ItemTemplate>

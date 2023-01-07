@@ -48,21 +48,21 @@
                 </Grid.RowDefinitions>
                 <materialDesign:ColorZone Background="Transparent" Grid.Row="0">
                     <StackPanel Orientation="Horizontal" Margin="2" HorizontalAlignment="Center">
-                        <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="favoriteTab" Width="315" Margin="1" Content="Favorite" IsChecked="{Binding ItemsList.IsFavorite}"/>
-                        <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="rareTab" Width="315" Margin="1" Content="Rare" IsChecked="{Binding ItemsList.IsRare}"/>
+                        <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="reserveTab" Width="315" Margin="1" Content="Reserve" IsChecked="{Binding SavedItems.IsReserve}"/>
+                        <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="rareTab" Width="315" Margin="1" Content="Rare" IsChecked="{Binding SavedItems.IsRare}"/>
                     </StackPanel>
                 </materialDesign:ColorZone>
                 <Border Grid.Row="1" BorderBrush="{StaticResource PrimaryHueMidBrush}" Margin="5">
                     <Grid>
                         <DataGrid Grid.Row="1" Grid.ColumnSpan="3" AlternationCount="2" AlternatingRowBackground="{DynamicResource ElementBackground}"
-                                  AutoGenerateColumns="False" x:Name="favoriteGrid" KeyDown="favoriteGrid_KeyDown"
-                                  ItemsSource="{Binding ItemsList.List, UpdateSourceTrigger=PropertyChanged}" SelectionMode="Single"
-                                  SelectedItem="{Binding ItemsList.SelectedItem}" ToolTip="Press 'Backspace' to remove item"
+                                  AutoGenerateColumns="False" x:Name="reserveGrid" KeyDown="reserveGrid_KeyDown"
+                                  ItemsSource="{Binding SavedItems.List, UpdateSourceTrigger=PropertyChanged}" SelectionMode="Single"
+                                  SelectedItem="{Binding SavedItems.SelectedItem}" ToolTip="Press 'Backspace' to remove item"
                                   IsReadOnly="True" CanUserReorderColumns="False" CanUserResizeRows="False" CanUserResizeColumns="False">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Binding="{Binding ItemName}" CanUserResize="False" MinWidth="350" Width="auto">
                                     <DataGridTextColumn.Header>
-                                        <TextBlock Text="{Binding DataContext.ItemsList.List.Count, RelativeSource={RelativeSource AncestorType=Window}, StringFormat='Item: {0}'}"/>
+                                        <TextBlock Text="{Binding DataContext.SavedItems.List.Count, RelativeSource={RelativeSource AncestorType=Window}, StringFormat='Item: {0}'}"/>
                                     </DataGridTextColumn.Header>
                                 </DataGridTextColumn>
                                 <DataGridTextColumn Header="Service" CanUserResize="False" MaxWidth="150" Width="auto"
@@ -81,7 +81,7 @@
                         <ColumnDefinition Width="25"/>
                         <ColumnDefinition Width="25"/>
                     </Grid.ColumnDefinitions>
-                    <ComboBox Grid.Column="0" x:Name="services" ItemsSource="{Binding ItemsList.Services}" SelectedIndex="{Binding ItemsList.ServiceId}"/>
+                    <ComboBox Grid.Column="0" x:Name="services" ItemsSource="{Binding SavedItems.Services}" SelectedIndex="{Binding SavedItems.ServiceId}"/>
                     <TextBox Grid.Column="2" VerticalAlignment="Center" ToolTip="Item Name" x:Name="itemName"/>
                     <Button Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignToolForegroundButton}"
                             Command="{Binding AddCommand}" CommandParameter="{Binding ElementName=itemName, Path=Text}">

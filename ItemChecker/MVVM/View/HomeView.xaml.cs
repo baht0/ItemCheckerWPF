@@ -1,5 +1,4 @@
-﻿using ItemChecker.MVVM.Model;
-using ItemChecker.MVVM.ViewModel;
+﻿using ItemChecker.MVVM.ViewModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -55,7 +54,7 @@ namespace ItemChecker.MVVM.View
         {
             if (!MainWindow.IsWindowOpen<Window>("showListWindow"))
             {
-                ShowListWindow window = new("Favorite");
+                ShowListWindow window = new("Reserve");
                 window.Show();
             }
             else

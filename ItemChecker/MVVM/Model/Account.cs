@@ -17,7 +17,7 @@ namespace ItemChecker.MVVM.Model
                 Main.Notifications.Add(new()
                 {
                     Title = title,
-                    Message = $"Your balance has decreased.\n-{_balance - value}$"
+                    Message = $"Your balance has decreased.\n-{_balance - value}$\nThe balance is: {_balance}"
                 });
             }
             else if (_balance < value && _balance != -1)
@@ -25,7 +25,7 @@ namespace ItemChecker.MVVM.Model
                 Main.Notifications.Add(new()
                 {
                     Title = title,
-                    Message = $"Your balance has increased.\n+{value - _balance}$"
+                    Message = $"Your balance has increased.\n+{value - _balance}$\nThe balance is: {_balance}"
                 });
             }
         }
@@ -157,8 +157,9 @@ namespace ItemChecker.MVVM.Model
                 var obj = Get.InventoryItems();
 
                 decimal sum = 0;
-                foreach (var i in obj)
-                    sum += Convert.ToDecimal(i.Value["p"]) / 100;
+                if (obj != null)
+                    foreach (var i in obj)
+                        sum += Convert.ToDecimal(i.Value["p"]) / 100;
                 return sum;
             }
         }

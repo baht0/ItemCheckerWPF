@@ -2,6 +2,7 @@
 using ItemChecker.MVVM.Model;
 using ItemChecker.MVVM.ViewModel;
 using ItemChecker.Properties;
+using ItemChecker.Support;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -46,6 +47,10 @@ namespace ItemChecker.MVVM.View
 
             Application.Current.Shutdown();
         }
+        private void Exit_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
+        }
 
         private void passTextbox_KeyDown(object sender, KeyEventArgs e)
         {
@@ -64,6 +69,11 @@ namespace ItemChecker.MVVM.View
                 if (viewModel.SubmitCodeCommand.CanExecute(null))
                     viewModel.SubmitCodeCommand.Execute(code2FA.Text);
             }
+        }
+
+        private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+        {
+            Edit.OpenUrl(e.Uri.ToString());
         }
     }
 }

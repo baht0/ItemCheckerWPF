@@ -2,10 +2,7 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ItemChecker.Properties" GeneratedClassName="HomeProperties">
   <Profiles />
   <Settings>
-    <Setting Name="TimePush" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">10</Value>
-    </Setting>
-    <Setting Name="Reserve" Type="System.Int32" Scope="User">
+    <Setting Name="Time" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">10</Value>
     </Setting>
     <Setting Name="MinPrecent" Type="System.Int32" Scope="User">

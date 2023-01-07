@@ -67,7 +67,7 @@
             <DataGrid Grid.Row="1" x:Name="parserGrid" AlternationCount="2" AlternatingRowBackground="{DynamicResource ElementBackground}"
                       AutoGenerateColumns="False" SelectionMode="Single" KeyDown="DataGrid_KeyDown" MouseDoubleClick="DataGrid_MouseDoubleClick"
                       ItemsSource="{Binding ParserTable.GridView, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding ParserTable.SelectedItem}"
-                      ToolTip="Press 'Insert' to add to queue&#x0a;Press 'F' to add to favorites&#x0a;Press 'F+Ctrl' to remove from favorites"
+                      ToolTip="Press 'Insert' to add to queue&#x0a;Press 'F' to add to Reserve&#x0a;Press 'F+Ctrl' to remove from Reserve"
                       IsReadOnly="True" CanUserReorderColumns="False" CanUserResizeRows="False" CanUserResizeColumns="False">
                 <DataGrid.Columns>
                     <DataGridTextColumn Binding="{Binding ItemName}" CanUserResize="False" Width="auto" MaxWidth="500" MinWidth="420">
@@ -517,20 +517,20 @@
                                     </MultiBinding>
                                 </TextBlock.Text>
                             </TextBlock>
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Orders:" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Remaining:" VerticalAlignment="Center"/>
                             <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Center">
                                 <TextBlock.Text>
                                     <MultiBinding StringFormat="{}{0}{1}">
-                                        <Binding Path="ParserQueue.OrderAmout" />
+                                        <Binding Path="ParserQueue.Remaining" />
                                         <Binding Path="ParserTable.CurrencySymbolSteam" />
                                     </MultiBinding>
                                 </TextBlock.Text>
                             </TextBlock>
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Remaining:" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Queue:" VerticalAlignment="Center"/>
                             <TextBlock Grid.Row="3" Grid.Column="1" VerticalAlignment="Center">
                                 <TextBlock.Text>
                                     <MultiBinding StringFormat="{}{0}{1}">
-                                        <Binding Path="ParserQueue.Remaining" />
+                                        <Binding Path="ParserQueue.OrderAmout" />
                                         <Binding Path="ParserTable.CurrencySymbolSteam" />
                                     </MultiBinding>
                                 </TextBlock.Text>

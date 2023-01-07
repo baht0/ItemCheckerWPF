@@ -12,11 +12,10 @@ namespace ItemChecker.Services
 {
     public class RareCheckService : BaseService
     {
-        public List<DataRare> Check(string itemName)
+        public static List<DataRare> Check(string itemName)
         {
             List<DataRare> items = new();
-            itemName = Edit.RemoveDoppler(itemName);
-            decimal priceCompare = SetPrice(itemName);
+            decimal priceCompare = PriceCompare(itemName);
 
             var json = SteamRequest.Get.ItemListings(itemName);
             var attributes = json["listinginfo"].ToList<JToken>();
@@ -35,42 +34,26 @@ namespace ItemChecker.Services
                     var jProperty = attribute.ToObject<JProperty>();
                     data.DataBuy.ListingId = jProperty.Name;
 
-                    data.DataBuy.Subtotal = Convert.ToDecimal(json["listinginfo"][data.DataBuy.ListingId]["converted_price"]);
-                    decimal fee_steam = Convert.ToDecimal(json["listinginfo"][data.DataBuy.ListingId]["converted_steam_fee"]);
-                    decimal fee_csgo = Convert.ToDecimal(json["listinginfo"][data.DataBuy.ListingId]["converted_publisher_fee"]);
-                    data.DataBuy.Fee = fee_steam + fee_csgo;
-                    data.DataBuy.Total = data.DataBuy.Subtotal + data.DataBuy.Fee;
-                    data.Price = data.DataBuy.Total / 100;
-
-                    data.Precent = Edit.Precent(data.Price, data.PriceCompare);
+                    data = GetPrices(data, json);
                     if (data.Precent < RareCheckConfig.CheckedConfig.MinPrecent)
                         break;
 
-                    data.Difference = Edit.Difference(data.Price, data.PriceCompare);
-                    string ass_id = json["listinginfo"][data.DataBuy.ListingId]["asset"]["id"].ToString();
-
-                    data.Stickers = GetStickers(json, ass_id);
-
-                    string link = json["listinginfo"][data.DataBuy.ListingId]["asset"]["market_actions"][0]["link"].ToString();
-                    link = link.Replace("%listingid%", data.DataBuy.ListingId);
-                    link = link.Replace("%assetid%", ass_id);
-                    data.Link = link;
-
-                    decimal maxFloat = SetMaxFloat(itemName);
-                    data.FloatValue = SetFloatValue(link);
+                    data.Stickers = GetStickers(data, json);
+                    data = InspectLink(data, json);
 
                     switch (RareCheckConfig.CheckedConfig.ParameterId)
                     {
                         case 0://float
-                            if (data.FloatValue < maxFloat)
+                            if (data.FloatValue < MaxFloat(itemName))
                                 items.Add(data);
                             break;
                         case 1://sticker
-                            if (CheckStickers(data))
+                            if (AllowStickers(data))
                                 items.Add(data);
                             break;
                         case 2://doppler
-
+                            if (AllowDopplerPhase(data))
+                                items.Add(data);
                             break;
                     }
                 }
@@ -84,14 +67,14 @@ namespace ItemChecker.Services
             return items;
         }
 
-        decimal SetPrice(string itemName)
+        static decimal PriceCompare(string itemName)
         {
             JObject steamPrices = SteamRequest.Get.PriceOverview(itemName, 1);
 
             decimal lowest_price = steamPrices.ContainsKey("lowest_price") ? Edit.GetDecimal(steamPrices["lowest_price"].ToString()) : 0m;
             decimal median_price = steamPrices.ContainsKey("median_price") ? Edit.GetDecimal(steamPrices["median_price"].ToString()) : 0m;
 
-            switch (RareProperties.Default.CompareId)
+            switch (RareCheckConfig.CheckedConfig.CompareId)
             {
                 case 0:
                     return lowest_price;
@@ -101,36 +84,27 @@ namespace ItemChecker.Services
                     return 0;
             }
         }
-        decimal SetMaxFloat(string itemName)
+        static DataRare GetPrices(DataRare data, JObject json)
         {
-            decimal maxFloat = 0;
-            if (itemName.Contains("Factory New")) maxFloat = RareProperties.Default.maxFloatValue_FN;
-            else if (itemName.Contains("Minimal Wear")) maxFloat = RareProperties.Default.maxFloatValue_MW;
-            else if (itemName.Contains("Field-Tested")) maxFloat = RareProperties.Default.maxFloatValue_FT;
-            else if (itemName.Contains("Well-Worn")) maxFloat = RareProperties.Default.maxFloatValue_WW;
-            else if (itemName.Contains("Battle-Scarred")) maxFloat = RareProperties.Default.maxFloatValue_BS;
+            data.DataBuy.Subtotal = Convert.ToDecimal(json["listinginfo"][data.DataBuy.ListingId]["converted_price"]);
+            decimal fee_steam = Convert.ToDecimal(json["listinginfo"][data.DataBuy.ListingId]["converted_steam_fee"]);
+            decimal fee_csgo = Convert.ToDecimal(json["listinginfo"][data.DataBuy.ListingId]["converted_publisher_fee"]);
+            data.DataBuy.Fee = fee_steam + fee_csgo;
+            data.DataBuy.Total = data.DataBuy.Subtotal + data.DataBuy.Fee;
+            data.Price = data.DataBuy.Total / 100;
 
-            return maxFloat;
-        }
-        decimal SetFloatValue(string link)
-        {
-            try
-            {
-                string json = HttpRequest.RequestGetAsync(@"https://api.csgofloat.com/?url=" + link).Result;
+            data.Precent = Edit.Precent(data.Price, data.PriceCompare);
 
-                return Convert.ToDecimal(JObject.Parse(json)["iteminfo"]["floatvalue"].ToString());
-            }
-            catch (Exception exp)
-            {
-                errorLog(exp, false);
-                return 1;
-            }
+            data.Difference = Edit.Difference(data.Price, data.PriceCompare);
+
+            return data;
         }
-        List<string> GetStickers(JObject obj, string ass_id)
+        static List<string> GetStickers(DataRare data, JObject json)
         {
-            List<string> stickers = new();
-            JArray descriptions = JArray.Parse(obj["assets"]["730"]["2"][ass_id]["descriptions"].ToString());
-            string value = descriptions.LastOrDefault()["value"].ToString().Trim();
+            string ass_id = json["listinginfo"][data.DataBuy.ListingId]["asset"]["id"].ToString();
+            var stickers = new List<string>();
+            var descriptions = JArray.Parse(json["assets"]["730"]["2"][ass_id]["descriptions"].ToString());
+            var value = descriptions.LastOrDefault()["value"].ToString().Trim();
             if (!String.IsNullOrEmpty(value))
             {
                 HtmlDocument htmlDoc = new();
@@ -144,8 +118,37 @@ namespace ItemChecker.Services
             }
             return stickers;
         }
+        static DataRare InspectLink(DataRare data, JObject json)
+        {
+            string ass_id = json["listinginfo"][data.DataBuy.ListingId]["asset"]["id"].ToString();
+            string link = json["listinginfo"][data.DataBuy.ListingId]["asset"]["market_actions"][0]["link"].ToString();
+            link = link.Replace("%listingid%", data.DataBuy.ListingId);
+            link = link.Replace("%assetid%", ass_id);
+            data.Link = link;
 
-        bool CheckStickers(DataRare data)
+            json = ServicesRequest.InspectLinkDetails(data.Link);
+            data.FloatValue = Convert.ToDecimal(json["floatvalue"].ToString());
+            int paintIndex = Convert.ToInt32(json["paintindex"].ToString());
+            data.Phase = CheckDopplerPhase(paintIndex);
+
+            return data;
+        }
+
+        //float
+        static decimal MaxFloat(string itemName)
+        {
+            decimal maxFloat = 0;
+            if (itemName.Contains("Factory New")) maxFloat = RareProperties.Default.maxFloatValue_FN;
+            else if (itemName.Contains("Minimal Wear")) maxFloat = RareProperties.Default.maxFloatValue_MW;
+            else if (itemName.Contains("Field-Tested")) maxFloat = RareProperties.Default.maxFloatValue_FT;
+            else if (itemName.Contains("Well-Worn")) maxFloat = RareProperties.Default.maxFloatValue_WW;
+            else if (itemName.Contains("Battle-Scarred")) maxFloat = RareProperties.Default.maxFloatValue_BS;
+
+            return maxFloat;
+        }
+
+        //sticker
+        static bool AllowStickers(DataRare data)
         {
             if (!String.IsNullOrEmpty(RareCheckConfig.CheckedConfig.NameContains) && !data.Stickers.Any(x => x.Contains(RareCheckConfig.CheckedConfig.NameContains)))
                 return false;
@@ -153,14 +156,14 @@ namespace ItemChecker.Services
             {
                 foreach (var sticker in data.Stickers)
                 {
-                    var baseItem = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == sticker);
+                    var baseItem = ItemsBase.List.FirstOrDefault(x => x.ItemName == sticker);
                     if (baseItem == null)
                         return false;
                     switch (baseItem.Quality)
                     {
                         case "Mil-Spec":
                             if (RareCheckConfig.CheckedConfig.Normal)
-                                return true;
+                                return RareCheckConfig.CheckedConfig.Normal;
                             break;
                         case "Restricted":
                             if ((RareCheckConfig.CheckedConfig.Holo && data.ItemName.Contains("Holo")) || (RareCheckConfig.CheckedConfig.Glitter && data.ItemName.Contains("Glitter")))
@@ -191,6 +194,56 @@ namespace ItemChecker.Services
                 }
             }
             return false;
+        }
+
+        //doppler
+        static string CheckDopplerPhase(int paintIndex)
+        {
+            switch (paintIndex)
+            {
+                case 415:
+                    return "Ruby";
+                case 416:
+                    return "Sapphire";
+                case 417:
+                    return "Black Pearl";
+                case 568 or 1119:
+                    return "Emerald";
+                case 418 or 569 or 1120:
+                    return "Phase 1";
+                case 419 or 570 or 1121:
+                    return "Phase 2";
+                case 420 or 571 or 1122:
+                    return "Phase 3";
+                case 421 or 572 or 1123:
+                    return "Phase 4";
+                default:
+                    return "-";
+            }
+        }
+        static bool AllowDopplerPhase(DataRare data)
+        {
+            switch (data.Phase)
+            {
+                case "Ruby":
+                    return RareCheckConfig.CheckedConfig.Ruby;
+                case "Sapphire":
+                    return RareCheckConfig.CheckedConfig.Sapphire;
+                case "Black pearl":
+                    return RareCheckConfig.CheckedConfig.BlackPearl;
+                case "Emerald":
+                    return RareCheckConfig.CheckedConfig.Emerald;
+                case "Phase 1":
+                    return RareCheckConfig.CheckedConfig.Phase1;
+                case "Phase 2":
+                    return RareCheckConfig.CheckedConfig.Phase2;
+                case "Phase 3":
+                    return RareCheckConfig.CheckedConfig.Phase3;
+                case "Phase 4":
+                    return RareCheckConfig.CheckedConfig.Phase4;
+                default:
+                    return false;
+            }
         }
     }
 }

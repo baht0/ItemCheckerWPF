@@ -68,7 +68,7 @@ namespace ItemChecker.MVVM.Model
             Application.Current.Dispatcher.Invoke(Application.Current.Shutdown);
         }
 
-        public static Boolean UploadCurrentVersion()
+        public static bool UploadCurrentVersion()
         {
             try
             {

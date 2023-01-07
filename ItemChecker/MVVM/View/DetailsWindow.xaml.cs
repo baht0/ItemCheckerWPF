@@ -47,7 +47,7 @@ namespace ItemChecker.MVVM.View
         private void searchBtn_Click(object sender, RoutedEventArgs e)
         {
             string itemName = searchTxt.Text;
-            if (SteamBase.ItemList.Any(x => x.ItemName == itemName))
+            if (ItemsBase.List.Any(x => x.ItemName == itemName))
             {
                 searchTxt.Text = string.Empty;
                 if (DataContext is DetailsViewModel vm && vm.SearchCommand.CanExecute(itemName))

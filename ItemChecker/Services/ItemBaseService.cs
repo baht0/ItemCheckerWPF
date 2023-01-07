@@ -26,14 +26,14 @@ namespace ItemChecker.Services
 
             JArray skinsBase = JArray.Parse(jobject["Items"].ToString());
 
-            SteamBase.Updated = Convert.ToDateTime(jobject["Updated"]);
+            ItemsBase.Updated = Convert.ToDateTime(jobject["Updated"]);
             string json = HttpRequest.RequestGetAsync("https://csgobackpack.net/api/GetItemsList/v2/?no_details=true").Result;
             JObject csgobackpack = (JObject)JObject.Parse(json)["items_list"];
             foreach (JObject item in skinsBase)
             {
                 string itemName = item["itemName"].ToString();
 
-                SteamBase.ItemList.Add(new()
+                ItemsBase.List.Add(new()
                 {
                     ItemName = itemName,
                     Type = item["type"].ToString(),
@@ -50,7 +50,7 @@ namespace ItemChecker.Services
         //stm
         public void UpdateSteamItem(string itemName, int currencyId = 1)
         {
-            var itemBase = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName).Steam;
+            var itemBase = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Steam;
             if (itemBase.Updated.AddMinutes(30) > DateTime.Now)
                 if (itemBase.CurrencyId == currencyId)
                     return;
@@ -66,7 +66,7 @@ namespace ItemChecker.Services
         }
         public void UpdateSteamItemHistory(string itemName)
         {
-            var itemBase = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName).Steam;
+            var itemBase = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Steam;
             if (itemBase == null || itemBase.History.Any())
                 return;
 
@@ -84,7 +84,7 @@ namespace ItemChecker.Services
         //lfm
         public void UpdateLfm()
         {
-            if (SteamBase.ItemList.Select(x => x.Lfm.Updated).Max().AddMinutes(30) > DateTime.Now)
+            if (ItemsBase.List.Select(x => x.Lfm.Updated).Max().AddMinutes(30) > DateTime.Now)
                 return;
 
             string json = HttpRequest.RequestGetAsync("https://loot.farm/fullprice.json").Result;
@@ -96,9 +96,9 @@ namespace ItemChecker.Services
                 int have = Convert.ToInt32(item["have"]);
                 int max = Convert.ToInt32(item["max"]);
 
-                if (SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName) != null)
+                if (ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName) != null)
                 {
-                    SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName).Lfm = new()
+                    ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Lfm = new()
                     {
                         Updated = DateTime.Now,
                         Price = price,
@@ -117,7 +117,7 @@ namespace ItemChecker.Services
         //csm
         public void UpdateCsm(ParserCheckConfig parserConfig)
         {
-            if (SteamBase.ItemList.Select(x => x.Csm.Inventory.Select(x => x.Updated).Max()).Max().AddMinutes(30) > DateTime.Now)
+            if (ItemsBase.List.Select(x => x.Csm.Inventory.Select(x => x.Updated).Max()).Max().AddMinutes(30) > DateTime.Now)
                 return;
 
             int offset = 0;
@@ -128,7 +128,7 @@ namespace ItemChecker.Services
                 if (items != null)
                 {
                     string itemName = items[0]["fullName"].ToString();
-                    var itemBase = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName).Csm;
+                    var itemBase = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Csm;
                     itemBase.Inventory.Clear();
                     foreach (JObject item in items)
                     {
@@ -154,7 +154,7 @@ namespace ItemChecker.Services
         }
         public void UpdateCsmItem(string itemName, bool isInventory)
         {
-            var itemBase = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName);
+            var itemBase = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName);
             if (itemBase.Csm.Updated.AddMinutes(30) > DateTime.Now && !isInventory)
                 return;
             if (itemBase.Csm.Inventory.Any() && itemBase.Csm.Inventory.Select(x => x.Updated).Max().AddMinutes(30) > DateTime.Now && isInventory)
@@ -217,7 +217,7 @@ namespace ItemChecker.Services
         //buff
         public void UpdateBuff(bool isBuyOrder, int min, int max)
         {
-            if (SteamBase.ItemList.Select(x => x.Buff.Updated).Max().AddMinutes(30) > DateTime.Now)
+            if (ItemsBase.List.Select(x => x.Buff.Updated).Max().AddMinutes(30) > DateTime.Now)
                 return;
 
             string tab = isBuyOrder ? "/buying" : string.Empty;
@@ -237,7 +237,7 @@ namespace ItemChecker.Services
                     foreach (JObject item in items)
                     {
                         string itemName = item["market_hash_name"].ToString();
-                        var itemBase = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName);
+                        var itemBase = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName);
                         if (itemBase != null && itemName != last_item)
                         {
                             decimal price = Currency.ConverterToUsd(Convert.ToDecimal(item["sell_min_price"]), 23);
@@ -263,7 +263,7 @@ namespace ItemChecker.Services
         }
         public void UpdateBuffItem(string itemName)
         {
-            var itemBase = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName);
+            var itemBase = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName);
             if (itemBase.Buff.Updated.AddMinutes(30) > DateTime.Now)
                 return;
 
@@ -307,7 +307,7 @@ namespace ItemChecker.Services
         }
         public void UpdateBuffItemHistory(string itemName)
         {
-            var itemBase = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName).Buff;
+            var itemBase = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Buff;
             if (itemBase == null || itemBase.History.Any())
                 return;
 

@@ -39,7 +39,7 @@ namespace ItemChecker.MVVM.Model
 
         public static bool ApplyFilter(ParserFilter filterConfig, DataParser item)
         {
-            var baseItem = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName);
+            var baseItem = ItemsBase.List.FirstOrDefault(x => x.ItemName == item.ItemName);
             //category
             bool category = true;
             if (filterConfig.Normal || filterConfig.Stattrak || filterConfig.Souvenir || filterConfig.KnifeGlove || filterConfig.KnifeGloveStattrak)
@@ -97,7 +97,7 @@ namespace ItemChecker.MVVM.Model
             if (filterConfig.Industrial || filterConfig.MilSpec || filterConfig.Restricted || filterConfig.Classified || filterConfig.Covert || filterConfig.Contraband)
             {
                 quality = false;
-                string Quality = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName).Quality;
+                string Quality = ItemsBase.List.FirstOrDefault(x => x.ItemName == item.ItemName).Quality;
                 if (filterConfig.Industrial)
                     quality = Quality == "Industrial Grade";
                 if (filterConfig.MilSpec && !quality)

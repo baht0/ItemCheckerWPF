@@ -74,7 +74,7 @@ namespace ItemChecker.MVVM.Model
                     {
                         if (isUpdateService)
                             baseService.UpdateSteamItem(data.ItemName);
-                        var Item = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == data.ItemName).Steam;
+                        var Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == data.ItemName).Steam;
                         data.ServicePrice = Item.LowestSellOrder;
                         data.ServiceGive = Math.Round(Item.LowestSellOrder * Calculator.CommissionSteam, 2);
                         break;
@@ -83,7 +83,7 @@ namespace ItemChecker.MVVM.Model
                     {
                         if (isUpdateService)
                             baseService.UpdateCsmItem(data.ItemName, false);
-                        var Item = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == data.ItemName).Csm;
+                        var Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == data.ItemName).Csm;
                         data.ServicePrice = Item.Price;
                         data.ServiceGive = Math.Round(Item.Price * Calculator.CommissionCsm, 2);
                         break;
@@ -92,7 +92,7 @@ namespace ItemChecker.MVVM.Model
                     {
                         if (isUpdateService)
                             baseService.UpdateLfm();
-                        var Item = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == data.ItemName).Lfm;
+                        var Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == data.ItemName).Lfm;
                         data.ServicePrice = Item.Price;
                         data.ServiceGive = Math.Round(Item.Price * Calculator.CommissionLf, 2);
                         break;
@@ -101,7 +101,7 @@ namespace ItemChecker.MVVM.Model
                     {
                         if (isUpdateService)
                             baseService.UpdateBuffItem(data.ItemName);
-                        var Item = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == data.ItemName).Buff;
+                        var Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == data.ItemName).Buff;
                         data.ServicePrice = Item.BuyOrder;
                         data.ServiceGive = Math.Round(Item.BuyOrder * Calculator.CommissionBuff, 2);
                         break;
@@ -110,7 +110,7 @@ namespace ItemChecker.MVVM.Model
                     {
                         if (isUpdateService)
                             baseService.UpdateBuffItem(data.ItemName);
-                        var Item = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == data.ItemName).Buff;
+                        var Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == data.ItemName).Buff;
                         data.ServicePrice = Item.Price;
                         data.ServiceGive = Math.Round(Item.Price * Calculator.CommissionBuff, 2);
                         break;
@@ -129,6 +129,37 @@ namespace ItemChecker.MVVM.Model
                 data.Difference = Edit.Difference(data.ServiceGive, data.OrderPrice);
             }
             return data;
+        }
+
+        public static void PlaceOrderFromReserve()
+        {
+            if (SteamMarket.Orders.GetAvailableAmount() < SteamMarket.MaxAmount * 0.15m || !SavedItems.Reserve.Any())
+                return;
+
+            int count = 0;
+            decimal sum = 0m;
+            foreach (var item in SavedItems.Reserve.Where(x => x.ServiceId == HomeProperties.Default.ServiceId))
+            {
+                try
+                {
+                    decimal orderPrice = PlaceOrder(item.ItemName);
+                    sum += orderPrice;
+                    count += orderPrice > 0 ? 1 : 0;
+                    if (sum >= SteamMarket.Orders.GetAvailableAmount())
+                        break;
+                }
+                catch (Exception exp)
+                {
+                    BaseService.errorLog(exp, false);
+                    continue;
+                }
+            }
+            if (count > 0)
+                Main.Notifications.Add(new()
+                {
+                    Title = "Orders",
+                    Message = $"{count} orders placed from Reserve.",
+                });
         }
     }
 }

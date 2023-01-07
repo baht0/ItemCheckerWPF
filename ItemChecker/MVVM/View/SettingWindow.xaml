@@ -88,7 +88,7 @@
                                 </Button>
 
                                 <TextBlock Grid.Row="3" Text="Currency:" Height="15"/>
-                                <TextBlock Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" Text="{Binding Currency}"/>
+                                <TextBlock Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" Text="{Binding Settings.Currency}"/>
                             </Grid>
                         </GroupBox>
                     </Grid>

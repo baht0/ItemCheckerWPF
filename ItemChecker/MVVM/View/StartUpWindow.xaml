@@ -109,7 +109,7 @@
                 </Grid>
                 <!--Login-->
                 <Grid Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center"
-                      Visibility="{Binding StartUp.IsSignInShow, Converter={StaticResource BooleanToVisibilityConverter}}">                    
+                      Visibility="{Binding StartUp.IsSignInShow, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Rectangle Width="235" Height="160" Fill="{DynamicResource Background}" RadiusX="12" RadiusY="12">
                         <Rectangle.Effect>
                             <DropShadowEffect Color="DarkGray" Direction="360" BlurRadius="15"
@@ -170,41 +170,41 @@
                             </Grid.RowDefinitions>
                             <TextBlock Text="The sign in request has expired." Grid.Row="0" VerticalAlignment="Bottom" FontSize="14"/>
                             <TextBlock Text="Restart to login." Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14"/>
-                            <Button Content="Exit" Grid.Row="2" Width="100" VerticalAlignment="Bottom" Command="{Binding ExitCommand}"/>
+                            <Button Content="Exit" Grid.Row="2" Width="100"  VerticalAlignment="Bottom" Click="Exit_Click"/>
                         </Grid>
-                    </Grid>
-                </Grid>
-                <!--currency-->
-                <Grid Grid.Column="1" Visibility="{Binding StartUp.IsCurrencyShow, Converter={StaticResource BooleanToVisibilityConverter}}"
-                      VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <Rectangle Width="235" Height="100" Fill="{DynamicResource Background}" RadiusX="12" RadiusY="12">
-                        <Rectangle.Effect>
-                            <DropShadowEffect Color="DarkGray" Direction="360" BlurRadius="15" RenderingBias="Quality" ShadowDepth="1"/>
-                        </Rectangle.Effect>
-                    </Rectangle>
-                    <Grid Width="200" Height="55" Margin="0 -20 0 0">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="25"/>
-                            <RowDefinition/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="65"/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="Account Currency" FontSize="15" Grid.ColumnSpan="2" FontWeight="Bold"
-                                   HorizontalAlignment="Center" VerticalAlignment="Top"/>
-                        <TextBlock Text="Currency:" Grid.Row="1" VerticalAlignment="Center"/>
-                        <ComboBox Grid.Row="1" Grid.Column="1" Height="25" FontSize="13"
-                                  ItemsSource="{Binding StartUp.CurrencyList}" SelectedItem="{Binding StartUp.SelectedCurrency}">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Name}"/>
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
-                        <Button Content="OK" Grid.ColumnSpan="2" Grid.Row="5"
-                                Width="100" Margin="0 0 0 -50" HorizontalAlignment="Center"  VerticalAlignment="Bottom"
+                        <!--IsCurrency-->
+                        <Grid Grid.Row="1" Visibility="{Binding StartUp.IsCurrencyShow, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <TextBlock VerticalAlignment="Center" TextWrapping="Wrap"
+                                       Text="You must select the currency of your steam&#160;">
+                                <Hyperlink NavigateUri="https://store.steampowered.com/account/" RequestNavigate="Hyperlink_RequestNavigate"
+                                           Foreground="#FF607D8B">account.</Hyperlink>
+                            </TextBlock>
+                            <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Top">
+                                <TextBlock Text="Currency:" VerticalAlignment="Center" Margin="0 0 10 0"/>
+                                <ComboBox Height="25" FontSize="13" Width="138" VerticalAlignment="Center"
+                                          ItemsSource="{Binding StartUp.CurrencyList}" SelectedItem="{Binding StartUp.SelectedCurrency}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Name}"/>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+                            <TextBlock Grid.Row="2" VerticalAlignment="Top" FontStyle="Italic"
+                                       Text="Learn more about supported&#x0a;">
+                                <Hyperlink NavigateUri="https://partner.steamgames.com/doc/store/pricing/currencies" RequestNavigate="Hyperlink_RequestNavigate"
+                                           Foreground="#FF607D8B">currencies.</Hyperlink>
+                            </TextBlock>
+
+                            <Button Content="Continue" Grid.ColumnSpan="2" Grid.Row="5"
+                                Width="100" Margin="0 0 0 -32" HorizontalAlignment="Center"  VerticalAlignment="Bottom"
                                 Command="{Binding SelectCurrencyCommand}" CommandParameter="{Binding StartUp.SelectedCurrency}"/>
+                        </Grid>
                     </Grid>
                 </Grid>
             </Grid>

@@ -12,7 +12,7 @@ namespace ItemChecker.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.3.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.4.0.0")]
     internal sealed partial class RareProperties : global::System.Configuration.ApplicationSettingsBase {
         
         private static RareProperties defaultInstance = ((RareProperties)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new RareProperties())));
@@ -32,30 +32,6 @@ namespace ItemChecker.Properties {
             }
             set {
                 this["Time"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int CompareId {
-            get {
-                return ((int)(this["CompareId"]));
-            }
-            set {
-                this["CompareId"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("-7")]
-        public int MinPrecent {
-            get {
-                return ((int)(this["MinPrecent"]));
-            }
-            set {
-                this["MinPrecent"] = value;
             }
         }
         

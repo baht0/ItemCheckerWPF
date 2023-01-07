@@ -110,6 +110,7 @@ namespace ItemChecker.MVVM.ViewModel
         {
             Task.Run(() => { 
                 OrderCheckService.SteamOrders(true);
+                HomeTable.OrderedGrid = new(SteamMarket.Orders);
                 HomeTable.IsBusy = false;
                 OnPropertyChanged(nameof(HomeTable));
             });
@@ -140,7 +141,7 @@ namespace ItemChecker.MVVM.ViewModel
                                 Edit.OpenUrl("https://loot.farm/");
                                 break;
                             case 4:
-                                Edit.OpenUrl("https://buff.163.com/goods/" + SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id);
+                                Edit.OpenUrl("https://buff.163.com/goods/" + ItemsBase.List.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id);
                                 break;
                         }
                         break;
@@ -209,13 +210,17 @@ namespace ItemChecker.MVVM.ViewModel
                 DataOrder item = obj as DataOrder;
                 MessageBoxResult result = MessageBox.Show(
                     $"Are you sure you want to cancel order?\n{item.ItemName}",
-                    "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);            
-
+                    "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result == MessageBoxResult.Yes)
                 {
-                    SteamMarket.Orders.Cancel(item);
-                    HomeTable.OrderedGrid = new ObservableCollection<DataOrder>(SteamMarket.Orders);
-                    Main.Message.Enqueue($"{item.ItemName}\nOrder has been canceled.");
+                    HomeTable.IsBusy = true;
+                    Task.Run(() =>
+                    {
+                        SteamMarket.Orders.Cancel(item);
+                        HomeTable.OrderedGrid = new(SteamMarket.Orders);
+                        Main.Message.Enqueue($"{item.ItemName}\nOrder has been canceled.");
+                        HomeTable.IsBusy = false;
+                    });
                 }
             });
         #endregion
@@ -228,10 +233,7 @@ namespace ItemChecker.MVVM.ViewModel
                 {
                     HomePush.IsService = true;
                     HomePush config = obj as HomePush;
-                    HomeProperties.Default.ServiceId = config.ServiceId;
-                    HomeProperties.Default.MinPrecent = config.MinPrecent;
-                    HomeProperties.Default.TimePush = config.Time;
-                    HomeProperties.Default.Reserve = config.Reserve;
+                    HomeProperties.Default.Time = config.Time;
                     HomeProperties.Default.Save();
 
                     HomePush.Timer.Elapsed += timerPushTick;
@@ -247,7 +249,7 @@ namespace ItemChecker.MVVM.ViewModel
                     HomePush.TimerTick = 0;
                     HomePush.Timer.Elapsed -= timerPushTick;
                 }
-            }, (obj) => SteamMarket.Orders.Any() && HomePush.Time > 0 && HomePush.MinPrecent >= 0 && HomePush.Reserve >= 0);
+            }, (obj) => SteamMarket.Orders.Any() && HomePush.Time > 0 && HomePush.MinPrecent >= 0);
         void timerPushTick(Object sender, ElapsedEventArgs e)
         {
             HomePush.TimerTick--;
@@ -262,6 +264,15 @@ namespace ItemChecker.MVVM.ViewModel
                 HomePush.cts = new();
                 HomePush.token = HomePush.cts.Token;
                 OrderPush();
+            }
+            if (!SteamMarket.Orders.Any())
+            {
+                HomePush.cts.Cancel();
+                HomePush.Status = string.Empty;
+                HomePush.IsService = false;
+                HomePush.Timer.Enabled = false;
+                HomePush.TimerTick = 0;
+                HomePush.Timer.Elapsed -= timerPushTick;
             }
         }
         void OrderPush()
@@ -291,15 +302,10 @@ namespace ItemChecker.MVVM.ViewModel
                         break;
                 }
                 HomePush.Status = "Update...";
-                if (HomePush.Check % 5 == 4)//every 5 check
+                if (HomePush.Check % 5 == 4 || SteamMarket.Orders.GetAvailableAmount() >= SteamMarket.MaxAmount * 0.5m)
                 {
-                    OrderCheckService.SteamOrders(true);//update service info
-
-                    if (SteamMarket.Orders.GetAvailableAmount() >= SteamMarket.MaxAmount * 0.15m)//order fav items
-                    {
-                        FavoriteService favorite = new();
-                        FavoriteService.Check();
-                    }
+                    OrderCheckService.PlaceOrderFromReserve();
+                    OrderCheckService.SteamOrders(true);
                 }
                 HomeTable.OrderedGrid = new(SteamMarket.Orders);
                 HomePush.Check++;
@@ -319,7 +325,7 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 if (!HomePush.token.IsCancellationRequested)
                 {
-                    HomePush.TimerTick = HomeProperties.Default.TimePush * 60;
+                    HomePush.TimerTick = HomeProperties.Default.Time * 60;
                     HomePush.Timer.Enabled = true;
                 }
             }

@@ -18,7 +18,6 @@ namespace ItemChecker.MVVM.ViewModel
     public class RareViewModel : ObservableObject
     {
         #region prop
-        System.Timers.Timer TimerView = new(500);
 
         public RareTable RareTable
         {
@@ -139,20 +138,7 @@ namespace ItemChecker.MVVM.ViewModel
 
         public RareViewModel()
         {
-            TimerView.Elapsed += UpdateView;
-            TimerView.Enabled = true;
             RareTable.GridView = CollectionViewSource.GetDefaultView(new List<DataRare>());
-        }
-        void UpdateView(Object sender, ElapsedEventArgs e)
-        {
-            try
-            {
-
-            }
-            catch (Exception ex)
-            {
-                BaseService.errorLog(ex, false);
-            }
         }
 
         #region table
@@ -241,6 +227,7 @@ namespace ItemChecker.MVVM.ViewModel
                 {
                     RareCheckStatus = new();
                     RareTable.Items.Clear();
+                    RareTable.Count = 0;
                     RareTable.GridView = CollectionViewSource.GetDefaultView(RareTable.Items);
                 }
             }, (obj) => RareTable.Items.Any() && !RareCheckStatus.IsService);
@@ -249,6 +236,7 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 if (!RareCheckStatus.IsService)
                 {
+                    RareCheckStatus.Status = "Starting...";
                     RareCheckStatus.IsService = true;
                     var config = obj as RareCheckConfig;
                     SaveConfig(config);
@@ -266,12 +254,10 @@ namespace ItemChecker.MVVM.ViewModel
                     RareCheckStatus.TimerTick = 0;
                     RareCheckStatus.Timer.Elapsed -= timerTick;
                 }
-            }, (obj) => ItemsList.Rare.Any() && RareCheckConfig.MinPrecent < 0 && RareCheckConfig.Time > 0);
+            }, (obj) => RareCheckConfig.MinPrecent < 0 && RareCheckConfig.Time > 0 && SavedItems.Rare.Any(x => x.ServiceId == RareCheckConfig.ParameterId));
         void SaveConfig(RareCheckConfig config)
         {
             RareProperties.Default.Time = config.Time;
-            RareProperties.Default.MinPrecent = config.MinPrecent;
-            RareProperties.Default.CompareId = config.CompareId;
 
             RareProperties.Default.maxFloatValue_FN = config.FactoryNew;
             RareProperties.Default.maxFloatValue_MW = config.MinimalWear;
@@ -297,21 +283,31 @@ namespace ItemChecker.MVVM.ViewModel
                 RareCheckStatus.token = RareCheckStatus.cts.Token;
                 Check();
             }
+            if (!SavedItems.Rare.Any(x => x.ServiceId == RareCheckConfig.ParameterId))
+            {
+                RareCheckStatus.cts.Cancel();
+                RareCheckStatus.Status = string.Empty;
+                RareCheckStatus.IsService = false;
+                RareCheckStatus.Timer.Enabled = false;
+                RareCheckStatus.TimerTick = 0;
+                RareCheckStatus.Timer.Elapsed -= timerTick;
+            }
         }
         void Check()
         {
             try
             {
+                var serviceList = SavedItems.Rare.Where(x => x.ServiceId == RareCheckConfig.CheckedConfig.ParameterId).ToList();
                 int start = RareTable.Items.Count;
 
-                RareCheckService floatCheck = new();
-                RareCheckStatus.MaxProgress = ItemsList.Rare.Count;
+                RareCheckStatus.MaxProgress = serviceList.Count;
                 RareCheckStatus.Status = "Checking...";
-                foreach (var list in ItemsList.Rare)
+                foreach (var list in serviceList)
                 {
                     try
                     {
-                        foreach (var item in floatCheck.Check(list.ItemName))
+                        var checkedList = RareCheckService.Check(list.ItemName);
+                        foreach (var item in checkedList)
                             if (!RareTable.Items.Any(x => x.FloatValue == item.FloatValue))
                                 RareTable.Items.Add(item);
                     }
@@ -332,7 +328,11 @@ namespace ItemChecker.MVVM.ViewModel
                 RareTable.GridView = CollectionViewSource.GetDefaultView(RareTable.Items);
                 RareCheckStatus.Cycles++;
                 if (RareTable.Items.Count - start != 0)
-                    System.Media.SystemSounds.Beep.Play();
+                    Main.Notifications.Add(new()
+                    {
+                        Title = "Rare",
+                        Message = $"Found {RareTable.Items.Count - start} items."
+                    });
             }
             catch (Exception exp)
             {

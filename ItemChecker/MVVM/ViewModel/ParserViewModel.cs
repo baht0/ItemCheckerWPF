@@ -149,10 +149,10 @@ namespace ItemChecker.MVVM.ViewModel
                                 Edit.OpenUrl("https://loot.farm/");
                                 break;
                             case 4:
-                                Edit.OpenUrl("https://buff.163.com/goods/" + SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id + "#tab=buying");
+                                Edit.OpenUrl("https://buff.163.com/goods/" + ItemsBase.List.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id + "#tab=buying");
                                 break;
                             case 5:
-                                Edit.OpenUrl("https://buff.163.com/goods/" + SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id);
+                                Edit.OpenUrl("https://buff.163.com/goods/" + ItemsBase.List.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id);
                                 break;
                         }
                         break;
@@ -169,10 +169,10 @@ namespace ItemChecker.MVVM.ViewModel
                                 Edit.OpenUrl("https://loot.farm/");
                                 break;
                             case 4:
-                                Edit.OpenUrl("https://buff.163.com/goods/" + SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id + "#tab=buying");
+                                Edit.OpenUrl("https://buff.163.com/goods/" + ItemsBase.List.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id + "#tab=buying");
                                 break;
                             case 5:
-                                Edit.OpenUrl("https://buff.163.com/goods/" + SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id);
+                                Edit.OpenUrl("https://buff.163.com/goods/" + ItemsBase.List.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id);
                                 break;
                         }
                         break;
@@ -272,7 +272,7 @@ namespace ItemChecker.MVVM.ViewModel
                     ParserCheckInfo.IsParser = false;
                     ParserCheckInfo.IsStoped = true;
                 }
-            }, (obj) => ParserCheckConfig.ServiceOne != ParserCheckConfig.ServiceTwo && SteamBase.ItemList.Any() && ParserCheckConfig.MaxPrice != 0);
+            }, (obj) => ParserCheckConfig.ServiceOne != ParserCheckConfig.ServiceTwo && ItemsBase.List.Any() && ParserCheckConfig.MaxPrice != 0);
         public ICommand ContinueCheckCommand =>
             new RelayCommand((obj) =>
             {
@@ -293,10 +293,19 @@ namespace ItemChecker.MVVM.ViewModel
                 if (checkList.Any())
                     StartCheck(checkList, checkedList);
                 else
+                {
                     MessageBox.Show("Nothing found. Adjust the parameters.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
 
                 ParserTable.Count = ParserTable.Items.Count;
                 ParserTable.GridView = CollectionViewSource.GetDefaultView(ParserTable.Items);
+
+                Main.Notifications.Add(new()
+                {
+                    Title = "Parser",
+                    Message = "The Parser has finished."
+                });
             }
             catch (Exception exp)
             {
@@ -355,7 +364,7 @@ namespace ItemChecker.MVVM.ViewModel
             }
             var list = ParserCheckService.ApplyConfig(config, checkedList);
 
-            if ((config.ServiceTwo == 4 || config.ServiceTwo == 5) && (SteamBase.ItemList.Count / 80 < list.Count))
+            if ((config.ServiceTwo == 4 || config.ServiceTwo == 5) && (ItemsBase.List.Count / 80 < list.Count))
             {
                 int min = (int)(config.MinPrice * 0.5m);
                 int max = (int)(config.MaxPrice * 2.5m);
@@ -516,26 +525,26 @@ namespace ItemChecker.MVVM.ViewModel
                     }                    
                 });
             }, (obj) => ParserQueue.Items.Any() && !ParserQueue.IsBusy);
-        //favorite
-        public ICommand AddFavoriteCommand =>
+        //Reserve
+        public ICommand AddReserveCommand =>
             new RelayCommand((obj) =>
             {
                 var name = obj as string;
 
                 DataItem item = new(name, ParserCheckConfig.CheckedConfig.ServiceTwo);
-                string message = ItemsList.Favorite.Add(item) ? $"{item.ItemName}\nItem has been added." : "Opps something went wrong...";
+                string message = SavedItems.Reserve.Add(item) ? $"{item.ItemName}\nItem has been added." : "Opps something went wrong...";
                 Main.Message.Enqueue(message);
             }, (obj) => ParserCheckConfig.ServiceOne < 2);
-        public ICommand RemoveFavoriteCommand =>
+        public ICommand RemoveReserveCommand =>
             new RelayCommand((obj) =>
             {
                 string itemName = (string)obj;
-                var item = ItemsList.Favorite.FirstOrDefault(x => x.ItemName == itemName);
+                var item = SavedItems.Reserve.FirstOrDefault(x => x.ItemName == itemName);
                 if (item != null)
                 {
-                    ItemsList.Favorite.Remove(item);
+                    SavedItems.Reserve.Remove(item);
                     Main.Message.Enqueue($"{itemName}\nRemoved from list.");
                 }
-            }, (obj) => ItemsList.Favorite.Any());
+            }, (obj) => SavedItems.Reserve.Any());
     }
 }

@@ -74,7 +74,7 @@ namespace ItemChecker.Services
                 {
                     if (item.Data.Any(x => x.Marketable))
                     {
-                        var baseItem = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName);
+                        var baseItem = ItemsBase.List.FirstOrDefault(x => x.ItemName == item.ItemName);
                         var json = SteamRequest.Get.ItemOrdersHistogram(baseItem.ItemName, baseItem.Steam.Id, 1);
                         var price = Convert.ToDecimal(json["highest_buy_order"]) / 100;
                         sumOfItems += price * item.Data.Count;
@@ -108,7 +108,7 @@ namespace ItemChecker.Services
         {
             ItemBaseService baseService = new();
             baseService.UpdateSteamItem(inventoryItem.ItemName, SteamAccount.Currency.Id);
-            var baseItem = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == inventoryItem.ItemName).Steam;
+            var baseItem = ItemsBase.List.FirstOrDefault(x => x.ItemName == inventoryItem.ItemName).Steam;
 
             foreach (var item in inventoryItem.Data)
             {

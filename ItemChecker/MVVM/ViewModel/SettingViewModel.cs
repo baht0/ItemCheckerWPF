@@ -99,15 +99,15 @@ namespace ItemChecker.MVVM.ViewModel
                 switch (id)
                 {
                     case 2:
-                        foreach (var item in SteamBase.ItemList.Where(x => x.Csm.Updated.AddMinutes(30) > DateTime.Now).ToList())
+                        foreach (var item in ItemsBase.List.Where(x => x.Csm.Updated.AddMinutes(30) > DateTime.Now).ToList())
                             item.Csm.Updated = DateTime.MinValue;
                         break;
                     case 3:
-                        foreach (var item in SteamBase.ItemList.Where(x => x.Lfm.Updated.AddMinutes(30) > DateTime.Now).ToList())
+                        foreach (var item in ItemsBase.List.Where(x => x.Lfm.Updated.AddMinutes(30) > DateTime.Now).ToList())
                             item.Lfm.Updated = DateTime.MinValue;
                         break;
                     case 4:
-                        foreach (var item in SteamBase.ItemList.Where(x => x.Buff.Updated.AddMinutes(30) > DateTime.Now).ToList())
+                        foreach (var item in ItemsBase.List.Where(x => x.Buff.Updated.AddMinutes(30) > DateTime.Now).ToList())
                             item.Buff.Updated = DateTime.MinValue;
                         break;
                 }

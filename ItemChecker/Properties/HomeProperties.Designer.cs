@@ -12,7 +12,7 @@ namespace ItemChecker.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.3.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.4.0.0")]
     internal sealed partial class HomeProperties : global::System.Configuration.ApplicationSettingsBase {
         
         private static HomeProperties defaultInstance = ((HomeProperties)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new HomeProperties())));
@@ -26,24 +26,12 @@ namespace ItemChecker.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("10")]
-        public int TimePush {
+        public int Time {
             get {
-                return ((int)(this["TimePush"]));
+                return ((int)(this["Time"]));
             }
             set {
-                this["TimePush"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("10")]
-        public int Reserve {
-            get {
-                return ((int)(this["Reserve"]));
-            }
-            set {
-                this["Reserve"] = value;
+                this["Time"] = value;
             }
         }
         

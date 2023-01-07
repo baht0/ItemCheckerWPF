@@ -7,7 +7,7 @@ namespace ItemChecker.Services
     {
         public static bool ApplyFilter(RareFilter filterConfig, DataRare item)
         {
-            var baseItem = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName);
+            var baseItem = ItemsBase.List.FirstOrDefault(x => x.ItemName == item.ItemName);
             //category
             bool category = true;
             if (filterConfig.Normal || filterConfig.Stattrak || filterConfig.Souvenir || filterConfig.KnifeGlove || filterConfig.KnifeGloveStattrak)

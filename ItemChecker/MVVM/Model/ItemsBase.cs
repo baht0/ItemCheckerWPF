@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 namespace ItemChecker.MVVM.Model
 {
-    public class SteamBase
+    public class ItemsBase
     {
         public static DateTime Updated { get; set; } = new();
-        public static List<Item> ItemList { get; set; } = new();
+        public static List<Item> List { get; set; } = new();
     }
     public class Item
     {

@@ -73,6 +73,11 @@ namespace ItemChecker.MVVM.ViewModel
                     StartUp.IsSignInShow = true;
                     SignIn();
                 }
+                else if (MainProperties.Default.SteamCurrencyId == 0)
+                {
+                    StartUp.IsSignInShow = true;
+                    SelectCurrency();
+                }
                 ServiceAccount.SignInToServices();
 
                 StartUp.Progress = Tuple.Create(4, "Get Account...");
@@ -114,8 +119,12 @@ namespace ItemChecker.MVVM.ViewModel
                 }
             });
             while (!isSetToken) Thread.Sleep(100);
-            StartUp.IsSignInShow = false;
 
+            SelectCurrency();
+        }
+        void SelectCurrency()
+        {
+            StartUp.Progress = Tuple.Create(3, "Please, Signing In...");
             StartUp.CurrencyList = new(Currencies.Steam);
             StartUp.SelectedCurrency = Currencies.Steam.FirstOrDefault();
             StartUp.IsCurrencyShow = true;
@@ -180,6 +189,7 @@ namespace ItemChecker.MVVM.ViewModel
                 var currency = obj as DataCurrency;
                 SteamAccount.Currency = currency;
                 StartUp.IsCurrencyShow = false;
+                StartUp.IsSignInShow = false;
 
                 MainProperties.Default.SteamCurrencyId = currency.Id;
                 MainProperties.Default.Save();

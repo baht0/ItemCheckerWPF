@@ -106,7 +106,7 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand UpdateItemsViewCommand =>
             new RelayCommand((obj) =>
             {
-                OnPropertyChanged("SelectedItem");
+                OnPropertyChanged(nameof(SelectedItem));
             });
 
         public ICommand ShowSearchCommand =>
@@ -191,10 +191,10 @@ namespace ItemChecker.MVVM.ViewModel
                         Edit.OpenUrl("https://loot.farm/");
                         break;
                     case 4:
-                        Edit.OpenUrl("https://buff.163.com/goods/" + SteamBase.ItemList.FirstOrDefault(x => x.ItemName == SelectedItem.ItemName).Buff.Id + "#tab=buying");
+                        Edit.OpenUrl("https://buff.163.com/goods/" + ItemsBase.List.FirstOrDefault(x => x.ItemName == SelectedItem.ItemName).Buff.Id + "#tab=buying");
                         break;
                     case 5:
-                        Edit.OpenUrl("https://buff.163.com/goods/" + SteamBase.ItemList.FirstOrDefault(x => x.ItemName == SelectedItem.ItemName).Buff.Id);
+                        Edit.OpenUrl("https://buff.163.com/goods/" + ItemsBase.List.FirstOrDefault(x => x.ItemName == SelectedItem.ItemName).Buff.Id);
                         break;
                 }
             });

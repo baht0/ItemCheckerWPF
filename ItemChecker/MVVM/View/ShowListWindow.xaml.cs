@@ -20,12 +20,12 @@ namespace ItemChecker.MVVM.View
             this.Close();
         }
 
-        private void favoriteGrid_KeyDown(object sender, KeyEventArgs e)
+        private void reserveGrid_KeyDown(object sender, KeyEventArgs e)
         {
-            if (!favoriteGrid.Items.IsEmpty)
+            if (!reserveGrid.Items.IsEmpty)
             {
                 var viewModel = (ShowListViewModel)DataContext;
-                var item = viewModel.ItemsList.SelectedItem;
+                var item = viewModel.SavedItems.SelectedItem;
                 if (e.Key == Key.Back && viewModel.RemoveCommand.CanExecute(item))
                     viewModel.RemoveCommand.Execute(item);
                 if (e.Key == Key.F1)

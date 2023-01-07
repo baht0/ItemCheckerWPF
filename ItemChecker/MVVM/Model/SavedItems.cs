@@ -1,6 +1,5 @@
 ﻿using ItemChecker.Core;
 using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -8,7 +7,7 @@ using System.Linq;
 
 namespace ItemChecker.MVVM.Model
 {
-    public class ItemsList : ObservableObject
+    public class SavedItems : ObservableObject
     {
         public ObservableCollection<DataItem> List
         {
@@ -31,26 +30,25 @@ namespace ItemChecker.MVVM.Model
         }
         private DataItem _selectedItem;
 
-        bool _isFavorite;
-        bool _isRare;
-        public bool IsFavorite
+        public bool IsReserve
         {
             get
             {
-                return _isFavorite;
+                return _isReserve;
             }
             set
             {
-                _isFavorite = value;
+                _isReserve = value;
                 ServiceId = 0;
                 if (value)
                 {
-                    List = new(Favorite);
+                    List = new(Reserve);
                     Services = Main.Services;
                 }
                 OnPropertyChanged();
             }
         }
+        bool _isReserve;
         public bool IsRare
         {
             get
@@ -64,17 +62,12 @@ namespace ItemChecker.MVVM.Model
                 if (value)
                 {
                     List = new(Rare);
-                    Services = new()
-                    {
-                        "Float",
-                        "Sticker",
-                        "Doppler (Soon)"
-                    };
+                    Services = Model.Rare.Services;
                 }
                 OnPropertyChanged();
             }
         }
-        private List<string> _services = Main.Services;
+        bool _isRare;
         public List<string> Services
         {
             get { return _services; }
@@ -84,7 +77,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private int _serviceId;
+        private List<string> _services = Main.Services;
         public int ServiceId
         {
             get { return _serviceId; }
@@ -94,8 +87,9 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
+        private int _serviceId;
 
-        public static Favorite<DataItem> Favorite { get; set; } =  ReadFile("Favorite").ToObject<Favorite<DataItem>>();
+        public static Reserve<DataItem> Reserve { get; set; } =  ReadFile("Reserve").ToObject<Reserve<DataItem>>();
         public static Rare<DataItem> Rare { get; set; } = ReadFile("Rare").ToObject<Rare<DataItem>>();
 
         public static JArray ReadFile(string listName)
@@ -105,7 +99,10 @@ namespace ItemChecker.MVVM.Model
             if (!File.Exists(path))
             {
                 File.Create(path);
-                File.WriteAllText(path, "{}");
+                var json = new JObject(
+                    new JProperty("Reserve", new JArray()),
+                    new JProperty("Rare", new JArray()));
+                File.WriteAllText(path, json.ToString());
                 return new();
             }
             JObject obj = JObject.Parse(File.ReadAllText(path));
@@ -124,12 +121,11 @@ namespace ItemChecker.MVVM.Model
             this.ServiceId = serviceId;
         }
     }
-    public class Favorite<T> : SavedList<T>
+    public class Reserve<T> : SavedList<T>
     {
-        public new Boolean Add(T item)
+        public new bool Add(T item)
         {
-            var currentItem = item as DataItem;
-            if (IsAllow(currentItem))
+            if (IsAllow(item))
             {
                 base.Add(item);
                 Save();
@@ -137,25 +133,26 @@ namespace ItemChecker.MVVM.Model
             }
             return false;
         }
-        Boolean IsAllow(DataItem item)
+        bool IsAllow(T item)
         {
-            var currentList = this as Favorite<DataItem>;
-            var steamBase = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName);
+            var currentItem = item as DataItem;
+            var currentList = this as Reserve<DataItem>;
+            var steamBase = ItemsBase.List.FirstOrDefault(x => x.ItemName == currentItem.ItemName);
 
             bool isAllow = item != null;
             if (isAllow)
                 isAllow = steamBase != null;
             if (isAllow)
-                isAllow = !currentList.Any(x => x.ItemName == item.ItemName && x.ServiceId == item.ServiceId);
+                isAllow = !currentList.Any(x => x.ItemName == currentItem.ItemName && x.ServiceId == currentItem.ServiceId);
             if (isAllow)
-                isAllow = currentList.Select(x => x.ServiceId == item.ServiceId).Count() < 200;
+                isAllow = currentList.Select(x => x.ServiceId == currentItem.ServiceId).Count() < 200;
 
             return isAllow;                
         }
     }
     public class Rare<T> : SavedList<T>
     {
-        public new Boolean Add(T item)
+        public new bool Add(T item)
         {
             var currentItem = item as DataItem;
             if (IsAllow(currentItem))
@@ -166,10 +163,10 @@ namespace ItemChecker.MVVM.Model
             }
             return false;
         }
-        Boolean IsAllow(DataItem item)
+        bool IsAllow(DataItem item)
         {
             var currentList = this as Rare<DataItem>;
-            var steamBase = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == item.ItemName);
+            var steamBase = ItemsBase.List.FirstOrDefault(x => x.ItemName == item.ItemName);
 
             bool isAllow = item != null;
 
@@ -196,8 +193,8 @@ namespace ItemChecker.MVVM.Model
         protected void Save()
         {
             JObject json = new(
-                    new JProperty("Favorite", JArray.FromObject(ItemsList.Favorite)),
-                    new JProperty("Rare", JArray.FromObject(ItemsList.Rare)));
+                    new JProperty("Reserve", JArray.FromObject(SavedItems.Reserve)),
+                    new JProperty("Rare", JArray.FromObject(SavedItems.Rare)));
 
             string path = ProjectInfo.DocumentPath + "SavedList.json";
             if (!File.Exists(path))

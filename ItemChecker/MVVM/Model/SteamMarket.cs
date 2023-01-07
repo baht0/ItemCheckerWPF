@@ -1,5 +1,6 @@
 ﻿using ItemChecker.Net;
 using ItemChecker.Properties;
+using ItemChecker.Support;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -45,7 +46,7 @@ namespace ItemChecker.MVVM.Model
     }
     public class Order<T> : List<T>
     {
-        public Boolean CancelMinPrecent()
+        public bool CancelMinPrecent()
         {
             var currentList = this as Order<DataOrder>;
             decimal availableAmount = GetAvailableAmount();
@@ -57,7 +58,7 @@ namespace ItemChecker.MVVM.Model
             }
             return false;
         }
-        public Decimal GetAvailableAmount()
+        public decimal GetAvailableAmount()
         {
             var currentList = this as Order<DataOrder>;
 
@@ -67,26 +68,29 @@ namespace ItemChecker.MVVM.Model
         }
         public void Cancel(T order)
         {
-            var itemOrder = order as DataOrder;
-            SteamRequest.Post.CancelBuyOrder(itemOrder.ItemName, itemOrder.Id);
+            var item = order as DataOrder;
+            SteamRequest.Post.CancelBuyOrder(item.ItemName, item.Id);
             base.Remove(order);
+            var reservItem = SavedItems.Reserve.FirstOrDefault(x => x.ItemName == item.ItemName && x.ServiceId == HomeProperties.Default.ServiceId);
+            if (reservItem != null)
+                SavedItems.Reserve.Remove(reservItem);
         }
-        public new Boolean Add(T order)
+        public new bool Add(T order)
         {
             if (IsAllow(order))
             {
                 base.Add(order);
                 var item = order as DataOrder;
-                ItemsList.Favorite.Add(new(item.ItemName, HomeProperties.Default.ServiceId));
+                SavedItems.Reserve.Add(new(item.ItemName, HomeProperties.Default.ServiceId));
                 return true;
             }
             Cancel(order);
             return false;
         }
-        Boolean IsAllow(T order)
+        bool IsAllow(T order)
         {
             var itemOrder = order as DataOrder;
-            var item = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemOrder.ItemName);
+            var item = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemOrder.ItemName);
 
             bool isAllow = item != null;
             if (isAllow)
@@ -105,6 +109,66 @@ namespace ItemChecker.MVVM.Model
                         break;
                 }
             }
+
+            return isAllow;
+        }
+    }
+
+    public class DataQueue
+    {
+        public string ItemName { get; set; }
+        public decimal OrderPrice
+        {
+            get
+            {
+                return _orderPrice;
+            }
+            set
+            {
+                var currency = SteamAccount.Currency.Id;
+                if (ParserTable.CurectCurrency.Id != 1)
+                    value = Currency.ConverterToUsd(value, ParserTable.CurectCurrency.Id);
+                value = Currency.ConverterFromUsd(value, currency);
+                _orderPrice = value;
+            }
+        }
+        decimal _orderPrice;
+        public decimal Precent { get; set; }
+
+        public DataQueue(string itemName, decimal orderPrice, decimal precent)
+        {
+            ItemName = itemName;
+            OrderPrice = orderPrice;
+            Precent = precent;
+        }
+    }
+    public class Queue<T> : List<T>
+    {
+        public new bool Add(T item)
+        {
+            if (IsAllow(item))
+            {
+                base.Add(item);
+                return true;
+            }
+            return false;
+        }
+        bool IsAllow(T item)
+        {
+            var currentItem = item as DataQueue;
+            var currentList = this as Queue<DataQueue>;
+
+            decimal sum = currentList.Select(x => x.OrderPrice).Sum();
+
+            bool isAllow = !currentList.Any(x => x.ItemName == currentItem.ItemName);
+            if (isAllow)
+                isAllow = !SteamMarket.Orders.Any(n => n.ItemName == currentItem.ItemName);
+            if (isAllow)
+                isAllow = (sum + currentItem.OrderPrice) < SteamMarket.Orders.GetAvailableAmount();
+            if (isAllow)
+                isAllow = currentItem.OrderPrice < SteamAccount.Balance;
+            if (isAllow)
+                isAllow = currentItem.Precent > HomeProperties.Default.MinPrecent;
 
             return isAllow;
         }

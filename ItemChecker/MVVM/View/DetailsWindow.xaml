@@ -87,11 +87,11 @@
                                   ItemsSource="{Binding Details.CurrencyList}" SelectedIndex="{Binding SelectedItem.CurrencyId}"/>
                         <Separator Grid.ColumnSpan="4" VerticalAlignment="Bottom"/>
                         <DataGrid Grid.Row="1" Grid.ColumnSpan="4" AlternationCount="2" AlternatingRowBackground="{DynamicResource ElementBackground}"
-                              AutoGenerateColumns="False" IsReadOnly="True" x:Name="pricesGrid" SelectionMode="Single" CanUserSortColumns="False"
-                              ItemsSource="{Binding SelectedItem.Prices}" SelectedItem="{Binding SelectedItem.Price}" MouseDoubleClick="DataGrid_MouseDoubleClick">
+                                  AutoGenerateColumns="False" IsReadOnly="True" x:Name="pricesGrid" SelectionMode="Single" CanUserSortColumns="False" IsEnabled="{Binding SelectedItem.Price.IsBusy, Converter={StaticResource InvertBooleanConverter}}"
+                                  ItemsSource="{Binding SelectedItem.Prices}" SelectedItem="{Binding SelectedItem.Price}" MouseDoubleClick="DataGrid_MouseDoubleClick">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Service" Binding="{Binding Service}" CanUserResize="False" Width="auto"/>
-                                <DataGridTextColumn Header="Price" Binding="{Binding Price}" CanUserResize="False" Width="auto"/>
+                                <DataGridTextColumn Header="Price" Binding="{Binding Price}" CanUserResize="False" Width="auto" FontWeight="Bold"/>
                                 <DataGridTextColumn Header="Get" Binding="{Binding Get}" CanUserResize="False" Width="auto"/>
                                 <DataGridTextColumn Header="Have" Binding="{Binding Have, Converter={StaticResource BooleanToYesNoConverter}}" CanUserResize="False" Width="auto"/>
                                 <DataGridTextColumn Header="Available" Binding="{Binding Available, Converter={StaticResource BooleanToYesNoConverter}}" CanUserResize="False" Width="auto"/>
@@ -100,7 +100,7 @@
                         <ProgressBar Grid.Row="1" Grid.ColumnSpan="4" VerticalAlignment="Center" HorizontalAlignment="Center" IsIndeterminate="True"
                                      Visibility="{Binding SelectedItem.Price.IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
                                      Style="{StaticResource MaterialDesignCircularProgressBar}"/>
-                        <GroupBox Header="Compare" Grid.Row="2" Grid.ColumnSpan="3" Style="{DynamicResource none}" BorderThickness="0.5">
+                        <GroupBox Header="Compare" Grid.Row="2" Grid.ColumnSpan="4" Style="{DynamicResource none}" BorderThickness="0.5">
                             <Grid Margin="10">
                                 <Grid.RowDefinitions>
                                     <RowDefinition/>

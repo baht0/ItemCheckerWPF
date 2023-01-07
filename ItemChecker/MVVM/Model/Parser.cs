@@ -1,6 +1,7 @@
 ﻿using ItemChecker.Core;
 using ItemChecker.Support;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 
@@ -197,5 +198,47 @@ namespace ItemChecker.MVVM.Model
         public decimal PrecentTo { get; set; }
         public decimal DifferenceFrom { get; set; }
         public decimal DifferenceTo { get; set; }
+    }
+    public class DataParser
+    {
+        public string ItemName { get; set; }
+        public decimal Purchase { get; set; }
+        public decimal Price { get; set; }
+        public decimal Get { get; set; }
+        public decimal Precent { get; set; }
+        public decimal Difference { get; set; }
+        public bool Have { get; set; }
+    }
+
+    public class ImportParser : ObservableObject
+    {
+        public ObservableCollection<ImportFile> List
+        {
+            get { return _list; }
+            set
+            {
+                _list = value;
+                OnPropertyChanged();
+            }
+        }
+        ObservableCollection<ImportFile> _list = new();
+        public ImportFile Selected
+        {
+            get
+            {
+                return _selected;
+            }
+            set
+            {
+                _selected = value;
+                OnPropertyChanged();
+            }
+        }
+        ImportFile _selected = new();
+    }
+    public class ImportFile : ParserCheckConfig
+    {
+        public string Path { get; set; }
+        public int Size { get; set; }
     }
 }

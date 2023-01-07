@@ -61,7 +61,7 @@ namespace ItemChecker.MVVM.Model
         bool IsAllow(string itemName)
         {
             var currentList = this as DetailsItemList<DetailItem>;
-            return !currentList.Any(x => x.ItemName == itemName) && SteamBase.ItemList.Any(x => x.ItemName == itemName);
+            return !currentList.Any(x => x.ItemName == itemName) && ItemsBase.List.Any(x => x.ItemName == itemName);
         }
     }
     public class DetailItem : ObservableObject
@@ -118,7 +118,7 @@ namespace ItemChecker.MVVM.Model
                     {
                         case 0 or 1:
                             {
-                                var data = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == ItemName).Steam;
+                                var data = ItemsBase.List.FirstOrDefault(x => x.ItemName == ItemName).Steam;
 
                                 data.LowestSellOrder = Currency.ConverterFromUsd(data.LowestSellOrder, ParserTable.CurectCurrency.Id);
                                 data.HighestBuyOrder = Currency.ConverterFromUsd(data.HighestBuyOrder, ParserTable.CurectCurrency.Id);
@@ -139,7 +139,7 @@ namespace ItemChecker.MVVM.Model
                         case 2:
                             {
                                 baseService.UpdateCsmItem(ItemName, true);
-                                Info.CsmInfo.Item = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == ItemName).Csm;
+                                Info.CsmInfo.Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == ItemName).Csm;
                                 Info.CsmInfo.CurrentItem = Info.CsmInfo.Item.Inventory.FirstOrDefault();
                                 Info.CsmInfo.MaxValueSlide = Info.CsmInfo.Item.Inventory.Count;
                                 Info.CsmInfo.ValueSlide = Info.CsmInfo.Item.Inventory.Any() ? 1 : 0;
@@ -149,7 +149,7 @@ namespace ItemChecker.MVVM.Model
                             }
                         case 3:
                             {
-                                Info.LfmInfo.Item = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == ItemName).Lfm;
+                                Info.LfmInfo.Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == ItemName).Lfm;
 
                                 Info.LfmInfo.IsShow = true;
                                 break;
@@ -157,7 +157,7 @@ namespace ItemChecker.MVVM.Model
                         case 4 or 5:
                             {
                                 baseService.UpdateBuffItemHistory(ItemName);
-                                var data = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == ItemName).Buff;
+                                var data = ItemsBase.List.FirstOrDefault(x => x.ItemName == ItemName).Buff;
                                 Info.BuffInfo.LastSale = data.History.FirstOrDefault().Date;
                                 Info.BuffInfo.Item = data;
 
@@ -216,24 +216,24 @@ namespace ItemChecker.MVVM.Model
             switch (service)
             {
                 case 0:
-                    this.Price = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName).Steam.HighestBuyOrder;
+                    this.Price = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Steam.HighestBuyOrder;
                     this.Get = Math.Round(this.Price * Calculator.CommissionSteam, 2);
                     this.Have = Price > 0;
                     break;
                 case 1:
-                    this.Price = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName).Steam.LowestSellOrder;
+                    this.Price = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Steam.LowestSellOrder;
                     this.Get = Math.Round(this.Price * Calculator.CommissionSteam, 2);
                     this.Have = Price > 0;
                     break;
                 case 2:
-                    item = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName).Csm;
+                    item = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Csm;
                     this.Price = item.Price;
                     this.Get = Math.Round(this.Price * Calculator.CommissionCsm, 2);
                     this.Have = item.IsHave;
                     this.Available = !item.Unavailable && !item.Overstock;
                     break;
                 case 3:
-                    item = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName).Lfm;
+                    item = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Lfm;
                     var price = item.Price;
                     this.Price = Math.Round(price * 1.03m, 2);
                     this.Get = Math.Round(price * Calculator.CommissionLf, 2);
@@ -241,14 +241,14 @@ namespace ItemChecker.MVVM.Model
                     this.Available = !item.Unavailable && !item.Overstock;
                     break;
                 case 4:
-                    this.Price = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName).Buff.BuyOrder;
+                    this.Price = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Buff.BuyOrder;
                     this.Get = Math.Round(this.Price * Calculator.CommissionBuff, 2);
                     this.Have = Price > 0;
                     break;
                 case 5:
-                    this.Price = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName).Buff.Price;
+                    this.Price = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Buff.Price;
                     this.Get = Math.Round(this.Price * Calculator.CommissionBuff, 2);
-                    this.Have = SteamBase.ItemList.FirstOrDefault(x => x.ItemName == itemName).Buff.IsHave;
+                    this.Have = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Buff.IsHave;
                     break;
             }
             return this;

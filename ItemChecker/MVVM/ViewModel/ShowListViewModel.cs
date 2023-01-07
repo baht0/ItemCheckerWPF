@@ -9,7 +9,6 @@ namespace ItemChecker.MVVM.ViewModel
 {
     public class ShowListViewModel : ObservableObject
     {
-        SnackbarMessageQueue _message = new();
         public SnackbarMessageQueue Message
         {
             get { return _message; }
@@ -19,29 +18,29 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-
-        private ItemsList _itemsList = new();
-        public ItemsList ItemsList
+        SnackbarMessageQueue _message = new();
+        public SavedItems SavedItems
         {
-            get { return _itemsList; }
+            get { return _savedItems; }
             set
             {
-                _itemsList = value;
+                _savedItems = value;
                 OnPropertyChanged();
             }
         }
+        private SavedItems _savedItems = new();
 
         public ShowListViewModel(string listName)
         {
             switch (listName)
             {
-                case "Favorite":
-                    ItemsList.IsFavorite = true;
-                    ItemsList.List = new(ItemsList.Favorite);
+                case "Reserve":
+                    SavedItems.IsReserve = true;
+                    SavedItems.List = new(SavedItems.Reserve);
                     break;
                 case "Rare":
-                    ItemsList.IsRare = true;
-                    ItemsList.List = new(ItemsList.Rare);
+                    SavedItems.IsRare = true;
+                    SavedItems.List = new(SavedItems.Rare);
                     break;
             }
         }
@@ -55,19 +54,19 @@ namespace ItemChecker.MVVM.ViewModel
 
                 if (result == MessageBoxResult.Yes)
                 {
-                    if (ItemsList.IsFavorite)
+                    if (SavedItems.IsReserve)
                     {
-                        ItemsList.Favorite.Remove(item);
-                        ItemsList.List = new(ItemsList.Favorite);
+                        SavedItems.Reserve.Remove(item);
+                        SavedItems.List = new(SavedItems.Reserve);
                     }
-                    else if (ItemsList.IsRare)
+                    else if (SavedItems.IsRare)
                     {
-                        ItemsList.Rare.Remove(item);
-                        ItemsList.List = new(ItemsList.Rare);
+                        SavedItems.Rare.Remove(item);
+                        SavedItems.List = new(SavedItems.Rare);
                     }
                     Message.Enqueue($"{item.ItemName}\nItem has been removed.");
                 }
-            }, (obj) => ItemsList.SelectedItem != null);
+            }, (obj) => SavedItems.SelectedItem != null);
         public ICommand AddCommand =>
             new RelayCommand((obj) =>
             {
@@ -76,17 +75,17 @@ namespace ItemChecker.MVVM.ViewModel
                 if (String.IsNullOrEmpty(name))
                     return;
 
-                DataItem item = new(name, ItemsList.ServiceId);
+                DataItem item = new(name, SavedItems.ServiceId);
                 string message = string.Empty;
-                if (ItemsList.IsFavorite)
+                if (SavedItems.IsReserve)
                 {
-                    message = ItemsList.Favorite.Add(item) ? $"{item.ItemName}\nItem has been added." : "Not successful. Conditions not met.";
-                    ItemsList.List = new(ItemsList.Favorite);
+                    message = SavedItems.Reserve.Add(item) ? $"{item.ItemName}\nItem has been added." : "Not successful. Conditions not met.";
+                    SavedItems.List = new(SavedItems.Reserve);
                 }
-                else if (ItemsList.IsRare)
+                else if (SavedItems.IsRare)
                 {
-                    message = ItemsList.Rare.Add(item) ? $"{item.ItemName}\nItem has been added." : "Not successful. Conditions not met.";
-                    ItemsList.List = new(ItemsList.Rare);
+                    message = SavedItems.Rare.Add(item) ? $"{item.ItemName}\nItem has been added." : "Not successful. Conditions not met.";
+                    SavedItems.List = new(SavedItems.Rare);
                 }
                 Message.Enqueue(message);
             });
@@ -99,15 +98,15 @@ namespace ItemChecker.MVVM.ViewModel
                 if (result == MessageBoxResult.No)
                     return;
 
-                if (ItemsList.IsFavorite)
+                if (SavedItems.IsReserve)
                 {
-                    ItemsList.Favorite.Clear();
-                    ItemsList.List = new(ItemsList.Favorite);
+                    SavedItems.Reserve.Clear();
+                    SavedItems.List = new(SavedItems.Reserve);
                 }
-                else if (ItemsList.IsRare)
+                else if (SavedItems.IsRare)
                 {
-                    ItemsList.Rare.Clear();
-                    ItemsList.List = new(ItemsList.Rare);
+                    SavedItems.Rare.Clear();
+                    SavedItems.List = new(SavedItems.Rare);
                 }
                 Message.Enqueue("The list has been cleared.");
             });

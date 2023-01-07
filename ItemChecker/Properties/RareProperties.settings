@@ -5,12 +5,6 @@
     <Setting Name="Time" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">10</Value>
     </Setting>
-    <Setting Name="CompareId" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">0</Value>
-    </Setting>
-    <Setting Name="MinPrecent" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">-7</Value>
-    </Setting>
     <Setting Name="maxFloatValue_FN" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)">0.001</Value>
     </Setting>
