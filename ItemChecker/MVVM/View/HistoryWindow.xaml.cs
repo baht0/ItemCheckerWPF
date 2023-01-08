@@ -22,6 +22,11 @@ namespace ItemChecker.MVVM.View
         {
             this.Close();
         }
+        private void historyWindow_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+                this.Close();
+        }
 
         private void currency_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

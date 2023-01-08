@@ -21,7 +21,12 @@ namespace ItemChecker.MVVM.View
         }
         private void Button_Close(object sender, RoutedEventArgs e)
         {
-            Close();
+            this.Close();
+        }
+        private void detailsWindow_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+                this.Close();
         }
 
         private void currency_SelectionChanged(object sender, SelectionChangedEventArgs e)

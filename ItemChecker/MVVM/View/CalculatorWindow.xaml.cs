@@ -24,6 +24,11 @@ namespace ItemChecker.MVVM.View
         {
             Close();
         }
+        private void calculatorWindow_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+                this.Close();
+        }
 
         private void InputDecimal(object sender, TextCompositionEventArgs e)
         {

@@ -23,6 +23,12 @@ namespace ItemChecker.MVVM.View
         {
             this.Close();
         }
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+                this.Close();
+        }
+
         private void filesGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             object item = filesGrid.CurrentItem;

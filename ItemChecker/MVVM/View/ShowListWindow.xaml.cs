@@ -19,6 +19,11 @@ namespace ItemChecker.MVVM.View
         {
             this.Close();
         }
+        private void showListWindow_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+                this.Close();
+        }
 
         private void reserveGrid_KeyDown(object sender, KeyEventArgs e)
         {

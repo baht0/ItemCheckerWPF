@@ -13,7 +13,7 @@
         Background="{DynamicResource Background}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Normal" FontFamily="{materialDesign:MaterialDesignFont}"
-        WindowStartupLocation="CenterScreen"
+        WindowStartupLocation="CenterScreen" KeyDown="detailsWindow_KeyDown"
         WindowStyle="None" ResizeMode="NoResize">
     <Window.Resources>
         <ControlTemplate x:Key="ValidError"/>

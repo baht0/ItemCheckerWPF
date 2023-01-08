@@ -12,9 +12,9 @@
         d:DataContext="{d:DesignInstance Type=viewmodel:CalculatorViewModel}"
         Background="{DynamicResource Background}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-        TextElement.FontWeight="Normal"
+        TextElement.FontWeight="Normal" Topmost="True"
         FontFamily="{materialDesign:MaterialDesignFont}"
-        WindowStartupLocation="CenterScreen" Topmost="True"
+        WindowStartupLocation="CenterScreen" KeyDown="calculatorWindow_KeyDown"
         WindowStyle="None" ResizeMode="NoResize">
     <Window.Resources>
         <ControlTemplate x:Key="ValidError"/>

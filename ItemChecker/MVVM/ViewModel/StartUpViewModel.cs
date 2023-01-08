@@ -83,7 +83,7 @@ namespace ItemChecker.MVVM.ViewModel
                 StartUp.Progress = Tuple.Create(4, "Get Account...");
                 SteamAccount.GetAccount();
 
-                StartUp.Progress = Tuple.Create(5, "Creation ItemBase...");
+                StartUp.Progress = Tuple.Create(5, "Creation ItemsBase...");
                 ItemBaseService itemBase = new();
                 itemBase.CreateItemsBase();
 
@@ -119,6 +119,7 @@ namespace ItemChecker.MVVM.ViewModel
                 }
             });
             while (!isSetToken) Thread.Sleep(100);
+            StartUp.IsConfirmationShow = false;
 
             SelectCurrency();
         }

@@ -22,6 +22,11 @@ namespace ItemChecker.MVVM.View
         {
             this.Close();
         }
+        private void whatsNewWindow_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+                this.Close();
+        }
 
         private void ComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {

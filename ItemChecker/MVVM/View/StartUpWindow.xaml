@@ -14,7 +14,7 @@
         d:DataContext="{d:DesignInstance Type=viewmodel:StartUpViewModel}"
         Background="{DynamicResource Background}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-        TextElement.FontWeight="Normal"
+        TextElement.FontWeight="Normal" KeyDown="Window_KeyDown"
         FontFamily="{materialDesign:MaterialDesignFont}"
         WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="NoResize">
     <Window.Resources>

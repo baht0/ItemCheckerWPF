@@ -24,11 +24,19 @@ namespace ItemChecker.MVVM.View
         }
         private void Close_Click(object sender, RoutedEventArgs e)
         {
+            Exit();
+        }
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+                Exit();
+        }
+        void Exit()
+        {
             MessageBoxResult result = MessageBox.Show("Are you sure you want to close?", "Question",
                 MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (result == MessageBoxResult.No)
-                return;
-            Application.Current.Shutdown();
+            if (result == MessageBoxResult.Yes)
+                Application.Current.Shutdown();
         }
         private void Reset_Click(object sender, RoutedEventArgs e)
         {
@@ -75,5 +83,6 @@ namespace ItemChecker.MVVM.View
         {
             Edit.OpenUrl(e.Uri.ToString());
         }
+
     }
 }

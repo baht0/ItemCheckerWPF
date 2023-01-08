@@ -16,7 +16,6 @@ namespace ItemChecker.MVVM.View
             InitializeComponent();
             this.DataContext = new SettingViewModel();
         }
-
         private void Window_DragMove(object sender, MouseButtonEventArgs e)
         {
             this.DragMove();
@@ -25,6 +24,12 @@ namespace ItemChecker.MVVM.View
         {
             this.Close();
         }
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+                this.Close();
+        }
+
         private void Decimal_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !decimal.TryParse(e.Text, out decimal result);
