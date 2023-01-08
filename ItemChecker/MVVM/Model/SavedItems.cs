@@ -154,8 +154,7 @@ namespace ItemChecker.MVVM.Model
     {
         public new bool Add(T item)
         {
-            var currentItem = item as DataItem;
-            if (IsAllow(currentItem))
+            if (IsAllow(item))
             {
                 base.Add(item);
                 Save();
@@ -163,17 +162,21 @@ namespace ItemChecker.MVVM.Model
             }
             return false;
         }
-        bool IsAllow(DataItem item)
+        bool IsAllow(T item)
         {
+            var currentItem = item as DataItem;
             var currentList = this as Rare<DataItem>;
-            var steamBase = ItemsBase.List.FirstOrDefault(x => x.ItemName == item.ItemName);
 
-            bool isAllow = item != null;
-
+            var steamBase = ItemsBase.List.FirstOrDefault(x => x.ItemName == currentItem.ItemName);
+            bool isAllow = steamBase != null;
             if (isAllow)
-                isAllow = steamBase != null && (steamBase.Type == "Weapon" || steamBase.Type == "Knife" || steamBase.Type == "Gloves");
+                isAllow = steamBase.Type == "Weapon" || steamBase.Type == "Knife" || steamBase.Type == "Gloves";
             if (isAllow)
-                isAllow = !currentList.Any(x => x.ItemName == item.ItemName && x.ServiceId == item.ServiceId);
+                isAllow = !currentList.Any(x => x.ItemName == currentItem.ItemName && x.ServiceId == currentItem.ServiceId);
+            if (isAllow && currentItem.ServiceId == 1)
+                isAllow = steamBase.Type == "Weapon";
+            if (isAllow && currentItem.ServiceId == 2)
+                isAllow = currentItem.ItemName.Contains("Doppler");
 
             return isAllow;                
         }
