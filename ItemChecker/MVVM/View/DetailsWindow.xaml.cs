@@ -15,26 +15,26 @@ namespace ItemChecker.MVVM.View
             InitializeComponent();
             DataContext = new DetailsViewModel(isMenu);
         }
-        private void Window_DragMove(object sender, MouseButtonEventArgs e)
+        void Window_DragMove(object sender, MouseButtonEventArgs e)
         {
             this.DragMove();
         }
-        private void Button_Close(object sender, RoutedEventArgs e)
+        void Button_Close(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
-        private void detailsWindow_KeyDown(object sender, KeyEventArgs e)
+        void detailsWindow_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Escape)
                 this.Close();
         }
 
-        private void currency_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        void currency_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!isSelectedItem && DataContext is DetailsViewModel vm && vm.SwitchCurrencyCommand.CanExecute(currency.SelectedItem))
                 vm.SwitchCurrencyCommand.Execute(currency.SelectedItem);
         }
-        private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             object item = pricesGrid.CurrentItem;
             if (!pricesGrid.Items.IsEmpty && item != null)
@@ -43,13 +43,13 @@ namespace ItemChecker.MVVM.View
                     vm.OpenItemOutCommand.Execute(item);
             }
         }
-        private void Compare_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        void Compare_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (DataContext is DetailsViewModel vm && vm.CompareCommand.CanExecute(null))
                 vm.CompareCommand.Execute(null);
         }
 
-        private void searchBtn_Click(object sender, RoutedEventArgs e)
+        void searchBtn_Click(object sender, RoutedEventArgs e)
         {
             string itemName = searchTxt.Text;
             if (ItemsBase.List.Any(x => x.ItemName == itemName))
@@ -66,13 +66,13 @@ namespace ItemChecker.MVVM.View
                 searchTxt.Focus();
             }
         }
-        private void searchTxt_KeyDown(object sender, KeyEventArgs e)
+        void searchTxt_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
                 searchBtn_Click(null, new());
         }
 
-        private void itemsCmb_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        void itemsCmb_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             isSelectedItem = true;
             if (DataContext is DetailsViewModel vm && vm.UpdateItemsViewCommand.CanExecute(null))
