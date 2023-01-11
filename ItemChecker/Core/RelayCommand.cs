@@ -5,8 +5,8 @@ namespace ItemChecker.Core
 {
     class RelayCommand : ICommand
     {
-        private Action<object> _execute;
-        private Func<object, bool> _canExecute;
+        Action<object> _execute;
+        Func<object, bool> _canExecute;
         public event EventHandler CanExecuteChanged
         {
             add

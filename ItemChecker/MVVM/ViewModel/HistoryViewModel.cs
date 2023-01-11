@@ -33,7 +33,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        private History _history = new();
+        History _history = new();
 
         public ICommand SwitchCurrencyCommand =>
             new RelayCommand((obj) =>

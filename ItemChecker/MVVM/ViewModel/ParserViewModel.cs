@@ -440,6 +440,7 @@ namespace ItemChecker.MVVM.ViewModel
             }, (obj) => !ParserCheckInfo.IsParser);
         #endregion
 
+        #region Order
         //order
         public ICommand AddQueueCommand =>
             new RelayCommand((obj) =>
@@ -546,5 +547,6 @@ namespace ItemChecker.MVVM.ViewModel
                     Main.Message.Enqueue($"{itemName}\nRemoved from list.");
                 }
             }, (obj) => SavedItems.Reserve.Any());
+        #endregion
     }
 }

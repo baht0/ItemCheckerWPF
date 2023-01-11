@@ -114,7 +114,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private DateTime _dateTime = DateTime.MinValue;
+        DateTime _dateTime = DateTime.MinValue;
 
         //progress
         public bool IsParser

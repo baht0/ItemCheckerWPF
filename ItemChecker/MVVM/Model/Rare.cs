@@ -155,7 +155,7 @@ namespace ItemChecker.MVVM.Model
     public class RareCheckConfig
     {
         public int Time { get; set; } = RareProperties.Default.Time;
-        public int MinPrecent { get; set; } = -7;
+        public int MaxPrecent { get; set; } = 7;
         public List<string> ComparePrices
         {
             get

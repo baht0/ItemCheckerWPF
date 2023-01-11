@@ -49,7 +49,7 @@ namespace ItemChecker.MVVM.ViewModel
 
             Task.Run(StartTask);
         }
-        void Hide()
+        void Close()
         {
             _view.Close();
         }
@@ -87,7 +87,7 @@ namespace ItemChecker.MVVM.ViewModel
                 ItemBaseService.CreateItemsBase();
 
                 LaunchSuccessful = true;
-                Application.Current.Dispatcher.Invoke(Hide);
+                Application.Current.Dispatcher.Invoke(Close);
             }
             catch (Exception exp)
             {

@@ -37,7 +37,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        private Settings _settings = new();
+        Settings _settings = new();
         public SettingsAbout About
         {
             get
@@ -50,7 +50,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        private SettingsAbout _about = new();
+        SettingsAbout _about = new();
 
         public ICommand GetCurrencyApiCommand
         {

@@ -18,15 +18,15 @@ namespace ItemChecker.MVVM.View
             this.DataContext = new StartUpViewModel(this);
         }
 
-        private void Window_DragMove(object sender, MouseButtonEventArgs e)
+        void Window_DragMove(object sender, MouseButtonEventArgs e)
         {
             this.DragMove();
         }
-        private void Close_Click(object sender, RoutedEventArgs e)
+        void Close_Click(object sender, RoutedEventArgs e)
         {
             Exit();
         }
-        private void Window_KeyDown(object sender, KeyEventArgs e)
+        void Window_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Escape)
                 Exit();
@@ -38,7 +38,7 @@ namespace ItemChecker.MVVM.View
             if (result == MessageBoxResult.Yes)
                 Application.Current.Shutdown();
         }
-        private void Reset_Click(object sender, RoutedEventArgs e)
+        void Reset_Click(object sender, RoutedEventArgs e)
         {
             MessageBoxResult result = MessageBox.Show(
                 "Are you sure you want to delete all saved account data?\n\nThe settings are saved.", "Question",
@@ -55,12 +55,12 @@ namespace ItemChecker.MVVM.View
 
             Application.Current.Shutdown();
         }
-        private void Exit_Click(object sender, RoutedEventArgs e)
+        void Exit_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
         }
 
-        private void passTextbox_KeyDown(object sender, KeyEventArgs e)
+        void passTextbox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
@@ -69,7 +69,7 @@ namespace ItemChecker.MVVM.View
                     viewModel.SignInCommand.Execute(passTextbox);
             }
         }
-        private void code2FA_TextChanged(object sender, TextChangedEventArgs e)
+        void code2FA_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (code2FA.Text.Length == 5)
             {
@@ -79,7 +79,7 @@ namespace ItemChecker.MVVM.View
             }
         }
 
-        private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+        void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
         {
             Edit.OpenUrl(e.Uri.ToString());
         }

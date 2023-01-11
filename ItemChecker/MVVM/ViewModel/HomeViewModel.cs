@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Input;
 using ItemChecker.Core;
 using ItemChecker.MVVM.Model;
+using ItemChecker.MVVM.View;
 using ItemChecker.Net;
 using ItemChecker.Properties;
 using ItemChecker.Services;
@@ -232,9 +233,10 @@ namespace ItemChecker.MVVM.ViewModel
                 if (!HomePush.IsService)
                 {
                     HomePush.IsService = true;
-                    HomePush config = obj as HomePush;
+                    var config = obj as HomePush;
                     HomeProperties.Default.Time = config.Time;
                     HomeProperties.Default.Save();
+                    MainWindow.CloseShowListWin("Reserve");
 
                     HomePush.Timer.Elapsed += timerPushTick;
                     HomePush.TimerTick = config.Time * 60;

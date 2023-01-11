@@ -18,7 +18,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        private Calculator _calculator = new();
+        Calculator _calculator = new();
 
         public ICommand CompareCommand =>
             new RelayCommand((obj) =>

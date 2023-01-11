@@ -19,6 +19,6 @@ namespace ItemChecker.Converter
             return (DateTime)value == new DateTime() ? "Free" : $"{ToReadable(value)} | {days} Days";
         }
 
-        private static string ToReadable(object value) => ((DateTime)value).ToString("dd MMM yy");
+        static string ToReadable(object value) => ((DateTime)value).ToString("dd MMM yy");
     }
 }

@@ -40,7 +40,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private string _currentVersion = DataProjectInfo.CurrentVersion;
+        string _currentVersion = DataProjectInfo.CurrentVersion;
         public string LatestVersion
         {
             get
@@ -53,7 +53,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private string _latestVersion = DataProjectInfo.LatestVersion;
+        string _latestVersion = DataProjectInfo.LatestVersion;
         public bool Admin
         {
             get
@@ -66,6 +66,6 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private bool _admin = SteamAccount.AccountName == "bahtiarov116";
+        bool _admin = SteamAccount.AccountName == "bahtiarov116";
     }
 }

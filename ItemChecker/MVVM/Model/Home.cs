@@ -82,7 +82,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private int _serviceId = HomeProperties.Default.ServiceId;
+        int _serviceId = HomeProperties.Default.ServiceId;
         public int MinPrecent
         {
             get
@@ -97,7 +97,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private int _minPrecent = HomeProperties.Default.MinPrecent;
+        int _minPrecent = HomeProperties.Default.MinPrecent;
         public int Time { get; set; } = HomeProperties.Default.Time;
 
         public bool IsService
@@ -112,7 +112,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private bool _isService;
+        bool _isService;
         public int Check
         {
             get
@@ -125,7 +125,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private int _check = 0;
+        int _check = 0;
         public int Push
         {
             get
@@ -138,7 +138,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private int _push = 0;
+        int _push = 0;
         public int Progress
         {
             get { return _progress; }
@@ -148,7 +148,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private int _progress = 0;
+        int _progress = 0;
         public int MaxProgress
         {
             get { return _maxProgress; }
@@ -158,7 +158,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private int _maxProgress = 0;
+        int _maxProgress = 0;
         public string Status
         {
             get { return _status; }
@@ -168,7 +168,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private string _status = string.Empty;
+        string _status = string.Empty;
     }
     //inventory
     public class HomeInventoryConfig : ObservableObject

@@ -33,7 +33,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private DataResult _result = new();
+        DataResult _result = new();
 
         public List<string> Interval
         {
@@ -64,7 +64,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private int _currencyId = 0;
+        int _currencyId = 0;
         public List<string> CurrencyList
         {
             get

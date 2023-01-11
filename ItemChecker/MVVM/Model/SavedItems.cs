@@ -9,6 +9,7 @@ namespace ItemChecker.MVVM.Model
 {
     public class SavedItems : ObservableObject
     {
+        public static string ShowListName { get; set; }
         public ObservableCollection<DataItem> List
         {
             get { return _list; }
@@ -18,7 +19,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private ObservableCollection<DataItem> _list = new();
+        ObservableCollection<DataItem> _list = new();
         public DataItem SelectedItem
         {
             get { return _selectedItem; }
@@ -28,46 +29,28 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private DataItem _selectedItem;
+        DataItem _selectedItem;
 
-        public bool IsReserve
+        public string ListName
         {
-            get
-            {
-                return _isReserve;
-            }
+            get { return _listName; }
             set
             {
-                _isReserve = value;
-                ServiceId = 0;
-                if (value)
-                {
-                    List = new(Reserve);
-                    Services = Main.Services;
-                }
+                _listName = value;
                 OnPropertyChanged();
             }
         }
-        bool _isReserve;
-        public bool IsRare
+        string _listName = "ListName";
+        public string ItemName
         {
-            get
-            {
-                return _isRare;
-            }
+            get { return _itemName; }
             set
             {
-                _isRare = value;
-                ServiceId = 0;
-                if (value)
-                {
-                    List = new(Rare);
-                    Services = Model.Rare.Services;
-                }
+                _itemName = value;
                 OnPropertyChanged();
             }
         }
-        bool _isRare;
+        string _itemName = string.Empty;
         public List<string> Services
         {
             get { return _services; }
@@ -77,7 +60,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private List<string> _services = Main.Services;
+        List<string> _services = new();
         public int ServiceId
         {
             get { return _serviceId; }
@@ -87,7 +70,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private int _serviceId;
+        int _serviceId;
 
         public static Reserve<DataItem> Reserve { get; set; } =  ReadFile("Reserve").ToObject<Reserve<DataItem>>();
         public static Rare<DataItem> Rare { get; set; } = ReadFile("Rare").ToObject<Rare<DataItem>>();

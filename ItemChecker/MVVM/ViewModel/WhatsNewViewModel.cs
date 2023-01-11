@@ -26,7 +26,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        private List<string> _versions = new();
+        List<string> _versions = new();
         public string SelectedVersion
         {
             get
@@ -39,7 +39,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        private string _selectedVersion;
+        string _selectedVersion;
         public string Text
         {
             get
@@ -52,7 +52,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        private string _text = "Loading...";
+        string _text = "Loading...";
         public DateTime Released
         {
             get
@@ -65,7 +65,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        private DateTime _released;
+        DateTime _released;
 
         public WhatsNewViewModel()
         {

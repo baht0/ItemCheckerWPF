@@ -28,7 +28,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        private MainInfo _mainInfo = new();
+        MainInfo _mainInfo = new();
         #endregion
 
         public MainViewModel()

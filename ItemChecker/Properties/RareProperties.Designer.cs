@@ -15,7 +15,7 @@ namespace ItemChecker.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.4.0.0")]
     internal sealed partial class RareProperties : global::System.Configuration.ApplicationSettingsBase {
         
-        private static RareProperties defaultInstance = ((RareProperties)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new RareProperties())));
+        static RareProperties defaultInstance = ((RareProperties)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new RareProperties())));
         
         public static RareProperties Default {
             get {

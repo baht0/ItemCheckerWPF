@@ -61,7 +61,7 @@ namespace ItemChecker
             notifyIcon.Visible = true;
             base.OnStartup(e);
         }
-        private void ApplicationStart(object sender, StartupEventArgs e)
+        void ApplicationStart(object sender, StartupEventArgs e)
         {
             if (Process.GetProcessesByName(Path.GetFileNameWithoutExtension(System.Reflection.Assembly.GetEntryAssembly().Location)).Count() > 1)
             {

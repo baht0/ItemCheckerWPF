@@ -16,31 +16,31 @@ namespace ItemChecker.MVVM.View
             InitializeComponent();
             this.DataContext = new SettingViewModel();
         }
-        private void Window_DragMove(object sender, MouseButtonEventArgs e)
+        void Window_DragMove(object sender, MouseButtonEventArgs e)
         {
             this.DragMove();
         }
-        private void Button_Close(object sender, RoutedEventArgs e)
+        void Button_Close(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
-        private void Window_KeyDown(object sender, KeyEventArgs e)
+        void Window_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Escape)
                 this.Close();
         }
 
-        private void Decimal_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        void Decimal_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !decimal.TryParse(e.Text, out decimal result);
         }
-        private void String_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        void String_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             Regex regex = new(@"^[a-zA-Z_]+$");
             e.Handled = !regex.IsMatch(e.Text);
         }
 
-        private void whatIsNewButton_Click(object sender, RoutedEventArgs e)
+        void whatIsNewButton_Click(object sender, RoutedEventArgs e)
         {
             if (!MainWindow.IsWindowOpen<Window>("whatsNewWindow"))
             {

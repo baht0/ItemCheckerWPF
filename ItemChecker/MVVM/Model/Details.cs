@@ -463,7 +463,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private SteamItem _item = new();
+        SteamItem _item = new();
         public Tuple<int, int> Count
         {
             get
@@ -476,7 +476,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private Tuple<int, int> _count = new(0, 0);
+        Tuple<int, int> _count = new(0, 0);
         public Tuple<decimal, decimal> Avg
         {
             get
@@ -489,7 +489,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private Tuple<decimal, decimal> _avg = new(0, 0);
+        Tuple<decimal, decimal> _avg = new(0, 0);
     }
     public class CsmInfo : ItemInfo
     {
@@ -505,7 +505,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private CsmItem _item = new();
+        CsmItem _item = new();
         public int CurrentItemId
         {
             get
@@ -576,7 +576,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private LfmItem _item = new();
+        LfmItem _item = new();
     }
     public class BuffInfo : ItemInfo
     {
@@ -592,6 +592,6 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private BuffItem _item = new();
+        BuffItem _item = new();
     }
 }

@@ -37,6 +37,14 @@ namespace ItemChecker.MVVM.View
                 window.Activate();
             }
         }
+        public static void CloseShowListWin(string listName)
+        {
+            if (IsWindowOpen<Window>("showListWindow") && listName == SavedItems.ShowListName)
+            {
+                Window window = Application.Current.Windows.OfType<Window>().Where(w => w.Name.Equals("showListWindow")).FirstOrDefault();
+                window.Close();
+            }
+        }
 
         public MainWindow()
         {
@@ -46,25 +54,25 @@ namespace ItemChecker.MVVM.View
             Home.IsEnabled = false;
             Title = "ItemChecker - Home";
         }
-        private void Window_DragMove(object sender, MouseButtonEventArgs e)
+        void Window_DragMove(object sender, MouseButtonEventArgs e)
         {
             this.DragMove();
         }
-        private void MinWin_Click(object sender, RoutedEventArgs e)
+        void MinWin_Click(object sender, RoutedEventArgs e)
         {
             this.WindowState = WindowState.Minimized;
         }
-        private void Button_Close(object sender, RoutedEventArgs e)
+        void Button_Close(object sender, RoutedEventArgs e)
         {
             Close();
         }
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             e.Cancel = true;
             this.Visibility = Visibility.Hidden;
         }
 
-        private void buttonItemChecker_Click(object sender, RoutedEventArgs e)
+        void buttonItemChecker_Click(object sender, RoutedEventArgs e)
         {
             var btn = sender as Button;
             ContextMenu contextMenu = btn.ContextMenu;
@@ -72,7 +80,7 @@ namespace ItemChecker.MVVM.View
             contextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
             contextMenu.IsOpen = true;
         }
-        private void Home_Click(object sender, RoutedEventArgs e)
+        void Home_Click(object sender, RoutedEventArgs e)
         {
             if (bodyContent.Content != homeViewModel)
             {
@@ -83,7 +91,7 @@ namespace ItemChecker.MVVM.View
                 Rare.IsEnabled = true;
             }
         }
-        private void Parser_Click(object sender, RoutedEventArgs e)
+        void Parser_Click(object sender, RoutedEventArgs e)
         {
             if (bodyContent.Content != parserViewModel)
             {
@@ -94,7 +102,7 @@ namespace ItemChecker.MVVM.View
                 Rare.IsEnabled = true;
             }
         }
-        private void Rare_Click(object sender, RoutedEventArgs e)
+        void Rare_Click(object sender, RoutedEventArgs e)
         {
             if (bodyContent.Content != rareViewModel)
             {
@@ -106,11 +114,11 @@ namespace ItemChecker.MVVM.View
             }
         }
 
-        private void Notification_Click(object sender, RoutedEventArgs e)
+        void Notification_Click(object sender, RoutedEventArgs e)
         {
             PopupNotification.IsOpen = true;
         }
-        private void PopupNotification_Closed(object sender, System.EventArgs e)
+        void PopupNotification_Closed(object sender, System.EventArgs e)
         {
             MainViewModel viewModel = (MainViewModel)DataContext;
             if (viewModel.ReadNotificationCommand.CanExecute(null))

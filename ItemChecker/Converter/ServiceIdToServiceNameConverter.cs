@@ -13,7 +13,7 @@ namespace ItemChecker.Converter
             if (parameter == null)
                 return Main.Services[(int)value];
 
-            ComboBox combobox = (ComboBox)parameter;
+            var combobox = (ComboBox)parameter;
             var services = combobox.Items;
             return services[(int)value];
         }
@@ -23,7 +23,7 @@ namespace ItemChecker.Converter
             if (parameter == null)
                 return Main.Services[(int)value];
 
-            ComboBox combobox = (ComboBox)parameter;
+            var combobox = (ComboBox)parameter;
             var services = combobox.Items;
             return services[(int)value];
         }

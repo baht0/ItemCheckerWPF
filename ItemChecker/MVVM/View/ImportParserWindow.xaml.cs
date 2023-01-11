@@ -15,21 +15,21 @@ namespace ItemChecker.MVVM.View
             InitializeComponent();
             this.DataContext = new ImportParserViewModel();
         }
-        private void Window_DragMove(object sender, MouseButtonEventArgs e)
+        void Window_DragMove(object sender, MouseButtonEventArgs e)
         {
             this.DragMove();
         }
-        private void Button_Close(object sender, RoutedEventArgs e)
+        void Button_Close(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
-        private void Window_KeyDown(object sender, KeyEventArgs e)
+        void Window_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Escape)
                 this.Close();
         }
 
-        private void filesGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        void filesGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             object item = filesGrid.CurrentItem;
             if (!filesGrid.Items.IsEmpty && item != null)
@@ -38,7 +38,7 @@ namespace ItemChecker.MVVM.View
                 this.Close();
             }
         }
-        private void filesGrid_KeyDown(object sender, KeyEventArgs e)
+        void filesGrid_KeyDown(object sender, KeyEventArgs e)
         {
             if (!filesGrid.Items.IsEmpty)
             {
