@@ -6,26 +6,26 @@ namespace ItemChecker.MVVM.View
 {
     public partial class ShowListWindow : Window
     {
-        public ShowListWindow(string listName)
+        public ShowListWindow()
         {
             InitializeComponent();
-            DataContext = new ShowListViewModel(listName);
+            DataContext = new ShowListViewModel();
         }
-        private void Window_DragMove(object sender, MouseButtonEventArgs e)
+        void Window_DragMove(object sender, MouseButtonEventArgs e)
         {
             this.DragMove();
         }
-        private void Button_Close(object sender, RoutedEventArgs e)
+        void Button_Close(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
-        private void showListWindow_KeyDown(object sender, KeyEventArgs e)
+        void showListWindow_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Escape)
                 this.Close();
         }
 
-        private void reserveGrid_KeyDown(object sender, KeyEventArgs e)
+        void reserveGrid_KeyDown(object sender, KeyEventArgs e)
         {
             if (!reserveGrid.Items.IsEmpty)
             {

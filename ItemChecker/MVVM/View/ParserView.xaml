@@ -321,22 +321,22 @@
                     <!--check-->
                     <Grid Visibility="{Binding IsChecked, ElementName=checkTab, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Grid.RowDefinitions>
+                            <RowDefinition Height="32"/>
                             <RowDefinition/>
                             <RowDefinition Height="32"/>
-                            <RowDefinition Height="32"/>
                         </Grid.RowDefinitions>
+                        <TextBlock Text="{Binding ParserCheckInfo.CountList, StringFormat='Generated list: {0}'}"
+                                   VerticalAlignment="Center" FontWeight="Bold"/>
+                        <Separator VerticalAlignment="Bottom"/>
                         <!--config-->
-                        <Grid Grid.Row="0">
+                        <Grid Grid.Row="1" IsEnabled="{Binding ParserCheckInfo.IsParser, Converter={StaticResource InvertBooleanConverter}}">
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="32"/>
                                 <RowDefinition Height="160"/>
                                 <RowDefinition Height="60"/>
                                 <RowDefinition Height="100"/>
+                                <RowDefinition/>
                             </Grid.RowDefinitions>
-                            <TextBlock VerticalAlignment="Center" FontWeight="Bold"
-                                       Text="{Binding ParserCheckInfo.CountList, StringFormat='Generated list: {0}'}"/>
-                            <Separator VerticalAlignment="Bottom"/>
-                            <GroupBox Grid.Row="1" Style="{DynamicResource none}" BorderThickness="0">
+                            <GroupBox Style="{DynamicResource none}" BorderThickness="0">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="40"/>
@@ -352,11 +352,11 @@
                                     <TextBlock Text="Price:" VerticalAlignment="Center" ToolTip="For Service 1"/>
                                     <VirtualizingStackPanel Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                                         <TextBox Width="60" Text="{Binding ParserCheckConfig.MinPrice}" VerticalAlignment="Center"
-                                                 TextInput="NumberPlus_PreviewTextInput" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
+                                                  PreviewTextInput="InputInt" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                                         <TextBlock Margin="8 0 8 0" Text="-" VerticalAlignment="Center"/>
                                         <TextBox Width="60" Text="{Binding ParserCheckConfig.MaxPrice}" VerticalAlignment="Center"
                                                  MouseDoubleClick="maxPriceTxt_MouseDoubleClick" x:Name="maxPriceTxt"
-                                                 TextInput="NumberPlus_PreviewTextInput" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
+                                                  PreviewTextInput="InputInt" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                                         <TextBlock Grid.Column="4" Text="$" VerticalAlignment="Center"/>
                                     </VirtualizingStackPanel>
                                     <CheckBox Grid.Row="1" Grid.Column="0" x:Name="Normal"
@@ -375,7 +375,7 @@
                                     <ComboBox Grid.Row="4" Grid.Column="1" ItemsSource="{Binding ParserCheckConfig.OnlyList}" SelectedIndex="{Binding ParserCheckConfig.SelectedOnly}"/>
                                 </Grid>
                             </GroupBox>
-                            <GroupBox Grid.Row="2" Style="{DynamicResource none}" BorderThickness="0" x:Name="csmGroup">
+                            <GroupBox Grid.Row="1" Style="{DynamicResource none}" BorderThickness="0" x:Name="csmGroup">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition/>
@@ -397,7 +397,7 @@
                                 </Grid>
                             </GroupBox>
                             <!--info-->
-                            <GroupBox Grid.Row="3" Style="{DynamicResource none}" Header="Information:" BorderThickness="0.5"
+                            <GroupBox Grid.Row="2" Style="{DynamicResource none}" Header="Information:" BorderThickness="0.5"
                                       Visibility="{Binding ParserCheckInfo.IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <Grid Margin="5">
                                     <Grid.ColumnDefinitions>
@@ -417,20 +417,16 @@
                                     <TextBlock Text="{Binding ParserCheckInfo.DateTime, StringFormat='{}{0:dd MMM hh:mm tt}'}" Grid.Row="3" Grid.Column="2" VerticalAlignment="Center"/>
                                 </Grid>
                             </GroupBox>
+                            <!--services-->
+                            <VirtualizingStackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                                <ComboBox Width="105" Height="25" SelectionChanged="ComboBoxSer1_SelectionChanged"
+                                          ItemsSource="{Binding ParserCheckConfig.Services}" x:Name="service1"
+                                          SelectedIndex="{Binding ParserCheckConfig.ServiceOne}"/>
+                                <TextBlock VerticalAlignment="Center" Margin="5"/>
+                                <ComboBox Width="105" Height="25" ItemsSource="{Binding ParserCheckConfig.Services}"
+                                          SelectedIndex="{Binding ParserCheckConfig.ServiceTwo}"/>
+                            </VirtualizingStackPanel>
                         </Grid>
-                        <!--services-->
-                        <VirtualizingStackPanel Grid.Row="1"
-                                    Orientation="Horizontal"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Bottom">
-                            <ComboBox Width="105" Height="25" SelectionChanged="ComboBoxSer1_SelectionChanged"
-                                      ItemsSource="{Binding ParserCheckConfig.Services}" x:Name="service1"
-                                      SelectedIndex="{Binding ParserCheckConfig.ServiceOne}"/>
-                            <TextBlock VerticalAlignment="Center" Margin="5"/>
-                            <ComboBox Width="105" Height="25"
-                                      ItemsSource="{Binding ParserCheckConfig.Services}"
-                                      SelectedIndex="{Binding ParserCheckConfig.ServiceTwo}"/>
-                        </VirtualizingStackPanel>
                         <!--buttons-->
                         <Grid Grid.Row="2">
                             <Grid.ColumnDefinitions>

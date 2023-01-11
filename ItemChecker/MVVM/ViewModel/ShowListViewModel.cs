@@ -2,6 +2,8 @@
 using ItemChecker.MVVM.Model;
 using MaterialDesignThemes.Wpf;
 using System;
+using System.Linq;
+using System.Timers;
 using System.Windows;
 using System.Windows.Input;
 
@@ -9,6 +11,7 @@ namespace ItemChecker.MVVM.ViewModel
 {
     public class ShowListViewModel : ObservableObject
     {
+        readonly Timer Timer = new(250);
         public SnackbarMessageQueue Message
         {
             get { return _message; }
@@ -28,22 +31,33 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        private SavedItems _savedItems = new();
+        SavedItems _savedItems = new();
 
-        public ShowListViewModel(string listName)
+        public ShowListViewModel()
         {
-            switch (listName)
+            Timer.Elapsed += UpdateWindow;
+            Timer.Enabled = true;
+        }
+        void UpdateWindow(Object sender, ElapsedEventArgs e)
+        {
+            if (SavedItems.ListName != SavedItems.ShowListName)
             {
-                case "Reserve":
-                    SavedItems.IsReserve = true;
-                    SavedItems.List = new(SavedItems.Reserve);
-                    break;
-                case "Rare":
-                    SavedItems.IsRare = true;
-                    SavedItems.List = new(SavedItems.Rare);
-                    break;
+                SavedItems.ListName = SavedItems.ShowListName;
+                switch (SavedItems.ListName)
+                {
+                    case "Reserve":
+                        SavedItems.List = new(SavedItems.Reserve);
+                        SavedItems.Services = Main.Services;
+                        break;
+                    case "Rare":
+                        SavedItems.List = new(SavedItems.Rare);
+                        SavedItems.Services = Rare.Services;
+                        break;
+                }
+                SavedItems.ServiceId = 0;
             }
         }
+
         public ICommand RemoveCommand =>
             new RelayCommand((obj) =>
             {
@@ -54,15 +68,16 @@ namespace ItemChecker.MVVM.ViewModel
 
                 if (result == MessageBoxResult.Yes)
                 {
-                    if (SavedItems.IsReserve)
+                    switch (SavedItems.ListName)
                     {
-                        SavedItems.Reserve.Remove(item);
-                        SavedItems.List = new(SavedItems.Reserve);
-                    }
-                    else if (SavedItems.IsRare)
-                    {
-                        SavedItems.Rare.Remove(item);
-                        SavedItems.List = new(SavedItems.Rare);
+                        case "Reserve":
+                            SavedItems.Reserve.Remove(item);
+                            SavedItems.List = new(SavedItems.Reserve);
+                            break;
+                        case "Rare":
+                            SavedItems.Rare.Remove(item);
+                            SavedItems.List = new(SavedItems.Rare);
+                            break;
                     }
                     Message.Enqueue($"{item.ItemName}\nItem has been removed.");
                 }
@@ -70,22 +85,22 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand AddCommand =>
             new RelayCommand((obj) =>
             {
-                var name = obj as string;
-
-                if (String.IsNullOrEmpty(name))
-                    return;
-
-                DataItem item = new(name, SavedItems.ServiceId);
+                DataItem item = new(SavedItems.ItemName, SavedItems.ServiceId);
                 string message = string.Empty;
-                if (SavedItems.IsReserve)
+                switch (SavedItems.ListName)
                 {
-                    message = SavedItems.Reserve.Add(item) ? $"{item.ItemName}\nItem has been added." : "Not successful. Conditions not met.";
-                    SavedItems.List = new(SavedItems.Reserve);
-                }
-                else if (SavedItems.IsRare)
-                {
-                    message = SavedItems.Rare.Add(item) ? $"{item.ItemName}\nItem has been added." : "Not successful. Conditions not met.";
-                    SavedItems.List = new(SavedItems.Rare);
+                    case "Reserve":
+                        bool isAdded = SavedItems.Reserve.Add(item);
+                        message = isAdded ? $"{item.ItemName}\nItem has been added." : "Not successful. Conditions not met.";
+                        SavedItems.List = new(SavedItems.Reserve);
+                        SavedItems.ItemName = isAdded ? string.Empty : SavedItems.ItemName;
+                        break;
+                    case "Rare":
+                        isAdded = SavedItems.Rare.Add(item);
+                        message = isAdded ? $"{item.ItemName}\nItem has been added." : "Not successful. Conditions not met.";
+                        SavedItems.ItemName = isAdded ? string.Empty : SavedItems.ItemName;
+                        SavedItems.List = new(SavedItems.Rare);
+                        break;
                 }
                 Message.Enqueue(message);
             });
@@ -98,17 +113,18 @@ namespace ItemChecker.MVVM.ViewModel
                 if (result == MessageBoxResult.No)
                     return;
 
-                if (SavedItems.IsReserve)
+                switch (SavedItems.ListName)
                 {
-                    SavedItems.Reserve.Clear();
-                    SavedItems.List = new(SavedItems.Reserve);
-                }
-                else if (SavedItems.IsRare)
-                {
-                    SavedItems.Rare.Clear();
-                    SavedItems.List = new(SavedItems.Rare);
+                    case "Reserve":
+                        SavedItems.Reserve.Clear();
+                        SavedItems.List = new(SavedItems.Reserve);
+                        break;
+                    case "Rare":
+                        SavedItems.Rare.Clear();
+                        SavedItems.List = new(SavedItems.Rare);
+                        break;
                 }
                 Message.Enqueue("The list has been cleared.");
-            });
+            }, (obj) => SavedItems.List.Any());
     }
 }

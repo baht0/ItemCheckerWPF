@@ -41,55 +41,51 @@
                     <materialDesign:PackIcon Kind="Close"/>
                 </Button>
             </Grid>
-            <Grid Grid.Row="1">
+            <Grid Grid.Row="1" Margin="5">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="32"/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <materialDesign:ColorZone Background="Transparent" Grid.Row="0">
-                    <StackPanel Orientation="Horizontal" Margin="2" HorizontalAlignment="Center">
-                        <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="reserveTab" Width="315" Margin="1" Content="Reserve" IsChecked="{Binding SavedItems.IsReserve}"/>
-                        <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" x:Name="rareTab" Width="315" Margin="1" Content="Rare" IsChecked="{Binding SavedItems.IsRare}"/>
-                    </StackPanel>
-                </materialDesign:ColorZone>
-                <Border Grid.Row="1" BorderBrush="{StaticResource PrimaryHueMidBrush}" Margin="5">
-                    <Grid>
-                        <DataGrid Grid.Row="1" Grid.ColumnSpan="3" AlternationCount="2" AlternatingRowBackground="{DynamicResource ElementBackground}"
-                                  AutoGenerateColumns="False" x:Name="reserveGrid" KeyDown="reserveGrid_KeyDown"
-                                  ItemsSource="{Binding SavedItems.List, UpdateSourceTrigger=PropertyChanged}" SelectionMode="Single"
-                                  SelectedItem="{Binding SavedItems.SelectedItem}" ToolTip="Press 'Backspace' to remove item"
-                                  IsReadOnly="True" CanUserReorderColumns="False" CanUserResizeRows="False" CanUserResizeColumns="False">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Binding="{Binding ItemName}" CanUserResize="False" MinWidth="350" Width="auto">
-                                    <DataGridTextColumn.Header>
-                                        <TextBlock Text="{Binding DataContext.SavedItems.List.Count, RelativeSource={RelativeSource AncestorType=Window}, StringFormat='Item: {0}'}"/>
-                                    </DataGridTextColumn.Header>
-                                </DataGridTextColumn>
-                                <DataGridTextColumn Header="Service" CanUserResize="False" MaxWidth="150" Width="auto"
-                                                    Binding="{Binding ServiceId, Converter={StaticResource ServiceIdToServiceNameConverter}, ConverterParameter={x:Reference services}}"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </Grid>
-                </Border>
+                <TextBlock VerticalAlignment="Center" FontSize="16" FontWeight="Bold">
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="{}{0}: {1}">
+                            <Binding Path="SavedItems.ListName"/>
+                            <Binding Path="SavedItems.List.Count"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+                <Button VerticalAlignment="Center" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignToolForegroundButton}"
+                            Command="{Binding ClearCommand}" ToolTip="Clear">
+                    <materialDesign:PackIcon Kind="Delete"/>
+                </Button>
+                <Separator VerticalAlignment="Bottom"/>
+                <DataGrid Grid.Row="1" Grid.ColumnSpan="3" AlternationCount="2" AlternatingRowBackground="{DynamicResource ElementBackground}"
+                          AutoGenerateColumns="False" x:Name="reserveGrid" KeyDown="reserveGrid_KeyDown"
+                          ItemsSource="{Binding SavedItems.List, UpdateSourceTrigger=PropertyChanged}" SelectionMode="Single"
+                          SelectedItem="{Binding SavedItems.SelectedItem}" ToolTip="Press 'Backspace' to remove item"
+                          IsReadOnly="True" CanUserReorderColumns="False" CanUserResizeRows="False" CanUserResizeColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Item" Binding="{Binding ItemName}" CanUserResize="False" Width="450"/>
+                        <DataGridTextColumn Header="Service" CanUserResize="False" Width="150"
+                                            Binding="{Binding ServiceId, Converter={StaticResource ServiceIdToServiceNameConverter}, ConverterParameter={x:Reference services}}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
             </Grid>
-            <GroupBox Header="Actions" Grid.Row="2" Grid.ColumnSpan="3" Style="{DynamicResource none}" BorderThickness="0.5">
+            <!--add-->
+            <GroupBox Header="Actions" Grid.Row="2" Grid.ColumnSpan="3"
+                      Style="{DynamicResource none}" BorderThickness="0.5">
                 <Grid Margin="5">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="110"/>
                         <ColumnDefinition Width="10"/>
                         <ColumnDefinition/>
                         <ColumnDefinition Width="25"/>
-                        <ColumnDefinition Width="25"/>
                     </Grid.ColumnDefinitions>
                     <ComboBox Grid.Column="0" x:Name="services" ItemsSource="{Binding SavedItems.Services}" SelectedIndex="{Binding SavedItems.ServiceId}"/>
-                    <TextBox Grid.Column="2" VerticalAlignment="Center" ToolTip="Item Name" x:Name="itemName"/>
-                    <Button Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignToolForegroundButton}"
-                            Command="{Binding AddCommand}" CommandParameter="{Binding ElementName=itemName, Path=Text}">
+                    <TextBox Grid.Column="2" VerticalAlignment="Center" ToolTip="Item Name" Text="{Binding SavedItems.ItemName}"/>
+                    <Button Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Right"
+                            Command="{Binding AddCommand}" Style="{StaticResource MaterialDesignToolForegroundButton}">
                         <materialDesign:PackIcon Kind="Plus"/>
-                    </Button>
-                    <Button Grid.Column="4" VerticalAlignment="Center" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignToolForegroundButton}"
-                            Command="{Binding ClearCommand}">
-                        <materialDesign:PackIcon Kind="Delete"/>
                     </Button>
                 </Grid>
             </GroupBox>

@@ -4,6 +4,7 @@ using System.Windows.Input;
 using System.Windows;
 using System.Linq;
 using System;
+using ItemChecker.MVVM.Model;
 
 namespace ItemChecker.MVVM.View
 {
@@ -14,30 +15,30 @@ namespace ItemChecker.MVVM.View
             InitializeComponent();
             qualityChb.IsEnabled = false;
         }
-        private void InputDecimal(object sender, TextCompositionEventArgs e)
+        void InputDecimal(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !decimal.TryParse(e.Text, out decimal result);
         }
-        private void InputInt(object sender, TextCompositionEventArgs e)
+        void InputInt(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !int.TryParse(e.Text, out int result);
         }
-        private void SearchEnter(object sender, KeyEventArgs e)
+        void SearchEnter(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
                 SearchTxt.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
         }
-        private void currency_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        void currency_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (DataContext is RareViewModel vm && vm.SwitchCurrencyCommand.CanExecute(currency.SelectedItem))
                 vm.SwitchCurrencyCommand.Execute(currency.SelectedItem);
         }
-        private void TimerFloat_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        void TimerFloat_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (DataContext is RareViewModel viewModel && viewModel.TimerCommand.CanExecute(null))
                 viewModel.TimerCommand.Execute(null);
         }
-        private void rareGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        void rareGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             object item = rareGrid.CurrentItem;
             if (!rareGrid.Items.IsEmpty && item != null)
@@ -47,7 +48,7 @@ namespace ItemChecker.MVVM.View
                     vm.OpenItemOutCommand.Execute(columnIndex);
             }
         }
-        private void rareGrid_KeyDown(object sender, KeyEventArgs e)
+        void rareGrid_KeyDown(object sender, KeyEventArgs e)
         {
             if (!rareGrid.Items.IsEmpty)
             {
@@ -57,22 +58,23 @@ namespace ItemChecker.MVVM.View
                     MainWindow.OpenDetailsItem(item.ItemName);
             }
         }
-        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             floatGroup.Visibility = parameter.SelectedIndex == 0 ? Visibility.Visible : Visibility.Hidden;
             stickerGroup.Visibility = parameter.SelectedIndex == 1 ? Visibility.Visible : Visibility.Hidden;
             phaseGroup.Visibility = parameter.SelectedIndex == 2 ? Visibility.Visible : Visibility.Hidden;
         }
-        private void ListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        void ListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (DataContext is RareViewModel vm && vm.OpenStickerOutCommand.CanExecute(stickersList.SelectedItem))
                 vm.OpenStickerOutCommand.Execute(stickersList.SelectedItem);
         }
-        private void ListShow_Click(object sender, RoutedEventArgs e)
+        void ListShow_Click(object sender, RoutedEventArgs e)
         {
+            SavedItems.ShowListName = "Rare";
             if (!MainWindow.IsWindowOpen<Window>("showListWindow"))
             {
-                ShowListWindow window = new("Rare");
+                ShowListWindow window = new();
                 window.Show();
             }
             else
@@ -82,12 +84,12 @@ namespace ItemChecker.MVVM.View
             }
         }
 
-        private void stickerQuality_Checked(object sender, RoutedEventArgs e)
+        void stickerQuality_Checked(object sender, RoutedEventArgs e)
         {
             qualityChb.IsEnabled = StickerQuality();
         }
 
-        private void stickerQuality_Unchecked(object sender, RoutedEventArgs e)
+        void stickerQuality_Unchecked(object sender, RoutedEventArgs e)
         {
             qualityChb.IsEnabled = StickerQuality();
         }

@@ -35,7 +35,7 @@ namespace ItemChecker.Services
                     data.DataBuy.ListingId = jProperty.Name;
 
                     data = GetPrices(data, json);
-                    if (data.Precent < RareCheckConfig.CheckedConfig.MinPrecent)
+                    if (data.Precent < RareCheckConfig.CheckedConfig.MaxPrecent)
                         break;
 
                     data.Stickers = GetStickers(data, json);

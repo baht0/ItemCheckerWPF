@@ -1,4 +1,5 @@
-﻿using ItemChecker.MVVM.ViewModel;
+﻿using ItemChecker.MVVM.Model;
+using ItemChecker.MVVM.ViewModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,18 +13,17 @@ namespace ItemChecker.MVVM.View
         {
             InitializeComponent();
         }
-        private void Number_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        void InputInt(object sender, TextCompositionEventArgs e)
         {
-            int result;
-            e.Handled = !int.TryParse(e.Text, out result);
+            e.Handled = !int.TryParse(e.Text, out int result);
         }
-        private void Decimal_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        void Decimal_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             decimal result;
             e.Handled = !decimal.TryParse(e.Text, out result);
         }
 
-        private void DataGrid_KeyDown(object sender, KeyEventArgs e)
+        void DataGrid_KeyDown(object sender, KeyEventArgs e)
         {
             if (!ordersGrid.Items.IsEmpty)
             {
@@ -34,7 +34,7 @@ namespace ItemChecker.MVVM.View
                     MainWindow.OpenDetailsItem(vm.HomeTable.SelectedOrderItem.ItemName);
             }
         }
-        private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             object item = ordersGrid.CurrentItem;
             if (!ordersGrid.Items.IsEmpty && item != null)
@@ -45,16 +45,17 @@ namespace ItemChecker.MVVM.View
             }
         }
 
-        private void TimerPush_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        void TimerPush_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (DataContext is HomeViewModel vm && vm.ResetTimerCommand.CanExecute(null))
                 vm.ResetTimerCommand.Execute(0);
         }
-        private void ListShow_Click(object sender, RoutedEventArgs e)
+        void ListShow_Click(object sender, RoutedEventArgs e)
         {
+            SavedItems.ShowListName = "Reserve";
             if (!MainWindow.IsWindowOpen<Window>("showListWindow"))
             {
-                ShowListWindow window = new("Reserve");
+                ShowListWindow window = new();
                 window.Show();
             }
             else
@@ -65,13 +66,13 @@ namespace ItemChecker.MVVM.View
         }
 
         #region inventory
-        private void inventoryListBox_KeyDown(object sender, KeyEventArgs e)
+        void inventoryListBox_KeyDown(object sender, KeyEventArgs e)
         {
             HomeViewModel vm = (HomeViewModel)DataContext;
             if (e.Key == Key.F1)
                 MainWindow.OpenDetailsItem(vm.SelectedInventory.ItemName);
         }
-        private void inventoryListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        void inventoryListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (!inventoryListBox.Items.IsEmpty)
             {
@@ -80,21 +81,21 @@ namespace ItemChecker.MVVM.View
                     viewModel.ShowInventoryItemCommand.Execute(item);
             }
         }
-        private void inventComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        void inventComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             inventoryGrid.Height = invenTasks.SelectedIndex == 1 && inventoryGrid.Visibility == Visibility.Visible ? 400 : 510;
             sellGroup.Visibility = invenTasks.SelectedIndex == 1 && inventoryGrid.Visibility == Visibility.Visible ? Visibility.Visible : Visibility.Hidden;
         }
 
-        private void priceCombox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        void priceCombox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             sellPrice.IsEnabled = priceCombox.SelectedIndex == 2 && (bool)selectedOnly.IsChecked;
         }
-        private void selectedOnly_Checked(object sender, RoutedEventArgs e)
+        void selectedOnly_Checked(object sender, RoutedEventArgs e)
         {
             sellPrice.IsEnabled = (bool)selectedOnly.IsChecked && priceCombox.SelectedIndex == 2;
         }
-        private void allAvailable_Checked(object sender, RoutedEventArgs e)
+        void allAvailable_Checked(object sender, RoutedEventArgs e)
         {
             sellPrice.IsEnabled = (bool)selectedOnly.IsChecked && priceCombox.SelectedIndex == 2;
         }

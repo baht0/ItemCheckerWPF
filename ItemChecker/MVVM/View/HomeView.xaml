@@ -92,12 +92,13 @@
                                 </MultiBinding>
                             </TextBlock.Text>
                         </TextBlock>
-                        <Button ToolTip="Reserve items" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignToolForegroundButton}" Click="ListShow_Click">
+                        <Button ToolTip="Reserve items" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignToolForegroundButton}"
+                                Click="ListShow_Click" IsEnabled="{Binding HomePush.IsService, Converter={StaticResource InvertBooleanConverter}}">
                             <materialDesign:PackIcon Kind="FormatListBulleted"/>
                         </Button>
                         <Separator Grid.ColumnSpan="2" VerticalAlignment="Bottom" Height="3"/>
                         <!--body-->
-                        <Grid Grid.Row="1" Margin="2">
+                        <Grid Grid.Row="1" Margin="2" IsEnabled="{Binding HomePush.IsService, Converter={StaticResource InvertBooleanConverter}}">
                             <Grid.RowDefinitions>
                                 <RowDefinition/>
                                 <RowDefinition/>
@@ -113,9 +114,9 @@
                             <ComboBox Grid.Column="1" Grid.ColumnSpan="2" VerticalAlignment="Center" x:Name="serviceCmb"
                                       ItemsSource="{Binding HomePush.ServicesList}" SelectedIndex="{Binding HomePush.ServiceId}"/>
 
-                            <TextBlock Grid.Row="1" Text="Min. precent:" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="1" Text="Min. Precent:" VerticalAlignment="Center"/>
                             <TextBox Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" ToolTip="Cancel order less than" x:Name="minPrecentTxt"
-                                     Text="{Binding HomePush.MinPrecent}" TextInput="Decimal_PreviewTextInput" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
+                                     Text="{Binding HomePush.MinPrecent}" PreviewTextInput="InputInt" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                             <TextBlock Grid.Row="1" Grid.Column="2" Text="%" Height="15" VerticalAlignment="Center"/>
 
                             <TextBlock Grid.Row="2" Grid.ColumnSpan="3" Text="Every 5th check the program will place an order from the Reserve list."
@@ -133,7 +134,7 @@
                                 <TextBlock VerticalAlignment="Center" Text="{Binding HomePush.Status}" Cursor="Hand"
                                            PreviewMouseDown="TimerPush_PreviewMouseDown" Visibility="{Binding HomePush.IsService, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                                 <StackPanel Orientation="Horizontal" Margin="5 0 0 0" Visibility="{Binding HomePush.IsService, Converter={StaticResource InverseBoolToVisConverter}}">
-                                    <TextBox Width="50" Text="{Binding HomePush.Time}" PreviewTextInput="Number_PreviewTextInput"
+                                    <TextBox Width="50" Text="{Binding HomePush.Time}" PreviewTextInput="InputInt"
                                              VerticalAlignment="Center" HorizontalAlignment="Right"/>
                                     <TextBlock Text="min." VerticalAlignment="Center"/>
                                 </StackPanel>

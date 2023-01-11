@@ -334,47 +334,48 @@
                     <!--Check-->
                     <Grid Visibility="{Binding IsChecked, ElementName=checkTab, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Grid.RowDefinitions>
-                            <RowDefinition/>
                             <RowDefinition Height="32"/>
+                            <RowDefinition/>
                         </Grid.RowDefinitions>
+                        <TextBlock Text="{Binding RareCheckStatus.Cycles, StringFormat='Cycles: {0}'}"
+                                   VerticalAlignment="Center" FontWeight="Bold"/>
+                        <Button HorizontalAlignment="Right" ToolTip="Checked Items" Click="ListShow_Click" Style="{StaticResource MaterialDesignToolForegroundButton}"
+                                IsEnabled="{Binding RareCheckStatus.IsService, Converter={StaticResource InvertBooleanConverter}}">
+                            <materialDesign:PackIcon Kind="FormatListBulleted"/>
+                        </Button>
+                        <Separator VerticalAlignment="Bottom" Height="3"/>
                         <!--config-->
-                        <Grid Grid.Row="0">
+                        <Grid Grid.Row="1" IsEnabled="{Binding RareCheckStatus.IsService, Converter={StaticResource InvertBooleanConverter}}">
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="32"/>
                                 <RowDefinition Height="65"/>
                                 <RowDefinition/>
+                                <RowDefinition Height="32"/>
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Column="0" VerticalAlignment="Center" FontWeight="Bold"
-                                       Text="{Binding RareCheckStatus.Cycles, StringFormat='Cycles: {0}'}"/>
-                            <Button Grid.Column="1" HorizontalAlignment="Right" ToolTip="Checked Items"
-                                    Style="{StaticResource MaterialDesignToolForegroundButton}" Click="ListShow_Click">
-                                <materialDesign:PackIcon Kind="FormatListBulleted"/>
-                            </Button>
-                            <Separator VerticalAlignment="Bottom" Height="3"/>
                             <!--main-->
-                            <Grid Margin="2" Grid.Row="1">
+                            <Grid Margin="2">
                                 <Grid.RowDefinitions>
                                     <RowDefinition/>
                                     <RowDefinition/>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="110"/>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="5"/>
                                     <ColumnDefinition Width="75"/>
                                     <ColumnDefinition/>
                                 </Grid.ColumnDefinitions>
-
                                 <TextBlock Grid.Row="0" Text="Compare Price:" VerticalAlignment="Center"/>
-                                <ComboBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" 
+                                <ComboBox Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" 
                                           ItemsSource="{Binding RareCheckConfig.ComparePrices}" SelectedIndex="{Binding RareCheckConfig.CompareId}"/>
-                                
-                                <TextBlock Grid.Row="1" Text="Min. Precent:" VerticalAlignment="Center"/>
-                                <TextBox Grid.Row="1" Grid.Column="1" VerticalAlignment="Center"
-                                         Text="{Binding RareCheckConfig.MinPrecent}" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"
-                                         ToolTip="Acceptable item price from 'Compare Price'" TextInput="InputDecimal"/>
-                                <TextBlock Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" Text="%" Margin="2 0 0 0"/>
+
+                                <TextBlock Grid.Row="1" Text="Max. Precent:" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" Text="-" VerticalAlignment="Center"/>
+                                <TextBox Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" PreviewTextInput="InputInt"
+                                         Text="{Binding RareCheckConfig.MaxPrecent}" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"
+                                         ToolTip="Acceptable item price from 'Compare Price'"/>
+                                <TextBlock Grid.Row="1" Grid.Column="3" VerticalAlignment="Center" Text="%" Margin="2 0 0 0"/>
                             </Grid>
                             <!--parametrs-->
-                            <GroupBox Header="Max. Float value:" Grid.Row="2" Style="{DynamicResource none}"
+                            <GroupBox Header="Max. Float value:" Grid.Row="1" Style="{DynamicResource none}"
                                       BorderThickness="0.5" x:Name="floatGroup" Height="215" VerticalAlignment="Top">
                                 <Grid Margin="5">
                                     <Grid.RowDefinitions>
@@ -391,7 +392,7 @@
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="Factory New:" VerticalAlignment="Center"/>
                                         <TextBlock Text="0.00 – 0.07" VerticalAlignment="Bottom" FontSize="9"/>
-                                        <TextBox Grid.Column="1" Width="75" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                        <TextBox Grid.Column="1" Width="105" HorizontalAlignment="Left" VerticalAlignment="Center"
                                                  Text="{Binding RareCheckConfig.FactoryNew}"
                                                  TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                                     </Grid>
@@ -402,7 +403,7 @@
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="Minimal Wear:" VerticalAlignment="Center"/>
                                         <TextBlock Text="0.07 – 0.15" VerticalAlignment="Bottom" FontSize="9"/>
-                                        <TextBox Grid.Column="1" Width="75" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                        <TextBox Grid.Column="1" Width="105" HorizontalAlignment="Left" VerticalAlignment="Center"
                                                  Text="{Binding RareCheckConfig.MinimalWear}"
                                                  TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                                     </Grid>
@@ -413,7 +414,7 @@
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="Field-Tested:" VerticalAlignment="Center"/>
                                         <TextBlock Text="0.15 – 0.38" VerticalAlignment="Bottom" FontSize="9"/>
-                                        <TextBox Grid.Column="1" Width="75" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                        <TextBox Grid.Column="1" Width="105" HorizontalAlignment="Left" VerticalAlignment="Center"
                                                  Text="{Binding RareCheckConfig.FieldTested}"
                                                  TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                                     </Grid>
@@ -424,7 +425,7 @@
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="Well-Worn:" VerticalAlignment="Center"/>
                                         <TextBlock Text="0.38 – 0.45" VerticalAlignment="Bottom" FontSize="9"/>
-                                        <TextBox Grid.Column="1" Width="75" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                        <TextBox Grid.Column="1" Width="105" HorizontalAlignment="Left" VerticalAlignment="Center"
                                                  Text="{Binding RareCheckConfig.WellWorn}"
                                                  TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                                     </Grid>
@@ -435,18 +436,18 @@
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="Battle-Scarred:" VerticalAlignment="Center"/>
                                         <TextBlock Text="0.45 – 1.00" VerticalAlignment="Bottom" FontSize="9"/>
-                                        <TextBox Grid.Column="1" Width="75" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                        <TextBox Grid.Column="1" Width="105" HorizontalAlignment="Left" VerticalAlignment="Center"
                                                  Text="{Binding RareCheckConfig.BattleScarred}"
                                                  TextInput="InputDecimal" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                                     </Grid>
                                 </Grid>
                             </GroupBox>
-                            <GroupBox Header="Stickers:" Grid.Row="2" Style="{DynamicResource none}"
+                            <GroupBox Header="Stickers:" Grid.Row="1" Style="{DynamicResource none}"
                                       BorderThickness="0.5" x:Name="stickerGroup" Height="200" VerticalAlignment="Top">
                                 <Grid Margin="5" DataContext="{Binding RareCheckConfig}">
                                     <Grid.RowDefinitions>
                                         <RowDefinition/>
-                                        <RowDefinition/>
+                                        <RowDefinition Height="20"/>
                                         <RowDefinition Height="25"/>
                                         <RowDefinition/>
                                         <RowDefinition/>
@@ -457,10 +458,10 @@
                                         <ColumnDefinition Width="110"/>
                                         <ColumnDefinition/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Min. stickers:" Grid.Row="0" VerticalAlignment="Center"/>
-                                    <ComboBox Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" PreviewTextInput="InputInt" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"
+                                    <TextBlock Text="Minimum stickers:" Grid.Row="0" VerticalAlignment="Center"/>
+                                    <ComboBox Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"
                                               ItemsSource="{Binding StickerCount}" SelectedItem="{Binding MinSticker}"/>
-                                    <TextBlock Text="Name contains:" Grid.Row="1" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Sticker name contains:" Grid.Row="1" Grid.ColumnSpan="2" VerticalAlignment="Bottom"/>
                                     <TextBox Text="{Binding NameContains}" Grid.Row="2" Grid.ColumnSpan="2" VerticalAlignment="Center"/>
                                     <CheckBox Content="Normal" Grid.Row="3" Grid.Column="0" IsChecked="{Binding Normal}" Foreground="#FF5E98D9"/>
                                     <CheckBox Content="Holo" Grid.Row="3" Grid.Column="1" IsChecked="{Binding Holo}" Foreground="#FF8847FF"/>
@@ -471,7 +472,7 @@
                                     <CheckBox Content="Contraband" Grid.Row="6" Grid.Column="0" IsChecked="{Binding Contraband}" Foreground="#FFE4AE39"/>
                                 </Grid>
                             </GroupBox>
-                            <GroupBox Header="Doppler:" Grid.Row="2" Style="{DynamicResource none}"
+                            <GroupBox Header="Doppler:" Grid.Row="1" Style="{DynamicResource none}"
                                       BorderThickness="0.5" x:Name="phaseGroup" Height="140" VerticalAlignment="Top">
                                 <Grid Margin="5" DataContext="{Binding RareCheckConfig}">
                                     <Grid.RowDefinitions>
@@ -494,13 +495,11 @@
                                     <CheckBox Content="Emerald" Grid.Row="3" Grid.Column="1" IsChecked="{Binding Emerald}" Foreground="#00D074"/>
                                 </Grid>
                             </GroupBox>
+                            <!--services-->
+                            <TextBlock Text="Parameter:" Grid.Row="2" Margin="2" VerticalAlignment="Center"/>
+                            <ComboBox Width="105" Height="25" Grid.Row="2" HorizontalAlignment="Right" x:Name="parameter" SelectionChanged="ComboBox_SelectionChanged"
+                                      ItemsSource="{Binding RareCheckConfig.Parameters}" SelectedIndex="{Binding RareCheckConfig.ParameterId}"/>
                         </Grid>
-                        <!--services-->
-                        <TextBlock Text="Parameter:" Grid.Row="1" Margin="2" VerticalAlignment="Center"/>
-                        <ComboBox Width="105" Height="25" Grid.Row="1" HorizontalAlignment="Right" 
-                                  x:Name="parameter" SelectionChanged="ComboBox_SelectionChanged"
-                                      ItemsSource="{Binding RareCheckConfig.Parameters}"
-                                      SelectedIndex="{Binding RareCheckConfig.ParameterId}"/>
                     </Grid>
                     <!--Info-->
                     <Grid Visibility="{Binding IsChecked, ElementName=infoTab, Converter={StaticResource BooleanToVisibilityConverter}}">

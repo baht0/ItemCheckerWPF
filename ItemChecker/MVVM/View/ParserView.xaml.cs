@@ -12,21 +12,21 @@ namespace ItemChecker.MVVM.View
         {
             InitializeComponent();
         }
-        private void InputDecimal(object sender, TextCompositionEventArgs e)
+        void InputDecimal(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !decimal.TryParse(e.Text, out decimal result);
         }
-        private void NumberPlus_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        void InputInt(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !int.TryParse(e.Text, out int result);
         }
 
-        private void currency_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        void currency_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!parserGrid.Items.IsEmpty && DataContext is ParserViewModel vm && vm.SwitchCurrencyCommand.CanExecute(currency.SelectedItem))
                 vm.SwitchCurrencyCommand.Execute(currency.SelectedItem);
         }
-        private void DataGrid_KeyDown(object sender, KeyEventArgs e)
+        void DataGrid_KeyDown(object sender, KeyEventArgs e)
         {
             if (!parserGrid.Items.IsEmpty)
             {
@@ -46,7 +46,7 @@ namespace ItemChecker.MVVM.View
                     MainWindow.OpenDetailsItem(item.ItemName);
             }
         }
-        private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             object item = parserGrid.CurrentItem;
             if (!parserGrid.Items.IsEmpty && item != null)
@@ -56,13 +56,13 @@ namespace ItemChecker.MVVM.View
                     viewModel.OpenItemOutCommand.Execute(columnIndex);
             }
         }
-        private void TextBox_KeyDown(object sender, KeyEventArgs e)
+        void TextBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
                 SearchTxt.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
         }
 
-        private void ComboBoxSer1_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        void ComboBoxSer1_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             int id = service1.SelectedIndex;
             csmGroup.IsEnabled = id == 2;
@@ -70,7 +70,7 @@ namespace ItemChecker.MVVM.View
             if (DataContext is ParserViewModel viewModel && viewModel.MaxPriceCommand.CanExecute(id))
                 viewModel.MaxPriceCommand.Execute(id);
         }
-        private void Import_Click(object sender, System.Windows.RoutedEventArgs e)
+        void Import_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             ImportParserWindow window = new();
             window.ShowDialog();
@@ -82,7 +82,7 @@ namespace ItemChecker.MVVM.View
             }
         }
 
-        private void queueListBox_KeyDown(object sender, KeyEventArgs e)
+        void queueListBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (!queueListBox.Items.IsEmpty)
             {
@@ -94,7 +94,7 @@ namespace ItemChecker.MVVM.View
                     MainWindow.OpenDetailsItem(item.ItemName);
             }
         }
-        private void queueListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        void queueListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (!queueListBox.Items.IsEmpty)
             {
@@ -108,7 +108,7 @@ namespace ItemChecker.MVVM.View
             }
         }
 
-        private void maxPriceTxt_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        void maxPriceTxt_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             maxPriceTxt.IsReadOnly = false;
         }

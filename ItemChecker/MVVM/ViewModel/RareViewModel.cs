@@ -1,5 +1,6 @@
 ﻿using ItemChecker.Core;
 using ItemChecker.MVVM.Model;
+using ItemChecker.MVVM.View;
 using ItemChecker.Net;
 using ItemChecker.Properties;
 using ItemChecker.Services;
@@ -240,6 +241,7 @@ namespace ItemChecker.MVVM.ViewModel
                     RareCheckStatus.IsService = true;
                     var config = obj as RareCheckConfig;
                     SaveConfig(config);
+                    MainWindow.CloseShowListWin("Rare");
 
                     RareCheckStatus.Timer.Elapsed += timerTick;
                     RareCheckStatus.TimerTick = config.Time * 60;
@@ -254,7 +256,7 @@ namespace ItemChecker.MVVM.ViewModel
                     RareCheckStatus.TimerTick = 0;
                     RareCheckStatus.Timer.Elapsed -= timerTick;
                 }
-            }, (obj) => RareCheckConfig.MinPrecent < 0 && RareCheckConfig.Time > 0 && SavedItems.Rare.Any(x => x.ServiceId == RareCheckConfig.ParameterId));
+            }, (obj) => RareCheckConfig.MaxPrecent > 0 && RareCheckConfig.Time > 0 && SavedItems.Rare.Any(x => x.ServiceId == RareCheckConfig.ParameterId));
         void SaveConfig(RareCheckConfig config)
         {
             RareProperties.Default.Time = config.Time;
@@ -264,9 +266,10 @@ namespace ItemChecker.MVVM.ViewModel
             RareProperties.Default.maxFloatValue_FT = config.FieldTested;
             RareProperties.Default.maxFloatValue_WW = config.WellWorn;
             RareProperties.Default.maxFloatValue_BS = config.BattleScarred;
+            RareProperties.Default.Save();
 
             RareCheckConfig.CheckedConfig = (RareCheckConfig)config.Clone();
-            RareProperties.Default.Save();
+            RareCheckConfig.CheckedConfig.MaxPrecent *= -1;
         }
         void timerTick(Object sender, ElapsedEventArgs e)
         {
