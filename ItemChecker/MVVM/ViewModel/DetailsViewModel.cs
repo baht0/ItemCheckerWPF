@@ -1,12 +1,10 @@
 ﻿using ItemChecker.Core;
 using ItemChecker.MVVM.Model;
-using ItemChecker.Services;
 using ItemChecker.Support;
 using MaterialDesignThemes.Wpf;
 using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Input;
@@ -37,6 +35,19 @@ namespace ItemChecker.MVVM.ViewModel
         }
         Details _details = new();
 
+        public ObservableCollection<DetailItem> ItemsView
+        {
+            get
+            {
+                return _itemsView;
+            }
+            set
+            {
+                _itemsView = value;
+                OnPropertyChanged();
+            }
+        }
+        ObservableCollection<DetailItem> _itemsView = new(Details.Items);
         public DetailItem SelectedItem
         {
             get
@@ -46,59 +57,40 @@ namespace ItemChecker.MVVM.ViewModel
             set
             {
                 _selectedItem = value;
-
-                if (_selectedItem == null || _selectedItem.ItemName == "Unknown" || _selectedItem.Price == null || _selectedItem.Prices.Any())
-                    return;
-
-                _selectedItem.Price.IsBusy = true;
-                Task.Run(() =>
-                {
-                    try
-                    {
-                        string itemName = _selectedItem.ItemName;
-                        ItemBaseService baseService = new();
-                        baseService.UpdateSteamItem(itemName);
-                        baseService.UpdateCsmItem(itemName, false);
-                        baseService.UpdateLfm();
-                        baseService.UpdateBuffItem(itemName);
-
-                        List<DetailItemPrice> prices = new();
-                        for (int i = 0; i < Main.Services.Count; i++)
-                        {
-                            DetailItemPrice price = new();
-                            prices.Add(price.Add(i, itemName));
-                        }
-                        _selectedItem.Prices = new(prices);
-                    }
-                    catch (Exception ex)
-                    {
-                        BaseService.errorLog(ex, true);
-                    }
-                    finally
-                    {
-                        _selectedItem.Price.IsBusy = false;
-                    }
-                });
                 OnPropertyChanged();
             }
         }
         DetailItem _selectedItem = new();
+        public bool IsSearch
+        {
+            get
+            {
+                return _isSearch;
+            }
+            set
+            {
+                _isSearch = value;
+                OnPropertyChanged();
+            }
+        }
+        bool _isSearch;
 
         public DetailsViewModel(bool isMenu)
         {
-            Details.IsSearch = isMenu && !Details.Items.Any();
+            IsSearch = isMenu && !Details.Items.Any();
 
             Timer.Elapsed += UpdateWindow;
             Timer.Enabled = true;
 
-            Details.ItemsView = new(Details.Items);
-            SelectedItem = Details.Items.Any() ? Details.Items.LastOrDefault() : new();
+            ItemsView = new(Details.Items);
+            if (Details.Items.Any())
+                SelectedItem = Details.Item != null ? Details.Item : Details.Items.LastOrDefault();
         }
         void UpdateWindow(Object sender, ElapsedEventArgs e)
         {
             if (Details.Item != null)
             {
-                Details.ItemsView = new(Details.Items);
+                ItemsView = new(Details.Items);
                 SelectedItem = Details.Item;
                 Details.Item = null;
             }
@@ -112,17 +104,17 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand ShowSearchCommand =>
             new RelayCommand((obj) =>
             {
-                if (!Details.IsSearch)
-                    Details.IsSearch = true;
-                else if (Details.ItemsView.Count > 0)
-                    Details.IsSearch = false;
+                if (!IsSearch)
+                    IsSearch = true;
+                else if (ItemsView.Count > 0)
+                    IsSearch = false;
             });
         public ICommand SearchCommand =>
             new RelayCommand((obj) =>
             {
                 var str = obj as string;
                 Details.Items.Add(str);
-                Details.ItemsView = new(Details.Items);
+                ItemsView = new(Details.Items);
                 SelectedItem = Details.Items.LastOrDefault();
             });
         public ICommand CopyCommand =>
@@ -140,17 +132,17 @@ namespace ItemChecker.MVVM.ViewModel
 
                 if (result == MessageBoxResult.Yes)
                 {
-                    Details.Items.Clear();
-                    Details = new();
-                    Details.IsSearch = true;
+                    IsSearch = true;
                     SelectedItem = new();
+                    ItemsView = new();
+                    Details.Items.Clear();
                 }
-            }, (obj) => !SelectedItem.Price.IsBusy && !SelectedItem.Info.IsBusy);
+            }, (obj) => !ItemsView.Any(x => x.IsBusy) && !ItemsView.Any(x => x.Info.IsBusy));
         public ICommand SwitchCurrencyCommand =>
             new RelayCommand((obj) =>
             {
                 var currency = Currencies.Allow.FirstOrDefault(x => x.Name == (string)obj);
-                var prices = SelectedItem.Prices.ToList();
+                var prices = SelectedItem.Services.ToList();
                 if (Details.CurectCurrency.Id != 1)
                 {
                     foreach (var price in prices)
@@ -170,12 +162,12 @@ namespace ItemChecker.MVVM.ViewModel
                 SelectedItem.Compare.Difference = Currency.ConverterFromUsd(SelectedItem.Compare.Difference, currency.Id);
 
                 Details.CurectCurrency = currency;
-                SelectedItem.Prices = new(prices);
-            }, (obj) => SelectedItem.Prices != null && SelectedItem.Prices.Any());
+                SelectedItem.Services = new(prices);
+            }, (obj) => SelectedItem.Services != null && SelectedItem.Services.Any());
         public ICommand OpenItemOutCommand =>
             new RelayCommand((obj) =>
             {
-                var item = (DetailItemPrice)obj;
+                var item = (DetailService)obj;
                 string itemName = SelectedItem.ItemName.Replace("(Holo/Foil)", "(Holo-Foil)");
                 string market_hash_name = Uri.EscapeDataString(itemName);
                 switch (item.ServiceId)
@@ -201,12 +193,12 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand CompareCommand =>
             new RelayCommand((obj) =>
             {
-                if (SelectedItem.Prices != null && SelectedItem.Prices.Any())
+                if (SelectedItem.Services != null && SelectedItem.Services.Any())
                 {
-                    SelectedItem.Compare.Get = SelectedItem.Prices[SelectedItem.Compare.Service2].Get;
-                    SelectedItem.Compare.Precent = Edit.Precent(SelectedItem.Prices[SelectedItem.Compare.Service1].Price, SelectedItem.Prices[SelectedItem.Compare.Service2].Get);
-                    SelectedItem.Compare.Difference = Edit.Difference(SelectedItem.Prices[SelectedItem.Compare.Service2].Get, SelectedItem.Prices[SelectedItem.Compare.Service1].Price);
+                    SelectedItem.Compare.Get = SelectedItem.Services[SelectedItem.Compare.Service2].Get;
+                    SelectedItem.Compare.Precent = Edit.Precent(SelectedItem.Services[SelectedItem.Compare.Service1].Price, SelectedItem.Services[SelectedItem.Compare.Service2].Get);
+                    SelectedItem.Compare.Difference = Edit.Difference(SelectedItem.Services[SelectedItem.Compare.Service2].Get, SelectedItem.Services[SelectedItem.Compare.Service1].Price);
                 }
-            }, (obj) => SelectedItem != null && SelectedItem.ItemName != "Unknown" && SelectedItem.Prices != null && SelectedItem.Prices.Any());
+            }, (obj) => SelectedItem != null && SelectedItem.ItemName != "Unknown" && SelectedItem.Services != null && SelectedItem.Services.Any());
     }
 }

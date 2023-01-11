@@ -44,7 +44,7 @@ namespace ItemChecker.MVVM.View
             DataContext = new MainViewModel();
             bodyContent.Content = homeViewModel;
             Home.IsEnabled = false;
-            Title = "Home - ItemChecker";
+            Title = "ItemChecker - Home";
         }
         private void Window_DragMove(object sender, MouseButtonEventArgs e)
         {

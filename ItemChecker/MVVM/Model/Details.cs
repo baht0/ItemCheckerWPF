@@ -12,51 +12,19 @@ namespace ItemChecker.MVVM.Model
     public class Details : ObservableObject
     {
         public static DetailsItemList<DetailItem> Items { get; set; } = new();
-        public static DetailItem Item { get; set; } = new();
+        public static DetailItem Item { get; set; }
 
         public List<string> CurrencyList { get; set; } = Currencies.Allow.Select(x => x.Name).ToList();
         public static DataCurrency CurectCurrency { get; set; } = Currencies.Allow.FirstOrDefault(x => x.Id == 1);
         public string CurrencySymbolSteam { get; set; } = SteamAccount.Currency.Symbol;
         public List<string> Services { get; set; } = Main.Services;
-
-        public ObservableCollection<DetailItem> ItemsView
-        {
-            get
-            {
-                return _itemsView;
-            }
-            set
-            {
-                _itemsView = value;
-                OnPropertyChanged();
-            }
-        }
-        ObservableCollection<DetailItem> _itemsView = new(Items);
-        public bool IsSearch
-        {
-            get
-            {
-                return _isSearch;
-            }
-            set
-            {
-                _isSearch = value;
-                OnPropertyChanged();
-            }
-        }
-        bool _isSearch;
     }
     public class DetailsItemList<T> : List<DetailItem>
     {
         public new void Add(string itemName)
         {
             if (IsAllow(itemName))
-            {
-                base.Add(new DetailItem()
-                {
-                    ItemName = itemName,
-                });
-            }
+                base.Add(new DetailItem(itemName));
         }
         bool IsAllow(string itemName)
         {
@@ -66,17 +34,42 @@ namespace ItemChecker.MVVM.Model
     }
     public class DetailItem : ObservableObject
     {
-        public string ItemName { get; set; } = "Unknown";
-        public ObservableCollection<DetailItemPrice> Prices
+        public bool IsBusy
         {
-            get { return _prices; }
+            get
+            {
+                return _isBusy;
+            }
             set
             {
-                _prices = value;
+                _isBusy = value;
                 OnPropertyChanged();
             }
         }
-        ObservableCollection<DetailItemPrice> _prices = new();
+        bool _isBusy = true;
+        public string ItemName
+        {
+            get
+            {
+                return _itemName;
+            }
+            set
+            {
+                _itemName = value;
+                OnPropertyChanged();
+            }
+        }
+        string _itemName = "Unknown";
+        public ObservableCollection<DetailService> Services
+        {
+            get { return _services; }
+            set
+            {
+                _services = value;
+                OnPropertyChanged();
+            }
+        }
+        ObservableCollection<DetailService> _services = new();
 
         public DetailItemCompare Compare
         {
@@ -98,79 +91,17 @@ namespace ItemChecker.MVVM.Model
             }
         }
         DetailItemInfo _info = new();
-        public DetailItemPrice Price
+        public DetailService Service
         {
-            get { return _price; }
+            get { return _service; }
             set
             {
-                _price = value;
-                if (value == null || ItemName == "New")
-                    return;
-
-                Info.IsBusy = true;
-                Info.AllHide();
-
-                Task.Run(() =>
-                {
-                    ItemBaseService baseService = new();
-
-                    switch (value.ServiceId)
-                    {
-                        case 0 or 1:
-                            {
-                                var data = ItemsBase.List.FirstOrDefault(x => x.ItemName == ItemName).Steam;
-
-                                data.LowestSellOrder = Currency.ConverterFromUsd(data.LowestSellOrder, ParserTable.CurectCurrency.Id);
-                                data.HighestBuyOrder = Currency.ConverterFromUsd(data.HighestBuyOrder, ParserTable.CurectCurrency.Id);
-
-                                baseService.UpdateSteamItemHistory(ItemName);
-                                Info.SteamInfo.LastSale = data.History.FirstOrDefault().Date;
-                                List<decimal> last30 = data.History.Where(x => x.Date > DateTime.Today.AddDays(-30)).Select(x => x.Price).ToList();
-                                List<decimal> last60 = data.History.Where(x => x.Date > DateTime.Today.AddDays(-60)).Select(x => x.Price).ToList();
-                                Info.SteamInfo.Count = Tuple.Create(last30.Count, last60.Count);
-                                decimal avg30 = last30.Any() ? Math.Round(Queryable.Average(last30.AsQueryable()), 2) : 0;
-                                decimal avg60 = last60.Any() ? Math.Round(Queryable.Average(last60.AsQueryable()), 2) : 0;
-                                Info.SteamInfo.Avg = Tuple.Create(avg30, avg60);
-                                Info.SteamInfo.Item = data;
-
-                                Info.SteamInfo.IsShow = true;
-                                break;
-                            }
-                        case 2:
-                            {
-                                baseService.UpdateCsmItem(ItemName, true);
-                                Info.CsmInfo.Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == ItemName).Csm;
-                                Info.CsmInfo.CurrentItem = Info.CsmInfo.Item.Inventory.FirstOrDefault();
-                                Info.CsmInfo.MaxValueSlide = Info.CsmInfo.Item.Inventory.Count;
-                                Info.CsmInfo.ValueSlide = Info.CsmInfo.Item.Inventory.Any() ? 1 : 0;
-
-                                Info.CsmInfo.IsShow = true;
-                                break;
-                            }
-                        case 3:
-                            {
-                                Info.LfmInfo.Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == ItemName).Lfm;
-
-                                Info.LfmInfo.IsShow = true;
-                                break;
-                            }
-                        case 4 or 5:
-                            {
-                                baseService.UpdateBuffItemHistory(ItemName);
-                                var data = ItemsBase.List.FirstOrDefault(x => x.ItemName == ItemName).Buff;
-                                Info.BuffInfo.LastSale = data.History.FirstOrDefault().Date;
-                                Info.BuffInfo.Item = data;
-
-                                Info.BuffInfo.IsShow = true;
-                                break;
-                            }
-                    }
-                    Info.IsBusy = false;
-            });
-            OnPropertyChanged();
+                _service = value;
+                Info = new(value.ServiceId, ItemName);
+                OnPropertyChanged();
             }
         }
-        DetailItemPrice _price = new();
+        DetailService _service = new();
         public int CurrencyId
         {
             get
@@ -184,23 +115,44 @@ namespace ItemChecker.MVVM.Model
             }
         }
         int _currencyId = 0;
+
+        public DetailItem()
+        {
+
+        }
+        public DetailItem(string itemName)
+        {
+            ItemName = itemName;
+            IsBusy = true;
+            Task.Run(() =>
+            {
+                try
+                {
+        
+                    ItemBaseService.UpdateSteamItem(itemName);
+                    ItemBaseService.UpdateCsmItem(itemName, false);
+                    ItemBaseService.UpdateLfm();
+                    ItemBaseService.UpdateBuffItem(itemName);
+
+                    var prices = new List<DetailService>();
+                    for (int i = 0; i < Main.Services.Count; i++)
+                        prices.Add(new(i, itemName));
+                    Services = new(prices);
+                }
+                catch (Exception ex)
+                {
+                    BaseService.errorLog(ex, true);
+                }
+                finally
+                {
+                    IsBusy = false;
+                }
+            });
+        }
     }
 
-    public class DetailItemPrice : ObservableObject
+    public class DetailService : ObservableObject
     {
-        public bool IsBusy
-        {
-            get
-            {
-                return _isBusy;
-            }
-            set
-            {
-                _isBusy = value;
-                OnPropertyChanged();
-            }
-        }
-        bool _isBusy = new();
         public int ServiceId { get; set; }
         public string Service { get; set; }
         public decimal Price { get; set; }
@@ -208,7 +160,11 @@ namespace ItemChecker.MVVM.Model
         public bool Have { get; set; }
         public bool Available { get; set; } = true;
 
-        public DetailItemPrice Add(int service, string itemName)
+        public DetailService()
+        {
+
+        }
+        public DetailService(int service, string itemName)
         {
             dynamic item = null;
             this.ServiceId = service;
@@ -251,7 +207,6 @@ namespace ItemChecker.MVVM.Model
                     this.Have = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Buff.IsHave;
                     break;
             }
-            return this;
         }
     }
     public class DetailItemCompare : ObservableObject
@@ -336,7 +291,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        bool _isBusy = new();
+        bool _isBusy;
         public SteamInfo SteamInfo
         {
             get
@@ -390,12 +345,79 @@ namespace ItemChecker.MVVM.Model
         }
         BuffInfo _buffInfo = new();
 
-        public void AllHide()
+        public DetailItemInfo()
         {
+
+        }
+        public DetailItemInfo(int serviceId, string itemName)
+        {
+            if (itemName == "Unknown")
+                return;
+
+            IsBusy = true;
+
             SteamInfo.IsShow = false;
             CsmInfo.IsShow = false;
             LfmInfo.IsShow = false;
             BuffInfo.IsShow = false;
+
+            Task.Run(() =>
+            {
+    
+
+                switch (serviceId)
+                {
+                    case 0 or 1:
+                        {
+                            var data = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Steam;
+
+                            data.LowestSellOrder = Currency.ConverterFromUsd(data.LowestSellOrder, ParserTable.CurectCurrency.Id);
+                            data.HighestBuyOrder = Currency.ConverterFromUsd(data.HighestBuyOrder, ParserTable.CurectCurrency.Id);
+
+                            ItemBaseService.UpdateSteamItemHistory(itemName);
+                            SteamInfo.LastSale = data.History.FirstOrDefault().Date;
+                            List<decimal> last30 = data.History.Where(x => x.Date > DateTime.Today.AddDays(-30)).Select(x => x.Price).ToList();
+                            List<decimal> last60 = data.History.Where(x => x.Date > DateTime.Today.AddDays(-60)).Select(x => x.Price).ToList();
+                            SteamInfo.Count = Tuple.Create(last30.Count, last60.Count);
+                            decimal avg30 = last30.Any() ? Math.Round(Queryable.Average(last30.AsQueryable()), 2) : 0;
+                            decimal avg60 = last60.Any() ? Math.Round(Queryable.Average(last60.AsQueryable()), 2) : 0;
+                            SteamInfo.Avg = Tuple.Create(avg30, avg60);
+                            SteamInfo.Item = data;
+
+                            SteamInfo.IsShow = true;
+                            break;
+                        }
+                    case 2:
+                        {
+                            ItemBaseService.UpdateCsmItem(itemName, true);
+                            CsmInfo.Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Csm;
+                            CsmInfo.CurrentItem = CsmInfo.Item.Inventory.FirstOrDefault();
+                            CsmInfo.MaxValueSlide = CsmInfo.Item.Inventory.Count;
+                            CsmInfo.ValueSlide = CsmInfo.Item.Inventory.Any() ? 1 : 0;
+
+                            CsmInfo.IsShow = true;
+                            break;
+                        }
+                    case 3:
+                        {
+                            LfmInfo.Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Lfm;
+
+                            LfmInfo.IsShow = true;
+                            break;
+                        }
+                    case 4 or 5:
+                        {
+                            ItemBaseService.UpdateBuffItemHistory(itemName);
+                            var data = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Buff;
+                            BuffInfo.LastSale = data.History.FirstOrDefault().Date;
+                            BuffInfo.Item = data;
+
+                            BuffInfo.IsShow = true;
+                            break;
+                        }
+                }
+                IsBusy = false;
+            });
         }
     }
     public class ItemInfo : ObservableObject
@@ -412,7 +434,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private bool _isShow = false;
+        bool _isShow = false;
         public DateTime LastSale
         {
             get
@@ -425,7 +447,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        private DateTime _lastSale = new();
+        DateTime _lastSale = new();
     }
     public class SteamInfo : ItemInfo
     {

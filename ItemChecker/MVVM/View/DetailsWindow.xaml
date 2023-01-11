@@ -74,8 +74,8 @@
                                     Style="{StaticResource MaterialDesignToolForegroundButton}">
                             <materialDesign:PackIcon Kind="ContentCopy"/>
                         </Button>
-                        <ComboBox Grid.Column="2" ItemsSource="{Binding Details.ItemsView}" SelectedItem="{Binding SelectedItem}"
-                                  Margin="0 0 10 0" x:Name="itemsCmb" SelectionChanged="itemsCmb_SelectionChanged" IsEnabled="{Binding SelectedItem.Price.IsBusy, Converter={StaticResource InvertBooleanConverter}}">
+                        <ComboBox Grid.Column="2" ItemsSource="{Binding ItemsView}" SelectedItem="{Binding SelectedItem}"
+                                  Margin="0 0 10 0" x:Name="itemsCmb" SelectionChanged="itemsCmb_SelectionChanged" IsEnabled="{Binding SelectedItem.IsBusy, Converter={StaticResource InvertBooleanConverter}}">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding ItemName}"/>
@@ -83,12 +83,12 @@
                             </ComboBox.ItemTemplate>
                         </ComboBox>
                         <ComboBox Grid.Column="3" VerticalAlignment="Center" ToolTip="Displaying prices in tables"
-                                  x:Name="currency" SelectionChanged="currency_SelectionChanged" IsEnabled="{Binding SelectedItem.Price.IsBusy, Converter={StaticResource InvertBooleanConverter}}"
+                                  x:Name="currency" SelectionChanged="currency_SelectionChanged" IsEnabled="{Binding SelectedItem.IsBusy, Converter={StaticResource InvertBooleanConverter}}"
                                   ItemsSource="{Binding Details.CurrencyList}" SelectedIndex="{Binding SelectedItem.CurrencyId}"/>
                         <Separator Grid.ColumnSpan="4" VerticalAlignment="Bottom"/>
                         <DataGrid Grid.Row="1" Grid.ColumnSpan="4" AlternationCount="2" AlternatingRowBackground="{DynamicResource ElementBackground}"
-                                  AutoGenerateColumns="False" IsReadOnly="True" x:Name="pricesGrid" SelectionMode="Single" CanUserSortColumns="False" IsEnabled="{Binding SelectedItem.Price.IsBusy, Converter={StaticResource InvertBooleanConverter}}"
-                                  ItemsSource="{Binding SelectedItem.Prices}" SelectedItem="{Binding SelectedItem.Price}" MouseDoubleClick="DataGrid_MouseDoubleClick">
+                                  AutoGenerateColumns="False" IsReadOnly="True" x:Name="pricesGrid" SelectionMode="Single" CanUserSortColumns="False" IsEnabled="{Binding SelectedItem.IsBusy, Converter={StaticResource InvertBooleanConverter}}"
+                                  ItemsSource="{Binding SelectedItem.Services}" SelectedItem="{Binding SelectedItem.Service}" MouseDoubleClick="DataGrid_MouseDoubleClick">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Service" Binding="{Binding Service}" CanUserResize="False" Width="auto"/>
                                 <DataGridTextColumn Header="Price" Binding="{Binding Price}" CanUserResize="False" Width="auto" FontWeight="Bold"/>
@@ -98,7 +98,7 @@
                             </DataGrid.Columns>
                         </DataGrid>
                         <ProgressBar Grid.Row="1" Grid.ColumnSpan="4" VerticalAlignment="Center" HorizontalAlignment="Center" IsIndeterminate="True"
-                                     Visibility="{Binding SelectedItem.Price.IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                     Visibility="{Binding SelectedItem.IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
                                      Style="{StaticResource MaterialDesignCircularProgressBar}"/>
                         <GroupBox Header="Compare" Grid.Row="2" Grid.ColumnSpan="4" Style="{DynamicResource none}" BorderThickness="0.5">
                             <Grid Margin="10">
@@ -117,11 +117,11 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="From" VerticalAlignment="Center"/>
                                 <ComboBox Grid.Column="0" Grid.Row="1" ItemsSource="{Binding Details.Services}" SelectedIndex="{Binding SelectedItem.Compare.Service1}" SelectionChanged="Compare_SelectionChanged"
-                                          IsEnabled="{Binding SelectedItem.Price.IsBusy, Converter={StaticResource InvertBooleanConverter}}"/>
+                                          IsEnabled="{Binding SelectedItem.IsBusy, Converter={StaticResource InvertBooleanConverter}}"/>
 
                                 <TextBlock Grid.Column="2" Text="To" VerticalAlignment="Center"/>
                                 <ComboBox Grid.Column="2" Grid.Row="1" ItemsSource="{Binding Details.Services}" SelectedIndex="{Binding SelectedItem.Compare.Service2}" SelectionChanged="Compare_SelectionChanged"
-                                          IsEnabled="{Binding SelectedItem.Price.IsBusy, Converter={StaticResource InvertBooleanConverter}}"/>
+                                          IsEnabled="{Binding SelectedItem.IsBusy, Converter={StaticResource InvertBooleanConverter}}"/>
 
                                 <TextBlock Grid.Column="4" Text="Get" VerticalAlignment="Center"/>
                                 <TextBlock Grid.Column="4" Grid.Row="1" Text="{Binding SelectedItem.Compare.Get}" VerticalAlignment="Center"/>
@@ -299,7 +299,7 @@
                     </Grid>
                 </Grid>
                 <!--search-->
-                <Grid Grid.Row="2" x:Name="searchWin" Visibility="{Binding Details.IsSearch, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid Grid.Row="2" x:Name="searchWin" Visibility="{Binding IsSearch, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Grid Background="Black" Opacity="0.8"/>
                     <Border CornerRadius="3" Width="500" Height="55" Background="{DynamicResource Background}">
                         <Grid Margin="10">
