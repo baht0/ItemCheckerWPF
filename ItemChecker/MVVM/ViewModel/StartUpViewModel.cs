@@ -84,8 +84,7 @@ namespace ItemChecker.MVVM.ViewModel
                 SteamAccount.GetAccount();
 
                 StartUp.Progress = Tuple.Create(5, "Creation ItemsBase...");
-                ItemBaseService itemBase = new();
-                itemBase.CreateItemsBase();
+                ItemBaseService.CreateItemsBase();
 
                 LaunchSuccessful = true;
                 Application.Current.Dispatcher.Invoke(Hide);

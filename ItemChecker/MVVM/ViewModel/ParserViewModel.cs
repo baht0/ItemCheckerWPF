@@ -343,23 +343,23 @@ namespace ItemChecker.MVVM.ViewModel
         List<string> CreateList(ParserCheckConfig config, List<DataParser> checkedList)
         {
             ParserCheckInfo.Status = "Create List...";
-            ItemBaseService baseService = new();
+
             switch (config.ServiceOne)
             {
                 case 2:
-                    baseService.UpdateCsm(config);
+                    ItemBaseService.UpdateCsm(config);
                     break;
                 case 3:
-                    baseService.UpdateLfm();
+                    ItemBaseService.UpdateLfm();
                     break;
                 case 4 or 5:
-                    baseService.UpdateBuff(config.ServiceOne == 4, config.MinPrice, config.MaxPrice);
+                    ItemBaseService.UpdateBuff(config.ServiceOne == 4, config.MinPrice, config.MaxPrice);
                     break;
             }
             switch (config.ServiceTwo)
             {
                 case 3:
-                    baseService.UpdateLfm();
+                    ItemBaseService.UpdateLfm();
                     break;
             }
             var list = ParserCheckService.ApplyConfig(config, checkedList);
@@ -369,7 +369,7 @@ namespace ItemChecker.MVVM.ViewModel
                 int min = (int)(config.MinPrice * 0.5m);
                 int max = (int)(config.MaxPrice * 2.5m);
 
-                baseService.UpdateBuff(config.ServiceTwo == 4, min, max);
+                ItemBaseService.UpdateBuff(config.ServiceTwo == 4, min, max);
             }
             return list;
         }

@@ -106,8 +106,8 @@ namespace ItemChecker.Services
         }
         public static void SellItem(DataInventory inventoryItem, HomeInventoryConfig config)
         {
-            ItemBaseService baseService = new();
-            baseService.UpdateSteamItem(inventoryItem.ItemName, SteamAccount.Currency.Id);
+
+            ItemBaseService.UpdateSteamItem(inventoryItem.ItemName, SteamAccount.Currency.Id);
             var baseItem = ItemsBase.List.FirstOrDefault(x => x.ItemName == inventoryItem.ItemName).Steam;
 
             foreach (var item in inventoryItem.Data)

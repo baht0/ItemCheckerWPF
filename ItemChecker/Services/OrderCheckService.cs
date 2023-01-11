@@ -58,7 +58,6 @@ namespace ItemChecker.MVVM.Model
         }
         static DataOrder SetService(DataOrder data, bool isUpdateService)
         {
-            ItemBaseService baseService = new();
             int serviceId = HomeProperties.Default.ServiceId;
             switch (serviceId)
             {
@@ -73,7 +72,7 @@ namespace ItemChecker.MVVM.Model
                 case 1:
                     {
                         if (isUpdateService)
-                            baseService.UpdateSteamItem(data.ItemName);
+                            ItemBaseService.UpdateSteamItem(data.ItemName);
                         var Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == data.ItemName).Steam;
                         data.ServicePrice = Item.LowestSellOrder;
                         data.ServiceGive = Math.Round(Item.LowestSellOrder * Calculator.CommissionSteam, 2);
@@ -82,7 +81,7 @@ namespace ItemChecker.MVVM.Model
                 case 2:
                     {
                         if (isUpdateService)
-                            baseService.UpdateCsmItem(data.ItemName, false);
+                            ItemBaseService.UpdateCsmItem(data.ItemName, false);
                         var Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == data.ItemName).Csm;
                         data.ServicePrice = Item.Price;
                         data.ServiceGive = Math.Round(Item.Price * Calculator.CommissionCsm, 2);
@@ -91,7 +90,7 @@ namespace ItemChecker.MVVM.Model
                 case 3:
                     {
                         if (isUpdateService)
-                            baseService.UpdateLfm();
+                            ItemBaseService.UpdateLfm();
                         var Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == data.ItemName).Lfm;
                         data.ServicePrice = Item.Price;
                         data.ServiceGive = Math.Round(Item.Price * Calculator.CommissionLf, 2);
@@ -100,7 +99,7 @@ namespace ItemChecker.MVVM.Model
                 case 4:
                     {
                         if (isUpdateService)
-                            baseService.UpdateBuffItem(data.ItemName);
+                            ItemBaseService.UpdateBuffItem(data.ItemName);
                         var Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == data.ItemName).Buff;
                         data.ServicePrice = Item.BuyOrder;
                         data.ServiceGive = Math.Round(Item.BuyOrder * Calculator.CommissionBuff, 2);
@@ -109,7 +108,7 @@ namespace ItemChecker.MVVM.Model
                 case 5:
                     {
                         if (isUpdateService)
-                            baseService.UpdateBuffItem(data.ItemName);
+                            ItemBaseService.UpdateBuffItem(data.ItemName);
                         var Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == data.ItemName).Buff;
                         data.ServicePrice = Item.Price;
                         data.ServiceGive = Math.Round(Item.Price * Calculator.CommissionBuff, 2);

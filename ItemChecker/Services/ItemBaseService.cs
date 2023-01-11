@@ -12,7 +12,7 @@ namespace ItemChecker.Services
 {
     public class ItemBaseService : BaseService
     {
-        public void CreateItemsBase()
+        public static void CreateItemsBase()
         {
             JObject jobject = new();
             string path = $"{ProjectInfo.DocumentPath}SteamItemsBase.json";
@@ -48,15 +48,13 @@ namespace ItemChecker.Services
             }
         }
         //stm
-        public void UpdateSteamItem(string itemName, int currencyId = 1)
+        public static void UpdateSteamItem(string itemName, int currencyId = 1)
         {
             var itemBase = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Steam;
-            if (itemBase.Updated.AddMinutes(30) > DateTime.Now)
-                if (itemBase.CurrencyId == currencyId)
-                    return;
+            if (itemBase.Updated.AddMinutes(30) > DateTime.Now && itemBase.CurrencyId == currencyId)
+                return;
 
             JObject json = SteamRequest.Get.ItemOrdersHistogram(itemName, itemBase.Id, currencyId);
-
             decimal high = !String.IsNullOrEmpty(json["highest_buy_order"].ToString()) ? Convert.ToDecimal(json["highest_buy_order"]) / 100 : 0;
             decimal low = !String.IsNullOrEmpty(json["lowest_sell_order"].ToString()) ? Convert.ToDecimal(json["lowest_sell_order"]) / 100 : 0;
 
@@ -64,7 +62,7 @@ namespace ItemChecker.Services
             itemBase.LowestSellOrder = low;
             itemBase.IsHave = low > 0;
         }
-        public void UpdateSteamItemHistory(string itemName)
+        public static void UpdateSteamItemHistory(string itemName)
         {
             var itemBase = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Steam;
             if (itemBase == null || itemBase.History.Any())
@@ -82,7 +80,7 @@ namespace ItemChecker.Services
             }
         }
         //lfm
-        public void UpdateLfm()
+        public static void UpdateLfm()
         {
             if (ItemsBase.List.Select(x => x.Lfm.Updated).Max().AddMinutes(30) > DateTime.Now)
                 return;
@@ -115,7 +113,7 @@ namespace ItemChecker.Services
             }
         }
         //csm
-        public void UpdateCsm(ParserCheckConfig parserConfig)
+        public static void UpdateCsm(ParserCheckConfig parserConfig)
         {
             if (ItemsBase.List.Select(x => x.Csm.Inventory.Select(x => x.Updated).Max()).Max().AddMinutes(30) > DateTime.Now)
                 return;
@@ -152,7 +150,7 @@ namespace ItemChecker.Services
                     break;
             }
         }
-        public void UpdateCsmItem(string itemName, bool isInventory)
+        public static void UpdateCsmItem(string itemName, bool isInventory)
         {
             var itemBase = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName);
             if (itemBase.Csm.Updated.AddMinutes(30) > DateTime.Now && !isInventory)
@@ -215,7 +213,7 @@ namespace ItemChecker.Services
             }
         }
         //buff
-        public void UpdateBuff(bool isBuyOrder, int min, int max)
+        public static void UpdateBuff(bool isBuyOrder, int min, int max)
         {
             if (ItemsBase.List.Select(x => x.Buff.Updated).Max().AddMinutes(30) > DateTime.Now)
                 return;
@@ -261,7 +259,7 @@ namespace ItemChecker.Services
                 }
             }
         }
-        public void UpdateBuffItem(string itemName)
+        public static void UpdateBuffItem(string itemName)
         {
             var itemBase = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName);
             if (itemBase.Buff.Updated.AddMinutes(30) > DateTime.Now)
@@ -305,7 +303,7 @@ namespace ItemChecker.Services
                 }
             }
         }
-        public void UpdateBuffItemHistory(string itemName)
+        public static void UpdateBuffItemHistory(string itemName)
         {
             var itemBase = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Buff;
             if (itemBase == null || itemBase.History.Any())

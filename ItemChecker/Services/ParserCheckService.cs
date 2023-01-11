@@ -20,7 +20,7 @@ namespace ItemChecker.MVVM.Model
             {
                 case 0:
                     {
-                        itemBaseService.UpdateSteamItem(itemName);
+                        UpdateSteamItem(itemName);
                         var Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == data.ItemName).Steam;
                         data.Purchase = Item.HighestBuyOrder;
                         data.Have = data.Purchase > 0;
@@ -28,7 +28,7 @@ namespace ItemChecker.MVVM.Model
                     }
                 case 1:
                     {
-                        itemBaseService.UpdateSteamItem(itemName);
+                        UpdateSteamItem(itemName);
                         var Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == data.ItemName).Steam;
                         data.Purchase = Item.LowestSellOrder;
                         data.Have = data.Purchase > 0;
@@ -62,7 +62,7 @@ namespace ItemChecker.MVVM.Model
             {
                 case 0:
                     {
-                        itemBaseService.UpdateSteamItem(itemName);
+                        UpdateSteamItem(itemName);
                         var Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == data.ItemName).Steam;
                         data.Price = Item.HighestBuyOrder;
                         data.Get = Math.Round(data.Price * Calculator.CommissionSteam, 2);
@@ -70,7 +70,7 @@ namespace ItemChecker.MVVM.Model
                     }
                 case 1:
                     {
-                        itemBaseService.UpdateSteamItem(itemName);
+                        UpdateSteamItem(itemName);
                         var Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == data.ItemName).Steam;
                         data.Price = Item.LowestSellOrder;
                         data.Get = Math.Round(data.Price * Calculator.CommissionSteam, 2);
@@ -78,7 +78,7 @@ namespace ItemChecker.MVVM.Model
                     }
                 case 2:
                     {
-                        itemBaseService.UpdateCsmItem(itemName, false);
+                        UpdateCsmItem(itemName, false);
                         var Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == data.ItemName).Csm;
                         data.Price = Item.Price;
                         data.Get = Math.Round(data.Price * Calculator.CommissionCsm, 2);
@@ -93,7 +93,7 @@ namespace ItemChecker.MVVM.Model
                     }
                 case 4:
                     {
-                        itemBaseService.UpdateBuffItem(itemName);
+                        UpdateBuffItem(itemName);
                         var Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == data.ItemName).Buff;
                         data.Price = Item.BuyOrder;
                         data.Get = Math.Round(data.Price * Calculator.CommissionBuff, 2);
@@ -101,7 +101,7 @@ namespace ItemChecker.MVVM.Model
                     }
                 case 5:
                     {
-                        itemBaseService.UpdateBuffItem(itemName);
+                        UpdateBuffItem(itemName);
                         var Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == data.ItemName).Buff;
                         data.Price = Item.Price;
                         data.Get = Math.Round(data.Price * Calculator.CommissionBuff, 2);

@@ -10,8 +10,8 @@ namespace ItemChecker.Services
     {
         public static decimal PlaceOrder(string itemName)
         {
-            ItemBaseService baseService = new();
-            baseService.UpdateSteamItem(itemName, SteamAccount.Currency.Id);
+
+            ItemBaseService.UpdateSteamItem(itemName, SteamAccount.Currency.Id);
             var item = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Steam;
 
             if (SteamAccount.Balance > item.HighestBuyOrder)
@@ -31,8 +31,8 @@ namespace ItemChecker.Services
         }
         public static bool PushItems(DataOrder order)
         {
-            ItemBaseService baseService = new();
-            baseService.UpdateSteamItem(order.ItemName, SteamAccount.Currency.Id);
+
+            ItemBaseService.UpdateSteamItem(order.ItemName, SteamAccount.Currency.Id);
             var item = ItemsBase.List.FirstOrDefault(x => x.ItemName == order.ItemName).Steam;
 
             if (item.HighestBuyOrder > order.OrderPrice && SteamAccount.Balance >= item.HighestBuyOrder && (item.HighestBuyOrder - order.OrderPrice) <= SteamMarket.Orders.GetAvailableAmount())
