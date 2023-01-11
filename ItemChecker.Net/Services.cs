@@ -107,11 +107,10 @@ namespace ItemChecker.Net
                 internal static bool IsAuthorized()
                 {
                     Cookies = DeserializeCookieAsync("csm").Result;
-                    if (Cookies == null)
+                    if (Cookies == null || Cookies.Count == 0)
                         return false;
 
                     var json = Request("https://cs.money/3.0/load_user_inventory/730");
-
                     return !JObject.Parse(json).ContainsKey("error");
                 }
             }
@@ -152,7 +151,7 @@ namespace ItemChecker.Net
                 internal static bool IsAuthorized()
                 {
                     Cookies = DeserializeCookieAsync("lfm").Result;
-                    if (Cookies == null)
+                    if (Cookies == null || Cookies.Count == 0)
                         return false;
 
                     var json = Request("https://loot.farm/historyJSON.php");
@@ -191,7 +190,7 @@ namespace ItemChecker.Net
                 internal static bool IsAuthorized()
                 {
                     Cookies = DeserializeCookieAsync("bff").Result;
-                    if (Cookies == null)
+                    if (Cookies == null || Cookies.Count == 0)
                         return false;
 
                     var json = Request("https://buff.163.com/api/market/goods?game=csgo&page_num=2");
@@ -207,7 +206,11 @@ namespace ItemChecker.Net
                     if (!Get.IsAuthorized())
                     {
                         Cookies = GetCookie("https://buff.163.com/account/login/steam?back_url=/", "https://buff.163.com");
-                        Cookies.Add(new Cookie("Locale-Supported", "en", "/", "buff.163.com"));
+                        var lan = new Cookie("Locale-Supported", "en", "/", "buff.163.com")
+                        {
+                            Secure = true
+                        };
+                        Cookies.Add(lan);
                         SerializeCookieAsync(Cookies, "bff").Wait();
                     }
                 }
