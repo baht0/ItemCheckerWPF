@@ -20,10 +20,10 @@ namespace ItemChecker.Net
         }
         internal static async Task<string> RequestGetAsync(string url, CookieContainer cookies)
         {
-            Uri uriAddress = new(url);
-            uriAddress = new($"https://{uriAddress.Host}");
+            Uri uri = new(url);
+            uri = new($"https://{uri.Host}");
             HttpClient.DefaultRequestHeaders.Clear();
-            HttpClient.DefaultRequestHeaders.TryAddWithoutValidation("cookie", cookies.GetCookieHeader(uriAddress));
+            HttpClient.DefaultRequestHeaders.Add("cookie", cookies.GetCookieHeader(uri));
             return await HttpClient.GetStringAsync(url);
         }
         internal static async Task<string> RequestGetAsync(string url, CookieContainer cookies, Uri uri)

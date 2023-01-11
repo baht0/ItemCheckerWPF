@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -41,24 +42,30 @@ namespace ItemChecker.Net
 
             var cookie = new Cookie("sessionid", sessionId, "/", "steamcommunity.com")
             {
-                Expires = DateTime.Now.AddYears(1),
-                Secure = true
+                Secure = true,
+                HttpOnly = false,
             };
 
             return cookie;
         }
         internal static CookieContainer GetCookieContainer(string cookieHost, HttpResponseMessage response)
         {
-            Uri uriAddress = new(cookieHost);
-            var serviceCookies = new CookieContainer();
-            int i = 0;
-            foreach (var cookieHeader in response.Headers.GetValues("Set-Cookie"))
+            Uri uri = new(cookieHost);
+            var initialContainer = new CookieContainer();
+            foreach (var header in response.Headers.GetValues("Set-Cookie"))
             {
-                var cookie = cookieHeader.Replace("CET", "GMT");
-                serviceCookies.SetCookies(uriAddress, cookie);
+                var cookie = header.Replace("CET", "GMT");
+                initialContainer.SetCookies(uri, cookie);
             }
-
-            return serviceCookies;
+            var collection = initialContainer.GetAllCookies();
+            foreach (Cookie cookie in collection.Cast<Cookie>())
+            {
+                cookie.Secure = true;
+                cookie.Expires = cookie.Expires != new DateTime() ? cookie.Expires.AddYears(1) : DateTime.Now.AddYears(1);
+            }
+            var cookies = new CookieContainer();
+            cookies.Add(collection);
+            return cookies;
         }
         internal static async Task<string> ToResponseStringAsync(HttpResponseMessage response)
         {
