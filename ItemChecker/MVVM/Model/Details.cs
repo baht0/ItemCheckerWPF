@@ -46,7 +46,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        bool _isBusy = true;
+        bool _isBusy;
         public string ItemName
         {
             get

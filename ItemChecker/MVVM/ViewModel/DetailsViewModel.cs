@@ -13,7 +13,7 @@ namespace ItemChecker.MVVM.ViewModel
 {
     public class DetailsViewModel : ObservableObject
     {
-        readonly Timer Timer = new(500);
+        readonly Timer Timer = new(100);
         public SnackbarMessageQueue Message
         {
             get { return _message; }
@@ -88,9 +88,13 @@ namespace ItemChecker.MVVM.ViewModel
         }
         void UpdateWindow(Object sender, ElapsedEventArgs e)
         {
-            if (Details.Item != null)
+            if (ItemsView.Count < Details.Items.Count)
             {
                 ItemsView = new(Details.Items);
+                SelectedItem = Details.Items.LastOrDefault();
+            }
+            if (Details.Item != null)
+            {
                 SelectedItem = Details.Item;
                 Details.Item = null;
             }
@@ -133,9 +137,9 @@ namespace ItemChecker.MVVM.ViewModel
                 if (result == MessageBoxResult.Yes)
                 {
                     IsSearch = true;
-                    SelectedItem = new();
-                    ItemsView = new();
                     Details.Items.Clear();
+                    ItemsView = new(Details.Items);
+                    SelectedItem = new();
                 }
             }, (obj) => !ItemsView.Any(x => x.IsBusy) && !ItemsView.Any(x => x.Info.IsBusy));
         public ICommand SwitchCurrencyCommand =>
@@ -163,7 +167,7 @@ namespace ItemChecker.MVVM.ViewModel
 
                 Details.CurectCurrency = currency;
                 SelectedItem.Services = new(prices);
-            }, (obj) => SelectedItem.Services != null && SelectedItem.Services.Any());
+            }, (obj) => SelectedItem != null && SelectedItem.Services != null && SelectedItem.Services.Any());
         public ICommand OpenItemOutCommand =>
             new RelayCommand((obj) =>
             {
