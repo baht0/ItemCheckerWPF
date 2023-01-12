@@ -46,7 +46,12 @@ namespace ItemChecker.MVVM.ViewModel
                 MainProperties.Default.CompletionUpdate = false;
                 MainProperties.Default.Save();
             }
-            Task.Run(Main.CreateHistoryRecords);
+            Task.Run(() =>
+            {
+                Main.CreateHistoryRecords();
+                MainInfo.Balance = Main.Balances.FirstOrDefault();
+                MainInfo.IsUpdateBalance = false;
+            });
         }
         public ICommand MenuCommand =>
             new RelayCommand((obj) =>
@@ -126,6 +131,17 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 Application.Current.Shutdown();
             });
+        public ICommand UpdateBalancesCommand =>
+            new RelayCommand((obj) =>
+            {
+                MainInfo.IsUpdateBalance = true;
+                Task.Run(() =>
+                {
+                    Main.CreateHistoryRecords();
+                    MainInfo.Balance = Main.Balances.FirstOrDefault();
+                    MainInfo.IsUpdateBalance = false;
+                });
+            }, (obj) => !MainInfo.IsUpdateBalance);
         public ICommand ReadNotificationCommand =>
             new RelayCommand((obj) =>
             {
@@ -137,7 +153,10 @@ namespace ItemChecker.MVVM.ViewModel
         {
             try
             {
+                MainInfo.IsUpdateBalance = true;
                 Main.CreateHistoryRecords();
+                MainInfo.Balance = Main.Balances.FirstOrDefault();
+                MainInfo.IsUpdateBalance = false;
 
                 if (SteamMarket.StatusCommunity != "normal")
                 {
@@ -155,7 +174,10 @@ namespace ItemChecker.MVVM.ViewModel
         }
         void UpdateWindow(Object sender, ElapsedEventArgs e)
         {
-            MainInfo = new();
+            MainInfo.Balances = Main.Balances;
+            MainInfo.Message = Main.Message;
+            MainInfo.IsNotification = Main.Notifications.Any(x => !x.IsRead);
+            MainInfo.Notifications = new(Main.Notifications.OrderByDescending(x => x.Date));
         }
     }
 }

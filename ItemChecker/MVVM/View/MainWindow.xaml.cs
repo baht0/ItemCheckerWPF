@@ -23,8 +23,8 @@ namespace ItemChecker.MVVM.View
         {
             if (!string.IsNullOrEmpty(itemName))
             {
-                Details.Items.Add(itemName);
                 Details.Item = Details.Items.FirstOrDefault(x => x.ItemName == itemName);
+                Details.Items.Add(itemName);
             }
             if (!IsWindowOpen<Window>("detailsWindow"))
             {

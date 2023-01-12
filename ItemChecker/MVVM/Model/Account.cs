@@ -4,6 +4,7 @@ using ItemChecker.Properties;
 using ItemChecker.Support;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ItemChecker.MVVM.Model
@@ -98,7 +99,7 @@ namespace ItemChecker.MVVM.Model
             ServicesRequest.LootFarm.Post.SignIn();
             ServicesRequest.Buff163.Post.SignIn();
         }
-        public static void GetBalances()
+        public static void UpdateBalances()
         {
             Csm.GetBalance();
             Lfm.GetBalance();

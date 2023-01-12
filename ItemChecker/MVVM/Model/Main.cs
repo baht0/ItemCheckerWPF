@@ -51,44 +51,76 @@ namespace ItemChecker.MVVM.Model
                 Message = "The program has been launched!"
             }
         };
-        internal static decimal AllIn { get; set; }
+        public static Dictionary<string, decimal> Balances { get; set; } = new();
 
         public static void CreateHistoryRecords()
         {
             SteamAccount.GetBalance();
-            ServiceAccount.GetBalances();
+            ServiceAccount.UpdateBalances();
 
-            var steam = Currency.ConverterToUsd(SteamAccount.Balance, SteamAccount.Currency.Id) + InventoryService.GetSumOfItems();
+            var steamBalance = Currency.ConverterToUsd(SteamAccount.Balance, SteamAccount.Currency.Id);
+            var steam = steamBalance + InventoryService.GetSumOfItems();
             var csm = ServiceAccount.Csm.Balance + ServiceAccount.Csm.GetSumOfItems();
             var lfm = ServiceAccount.Lfm.Balance + ServiceAccount.Lfm.GetSumOfItems();
 
-            decimal total = steam + csm + lfm + ServiceAccount.Buff.Balance;
             History.Records.Add(new()
             {
-                Total = total,
+                Total = steam + csm + lfm + ServiceAccount.Buff.Balance,
                 Steam = steam,
                 CsMoney = csm,
                 LootFarm = lfm,
                 Buff163 = ServiceAccount.Buff.Balance,
             });
-            AllIn = total;
+            Balances = new()
+            {
+                { ServicesShort[0], steamBalance },
+                { ServicesShort[1], ServiceAccount.Csm.Balance },
+                { ServicesShort[2], ServiceAccount.Lfm.Balance },
+                { ServicesShort[3], ServiceAccount.Buff.Balance }
+            };
         }
     }
     public class MainInfo : ObservableObject
     {
-        public decimal AllIn
+        public Dictionary<string, decimal> Balances
         {
             get
             {
-                return _allIn;
+                return _balances;
             }
             set
             {
-                _allIn = value;
+                _balances = value;
                 OnPropertyChanged();
             }
         }
-        public decimal _allIn = Main.AllIn;
+        Dictionary<string, decimal> _balances = Main.Balances;
+        public KeyValuePair<string, decimal> Balance
+        {
+            get
+            {
+                return _balance;
+            }
+            set
+            {
+                _balance = value;
+                OnPropertyChanged();
+            }
+        }
+        KeyValuePair<string, decimal> _balance;
+        public bool IsUpdateBalance
+        {
+            get
+            {
+                return _isUpdateBalance;
+            }
+            set
+            {
+                _isUpdateBalance = value;
+                OnPropertyChanged();
+            }
+        }
+        bool _isUpdateBalance = true;
         public SnackbarMessageQueue Message
         {
             get
@@ -101,7 +133,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        public SnackbarMessageQueue _message = Main.Message;
+        SnackbarMessageQueue _message = Main.Message;
         public bool IsNotification
         {
             get
@@ -114,7 +146,7 @@ namespace ItemChecker.MVVM.Model
                 OnPropertyChanged();
             }
         }
-        public bool _isNotification = Main.Notifications.Any(x => !x.IsRead);
+        bool _isNotification = Main.Notifications.Any(x => !x.IsRead);
         public ObservableCollection<DataNotification> Notifications
         {
             get
