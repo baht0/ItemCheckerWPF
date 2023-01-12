@@ -256,7 +256,10 @@ namespace ItemChecker.MVVM.ViewModel
                     RareCheckStatus.TimerTick = 0;
                     RareCheckStatus.Timer.Elapsed -= timerTick;
                 }
-            }, (obj) => RareCheckConfig.MaxPrecent > 0 && RareCheckConfig.Time > 0 && SavedItems.Rare.Any(x => x.ServiceId == RareCheckConfig.ParameterId));
+            }, (obj) => RareCheckConfig.MaxPrecent > 0
+                        && RareCheckConfig.Time > 0
+                        && (SavedItems.Rare.Any(x => x.ServiceId == RareCheckConfig.ParameterId))
+                            || RareCheckConfig.ParameterId == 2 && RareCheckConfig.AllDopplers);
         void SaveConfig(RareCheckConfig config)
         {
             RareProperties.Default.Time = config.Time;
@@ -286,7 +289,7 @@ namespace ItemChecker.MVVM.ViewModel
                 RareCheckStatus.token = RareCheckStatus.cts.Token;
                 Check();
             }
-            if (!SavedItems.Rare.Any(x => x.ServiceId == RareCheckConfig.ParameterId))
+            if (!SavedItems.Rare.Any(x => x.ServiceId == RareCheckConfig.ParameterId) && RareCheckConfig.ParameterId != 2 && !RareCheckConfig.AllDopplers)
             {
                 RareCheckStatus.cts.Cancel();
                 RareCheckStatus.Status = string.Empty;
@@ -300,7 +303,8 @@ namespace ItemChecker.MVVM.ViewModel
         {
             try
             {
-                var serviceList = SavedItems.Rare.Where(x => x.ServiceId == RareCheckConfig.CheckedConfig.ParameterId).ToList();
+                var serviceList = SavedItems.Rare.Where(x => x.ServiceId == RareCheckConfig.ParameterId).ToList();
+                serviceList = RareCheckConfig.ParameterId == 2 && RareCheckConfig.AllDopplers ? RareService.GetAllDoppler() : serviceList;
                 int start = RareTable.Items.Count;
 
                 RareCheckStatus.MaxProgress = serviceList.Count;

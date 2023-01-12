@@ -1,5 +1,7 @@
 ﻿using ItemChecker.MVVM.Model;
+using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Documents;
 
 namespace ItemChecker.Services
 {
@@ -171,6 +173,13 @@ namespace ItemChecker.Services
 
             bool isShow = category && exterior && quality && qualityS && prices && profit && other;
             return isShow;
+        }
+        public static List<DataItem> GetAllDoppler()
+        {
+            var list = new List<DataItem>();
+            foreach (var doppler in ItemsBase.List.Where(x => x.ItemName.Contains("Doppler")).ToList())
+                list.Add(new DataItem(doppler.ItemName, 2));
+            return list;
         }
     }
 }

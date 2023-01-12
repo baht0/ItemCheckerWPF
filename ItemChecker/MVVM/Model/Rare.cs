@@ -204,6 +204,7 @@ namespace ItemChecker.MVVM.Model
         public bool Lenticular { get; set; }
         public bool Contraband { get; set; }
         //dopplers
+        public bool AllDopplers { get; set; }
         public bool Phase1 { get; set; }
         public bool Phase2 { get; set; }
         public bool Phase3 { get; set; }
