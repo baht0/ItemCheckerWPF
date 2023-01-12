@@ -44,6 +44,7 @@ namespace ItemChecker.MVVM.ViewModel
                     }
                     ImportParser.List = new(files.OrderByDescending(d => d.CheckedTime));
                 }
+                ImportParser.IsBusy = false;
             });
         }
         public ICommand ClearCommand =>

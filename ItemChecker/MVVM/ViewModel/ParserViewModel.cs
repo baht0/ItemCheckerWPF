@@ -1,13 +1,16 @@
 ﻿using ItemChecker.Core;
 using ItemChecker.MVVM.Model;
+using ItemChecker.MVVM.View;
 using ItemChecker.Services;
 using ItemChecker.Support;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 
@@ -234,7 +237,6 @@ namespace ItemChecker.MVVM.ViewModel
         #endregion
 
         #region Check
-        //check
         public ICommand MaxPriceCommand =>
             new RelayCommand((obj) =>
             {
@@ -416,28 +418,33 @@ namespace ItemChecker.MVVM.ViewModel
                 ParserCheckInfo.Timer.Enabled = false;
             ParserCheckInfo.Status = Edit.calcTimeLeft(timeStart, itemCount, ParserCheckInfo.CurrentProgress);
         }
-        //file
+        //Import
         public ICommand ImportCommand =>
             new RelayCommand((obj) =>
             {
-                string filePath = (string)obj;
-                Task.Run(() =>
+                ImportParserWindow window = new();
+                window.ShowDialog();
+                string filePath = window.ReturnValue;
+                if (!string.IsNullOrEmpty(filePath))
                 {
-                    var response = ParserService.Import(filePath);
-                    if (response.Any())
+                    Task.Run(() =>
                     {
-                        PreparationView(ParserCheckConfig.CheckedConfig);
-                        ParserTable.CurrencyId = 0;
-                        ParserTable.Count = response.Count;
-                        ParserTable.Items = response;
-                        ParserTable.GridView = CollectionViewSource.GetDefaultView(response);
+                        var response = ParserService.Import(filePath);
+                        if (response.Any())
+                        {
+                            PreparationView(ParserCheckConfig.CheckedConfig);
+                            ParserTable.CurrencyId = 0;
+                            ParserTable.Count = response.Count;
+                            ParserTable.Items = response;
+                            ParserTable.GridView = CollectionViewSource.GetDefaultView(response);
 
-                        Main.Message.Enqueue("The table was successfully imported.");
-                    }
-                    ParserCheckInfo.IsParser = false;
-                    ParserCheckInfo.TimerOn = false;
-                });
-            }, (obj) => !ParserCheckInfo.IsParser);
+                            Main.Message.Enqueue("The table was successfully imported.");
+                        }
+                        ParserCheckInfo.IsParser = false;
+                        ParserCheckInfo.TimerOn = false;
+                    });
+                }
+            }, (obj) => !ParserCheckInfo.IsParser && Directory.Exists(ProjectInfo.DocumentPath + "extract"));
         #endregion
 
         #region Order

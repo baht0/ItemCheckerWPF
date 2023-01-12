@@ -434,9 +434,8 @@
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
                             <VirtualizingStackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                <Button ToolTip="Import saved tables" VerticalAlignment="Center"
-                                        Style="{StaticResource MaterialDesignToolForegroundButton}"
-                                        Click="Import_Click">
+                                <Button ToolTip="Import saved tables" VerticalAlignment="Center" Style="{StaticResource MaterialDesignToolForegroundButton}"
+                                        Command="{Binding ImportCommand}">
                                     <materialDesign:PackIcon Kind="Upload"/>
                                 </Button>
                                 <TextBlock Text="{Binding ParserCheckInfo.Status}" 

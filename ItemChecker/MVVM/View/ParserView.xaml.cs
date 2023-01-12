@@ -70,17 +70,6 @@ namespace ItemChecker.MVVM.View
             if (DataContext is ParserViewModel viewModel && viewModel.MaxPriceCommand.CanExecute(id))
                 viewModel.MaxPriceCommand.Execute(id);
         }
-        void Import_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            ImportParserWindow window = new();
-            window.ShowDialog();
-            if (!String.IsNullOrEmpty(window.ReturnValue))
-            {
-                string path = window.ReturnValue;
-                if (DataContext is ParserViewModel viewModel && viewModel.ImportCommand.CanExecute(path))
-                    viewModel.ImportCommand.Execute(path);
-            }
-        }
 
         void queueListBox_KeyDown(object sender, KeyEventArgs e)
         {

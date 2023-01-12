@@ -69,11 +69,14 @@
                               SelectedItem="{Binding ImportParser.Selected}">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Date" Binding="{Binding CheckedTime, StringFormat='{}{0:dd MMM hh:mm tt}'}" CanUserResize="False" Width="140"/>
-                            <DataGridTextColumn Header="From" Binding="{Binding ServiceOne, Converter={StaticResource ServiceIdToServiceNameConverter}}" CanUserResize="False" Width="auto"/>
-                            <DataGridTextColumn Header="To" Binding="{Binding ServiceTwo, Converter={StaticResource ServiceIdToServiceNameConverter}}" CanUserResize="False" Width="auto"/>
+                            <DataGridTextColumn Header="From" Binding="{Binding ServiceOne, Converter={StaticResource ServiceIdToServiceNameConverter}}" CanUserResize="False" Width="130"/>
+                            <DataGridTextColumn Header="To" Binding="{Binding ServiceTwo, Converter={StaticResource ServiceIdToServiceNameConverter}}" CanUserResize="False" Width="130"/>
                             <DataGridTextColumn Header="Size" Binding="{Binding Size}" CanUserResize="False" Width="auto"/>
                         </DataGrid.Columns>
                     </DataGrid>
+                    <ProgressBar Grid.Row="1" Grid.ColumnSpan="4" VerticalAlignment="Center" HorizontalAlignment="Center" IsIndeterminate="True"
+                                     Visibility="{Binding ImportParser.IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                     Style="{StaticResource MaterialDesignCircularProgressBar}"/>
                 </Grid>
                 <!--info-->
                 <Grid Grid.Column="2">
@@ -83,10 +86,7 @@
                     </Grid.RowDefinitions>
                     <TextBlock Text="Configuration" FontSize="13" VerticalAlignment="Center" FontWeight="Bold"/>
                     <Separator VerticalAlignment="Bottom"/>
-                    <Grid Grid.Row="1">
-                        <TextBlock Text="Export files not found." VerticalAlignment="Center" HorizontalAlignment="Center" FontStyle="Italic"/>
-                    </Grid>
-                    <Grid Grid.Row="1" Visibility="{Binding ImportParser.List.Count, Converter={StaticResource IntToVisibilityConverter}}" Background="{DynamicResource Background}">
+                    <Grid Grid.Row="1" Background="{DynamicResource Background}">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="160"/>
                             <RowDefinition Height="60"/>
@@ -179,6 +179,10 @@
                         </GroupBox>
                     </Grid>
                     <Grid Grid.Row="1" Background="Transparent"/>
+                    <Grid Grid.Row="1" Background="{DynamicResource Background}" Visibility="{Binding ImportParser.IsInfoShow, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                        <TextBlock Text="Select an export file from the table to see the configuration." TextWrapping="Wrap" TextAlignment="Center"
+                                   VerticalAlignment="Center" HorizontalAlignment="Center" FontStyle="Italic"/>
+                    </Grid>
                 </Grid>
             </Grid>
         </Grid>
