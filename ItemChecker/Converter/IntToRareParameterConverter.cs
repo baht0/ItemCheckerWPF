@@ -1,5 +1,4 @@
 ﻿using ItemChecker.MVVM.Model;
-using System;
 using System.Globalization;
 using System.Windows.Data;
 
@@ -7,16 +6,14 @@ namespace ItemChecker.Converter
 {
     internal class IntToRareParameterConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object value, System.Type targetType, object parameter, CultureInfo culture)
         {
-            RareCheckConfig rareCheck = new();
-            return rareCheck.Parameters[(int)value];
+            return BaseModel.Parameters[(int)value];
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object ConvertBack(object value, System.Type targetType, object parameter, CultureInfo culture)
         {
-            RareCheckConfig rareCheck = new();
-            return rareCheck.Parameters[(int)value];
+            return BaseModel.Parameters[(int)value];
         }
     }
 }

@@ -7,7 +7,7 @@ namespace ItemChecker.Converter
 {
     public class BooleanToColorConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object value, System.Type targetType, object parameter, CultureInfo culture)
         {
             if (!(bool)value)
             {
@@ -22,7 +22,7 @@ namespace ItemChecker.Converter
             return "Gray";
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object ConvertBack(object value, System.Type targetType, object parameter, CultureInfo culture)
         {
             if (!(bool)value)
             {
