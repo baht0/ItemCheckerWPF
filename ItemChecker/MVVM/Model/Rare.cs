@@ -1,94 +1,40 @@
 ﻿using ItemChecker.Core;
-using ItemChecker.Properties;
+using ItemChecker.Net;
 using ItemChecker.Support;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
 
 namespace ItemChecker.MVVM.Model
 {
-    public class Rare
+    public class DataGridRare : BaseMainTable<DataRare>
     {
-        public static List<string> Services
-        {
-            get
-            {
-                return new()
-                {
-                    "Float",
-                    "Sticker",
-                    "Doppler"
-                };
-            }
-        }
-    }
-    public class RareTable : ObservableObject
-    {
-        public int CurrencyId
-        {
-            get
-            {
-                return _currencyId;
-            }
-            set
-            {
-                _currencyId = value;
-                OnPropertyChanged();
-            }
-        }
-        int _currencyId = 0;
-        public string CurrencySymbol
-        {
-            get
-            {
-                return _currencySymbol;
-            }
-            set
-            {
-                _currencySymbol = value;
-                OnPropertyChanged();
-            }
-        }
-        string _currencySymbol = "$";
-        public string CurrencySymbolSteam { get; set; } = SteamAccount.Currency.Symbol;
-        public List<string> CurrencyList { get; set; } = Currencies.Allow.Select(x => x.Name).ToList();
-        public static DataCurrency CurectCurrency { get; set; } = Currencies.Allow.FirstOrDefault(x => x.Id == 1);
+        public static bool CanBeUpdated { get; set; }
 
-        public List<DataRare> Items { get; set; } = new();
-
-        public ICollectionView GridView
+        public void OpenItem(int columnId)
         {
-            get
+            var item = SelectedItem;
+            string market_hash_name = Uri.EscapeDataString(item.ItemName);
+            switch (columnId)
             {
-                return _gridView;
-            }
-            set
-            {
-                _gridView = value;
-                OnPropertyChanged();
+                case 1 or 2 or 3:
+                    MessageBoxResult result = MessageBox.Show("Inspect in Game?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    if (result == MessageBoxResult.Yes)
+                        Edit.OpenUrl(item.Link);
+                    break;
+                case 4:
+                    Edit.OpenUrl("https://steamcommunity.com/market/listings/730/" + market_hash_name);
+                    break;
+                default:
+                    Clipboard.SetText(item.ItemName);
+                    break;
             }
         }
-        ICollectionView _gridView;
-
-        public int Count
-        {
-            get
-            {
-                return _count;
-            }
-            set
-            {
-                _count = value;
-                OnPropertyChanged();
-            }
-        }
-        int _count = 0;
     }
     public class RareFilter
     {
-        public static RareFilter FilterConfig { get; set; }
-
         //category
         public bool Normal { get; set; }
         public bool Stattrak { get; set; }
@@ -139,180 +85,198 @@ namespace ItemChecker.MVVM.Model
         public decimal DifferenceFrom { get; set; }
         public decimal DifferenceTo { get; set; }
         //other
-        public List<int> CountStickers
-        {
-            get
-            {
-                return new()
+        public List<int> CountStickers => new()
                 {
                     0, 1, 2, 3, 4, 5
                 };
-            }
-        }
         public int MinStickerCount { get; set; } = 0;
-        public bool Quality { get; set; }
-    }
-    public class RareCheckConfig
-    {
-        public int Time { get; set; } = RareProperties.Default.Time;
-        public int MaxPrecent { get; set; } = 7;
-        public List<string> ComparePrices
+        public bool SameQuality { get; set; }
+
+        public bool ApplyFilter(DataRare item)
         {
-            get
+            var baseItem = ItemsBase.List.FirstOrDefault(x => x.ItemName == item.ItemName);
+            //category
+            bool category = true;
+            if (Normal || Stattrak || Souvenir || KnifeGlove || KnifeGloveStattrak)
             {
-                return new()
+                category = false;
+                if (baseItem.Type == Type.Weapon || baseItem.Type == Type.Knife || baseItem.Type == Type.Gloves)
                 {
-                    "Lowest ST",
-                    "Median ST",
-                };
+                    if (Normal)
+                        category = !item.ItemName.Contains("Souvenir") && !item.ItemName.Contains("StatTrak™") && !item.ItemName.Contains("★");
+                    if (Stattrak && !category)
+                        category = item.ItemName.Contains("StatTrak™");
+                    if (Souvenir && !category)
+                        category = item.ItemName.Contains("Souvenir");
+                    if (KnifeGlove && !category)
+                        category = item.ItemName.Contains("★");
+                    if (KnifeGloveStattrak && !category)
+                        category = item.ItemName.Contains("★ StatTrak™");
+                }
             }
-        }
-        public int CompareId { get; set; }
-        public List<string> Parameters
-        {
-            get
+            //exterior
+            bool exterior = true;
+            if (NotPainted || BattleScarred || WellWorn || FieldTested || MinimalWear || FactoryNew)
             {
-                return Rare.Services;
+                exterior = false;
+                if (NotPainted)
+                    exterior = !item.ItemName.Contains("Battle-Scarred")
+                        && !item.ItemName.Contains("Well-Worn")
+                        && !item.ItemName.Contains("Field-Tested")
+                        && !item.ItemName.Contains("Minimal Wear")
+                        && !item.ItemName.Contains("Factory New")
+                        && (baseItem.Type == Type.Knife || baseItem.Type == Type.Gloves);
+                if (BattleScarred && !exterior)
+                    exterior = item.ItemName.Contains("Battle-Scarred");
+                if (WellWorn && !exterior)
+                    exterior = item.ItemName.Contains("Well-Worn");
+                if (FieldTested && !exterior)
+                    exterior = item.ItemName.Contains("Field-Tested");
+                if (MinimalWear && !exterior)
+                    exterior = item.ItemName.Contains("Minimal Wear");
+                if (FactoryNew && !exterior)
+                    exterior = item.ItemName.Contains("Factory New");
             }
+            //Quality sticker
+            bool qualityS = true;
+            if (NormalS || Holo || Glitter || Foil || Gold || ContrabandS)
+            {
+                qualityS = false;
+                if (!SameQuality)
+                {
+                    if (NormalS)
+                        qualityS = !item.Stickers.Any(x => x.Contains("(Holo)")) &&
+                            !item.Stickers.Any(x => x.Contains("(Glitter)")) &&
+                            !item.Stickers.Any(x => x.Contains("(Foil)")) &&
+                            !item.Stickers.Any(x => x.Contains("(Gold)")) &&
+                            !item.Stickers.Any(x => x == "Sticker | Howling Dawn");
+                    if (Holo && !qualityS)
+                        qualityS = item.Stickers.Any(x => x.Contains("(Holo)"));
+                    if (Glitter && !qualityS)
+                        qualityS = item.Stickers.Any(x => x.Contains("(Glitter)"));
+                    if (Foil && !qualityS)
+                        qualityS = item.Stickers.Any(x => x.Contains("(Foil)"));
+                    if (Lenticular && !qualityS)
+                        qualityS = item.Stickers.Any(x => x.Contains("(Lenticular)"));
+                    if (Gold && !qualityS)
+                        qualityS = item.Stickers.Any(x => x.Contains("(Gold)"));
+                    if (ContrabandS && !qualityS)
+                        qualityS = item.Stickers.Any(x => x == "Sticker | Howling Dawn");
+                }
+                else if (SameQuality)
+                {
+                    if (NormalS)
+                        qualityS = !item.Stickers.All(x => x.Contains("(Holo)")) &&
+                            !item.Stickers.All(x => x.Contains("(Glitter)")) &&
+                            !item.Stickers.All(x => x.Contains("(Foil)")) &&
+                            !item.Stickers.All(x => x.Contains("(Gold)")) &&
+                            !item.Stickers.All(x => x == "Sticker | Howling Dawn");
+                    if (Holo && !qualityS)
+                        qualityS = item.Stickers.All(x => x.Contains("(Holo)"));
+                    if (Glitter && !qualityS)
+                        qualityS = item.Stickers.All(x => x.Contains("(Glitter)"));
+                    if (Foil && !qualityS)
+                        qualityS = item.Stickers.All(x => x.Contains("(Foil)"));
+                    if (Lenticular && !qualityS)
+                        qualityS = item.Stickers.All(x => x.Contains("(Lenticular)"));
+                    if (Gold && !qualityS)
+                        qualityS = item.Stickers.All(x => x.Contains("(Gold)"));
+                    if (ContrabandS && !qualityS)
+                        qualityS = item.Stickers.All(x => x == "Sticker | Howling Dawn");
+                }
+            }
+            //Quality
+            bool quality = true;
+            if (Industrial || MilSpec || Restricted || Classified || Covert || Contraband)
+            {
+                quality = false;
+                if (Industrial)
+                    quality = baseItem.Quality == Quality.IndustrialGrade;
+                if (MilSpec && !quality)
+                    quality = baseItem.Quality == Quality.MilSpec;
+                if (Restricted && !quality)
+                    quality = baseItem.Quality == Quality.Restricted;
+                if (Classified && !quality)
+                    quality = baseItem.Quality == Quality.Classified;
+                if (Covert && !quality)
+                    quality = baseItem.Quality == Quality.Covert;
+                if (Contraband && !quality)
+                    quality = baseItem.Quality == Quality.Contraband;
+            }
+            //phase
+            bool phase = true;
+            if (Phase1 || Phase2 || Phase3 || Phase4 || Ruby || Sapphire || BlackPearl || Emerald)
+            {
+                phase = false;
+                if (Phase1)
+                    phase = item.Phase == Doppler.Phase1;
+                if (Phase2 && !phase)
+                    phase = item.Phase == Doppler.Phase2;
+                if (Phase3 && !phase)
+                    phase = item.Phase == Doppler.Phase3;
+                if (Phase4 && !phase)
+                    phase = item.Phase == Doppler.Phase4;
+                if (Ruby && !phase)
+                    phase = item.Phase == Doppler.Ruby;
+                if (Sapphire && !phase)
+                    phase = item.Phase == Doppler.Sapphire;
+                if (BlackPearl && !phase)
+                    phase = item.Phase == Doppler.BlackPearl;
+                if (Emerald && !phase)
+                    phase = item.Phase == Doppler.Emerald;
+            }
+            //Prices
+            bool prices = true;
+            if (Price || Compare)
+            {
+                if (Price)
+                    prices = PriceFrom < item.Price && PriceTo > item.Price;
+                if (Compare && prices)
+                    prices = CompareFrom < item.PriceCompare && CompareTo > item.PriceCompare;
+            }
+            //profit
+            bool profit = true;
+            if (PrecentFrom != 0 || PrecentTo != 0 || DifferenceFrom != 0 || DifferenceTo != 0)
+            {
+                if (PrecentFrom != 0)
+                    profit = PrecentFrom < item.Precent;
+                if (PrecentTo != 0 && profit)
+                    profit = PrecentTo > item.Precent;
+                if (DifferenceFrom != 0 && profit)
+                    profit = DifferenceFrom < item.Difference;
+                if (DifferenceTo != 0 && profit)
+                    profit = DifferenceTo > item.Difference;
+            }
+            //other
+            bool other = true;
+            if (item.Stickers.Any() && MinStickerCount != 0)
+            {
+                other = false;
+                if (item.Stickers.Any())
+                    other = MinStickerCount <= item.Stickers.Count;
+            }
+
+            bool isShow = category && exterior && quality && qualityS && prices && profit && other;
+            return isShow;
         }
+    }
+    public class DataRare : ObservableObject
+    {
         public int ParameterId { get; set; }
+        public int CompareId { get; set; }
+        public string ItemName { get; set; } = "Unknown";
+        public decimal Price { get; set; }
+        public decimal PriceCompare { get; set; }
+        public decimal Precent { get; set; }
+        public decimal Difference { get; set; }
+        public string Link { get; set; }
 
-        //float
-        public decimal FactoryNew { get; set; } = RareProperties.Default.maxFloatValue_FN;
-        public decimal MinimalWear { get; set; } = RareProperties.Default.maxFloatValue_MW;
-        public decimal FieldTested { get; set; } = RareProperties.Default.maxFloatValue_FT;
-        public decimal WellWorn { get; set; } = RareProperties.Default.maxFloatValue_WW;
-        public decimal BattleScarred { get; set; } = RareProperties.Default.maxFloatValue_BS;
-        //stickers
-        public List<int> StickerCount
-        {
-            get
-            {
-                return new()
-                {
-                    1, 2, 3, 4, 5
-                };
-            }
-        }
-        public int MinSticker { get; set; } = 1;
-        public string NameContains { get; set; } = string.Empty;
-        public bool Normal { get; set; }
-        public bool Holo { get; set; }
-        public bool Glitter { get; set; }
-        public bool Foil { get; set; }
-        public bool Gold { get; set; }
-        public bool Lenticular { get; set; }
-        public bool Contraband { get; set; }
-        //dopplers
-        public bool AllDopplers { get; set; }
-        public bool Phase1 { get; set; }
-        public bool Phase2 { get; set; }
-        public bool Phase3 { get; set; }
-        public bool Phase4 { get; set; }
-        public bool Ruby { get; set; }
-        public bool Sapphire { get; set; }
-        public bool BlackPearl { get; set; }
-        public bool Emerald { get; set; }
+        public decimal FloatValue { get; set; }
+        public List<string> Stickers { get; set; } = new();
+        public Doppler Phase { get; set; } = Doppler.None;
+        public DateTime Checked { get; set; } = DateTime.Now;
 
-        //last saved config
-        public static RareCheckConfig CheckedConfig { get; set; } = new();
-        public object Clone()
-        {
-            return this.MemberwiseClone();
-        }
-    }
-    public class RareCheckStatus : ObservableObject
-    {
-        public static System.Timers.Timer Timer { get; set; } = new(1000);
-        public static int TimerTick { get; set; }
-        public static CancellationTokenSource cts { get; set; } = new();
-        public static CancellationToken token { get; set; } = cts.Token;
-
-        public bool IsService
-        {
-            get
-            {
-                return _isService;
-            }
-            set
-            {
-                _isService = value;
-                OnPropertyChanged();
-            }
-        }
-        bool _isService;
-        public int Cycles
-        {
-            get
-            {
-                return _cycles;
-            }
-            set
-            {
-                _cycles = value;
-                OnPropertyChanged();
-            }
-        }
-        int _cycles = 0;
-        public int PurchasesMade
-        {
-            get
-            {
-                return _purchasesMade;
-            }
-            set
-            {
-                _purchasesMade = value;
-                OnPropertyChanged();
-            }
-        }
-        int _purchasesMade = 0;
-        public int Progress
-        {
-            get { return _progress; }
-            set
-            {
-                _progress = value;
-                OnPropertyChanged();
-            }
-        }
-        int _progress = 0;
-        public int MaxProgress
-        {
-            get { return _maxProgress; }
-            set
-            {
-                _maxProgress = value;
-                OnPropertyChanged();
-            }
-        }
-        int _maxProgress = 0;
-        public string Status
-        {
-            get { return _status; }
-            set
-            {
-                _status = value;
-                OnPropertyChanged();
-            }
-        }
-        string _status = string.Empty;
-    }
-    public class RareInfo : ObservableObject
-    {
-        public DataRare Data
-        {
-            get
-            {
-                return _data;
-            }
-            set
-            {
-                _data = value;
-                OnPropertyChanged();
-            }
-        }
-        DataRare _data = new();
+        public DataListingItem DataBuy { get; set; } = new();
 
         public bool IsBusy
         {
@@ -327,5 +291,44 @@ namespace ItemChecker.MVVM.Model
             }
         }
         bool _isBusy;
+        public void BuyItem()
+        {
+            MessageBoxResult result = MessageBox.Show(
+                        "Are you sure you want to buy this item?", "Question",
+                        MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.No)
+                return;
+
+            IsBusy = true;
+            Task.Run(() =>
+            {
+                try
+                {
+                    var response = SteamRequest.Post.BuyListing(ItemName, DataBuy.ListingId, DataBuy.Fee, DataBuy.Subtotal, DataBuy.Total, SteamAccount.Currency.Id);
+                    string message = response.StatusCode == System.Net.HttpStatusCode.OK ? $"{ItemName}\nWas bought." : "Something went wrong...";
+                    Main.Message.Enqueue(message);
+                }
+                catch (Exception exp)
+                {
+                    BaseModel.ErrorLog(exp, true);
+                }
+                finally
+                {
+                    IsBusy = false;
+                }
+            });
+        }
+    }
+    public enum Doppler
+    {
+        None,
+        Phase1,
+        Phase2,
+        Phase3,
+        Phase4,
+        Ruby,
+        Sapphire,
+        BlackPearl,
+        Emerald
     }
 }

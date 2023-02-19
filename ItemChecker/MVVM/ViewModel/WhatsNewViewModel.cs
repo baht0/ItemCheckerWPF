@@ -67,10 +67,7 @@ namespace ItemChecker.MVVM.ViewModel
         }
         DateTime _released;
 
-        public WhatsNewViewModel()
-        {
-            Task.Run(() => GetUpdateNotes());
-        }
+        public WhatsNewViewModel() => Task.Run(GetUpdateNotes);
         void GetUpdateNotes()
         {
             JArray json = JArray.Parse(DropboxRequest.Get.Read("Updates.json"));

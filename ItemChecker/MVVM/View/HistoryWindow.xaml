@@ -49,7 +49,7 @@
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
                 <TextBlock VerticalAlignment="Center" FontWeight="Bold" FontSize="14" HorizontalAlignment="Left"
-                               Text="{Binding History.List.Count, StringFormat='History records: {0}'}"/>
+                               Text="{Binding DataGridRecords.Items.Count, StringFormat='History records: {0}'}"/>
                 <ComboBox Grid.Column="2" Width="60" x:Name="currency" HorizontalAlignment="Right" ToolTip="Displaying prices in tables" VerticalAlignment="Center"
                           ItemsSource="{Binding History.CurrencyList}" SelectedIndex="{Binding History.CurrencyId}" SelectionChanged="currency_SelectionChanged"/>
                 <Separator Grid.ColumnSpan="3" VerticalAlignment="Bottom"/>
@@ -88,7 +88,7 @@
                 <!--table-->
                 <DataGrid Grid.Row="1" Grid.Column="1" Margin="10 0 0 0" AlternationCount="2" AlternatingRowBackground="{DynamicResource ElementBackground}"
                           AutoGenerateColumns="False" x:Name="itemsGrid" SelectionMode="Single" FontSize="12"
-                          ItemsSource="{Binding History.List, UpdateSourceTrigger=PropertyChanged}" CanUserSortColumns="False"
+                          ItemsSource="{Binding DataGridRecords.Items, UpdateSourceTrigger=PropertyChanged}" CanUserSortColumns="False"
                           IsReadOnly="True" CanUserReorderColumns="False" CanUserResizeRows="False" CanUserResizeColumns="False">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat='{}{0:dd MMM yy}'}" Width="auto" FontWeight="Bold"/>

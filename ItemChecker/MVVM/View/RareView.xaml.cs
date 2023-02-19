@@ -53,7 +53,7 @@ namespace ItemChecker.MVVM.View
             if (!rareGrid.Items.IsEmpty)
             {
                 var viewModel = (RareViewModel)DataContext;
-                var item = viewModel.SelectedItem;
+                var item = viewModel.DataGridRare.SelectedItem;
                 if (e.Key == Key.F1)
                     MainWindow.OpenDetailsItem(item.ItemName);
             }

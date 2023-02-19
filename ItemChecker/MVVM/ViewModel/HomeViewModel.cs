@@ -1,28 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
-using System.Windows;
 using System.Windows.Input;
 using ItemChecker.Core;
 using ItemChecker.MVVM.Model;
 using ItemChecker.MVVM.View;
-using ItemChecker.Net;
-using ItemChecker.Properties;
-using ItemChecker.Services;
 using ItemChecker.Support;
 
 namespace ItemChecker.MVVM.ViewModel
 {
     public class HomeViewModel : ObservableObject
     {
-        #region Properties
-
-        //homeView
-        public Home Home
+        readonly Timer TimerView = new(500);
+        public BaseModel Home
         {
             get
             {
@@ -34,337 +25,123 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-        Home _home = new();
-        public HomeTable HomeTable
-        {
-            get
-            {
-                return _homeTable;
-            }
-            set
-            {
-                _homeTable = value;
-                OnPropertyChanged();
-            }
-        }
-        HomeTable _homeTable = new();
-
-        //orders
-        public HomePush HomePush
-        {
-            get
-            {
-                return _homePush;
-            }
-            set
-            {
-                _homePush = value;
-                OnPropertyChanged();
-            }
-        }
-        HomePush _homePush = new();
-        //inventory
-        public HomeInventoryConfig HomeInventoryConfig
-        {
-            get
-            {
-                return _homeInventoryConfig;
-            }
-            set
-            {
-                _homeInventoryConfig = value;
-                OnPropertyChanged();
-            }
-        }
-        HomeInventoryConfig _homeInventoryConfig = new();
-        public HomeInventoryInfo HomeInventoryInfo
-        {
-            get
-            {
-                return _homeInventoryInfo;
-            }
-            set
-            {
-                _homeInventoryInfo = value;
-                OnPropertyChanged();
-            }
-        }
-        HomeInventoryInfo _homeInventoryInfo = new();
-        public DataInventory SelectedInventory
-        {
-            get
-            {
-                if (_selectedInventory == null)
-                    return HomeInventoryInfo.Items.FirstOrDefault();
-                return _selectedInventory;
-            }
-            set
-            {
-                _selectedInventory = value;
-                OnPropertyChanged();
-            }
-        }
-        DataInventory _selectedInventory = new();
-        #endregion
-
+        BaseModel _home = new();
         public HomeViewModel()
         {
             Task.Run(() => { 
                 OrderCheckService.SteamOrders(true);
-                HomeTable.OrderedGrid = new(SteamMarket.Orders);
-                HomeTable.IsBusy = false;
-                OnPropertyChanged(nameof(HomeTable));
+                DataGridOrders.Items = new(SteamAccount.Orders);
+                DataGridOrders.IsBusy = false;
+                OnPropertyChanged(nameof(DataGridOrders));
             });
+            TimerView.Elapsed += UpdateView;
+            TimerView.Enabled = true;
         }
-
-        #region table
-        public ICommand OpenItemOutCommand =>
-            new RelayCommand((obj) =>
-            {
-                var item = HomeTable.SelectedOrderItem;
-                string itemName = item.ItemName.Replace("(Holo/Foil)", "(Holo-Foil)");
-                string market_hash_name = Uri.EscapeDataString(itemName);
-                switch ((Int32)obj)
-                {
-                    case 1:
-                        Edit.OpenUrl("https://steamcommunity.com/market/listings/730/" + market_hash_name);
-                        break;
-                    case 2 or 3:
-                        switch (HomeProperties.Default.ServiceId)
-                        {
-                            case 0 or 1:
-                                Edit.OpenUrl("https://steamcommunity.com/market/listings/730/" + market_hash_name);
-                                break;
-                            case 2:
-                                Edit.OpenCsm(itemName);
-                                break;
-                            case 3:
-                                Edit.OpenUrl("https://loot.farm/");
-                                break;
-                            case 4:
-                                Edit.OpenUrl("https://buff.163.com/goods/" + ItemsBase.List.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id);
-                                break;
-                        }
-                        break;
-                    default:
-                        Clipboard.SetText(itemName);
-                        break;
-                }
-            });
-        public ICommand OrdersCommand =>
-            new RelayCommand((obj) =>
-            {
-                HomeTable.IsBusy = true;
-                switch (Convert.ToInt32(obj))
-                {
-                    case 0:
-                        {
-                            Task.Run(() => {
-                                try
-                                {
-                                    OrderCheckService.SteamOrders(true);
-                                    HomeTable.OrderedGrid = new(SteamMarket.Orders);
-                                    Main.Message.Enqueue("MyOrders update is complete.");
-                                }
-                                catch (Exception ex)
-                                {
-                                    BaseService.errorLog(ex, true);
-                                }
-                                finally
-                                {
-                                    HomeTable.IsBusy = false;
-                                }
-                            });
-                            break;
-                        }
-                    case 1:
-                        {
-                            MessageBoxResult result = MessageBox.Show(
-                                "Do you really want to cancel all your orders?", "Question",
-                                MessageBoxButton.YesNo, MessageBoxImage.Question);
-                            if (result == MessageBoxResult.Yes)
-                                Task.Run(() => {
-                                    try
-                                    {
-                                        List<DataOrder> orders = new(SteamMarket.Orders);
-                                        foreach (DataOrder order in orders)
-                                            SteamMarket.Orders.Cancel(order);
-                                        HomeTable.OrderedGrid = new(SteamMarket.Orders);
-                                        Main.Message.Enqueue("All MyOrders have been cancelled.");
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        BaseService.errorLog(ex, true);
-                                    }
-                                    finally
-                                    {
-                                        HomeTable.IsBusy = false;
-                                    }
-                                });
-                            break;
-                        }
-                }
-            }, (obj) => !HomeTable.IsBusy);
-        public ICommand CancelOrderCommand =>
-            new RelayCommand((obj) =>
-            {
-                DataOrder item = obj as DataOrder;
-                MessageBoxResult result = MessageBox.Show(
-                    $"Are you sure you want to cancel order?\n{item.ItemName}",
-                    "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if (result == MessageBoxResult.Yes)
-                {
-                    HomeTable.IsBusy = true;
-                    Task.Run(() =>
-                    {
-                        SteamMarket.Orders.Cancel(item);
-                        HomeTable.OrderedGrid = new(SteamMarket.Orders);
-                        Main.Message.Enqueue($"{item.ItemName}\nOrder has been canceled.");
-                        HomeTable.IsBusy = false;
-                    });
-                }
-            });
-        #endregion
-
-        #region order
-        public ICommand PushCommand =>
-            new RelayCommand((obj) =>
-            {
-                if (!HomePush.IsService)
-                {
-                    HomePush.IsService = true;
-                    var config = obj as HomePush;
-                    HomeProperties.Default.Time = config.Time;
-                    HomeProperties.Default.Save();
-                    MainWindow.CloseShowListWin("Reserve");
-
-                    HomePush.Timer.Elapsed += timerPushTick;
-                    HomePush.TimerTick = config.Time * 60;
-                    HomePush.Timer.Enabled = true;
-                }
-                else
-                {
-                    HomePush.cts.Cancel();
-                    HomePush.Status = string.Empty;
-                    HomePush.IsService = false;
-                    HomePush.Timer.Enabled = false;
-                    HomePush.TimerTick = 0;
-                    HomePush.Timer.Elapsed -= timerPushTick;
-                }
-            }, (obj) => SteamMarket.Orders.Any() && HomePush.Time > 0 && HomePush.MinPrecent >= 0);
-        void timerPushTick(Object sender, ElapsedEventArgs e)
-        {
-            HomePush.TimerTick--;
-            TimeSpan timeSpan = TimeSpan.FromSeconds(HomePush.TimerTick);
-            HomePush.Status = timeSpan.ToString("mm':'ss");
-            if (HomePush.TimerTick <= 0)
-            {
-                HomePush.Status = "Preparation...";
-                HomePush.Timer.Enabled = false;
-                HomePush.Progress = 0;
-
-                HomePush.cts = new();
-                HomePush.token = HomePush.cts.Token;
-                OrderPush();
-            }
-            if (!SteamMarket.Orders.Any())
-            {
-                HomePush.cts.Cancel();
-                HomePush.Status = string.Empty;
-                HomePush.IsService = false;
-                HomePush.Timer.Enabled = false;
-                HomePush.TimerTick = 0;
-                HomePush.Timer.Elapsed -= timerPushTick;
-            }
-        }
-        void OrderPush()
+        void UpdateView(Object sender, ElapsedEventArgs e)
         {
             try
             {
-                SteamAccount.GetBalance();
-                OrderCheckService.SteamOrders(false);
-
-                HomePush.Status = "Pushing...";
-                HomePush.MaxProgress = SteamMarket.Orders.Count;
-                foreach (DataOrder order in SteamMarket.Orders)
+                if (DataGridOrders.CanBeUpdated)
                 {
-                    try
-                    {
-                        HomePush.Push += OrderService.PushItems(order) ? 1 : 0;
-                    }
-                    catch (Exception exp)
-                    {
-                        BaseService.errorLog(exp, false);
-                    }
-                    finally
-                    {
-                        HomePush.Progress++;
-                    }
-                    if (HomePush.token.IsCancellationRequested)
-                        break;
+                    DataGridOrders.Items = new(SteamAccount.Orders);
+                    DataGridOrders.CanBeUpdated = false;
                 }
-                HomePush.Status = "Update...";
-                if (HomePush.Check % 5 == 4 || SteamMarket.Orders.GetAvailableAmount() >= SteamMarket.MaxAmount * 0.5m)
-                {
-                    OrderCheckService.PlaceOrderFromReserve();
-                    OrderCheckService.SteamOrders(true);
-                }
-                HomeTable.OrderedGrid = new(SteamMarket.Orders);
-                HomePush.Check++;
             }
-            catch (Exception exp)
+            catch (Exception ex)
             {
-                HomePush.cts.Cancel();
-                HomePush.Status = string.Empty;
-                HomePush.IsService = false;
-                HomePush.Timer.Enabled = false;
-                HomePush.TimerTick = 0;
-                HomePush.Timer.Elapsed -= timerPushTick;
-
-                BaseService.errorLog(exp, true);
-            }
-            finally
-            {
-                if (!HomePush.token.IsCancellationRequested)
-                {
-                    HomePush.TimerTick = HomeProperties.Default.Time * 60;
-                    HomePush.Timer.Enabled = true;
-                }
+                BaseModel.ErrorLog(ex, false);
             }
         }
+
+        //Table
+        public DataGridOrders DataGridOrders
+        {
+            get
+            {
+                return _dataGridOrders;
+            }
+            set
+            {
+                _dataGridOrders = value;
+                OnPropertyChanged();
+            }
+        }
+        DataGridOrders _dataGridOrders = new();
+        public ICommand OpenItemOutCommand =>
+            new RelayCommand((obj) =>
+            {
+                DataGridOrders.ShowItemInService((int)obj);
+
+            }, (obj) => DataGridOrders.Items.Any());
+        public ICommand OrdersCommand =>
+            new RelayCommand((obj) =>
+            {
+                switch (Convert.ToInt32(obj))
+                {
+                    case 0:
+                        Task.Run(DataGridOrders.UpdateTable);
+                        break;
+                    case 1:
+                        Task.Run(DataGridOrders.CancelOrders);
+                        break;
+                }
+            }, (obj) => !DataGridOrders.IsBusy);
+        public ICommand CancelOrderCommand =>
+            new RelayCommand((obj) =>
+            {
+                Task.Run(() => {
+                    DataGridOrders.CancelOrder(obj as DataOrder);
+                });
+            }, (obj) => DataGridOrders.Items.Any() && DataGridOrders.SelectedItem != null);
+
+        //Push
+        public ToolPush PushTool
+        {
+            get
+            {
+                return _pushTool;
+            }
+            set
+            {
+                _pushTool = value;
+                OnPropertyChanged();
+            }
+        }
+        ToolPush _pushTool = new();
+        public ICommand PushCommand =>
+            new RelayCommand((obj) =>
+            {
+                MainWindow.CloseShowListWin("Reserve");
+                PushTool.Start(obj as ToolPush);
+
+            }, (obj) => SteamAccount.Orders.Any() && PushTool.TimeMin > 0);
         public ICommand ResetTimerCommand =>
             new RelayCommand((obj) =>
             {
-                HomePush.TimerTick = (int)obj == 0 ? 1 : HomePush.TimerTick;
-            }, (obj) => HomePush.IsService);
-        #endregion
+                PushTool.ResetTime();
 
-        # region inventory
-        public ICommand UpdateInformationsCommand =>
+            }, (obj) => PushTool.IsService);
+
+        //Inventory
+        public ToolInventory InventoryTool
+        {
+            get
+            {
+                return _inventoryTool;
+            }
+            set
+            {
+                _inventoryTool = value;
+                OnPropertyChanged();
+            }
+        }
+        ToolInventory _inventoryTool = new();
+        public ICommand UpdateInventoryCommand =>
             new RelayCommand((obj) =>
             {
-                Task.Run(() =>
-                {
-                    try
-                    {
-                        HomeInventoryInfo.IsBusy = true;
-                        var items = InventoryService.CheckInventory();
-                        HomeInventoryInfo.Items = new(items);
-                        HomeInventoryInfo.SumOfItems = InventoryService.GetSumOfItems(items);
-                        SelectedInventory = HomeInventoryInfo.Items.FirstOrDefault();
-                    }
-                    catch (Exception ex)
-                    {
-                        BaseService.errorLog(ex, true);
-                    }
-                    finally
-                    {
-                        HomeInventoryInfo.IsBusy = false;
-                        HomeInventoryConfig.TaskId = 0;
-                        Main.Message.Enqueue("Steam Inventory updated.");
-                    }
-                });
-            }, (obj) => !HomeInventoryInfo.IsBusy);
+                Task.Run(InventoryTool.UpdateInventory);
+
+            }, (obj) => !InventoryTool.IsBusy);
         public ICommand ShowInventoryItemCommand =>
             new RelayCommand((obj) =>
             {
@@ -372,120 +149,16 @@ namespace ItemChecker.MVVM.ViewModel
 
                 Edit.OpenUrl("https://steamcommunity.com/my/inventory/#730_2_" + item.Data.FirstOrDefault().AssetId);
 
-            }, (obj) => HomeInventoryInfo.Items.Any() && SelectedInventory != null);
+            }, (obj) => InventoryTool.Items.Any() && InventoryTool.SelectedItem != null);
         public ICommand InventoryTaskCommand =>
             new RelayCommand((obj) =>
             {
-                if (!HomeInventoryInfo.IsService)
-                {
-                    var config = (HomeInventoryConfig)obj;
-                    HomeInventoryInfo.IsService = true;
-                    HomeInventoryInfo.cts = new();
-                    HomeInventoryInfo.token = HomeInventoryInfo.cts.Token;
+                InventoryTool.StartTask();
 
-                    switch (config.TaskId)
-                    {
-                        case 0:
-                            Task.Run(() => TradeOffer());
-                            break;
-                        case 1:
-                            Task.Run(() => QuickSell(config));
-                            break;
-                    }
-                }
-                else
-                {
-                    HomeInventoryInfo.cts.Cancel();
-                    HomeInventoryInfo.IsService = false;
-                }
-            }, (obj) => HomeInventoryConfig.TaskId == 0
-                            || (HomeInventoryConfig.TaskId == 1 && HomeInventoryInfo.Items.Any()
-                                && ((HomeInventoryConfig.AllAvailable && HomeInventoryConfig.SellingPriceId != 2)
-                                    || (HomeInventoryConfig.SelectedOnly && SelectedInventory != null
-                                        && (HomeInventoryConfig.SellingPriceId < 2 || (HomeInventoryConfig.SellingPriceId == 2 && HomeInventoryConfig.Price != 0))))));
-        void TradeOffer()
-        {
-            try
-            {
-                var trades = InventoryService.CheckOffer();
-                while (trades.Any())
-                {
-                    HomeInventoryInfo.Progress = 0;
-                    HomeInventoryInfo.MaxProgress = trades.Count;
-                    foreach (var offer in trades)
-                    {
-                        try
-                        {
-                            SteamRequest.Post.AcceptTrade(offer.TradeOfferId, offer.PartnerId);
-                        }
-                        catch (Exception exp)
-                        {
-                            BaseService.errorLog(exp, false);
-                        }
-                        finally
-                        {
-                            HomeInventoryInfo.Progress++;
-                            Thread.Sleep(1000);
-                        }
-                        if (HomeInventoryInfo.token.IsCancellationRequested)
-                            break;
-                    }
-                    trades = InventoryService.CheckOffer();
-                }
-            }
-            catch (Exception exp)
-            {
-                HomeInventoryInfo.cts.Cancel();
-                BaseService.errorLog(exp, true);
-            }
-            finally
-            {
-                HomeInventoryInfo.IsService = false;
-                Main.Message.Enqueue("Accept trades has finished.");
-            }
-        }
-        void QuickSell(HomeInventoryConfig config)
-        {
-            try
-            {
-                var items = InventoryService.CheckInventory();
-                HomeInventoryInfo.Items = new(items);
-
-                items = config.SelectedOnly ? items.Where(x => x.ItemName != SelectedInventory.ItemName).ToList() : items;
-                HomeInventoryInfo.Progress = 0;
-                HomeInventoryInfo.MaxProgress = items.Count;
-
-                foreach (var item in items)
-                {
-                    try
-                    {
-                        InventoryService.SellItem(item, config);
-                    }
-                    catch (Exception exp)
-                    {
-                        BaseService.errorLog(exp, false);
-                    }
-                    finally
-                    {
-                        HomeInventoryInfo.Progress++;
-                        Thread.Sleep(1500);
-                    }
-                    if (HomeInventoryInfo.token.IsCancellationRequested)
-                        break;
-                }
-            }
-            catch (Exception exp)
-            {
-                HomeInventoryInfo.cts.Cancel();
-                BaseService.errorLog(exp, true);
-            }
-            finally
-            {
-                SelectedInventory = HomeInventoryInfo.Items.Any() ? HomeInventoryInfo.Items.FirstOrDefault() : new();
-                HomeInventoryInfo.IsService = false;
-                Main.Message.Enqueue("Quick sell items has finished.");
-            }
-        }
-        #endregion
+            }, (obj) => InventoryTool.TaskId == 0
+                            || (InventoryTool.TaskId == 1 && InventoryTool.Items.Any()
+                                && ((InventoryTool.AllAvailable && InventoryTool.SellingPriceId != 2)
+                                    || (InventoryTool.SelectedOnly && InventoryTool.SelectedItem != null
+                                        && (InventoryTool.SellingPriceId < 2 || (InventoryTool.SellingPriceId == 2 && InventoryTool.Price != 0))))));
     }
 }

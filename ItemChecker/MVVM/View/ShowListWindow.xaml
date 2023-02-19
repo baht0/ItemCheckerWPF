@@ -50,7 +50,7 @@
                     <TextBlock.Text>
                         <MultiBinding StringFormat="{}{0}: {1}">
                             <Binding Path="SavedItems.ListName"/>
-                            <Binding Path="SavedItems.List.Count"/>
+                            <Binding Path="SavedItems.Items.Count"/>
                         </MultiBinding>
                     </TextBlock.Text>
                 </TextBlock>
@@ -61,7 +61,7 @@
                 <Separator VerticalAlignment="Bottom"/>
                 <DataGrid Grid.Row="1" Grid.ColumnSpan="3" AlternationCount="2" AlternatingRowBackground="{DynamicResource ElementBackground}"
                           AutoGenerateColumns="False" x:Name="reserveGrid" KeyDown="reserveGrid_KeyDown"
-                          ItemsSource="{Binding SavedItems.List, UpdateSourceTrigger=PropertyChanged}" SelectionMode="Single"
+                          ItemsSource="{Binding SavedItems.Items, UpdateSourceTrigger=PropertyChanged}" SelectionMode="Single"
                           SelectedItem="{Binding SavedItems.SelectedItem}" ToolTip="Press 'Backspace' to remove item"
                           IsReadOnly="True" CanUserReorderColumns="False" CanUserResizeRows="False" CanUserResizeColumns="False">
                     <DataGrid.Columns>

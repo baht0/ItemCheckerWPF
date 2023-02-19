@@ -36,7 +36,7 @@
                 <TextBlock Text="Details" VerticalAlignment="Center" Margin="10 0 0 0"/>
                 <StackPanel Grid.Column="1" HorizontalAlignment="Right" Orientation="Horizontal">
                     <Button Command="{Binding ShowSearchCommand}" VerticalAlignment="Center"
-                        Style="{StaticResource MaterialDesignToolForegroundButton}">
+                            Style="{StaticResource MaterialDesignToolForegroundButton}">
                         <materialDesign:PackIcon Kind="Search"/>
                     </Button>
                     <Button  Click="Button_Close" VerticalAlignment="Center"
@@ -74,7 +74,7 @@
                                     Style="{StaticResource MaterialDesignToolForegroundButton}">
                             <materialDesign:PackIcon Kind="ContentCopy"/>
                         </Button>
-                        <ComboBox Grid.Column="2" ItemsSource="{Binding ItemsView}" SelectedItem="{Binding SelectedItem}"
+                        <ComboBox Grid.Column="2" ItemsSource="{Binding DataGridDetails.Items}" SelectedItem="{Binding DataGridDetails.SelectedItem}"
                                   Margin="0 0 10 0" x:Name="itemsCmb" SelectionChanged="itemsCmb_SelectionChanged" >
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
@@ -83,12 +83,12 @@
                             </ComboBox.ItemTemplate>
                         </ComboBox>
                         <ComboBox Grid.Column="3" VerticalAlignment="Center" ToolTip="Displaying prices in tables"
-                                  x:Name="currency" SelectionChanged="currency_SelectionChanged" IsEnabled="{Binding SelectedItem.IsBusy, Converter={StaticResource InvertBooleanConverter}}"
-                                  ItemsSource="{Binding Details.CurrencyList}" SelectedIndex="{Binding SelectedItem.CurrencyId}"/>
+                                  x:Name="currency" SelectionChanged="currency_SelectionChanged" IsEnabled="{Binding DataGridDetails.SelectedItem.IsBusy, Converter={StaticResource InvertBooleanConverter}}"
+                                  ItemsSource="{Binding Details.CurrencyList}" SelectedIndex="{Binding DataGridDetails.SelectedItem.CurrencyId}"/>
                         <Separator Grid.ColumnSpan="4" VerticalAlignment="Bottom"/>
                         <DataGrid Grid.Row="1" Grid.ColumnSpan="4" AlternationCount="2" AlternatingRowBackground="{DynamicResource ElementBackground}"
                                   AutoGenerateColumns="False" IsReadOnly="True" x:Name="pricesGrid" SelectionMode="Single" CanUserSortColumns="False" IsEnabled="{Binding SelectedItem.IsBusy, Converter={StaticResource InvertBooleanConverter}}"
-                                  ItemsSource="{Binding SelectedItem.Services}" SelectedItem="{Binding SelectedItem.Service}" MouseDoubleClick="DataGrid_MouseDoubleClick">
+                                  ItemsSource="{Binding DataGridDetails.SelectedItem.Services}" SelectedItem="{Binding DataGridDetails.SelectedItem.Service}" MouseDoubleClick="DataGrid_MouseDoubleClick">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Service" Binding="{Binding Service}" CanUserResize="False" Width="auto"/>
                                 <DataGridTextColumn Header="Price" Binding="{Binding Price}" CanUserResize="False" Width="auto" FontWeight="Bold"/>
@@ -98,8 +98,9 @@
                             </DataGrid.Columns>
                         </DataGrid>
                         <ProgressBar Grid.Row="1" Grid.ColumnSpan="4" VerticalAlignment="Center" HorizontalAlignment="Center" IsIndeterminate="True"
-                                     Visibility="{Binding SelectedItem.IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                     Visibility="{Binding DataGridDetails.SelectedItem.IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
                                      Style="{StaticResource MaterialDesignCircularProgressBar}"/>
+                        <!--compare-->
                         <GroupBox Header="Compare" Grid.Row="2" Grid.ColumnSpan="4" Style="{DynamicResource none}" BorderThickness="0.5">
                             <Grid Margin="10">
                                 <Grid.RowDefinitions>
@@ -116,21 +117,21 @@
                                     <ColumnDefinition/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="From" VerticalAlignment="Center"/>
-                                <ComboBox Grid.Column="0" Grid.Row="1" ItemsSource="{Binding Details.Services}" SelectedIndex="{Binding SelectedItem.Compare.Service1}" SelectionChanged="Compare_SelectionChanged"
-                                          IsEnabled="{Binding SelectedItem.IsBusy, Converter={StaticResource InvertBooleanConverter}}"/>
+                                <ComboBox Grid.Column="0" Grid.Row="1" ItemsSource="{Binding Details.Services}" SelectedIndex="{Binding DataGridDetails.SelectedItem.Compare.Service1}" SelectionChanged="Compare_SelectionChanged"
+                                          IsEnabled="{Binding DataGridDetails.SelectedItem.IsBusy, Converter={StaticResource InvertBooleanConverter}}"/>
 
                                 <TextBlock Grid.Column="2" Text="To" VerticalAlignment="Center"/>
-                                <ComboBox Grid.Column="2" Grid.Row="1" ItemsSource="{Binding Details.Services}" SelectedIndex="{Binding SelectedItem.Compare.Service2}" SelectionChanged="Compare_SelectionChanged"
-                                          IsEnabled="{Binding SelectedItem.IsBusy, Converter={StaticResource InvertBooleanConverter}}"/>
+                                <ComboBox Grid.Column="2" Grid.Row="1" ItemsSource="{Binding Details.Services}" SelectedIndex="{Binding DataGridDetails.SelectedItem.Compare.Service2}" SelectionChanged="Compare_SelectionChanged"
+                                          IsEnabled="{Binding DataGridDetails.SelectedItem.IsBusy, Converter={StaticResource InvertBooleanConverter}}"/>
 
                                 <TextBlock Grid.Column="4" Text="Get" VerticalAlignment="Center"/>
-                                <TextBlock Grid.Column="4" Grid.Row="1" Text="{Binding SelectedItem.Compare.Get}" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="4" Grid.Row="1" Text="{Binding DataGridDetails.SelectedItem.Compare.Get}" VerticalAlignment="Center"/>
 
                                 <TextBlock Grid.Column="5" Text="Precent" VerticalAlignment="Center"/>
-                                <TextBlock Grid.Column="5" Grid.Row="1" Text="{Binding SelectedItem.Compare.Precent}" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="5" Grid.Row="1" Text="{Binding DataGridDetails.SelectedItem.Compare.Precent, StringFormat='{}{0}%'}" VerticalAlignment="Center"/>
 
                                 <TextBlock Grid.Column="6" Text="Difference" VerticalAlignment="Center"/>
-                                <TextBlock Grid.Column="6" Grid.Row="1" Text="{Binding SelectedItem.Compare.Difference}" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="6" Grid.Row="1" Text="{Binding DataGridDetails.SelectedItem.Compare.Difference}" VerticalAlignment="Center"/>
                             </Grid>
                         </GroupBox>
                     </Grid>
@@ -144,64 +145,68 @@
                         <Separator VerticalAlignment="Bottom"/>
                         <Grid Grid.Row="1">
                             <ProgressBar VerticalAlignment="Center" HorizontalAlignment="Center" IsIndeterminate="True"
-                                     Visibility="{Binding SelectedItem.Info.IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                     Visibility="{Binding DataGridDetails.SelectedItem.Info.IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
                                      Style="{StaticResource MaterialDesignCircularProgressBar}"/>
                             <TextBlock Text="Click on a service to see more information." HorizontalAlignment="Center" VerticalAlignment="Center" FontStyle="Italic"
-                                       Visibility="{Binding SelectedItem.Info.IsBusy, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                                       Visibility="{Binding DataGridDetails.SelectedItem.Info.IsBusy, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
                         </Grid>
                         <!--ST-->
-                        <Grid Grid.Row="1" Visibility="{Binding SelectedItem.Info.SteamInfo.IsShow, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid Grid.Row="1" Visibility="{Binding DataGridDetails.SelectedItem.Info.SteamInfo.IsShow, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="20"/>
                                 <RowDefinition/>
                                 <RowDefinition Height="20"/>
                                 <RowDefinition Height="20"/>
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" VerticalAlignment="Bottom"
-                                   Text="{Binding SelectedItem.Info.SteamInfo.LastSale, StringFormat='LastSale: {0} Ago', Converter={StaticResource TradeLockConverter}}"/>
+                            <TextBlock Grid.Row="0" VerticalAlignment="Center"
+                                   Text="{Binding DataGridDetails.SelectedItem.Info.SteamInfo.LastSale, StringFormat='LastSale: {0} Ago', Converter={StaticResource TradeLockConverter}}"/>
+                            <DataGrid Grid.Row="1" ItemsSource="{Binding DataGridDetails.SelectedItem.Info.SteamInfo.Item.History}" FontSize="11"
+                                  AlternationCount="2" AlternatingRowBackground="{DynamicResource ElementBackground}"
+                                  AutoGenerateColumns="False" Margin="0 0 0 10" HorizontalScrollBarVisibility="Disabled"
+                                  IsReadOnly="True" CanUserReorderColumns="False" CanUserSortColumns="False" CanUserResizeRows="False" CanUserResizeColumns="False">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat='{}{0:dd MMM yy}'}" MaxWidth="90"/>
+                                    <DataGridTextColumn Binding="{Binding Price}">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="{Binding DataContext.Details.CurrencySteamSymbol, RelativeSource={RelativeSource AncestorType=Window}, StringFormat='Price ({0})'}"/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Count" Binding="{Binding Count}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
                             <TextBlock Grid.Row="2" VerticalAlignment="Center" FontStyle="Italic">
                                 <TextBlock.Text>
                                     <MultiBinding StringFormat="Last 30 days Avg ({0}): {1}{2}">
-                                        <Binding Path="SelectedItem.Info.SteamInfo.Count.Item1" />
-                                        <Binding Path="SelectedItem.Info.SteamInfo.Avg.Item1" />
-                                        <Binding Path="Details.CurrencySymbolSteam" />
+                                        <Binding Path="DataGridDetails.SelectedItem.Info.SteamInfo.Count.Item1" />
+                                        <Binding Path="DataGridDetails.SelectedItem.Info.SteamInfo.Avg.Item1" />
+                                        <Binding Path="Details.CurrencySteamSymbol" />
                                     </MultiBinding>
                                 </TextBlock.Text>
                             </TextBlock>
                             <TextBlock Grid.Row="3" VerticalAlignment="Center" FontStyle="Italic">
                                 <TextBlock.Text>
                                     <MultiBinding StringFormat="Last 60 days Avg ({0}): {1}{2}">
-                                        <Binding Path="SelectedItem.Info.SteamInfo.Count.Item2" />
-                                        <Binding Path="SelectedItem.Info.SteamInfo.Avg.Item2" />
-                                        <Binding Path="Details.CurrencySymbolSteam" />
+                                        <Binding Path="DataGridDetails.SelectedItem.Info.SteamInfo.Count.Item2" />
+                                        <Binding Path="DataGridDetails.SelectedItem.Info.SteamInfo.Avg.Item2" />
+                                        <Binding Path="Details.CurrencySteamSymbol" />
                                     </MultiBinding>
                                 </TextBlock.Text>
                             </TextBlock>
-                            <DataGrid Grid.Row="1" ItemsSource="{Binding SelectedItem.Info.SteamInfo.Item.History}" FontSize="11"
-                                  AlternationCount="2" AlternatingRowBackground="{DynamicResource ElementBackground}"
-                                  AutoGenerateColumns="False" Margin="0 0 0 10" HorizontalScrollBarVisibility="Disabled"
-                                  IsReadOnly="True" CanUserReorderColumns="False" CanUserSortColumns="False" CanUserResizeRows="False" CanUserResizeColumns="False">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat='{}{0:dd MMM yy}'}" MaxWidth="90"/>
-                                    <DataGridTextColumn Header="Price" Binding="{Binding Price}"/>
-                                    <DataGridTextColumn Header="Count" Binding="{Binding Count}"/>
-                                </DataGrid.Columns>
-                            </DataGrid>
                         </Grid>
                         <!--CSM-->
-                        <Grid Grid.Row="1" Visibility="{Binding SelectedItem.Info.CsmInfo.IsShow, Converter={StaticResource BooleanToVisibilityConverter}}" VerticalAlignment="Top"
+                        <Grid Grid.Row="1" Visibility="{Binding DataGridDetails.SelectedItem.Info.CsmInfo.IsShow, Converter={StaticResource BooleanToVisibilityConverter}}" VerticalAlignment="Top"
                           Background="{DynamicResource ElementBackground}">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="45"/>
                                 <RowDefinition Height="250"/>
                             </Grid.RowDefinitions>
                             <VirtualizingStackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <TextBlock Text="{Binding SelectedItem.Info.CsmInfo.ValueSlide}" VerticalAlignment="Center" Margin="0 0 20 0"/>
+                                <TextBlock Text="{Binding DataGridDetails.SelectedItem.Info.CsmInfo.ValueSlide}" VerticalAlignment="Center" Margin="0 0 20 0"/>
                                 <Slider Grid.Row="0" Width="200" VerticalAlignment="Center"
-                                    Maximum="{Binding SelectedItem.Info.CsmInfo.MaxValueSlide}" Value="{Binding SelectedItem.Info.CsmInfo.CurrentItemId}"/>
-                                <TextBlock Text="{Binding SelectedItem.Info.CsmInfo.Item.Inventory.Count}" VerticalAlignment="Center" Margin="20 0 0 0"/>
+                                    Maximum="{Binding DataGridDetails.SelectedItem.Info.CsmInfo.MaxValueSlide}" Value="{Binding SelectedItem.Info.CsmInfo.CurrentItemId}"/>
+                                <TextBlock Text="{Binding DataGridDetails.SelectedItem.Info.CsmInfo.Item.Inventory.Count}" VerticalAlignment="Center" Margin="20 0 0 0"/>
                             </VirtualizingStackPanel>
-                            <Grid Grid.Row="1" Margin="10" DataContext="{Binding SelectedItem.Info.CsmInfo.CurrentItem}">
+                            <Grid Grid.Row="1" Margin="10" DataContext="{Binding DataGridDetails.SelectedItem.Info.CsmInfo.CurrentItem}">
                                 <Grid.RowDefinitions>
                                     <RowDefinition/>
                                     <RowDefinition/>
@@ -232,9 +237,9 @@
                             </Grid>
                         </Grid>
                         <!--LF-->
-                        <Grid Grid.Row="1" Visibility="{Binding SelectedItem.Info.LfmInfo.IsShow, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        <Grid Grid.Row="1" Visibility="{Binding DataGridDetails.SelectedItem.Info.LfmInfo.IsShow, Converter={StaticResource BooleanToVisibilityConverter}}"
                           VerticalAlignment="Top" MinHeight="180" Background="{DynamicResource ElementBackground}">
-                            <Grid Margin="10" DataContext="{Binding SelectedItem.Info.LfmInfo.Item}">
+                            <Grid Margin="10" DataContext="{Binding DataGridDetails.SelectedItem.Info.LfmInfo.Item}">
                                 <Grid.RowDefinitions>
                                     <RowDefinition/>
                                     <RowDefinition/>
@@ -262,44 +267,33 @@
                             </Grid>
                         </Grid>
                         <!--BF-->
-                        <Grid Grid.Row="1" Visibility="{Binding SelectedItem.Info.BuffInfo.IsShow, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        <Grid Grid.Row="1" Visibility="{Binding DataGridDetails.SelectedItem.Info.BuffInfo.IsShow, Converter={StaticResource BooleanToVisibilityConverter}}"
                            MinHeight="130">
-                            <Grid DataContext="{Binding SelectedItem.Info.BuffInfo}">
+                            <Grid DataContext="{Binding DataGridDetails.SelectedItem.Info.BuffInfo}">
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="60"/>
+                                    <RowDefinition Height="20"/>
                                     <RowDefinition/>
+                                    <RowDefinition Height="20"/>
+                                    <RowDefinition Height="20"/>
                                 </Grid.RowDefinitions>
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="100"/>
-                                        <ColumnDefinition/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Row="0" Text="{Binding Item.Count, StringFormat='Sell({0}):'}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Item.Price, StringFormat='{}{0}$'}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="1" Text="{Binding Item.OrderCount, StringFormat='BuyOrder({0}):'}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Item.BuyOrder, StringFormat='{}{0}$'}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="2" Text="LastSale:" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding LastSale, Converter={StaticResource TradeLockConverter}, StringFormat='{}{0} Ago'}" VerticalAlignment="Center"/>
-                                </Grid>
-                                <DataGrid Grid.Row="2" ItemsSource="{Binding Item.History}" FontSize="11"
+                                <TextBlock Grid.Row="0" Text="{Binding LastSale, Converter={StaticResource TradeLockConverter}, StringFormat='LastSale: {0} Ago'}" VerticalAlignment="Center"/>
+                                <DataGrid Grid.Row="1" ItemsSource="{Binding Item.History}" FontSize="11"
                                       AlternationCount="2" AlternatingRowBackground="{DynamicResource ElementBackground}" AutoGenerateColumns="False"
                                       IsReadOnly="True" CanUserReorderColumns="False" CanUserSortColumns="False" CanUserResizeRows="False" CanUserResizeColumns="False">
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="Date" MaxWidth="90" Binding="{Binding Date, StringFormat='{}{0:dd MMM yy}'}"/>
-                                        <DataGridTextColumn Header="Price" Binding="{Binding Price}"/>
+                                        <DataGridTextColumn Header="Price ($)" Binding="{Binding Price}"/>
+                                        <DataGridTextColumn Header="BuyOrder" Binding="{Binding IsBuyOrder, Converter={StaticResource BooleanToYesNoConverter}}"/>
                                     </DataGrid.Columns>
                                 </DataGrid>
+                                <TextBlock Grid.Row="2" Text="{Binding Avg, StringFormat='Avg: {0}$'}" VerticalAlignment="Center" FontStyle="Italic"/>
+                                <TextBlock Grid.Row="3" Text="{Binding AvgOnlySale, StringFormat='Avg Only Sale: {0}$'}" VerticalAlignment="Center" FontStyle="Italic"/>
                             </Grid>
                         </Grid>
                     </Grid>
                 </Grid>
                 <!--search-->
-                <Grid Grid.Row="2" x:Name="searchWin" Visibility="{Binding IsSearch, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid Grid.Row="2" x:Name="searchWin" Visibility="{Binding Details.IsSearch, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Grid Background="Black" Opacity="0.8"/>
                     <Border CornerRadius="3" Width="500" Height="55" Background="{DynamicResource Background}">
                         <Grid Margin="10">

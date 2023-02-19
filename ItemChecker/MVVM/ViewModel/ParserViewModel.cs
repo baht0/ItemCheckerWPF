@@ -1,16 +1,13 @@
 ﻿using ItemChecker.Core;
 using ItemChecker.MVVM.Model;
 using ItemChecker.MVVM.View;
-using ItemChecker.Services;
 using ItemChecker.Support;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 
@@ -18,35 +15,67 @@ namespace ItemChecker.MVVM.ViewModel
 {
     public class ParserViewModel : ObservableObject
     {
-        #region prop
-        Timer TimerView = new(500);
-        //table
-        public ParserTable ParserTable
+        readonly Timer TimerView = new(500);
+        public BaseModel Parser
         {
-            get
-            {
-                return _parserTable;
-            }
+            get { return _parser; }
             set
             {
-                _parserTable = value;
+                _parser = value;
                 OnPropertyChanged();
             }
         }
-        ParserTable _parserTable = new();
-        public ParserFilter FilterConfig
+        BaseModel _parser = new();
+        public ParserViewModel()
+        {
+            DataGridParse.GridView = CollectionViewSource.GetDefaultView(DataGridParse.Items);
+            TimerView.Elapsed += UpdateView;
+            TimerView.Enabled = true;
+            ToolPlaceOrder.Update();
+        }
+        void UpdateView(Object sender, ElapsedEventArgs e)
+        {
+            try
+            {
+                if (DataGridParse.CanBeUpdated)
+                {
+                    DataGridParse.Items = new(ToolParser.Items);
+                    DataGridParse.CanBeUpdated = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                BaseModel.ErrorLog(ex, false);
+            }
+        }
+
+        //Table
+        public DataGridParse DataGridParse
         {
             get
             {
-                return _filterConfig;
+                return _dataGridParse;
             }
             set
             {
-                _filterConfig = value;
+                _dataGridParse = value;
                 OnPropertyChanged();
             }
         }
-        ParserFilter _filterConfig = new();
+        DataGridParse _dataGridParse = new();
+        public ParserFilter ParserFilter
+        {
+            get
+            {
+                return _parserFilter;
+            }
+            set
+            {
+                _parserFilter = value;
+                OnPropertyChanged();
+            }
+        }
+        ParserFilter _parserFilter = new();
         public string SearchString
         {
             get
@@ -56,9 +85,9 @@ namespace ItemChecker.MVVM.ViewModel
             set
             {
                 _searchString = value;
-                FilterConfig = new ParserFilter();
-                if (ParserTable.GridView != null)
-                    ParserTable.GridView.Filter = item =>
+                ParserFilter = new();
+                if (DataGridParse.GridView != null)
+                    DataGridParse.GridView.Filter = item =>
                     {
                         return ((DataParser)item).ItemName.Contains(value, StringComparison.OrdinalIgnoreCase);
                     };
@@ -66,136 +95,23 @@ namespace ItemChecker.MVVM.ViewModel
             }
         }
         string _searchString;
-
-        //panel
-        public ParserCheckConfig ParserCheckConfig
-        {
-            get
-            {
-                return _parserCheckConfig;
-            }
-            set
-            {
-                _parserCheckConfig = value;
-                OnPropertyChanged();
-            }
-        }
-        ParserCheckConfig _parserCheckConfig = new();
-        public ParserCheckInfo ParserCheckInfo
-        {
-            get
-            {
-                return _parserCheckInfo;
-            }
-            set
-            {
-                _parserCheckInfo = value;
-                OnPropertyChanged();
-            }
-        }
-        ParserCheckInfo _parserCheckInfo = new();
-        public ParserQueue ParserQueue
-        {
-            get { return _parserQueue; }
-            set
-            {
-                _parserQueue = value;
-                OnPropertyChanged();
-            }
-        }
-        ParserQueue _parserQueue = new();
-        #endregion 
-
-        public ParserViewModel()
-        {
-            ParserTable.GridView = CollectionViewSource.GetDefaultView(ParserTable.Items);
-            TimerView.Elapsed += UpdateView;
-            TimerView.Enabled = true;
-        }
-        void UpdateView(Object sender, ElapsedEventArgs e)
-        {
-            try
-            {
-                decimal availableAmount = SteamMarket.Orders.GetAvailableAmount();
-                ParserQueue.TotalAllowed = SteamMarket.MaxAmount;
-                ParserQueue.AvailableAmount = availableAmount;
-                ParserQueue.OrderAmout = ParserQueue.Queues.Select(x => x.OrderPrice).Sum();
-                ParserQueue.Remaining = availableAmount - ParserQueue.OrderAmout;
-                ParserQueue.AvailableAmountPrecent = Math.Round(availableAmount / SteamMarket.MaxAmount * 100, 1);
-            }
-            catch (Exception ex)
-            {
-                BaseService.errorLog(ex, false);
-            }
-        }
-
-        #region table
-        //grid
         public ICommand OpenItemOutCommand =>
             new RelayCommand((obj) =>
             {
-                DataParser item = ParserTable.SelectedItem;
-                string itemName = item.ItemName.Replace("(Holo/Foil)", "(Holo-Foil)");
-                string market_hash_name = Uri.EscapeDataString(itemName);
-                switch ((Int32)obj)
-                {
-                    case 1:
-                        switch (ParserCheckConfig.CheckedConfig.ServiceOne)
-                        {
-                            case 0 or 1:
-                                Edit.OpenUrl("https://steamcommunity.com/market/listings/730/" + market_hash_name);
-                                break;
-                            case 2:
-                                Edit.OpenCsm(itemName);
-                                break;
-                            case 3:
-                                Edit.OpenUrl("https://loot.farm/");
-                                break;
-                            case 4:
-                                Edit.OpenUrl("https://buff.163.com/goods/" + ItemsBase.List.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id + "#tab=buying");
-                                break;
-                            case 5:
-                                Edit.OpenUrl("https://buff.163.com/goods/" + ItemsBase.List.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id);
-                                break;
-                        }
-                        break;
-                    case 2 or 3:
-                        switch (ParserCheckConfig.CheckedConfig.ServiceTwo)
-                        {
-                            case 0 or 1:
-                                Edit.OpenUrl("https://steamcommunity.com/market/listings/730/" + market_hash_name);
-                                break;
-                            case 2:
-                                Edit.OpenCsm(itemName);
-                                break;
-                            case 3:
-                                Edit.OpenUrl("https://loot.farm/");
-                                break;
-                            case 4:
-                                Edit.OpenUrl("https://buff.163.com/goods/" + ItemsBase.List.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id + "#tab=buying");
-                                break;
-                            case 5:
-                                Edit.OpenUrl("https://buff.163.com/goods/" + ItemsBase.List.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id);
-                                break;
-                        }
-                        break;
-                    default:
-                        Clipboard.SetText(itemName);
-                        break;
-                }
-            });
+                DataGridParse.ShowItemInService((int)obj, ToolParser.ServiceOne, ToolParser.ServiceTwo);
+            }, (obj) => DataGridParse.Items.Any());
         public ICommand SwitchCurrencyCommand =>
             new RelayCommand((obj) =>
             {
                 var currency = Currencies.Allow.FirstOrDefault(x => x.Name == (string)obj);
-                var items = ParserTable.Items.ToList();
-                if (ParserTable.CurectCurrency.Id != 1)
+                var items = DataGridParse.Items.ToList();
+                if (Parser.CurrentCurrency.Id != 1)
                     foreach (var item in items)
                     {
-                        item.Purchase = Currency.ConverterToUsd(item.Purchase, ParserTable.CurectCurrency.Id);
-                        item.Price = Currency.ConverterToUsd(item.Price, ParserTable.CurectCurrency.Id);
-                        item.Get = Currency.ConverterToUsd(item.Get, ParserTable.CurectCurrency.Id);
-                        item.Difference = Currency.ConverterToUsd(item.Difference, ParserTable.CurectCurrency.Id);
+                        item.Purchase = Currency.ConverterToUsd(item.Purchase, Parser.CurrentCurrency.Id);
+                        item.Price = Currency.ConverterToUsd(item.Price, Parser.CurrentCurrency.Id);
+                        item.Get = Currency.ConverterToUsd(item.Get, Parser.CurrentCurrency.Id);
+                        item.Difference = Currency.ConverterToUsd(item.Difference, Parser.CurrentCurrency.Id);
                     }
                 foreach (var item in items)
                 {
@@ -204,345 +120,19 @@ namespace ItemChecker.MVVM.ViewModel
                     item.Get = Currency.ConverterFromUsd(item.Get, currency.Id);
                     item.Difference = Currency.ConverterFromUsd(item.Difference, currency.Id);
                 }
-                ParserTable.CurrencySymbol = currency.Symbol;
-                ParserTable.CurectCurrency = currency;
-                FilterConfig = new();
-                ParserTable.GridView = CollectionViewSource.GetDefaultView(items);
-            }, (obj) => ParserTable.Items.Any());
-        //filter
-        public ICommand ClearSearchCommand =>
-            new RelayCommand((obj) =>
-            {
-                SearchString = string.Empty;
-            }, (obj) => !String.IsNullOrEmpty(SearchString));
-        public ICommand ApplyCommand =>
-            new RelayCommand((obj) =>
-            {
-                ParserFilter filterConfig = obj as ParserFilter;
-
-                ParserTable.GridView.Filter = null;
-                ParserTable.GridView.Filter = item =>
-                {
-                    return ParserService.ApplyFilter(filterConfig, (DataParser)item);
-                };
-                ParserFilter.FilterConfig = filterConfig;
-            }, (obj) => ParserTable.Items.Any());
-        public ICommand ResetCommand =>
-            new RelayCommand((obj) =>
-            {
-                FilterConfig = new();
-                ParserTable.GridView.Filter = null;
-                ParserFilter.FilterConfig = new();
-            }, (obj) => ParserTable.Items.Any());
-        #endregion
-
-        #region Check
-        public ICommand MaxPriceCommand =>
-            new RelayCommand((obj) =>
-            {
-                switch ((int)obj)
-                {
-                    case 0 or 1:
-                        var steamUsd = Currency.ConverterToUsd(SteamAccount.Balance, SteamAccount.Currency.Id);
-                        ParserCheckConfig.MaxPrice = (int)Math.Ceiling(steamUsd);
-                        break;
-                    case 2:
-                        ParserCheckConfig.MaxPrice = (int)Math.Ceiling(ServiceAccount.Csm.Balance);
-                        break;
-                    case 3:
-                        ParserCheckConfig.MaxPrice = (int)Math.Ceiling(ServiceAccount.Lfm.Balance);
-                        break;
-                    case 4 or 5:
-                        ParserCheckConfig.MaxPrice = (int)Math.Ceiling(ServiceAccount.Buff.Balance);
-                        break;
-                }
-            });
-        public ICommand CheckCommand =>
-            new RelayCommand((obj) =>
-            {
-                if (!ParserCheckInfo.IsParser)
-                {
-                    var config = (ParserCheckConfig)obj;
-                    config.CheckedTime = DateTime.Now;
-                    ParserCheckConfig.CheckedConfig = (ParserCheckConfig)config.Clone();
-
-                    Task.Run(() => PreparationCheck(config, new()));
-                }
-                else
-                {
-                    ParserCheckInfo.cts.Cancel();
-                    ParserCheckInfo.IsParser = false;
-                    ParserCheckInfo.IsStoped = true;
-                }
-            }, (obj) => ParserCheckConfig.ServiceOne != ParserCheckConfig.ServiceTwo && ItemsBase.List.Any() && ParserCheckConfig.MaxPrice != 0);
-        public ICommand ContinueCheckCommand =>
-            new RelayCommand((obj) =>
-            {
-                Task.Run(() => PreparationCheck(ParserCheckConfig.CheckedConfig, ParserTable.Items.ToList()));
-            }, (obj) => !ParserCheckInfo.IsParser && ParserCheckInfo.IsStoped);
-        void PreparationCheck(ParserCheckConfig config, List<DataParser> checkedList)
-        {
-            try
-            {
-                ParserCheckInfo.cts = new();
-                ParserCheckInfo.token = ParserCheckInfo.cts.Token;
-                PreparationView(config);
-
-                var checkList = CreateList(config, checkedList);
-                ParserCheckInfo.CountList = checkList.Count;
-                ParserCheckInfo.CurrentProgress = 0;
-                ParserCheckInfo.MaxProgress = checkList.Count;
-                if (checkList.Any())
-                    StartCheck(checkList, checkedList);
-                else
-                {
-                    MessageBox.Show("Nothing found. Adjust the parameters.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                ParserTable.Count = ParserTable.Items.Count;
-                ParserTable.GridView = CollectionViewSource.GetDefaultView(ParserTable.Items);
-
-                Main.Notifications.Add(new()
-                {
-                    Title = "Parser",
-                    Message = "The Parser has finished."
-                });
-            }
-            catch (Exception exp)
-            {
-                ParserCheckInfo.cts.Cancel();
-                BaseService.errorLog(exp, true);
-            }
-            finally
-            {
-                if (ParserTable.Items.Any())
-                    ParserService.Export(ParserTable.Items, ParserCheckConfig.CheckedConfig);
-                ParserCheckInfo.TimerOn = false;
-                ParserCheckInfo.IsParser = false;
-            }
-        }
-        void PreparationView(ParserCheckConfig config)
-        {
-            ParserCheckInfo.Status = "Preparation...";
-            ParserCheckInfo.TimerOn = true;
-            ParserCheckInfo.IsParser = true;
-            ParserCheckInfo.IsStoped = false;
-            ParserTable.Count = 0;
-            ParserCheckInfo.DateTime = config.CheckedTime;
-            if (ParserTable.Items.Any())
-            {
-                FilterConfig = new();
-                ParserFilter.FilterConfig = new();
-
-                ParserTable.Items = new();
-                ParserTable.GridView = CollectionViewSource.GetDefaultView(ParserTable.Items);
-            }
-            ParserCheckInfo.Service1 = Main.Services[config.ServiceOne];
-            ParserCheckInfo.Service2 = Main.Services[config.ServiceTwo];
-            ParserCheckInfo.IsVisible = true;
-        }
-        List<string> CreateList(ParserCheckConfig config, List<DataParser> checkedList)
-        {
-            ParserCheckInfo.Status = "Create List...";
-
-            switch (config.ServiceOne)
-            {
-                case 2:
-                    ItemBaseService.UpdateCsm(config);
-                    break;
-                case 3:
-                    ItemBaseService.UpdateLfm();
-                    break;
-                case 4 or 5:
-                    ItemBaseService.UpdateBuff(config.ServiceOne == 4, config.MinPrice, config.MaxPrice);
-                    break;
-            }
-            switch (config.ServiceTwo)
-            {
-                case 3:
-                    ItemBaseService.UpdateLfm();
-                    break;
-            }
-            var list = ParserCheckService.ApplyConfig(config, checkedList);
-
-            if ((config.ServiceTwo == 4 || config.ServiceTwo == 5) && (ItemsBase.List.Count / 80 < list.Count))
-            {
-                int min = (int)(config.MinPrice * 0.5m);
-                int max = (int)(config.MaxPrice * 2.5m);
-
-                ItemBaseService.UpdateBuff(config.ServiceTwo == 4, min, max);
-            }
-            return list;
-        }
-        void StartCheck(List<string> checkList, List<DataParser> checkedList)
-        {
-            DateTime now = DateTime.Now;
-            ParserCheckInfo.Timer.Elapsed += (sender, e) => timerTick(checkList.Count, now);
-            ParserCheckInfo.Timer.Enabled = true;
-
-            ParserCheckService checkService = new();
-            foreach (string itemName in checkList)
-            {
-                try
-                {
-                    DataParser data = checkService.Check(itemName, ParserCheckConfig.CheckedConfig.ServiceOne, ParserCheckConfig.CheckedConfig.ServiceTwo);
-                    checkedList.Add(data);
-                }
-                catch (Exception exp)
-                {
-                    if (!exp.Message.Contains("429"))
-                        BaseService.errorLog(exp, true);
-                    else
-                        MessageBox.Show(exp.Message + "\n\nTo continue, you need to change the IP address.", "Parser stoped!", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    ParserCheckInfo.IsStoped = true;
-                    ParserCheckInfo.cts.Cancel();
-                }
-                finally
-                {
-                    ParserCheckInfo.CurrentProgress++;
-                    System.Threading.Thread.Sleep(100);
-                }
-                if (ParserCheckInfo.token.IsCancellationRequested)
-                    break;
-            }
-            ParserTable.CurrencyId = 0;
-            System.Threading.Thread.Sleep(1000);
-            ParserTable.Items = new(checkedList);
-            ParserCheckInfo.Timer.Enabled = false;
-            ParserCheckInfo.Timer.Elapsed -= (sender, e) => timerTick(checkList.Count, now);
-        }
-        void timerTick(int itemCount, DateTime timeStart)
-        {
-            if (ParserCheckInfo.token.IsCancellationRequested)
-                ParserCheckInfo.Timer.Enabled = false;
-            ParserCheckInfo.Status = Edit.calcTimeLeft(timeStart, itemCount, ParserCheckInfo.CurrentProgress);
-        }
-        //Import
-        public ICommand ImportCommand =>
-            new RelayCommand((obj) =>
-            {
-                ImportParserWindow window = new();
-                window.ShowDialog();
-                string filePath = window.ReturnValue;
-                if (!string.IsNullOrEmpty(filePath))
-                {
-                    Task.Run(() =>
-                    {
-                        var response = ParserService.Import(filePath);
-                        if (response.Any())
-                        {
-                            PreparationView(ParserCheckConfig.CheckedConfig);
-                            ParserTable.CurrencyId = 0;
-                            ParserTable.Count = response.Count;
-                            ParserTable.Items = response;
-                            ParserTable.GridView = CollectionViewSource.GetDefaultView(response);
-
-                            Main.Message.Enqueue("The table was successfully imported.");
-                        }
-                        ParserCheckInfo.IsParser = false;
-                        ParserCheckInfo.TimerOn = false;
-                    });
-                }
-            }, (obj) => !ParserCheckInfo.IsParser && Directory.Exists(ProjectInfo.DocumentPath + "extract"));
-        #endregion
-
-        #region Order
-        //order
-        public ICommand AddQueueCommand =>
-            new RelayCommand((obj) =>
-            {
-                var parseredItem = obj as DataParser;
-                if (ParserQueue.Queues.Add(new(parseredItem.ItemName, parseredItem.Purchase, parseredItem.Precent)))
-                {
-                    ParserQueue.Items = new(ParserQueue.Queues);
-                    Main.Message.Enqueue($"Success, added to Queue.\n{parseredItem.ItemName}");
-                    return;
-                }
-                Main.Message.Enqueue("Not successful. Conditions not met.");
-
-            }, (obj) => ParserCheckConfig.CheckedConfig.ServiceOne == 0);
-        public ICommand RemoveQueueCommand =>
-            new RelayCommand((obj) =>
-            {
-                var item = obj as DataQueue;
-
-                ParserQueue.Queues.Remove(item);
-                ParserQueue.Items = new(ParserQueue.Queues);
-
-            }, (obj) => ParserQueue.Items.Any() && ParserQueue.SelectedQueue != null);
-        public ICommand ClearQueueCommand =>
-            new RelayCommand((obj) =>
-            {
-                MessageBoxResult result = MessageBox.Show(
-                    "Are you sure you want to clear the list?",
-                    "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if (result == MessageBoxResult.Yes)
-                {
-                    ParserQueue.Queues.Clear();
-                    ParserQueue.Items = new();
-                }
-            }, (obj) => ParserQueue.Items.Any());
-        public ICommand PlaceOrderCommand =>
-            new RelayCommand((obj) =>
-            {
-                ParserQueue.IsBusy = true;
-                Task.Run(() => {
-                    try
-                    {
-                        SteamAccount.GetBalance();
-
-                        int success = 0;
-                        ParserQueue.MaxProgress = ParserQueue.Items.Count;
-                        ParserQueue.CurrentProgress = 0;
-                        foreach (var item in ParserQueue.Queues)
-                        {
-                            try
-                            {
-                                OrderService.PlaceOrder(item.ItemName);
-                                success++;
-                            }
-                            catch (Exception exp)
-                            {
-                                if (!exp.Message.Contains("429"))
-                                    BaseService.errorLog(exp, true);
-                                else
-                                    MessageBox.Show(exp.Message + "\n\nTo continue, you need to change the IP address.", "PlaceOrder stoped!", MessageBoxButton.OK, MessageBoxImage.Warning);
-                                break;
-                            }
-                            finally
-                            {
-                                ParserQueue.CurrentProgress++;
-                            }
-                        }
-                        Main.Notifications.Add(new()
-                        {
-                            Title = "Place Order",
-                            Message = $"{success}/{ParserQueue.Items.Count} orders has been placed."
-                        });
-                        ParserQueue.Items = new();
-                        ParserQueue.Queues.Clear();
-                    }
-                    catch (Exception ex)
-                    {
-                        BaseService.errorLog(ex, true);
-                    }
-                    finally
-                    {
-                        ParserQueue.IsBusy = false;
-                    }                    
-                });
-            }, (obj) => ParserQueue.Items.Any() && !ParserQueue.IsBusy);
-        //Reserve
+                Parser.CurrentCurrency = currency;
+                ParserFilter = new();
+                DataGridParse.GridView = CollectionViewSource.GetDefaultView(items);
+            }, (obj) => DataGridParse.Items.Any());
         public ICommand AddReserveCommand =>
             new RelayCommand((obj) =>
             {
                 var name = obj as string;
 
-                DataItem item = new(name, ParserCheckConfig.CheckedConfig.ServiceTwo);
+                DataItem item = new(name, ToolParser.ServiceTwo);
                 string message = SavedItems.Reserve.Add(item) ? $"{item.ItemName}\nItem has been added." : "Opps something went wrong...";
                 Main.Message.Enqueue(message);
-            }, (obj) => ParserCheckConfig.ServiceOne < 2);
+            }, (obj) => ToolParser.ServiceOne < 2);
         public ICommand RemoveReserveCommand =>
             new RelayCommand((obj) =>
             {
@@ -554,6 +144,127 @@ namespace ItemChecker.MVVM.ViewModel
                     Main.Message.Enqueue($"{itemName}\nRemoved from list.");
                 }
             }, (obj) => SavedItems.Reserve.Any());
-        #endregion
+        public ICommand ClearSearchCommand =>
+            new RelayCommand((obj) =>
+            {
+                SearchString = string.Empty;
+            }, (obj) => !String.IsNullOrEmpty(SearchString));
+        public ICommand ApplyCommand =>
+            new RelayCommand((obj) =>
+            {
+                DataGridParse.GridView.Filter = null;
+                DataGridParse.GridView.Filter = item => {
+                    return ParserFilter.ApplyFilter((DataParser)item);
+                };
+            }, (obj) => DataGridParse.Items.Any());
+        public ICommand ResetCommand =>
+            new RelayCommand((obj) =>
+            {
+                ParserFilter = new();
+                DataGridParse.GridView.Filter = null;
+            }, (obj) => DataGridParse.Items.Any());
+
+        //Check
+        public ToolParser ToolParser
+        {
+            get
+            {
+                return _toolParser;
+            }
+            set
+            {
+                _toolParser = value;
+                OnPropertyChanged();
+            }
+        }
+        ToolParser _toolParser = new();
+        public ICommand MaxPriceCommand =>
+            new RelayCommand((obj) =>
+            {
+                ToolParser.SetMaxPrice((int)obj);
+            });
+        public ICommand CheckCommand =>
+            new RelayCommand((obj) =>
+            {
+                DataGridParse = new();
+                ToolParser.Start();
+                Parser.CurrencyId = 0;
+                DataGridParse.Count = DataGridParse.Items.Count;
+                DataGridParse.GridView = CollectionViewSource.GetDefaultView(DataGridParse.Items.OrderByDescending(x => x.Precent));
+
+            }, (obj) => ItemsBase.List.Any() && ToolParser.ServiceOne != ToolParser.ServiceTwo
+                        && ToolParser.MaxPrice != 0 && ToolParser.MaxPrice > ToolParser.MinPrice);
+        public ICommand ContinueCheckCommand =>
+            new RelayCommand((obj) =>
+            {
+                Task.Run(() => ToolParser.Start(DataGridParse.Items.ToList()));
+            }, (obj) => !ToolParser.IsParser && ToolParser.IsStoped);
+        public ICommand ImportCommand =>
+            new RelayCommand((obj) =>
+            {
+                ImportParserWindow window = new();
+                window.ShowDialog();
+                string filePath = window.ReturnValue;
+                Task.Run(() =>
+                {
+                    var items = ToolParser.Import(filePath);
+                    if (items.Any())
+                    {
+                        DataGridParse = new();
+                        Parser.CurrencyId = 0;
+                        DataGridParse.Count = items.Count;
+                        DataGridParse.Items = items;
+
+                        Main.Message.Enqueue("The table was successfully imported.");
+                    }
+                });
+
+            }, (obj) => !ToolParser.IsParser && Directory.Exists(ProjectInfo.DocumentPath + "extract"));
+
+        //PlaceOrder
+        public ToolPlaceOrder ToolPlaceOrder
+        {
+            get { return _toolPlaceOrder; }
+            set
+            {
+                _toolPlaceOrder = value;
+                OnPropertyChanged();
+            }
+        }
+        ToolPlaceOrder _toolPlaceOrder = new();
+        public ICommand AddQueueCommand =>
+            new RelayCommand((obj) =>
+            {
+                var data = obj as DataParser;
+                var item = new DataQueue(data, Parser.CurrentCurrency);
+                ToolPlaceOrder.AddQueue(item);
+
+            }, (obj) => ToolParser.ServiceOne == 0);
+        public ICommand RemoveQueueCommand =>
+            new RelayCommand((obj) =>
+            {
+                var item = obj as DataQueue;
+                ToolPlaceOrder.Items.Remove(item);
+                ToolPlaceOrder.Update();
+
+            }, (obj) => ToolPlaceOrder.Items.Any() && ToolPlaceOrder.SelectedItem != null);
+        public ICommand ClearQueueCommand =>
+            new RelayCommand((obj) =>
+            {
+                MessageBoxResult result = MessageBox.Show(
+                    "Are you sure you want to clear the list?",
+                    "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
+                {
+                    ToolPlaceOrder.Items = new();
+                    ToolPlaceOrder.Update();
+                }
+            }, (obj) => ToolPlaceOrder.Items.Any());
+        public ICommand PlaceOrderCommand =>
+            new RelayCommand((obj) =>
+            {
+                ToolPlaceOrder.Start(ToolParser.ServiceTwo);
+                
+            }, (obj) => ToolPlaceOrder.Items.Any() && !ToolPlaceOrder.IsBusy);
     }
 }

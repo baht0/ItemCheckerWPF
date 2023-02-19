@@ -1,26 +1,14 @@
-﻿using ItemChecker.Core;
-using ItemChecker.Support;
+﻿using ItemChecker.Support;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 
 namespace ItemChecker.MVVM.Model
 {
-    public class History : ObservableObject
+    public class History : BaseModel
     {
-        public ObservableCollection<DataHistory> List
-        {
-            get { return _list; }
-            set
-            {
-                _list = value;
-                OnPropertyChanged();
-            }
-        }
-        ObservableCollection<DataHistory> _list = new();
         public DataResult Result
         {
             get
@@ -34,12 +22,7 @@ namespace ItemChecker.MVVM.Model
             }
         }
         DataResult _result = new();
-
-        public List<string> Interval
-        {
-            get
-            {
-                return new()
+        public List<string> Interval => new()
                 {
                     "All Time",
                     "1 Day",
@@ -49,38 +32,33 @@ namespace ItemChecker.MVVM.Model
                     "6 Months",
                     "1 Year",
                 };
-            }
-        }
-
-        public int CurrencyId
+    }
+    public class DataGridRecords : BaseTable<DataHistory>
+    {
+        public DataCurrency SwitchCurrency(DataCurrency currentCurrency, string currName)
         {
-            get
+            var currency = Currencies.Allow.FirstOrDefault(x => x.Name == currName);
+            List<DataHistory> items = Items.ToList();
+            if (currentCurrency.Id != 1)
+                foreach (var item in items)
+                {
+                    item.Total = Currency.ConverterToUsd(item.Total, currentCurrency.Id);
+                    item.Steam = Currency.ConverterToUsd(item.Steam, currentCurrency.Id);
+                    item.CsMoney = Currency.ConverterToUsd(item.CsMoney, currentCurrency.Id);
+                    item.LootFarm = Currency.ConverterToUsd(item.LootFarm, currentCurrency.Id);
+                    item.Buff163 = Currency.ConverterToUsd(item.Buff163, currentCurrency.Id);
+                }
+            foreach (var item in items)
             {
-                return _currencyId;
+                item.Total = Currency.ConverterFromUsd(item.Total, currency.Id);
+                item.Steam = Currency.ConverterFromUsd(item.Steam, currency.Id);
+                item.CsMoney = Currency.ConverterFromUsd(item.CsMoney, currency.Id);
+                item.LootFarm = Currency.ConverterFromUsd(item.LootFarm, currency.Id);
+                item.Buff163 = Currency.ConverterFromUsd(item.Buff163, currency.Id);
             }
-            set
-            {
-                _currencyId = value;
-                OnPropertyChanged();
-            }
+            Items = new(items.OrderByDescending(d => d.Date));
+            return currency;
         }
-        int _currencyId = 0;
-        public List<string> CurrencyList
-        {
-            get
-            {
-                return Currencies.Allow.Select(x => x.Name).ToList();
-            }
-        }
-        public static DataCurrency CurectCurrency { get; set; } = Currencies.Allow.FirstOrDefault();
-        public string CurrencySymbolSteam
-        {
-            get
-            {
-                return SteamAccount.Currency.Symbol;
-            }
-        }
-
         public static Records<DataHistory> Records { get; set; } = ReadFile().ToObject<Records<DataHistory>>();
         public static JArray ReadFile()
         {

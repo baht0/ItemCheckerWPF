@@ -1,7 +1,7 @@
 ﻿using ItemChecker.MVVM.ViewModel;
-using System;
 using System.Linq;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace ItemChecker.MVVM.View
@@ -31,7 +31,7 @@ namespace ItemChecker.MVVM.View
             if (!parserGrid.Items.IsEmpty)
             {
                 ParserViewModel viewModel = (ParserViewModel)DataContext;
-                var item = viewModel.ParserTable.SelectedItem;
+                var item = viewModel.DataGridParse.SelectedItem;
                 if (e.Key == Key.Insert && viewModel.AddQueueCommand.CanExecute(item))
                 {
                     viewModel.AddQueueCommand.Execute(item);
@@ -65,10 +65,51 @@ namespace ItemChecker.MVVM.View
         void ComboBoxSer1_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             int id = service1.SelectedIndex;
-            csmGroup.IsEnabled = id == 2;
-            maxPriceTxt.IsReadOnly = true;
+
             if (DataContext is ParserViewModel viewModel && viewModel.MaxPriceCommand.CanExecute(id))
                 viewModel.MaxPriceCommand.Execute(id);
+
+            configGrid.Children.Clear();
+            string[] binding = new string[] { "Normal", "Souvenir", "KnifeGlove", string.Empty, "Stattrak", "KnifeGloveStattrak" };
+            string[] name = new string[] { "Normal", "Souvenir", "★", string.Empty, "StatTrak™", "★ StatTrak™" };
+            name[3] = binding[3] = id == 4 || id == 5 ? "All" : "NotWeapon";
+            for (int i = 0; i < name.Length; i++)
+            {
+                dynamic button = id == 4 || id == 5 ? new RadioButton() : new CheckBox();
+                button.Content = name[i];
+                button.ToolTip = name[i] == "NotWeapon" ? "Stickers, graffiti, agents, music kit, etc." : null;
+
+                button.SetBinding(RadioButton.IsCheckedProperty, new Binding($"ParserConfig.{binding[i]}"));
+                configGrid.Children.Add(button);
+
+                switch (i)
+                {
+                    case 0:
+                        Grid.SetRow(button, 0);
+                        Grid.SetColumn(button, 0);
+                        break;
+                    case 1:
+                        Grid.SetRow(button, 1);
+                        Grid.SetColumn(button, 0);
+                        break;
+                    case 2:
+                        Grid.SetRow(button, 2);
+                        Grid.SetColumn(button, 0);
+                        break;
+                    case 3:
+                        Grid.SetRow(button, 0);
+                        Grid.SetColumn(button, 1);
+                        break;
+                    case 4:
+                        Grid.SetRow(button, 1);
+                        Grid.SetColumn(button, 1);
+                        break;
+                    case 5:
+                        Grid.SetRow(button, 2);
+                        Grid.SetColumn(button, 1);
+                        break;
+                }
+            }
         }
 
         void queueListBox_KeyDown(object sender, KeyEventArgs e)
@@ -76,7 +117,7 @@ namespace ItemChecker.MVVM.View
             if (!queueListBox.Items.IsEmpty)
             {
                 ParserViewModel viewModel = (ParserViewModel)DataContext;
-                var item = viewModel.ParserQueue.SelectedQueue;
+                var item = viewModel.ToolPlaceOrder.SelectedItem;
                 if (e.Key == Key.Back && viewModel.RemoveQueueCommand.CanExecute(item))
                     viewModel.RemoveQueueCommand.Execute(item);
                 if (e.Key == Key.F1)
@@ -95,11 +136,6 @@ namespace ItemChecker.MVVM.View
                     parserGrid.ScrollIntoView(selectedItem);
                 }
             }
-        }
-
-        void maxPriceTxt_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            maxPriceTxt.IsReadOnly = false;
         }
     }
 }
