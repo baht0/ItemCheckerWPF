@@ -34,52 +34,57 @@ namespace ItemChecker.MVVM.ViewModel
             }
         }
         History _history = new();
-        public DataGridRecords DataGridRecords
-        {
-            get
-            {
-                return _dataGridRecords;
-            }
-            set
-            {
-                _dataGridRecords = value;
-                OnPropertyChanged();
-            }
-        }
-        DataGridRecords _dataGridRecords = new();
 
         public ICommand SwitchCurrencyCommand =>
             new RelayCommand((obj) =>
             {
-                string currName = (string)obj;
-                var current = History.CurrentCurrency;
-                History.CurrentCurrency = DataGridRecords.SwitchCurrency(current, currName);
+                var currency = Currencies.Allow.FirstOrDefault(x => x.Name == (string)obj);
+                List<DataHistory> items = History.List.ToList();
+                if (History.CurectCurrency.Id != 1)
+                    foreach (var item in items)
+                    {
+                        item.Total = Currency.ConverterToUsd(item.Total, History.CurectCurrency.Id);
+                        item.Steam = Currency.ConverterToUsd(item.Steam, History.CurectCurrency.Id);
+                        item.CsMoney = Currency.ConverterToUsd(item.CsMoney, History.CurectCurrency.Id);
+                        item.LootFarm = Currency.ConverterToUsd(item.LootFarm, History.CurectCurrency.Id);
+                        item.Buff163 = Currency.ConverterToUsd(item.Buff163, History.CurectCurrency.Id);
+                    }
+                foreach (var item in items)
+                {
+                    item.Total = Currency.ConverterFromUsd(item.Total, currency.Id);
+                    item.Steam = Currency.ConverterFromUsd(item.Steam, currency.Id);
+                    item.CsMoney = Currency.ConverterFromUsd(item.CsMoney, currency.Id);
+                    item.LootFarm = Currency.ConverterFromUsd(item.LootFarm, currency.Id);
+                    item.Buff163 = Currency.ConverterFromUsd(item.Buff163, currency.Id);
+                }
+                History.CurectCurrency = currency;
+                History.List = new(items.OrderByDescending(d => d.Date));
 
-            }, (obj) => DataGridRecords.Items != null);
+            }, (obj) => History.List != null);
         public ICommand SwitchIntervalCommand =>
             new RelayCommand((obj) =>
             {
                 var index = (int)obj;
                 List<DataHistory> list = index switch
                 {
-                    1 => DataGridRecords.Records.Where(x => x.Date >= DateTime.Today.AddDays(-1)).ToList(),
-                    2 => DataGridRecords.Records.Where(x => x.Date >= DateTime.Today.AddDays(-7)).ToList(),
-                    3 => DataGridRecords.Records.Where(x => x.Date >= DateTime.Today.AddDays(-30)).ToList(),
-                    4 => DataGridRecords.Records.Where(x => x.Date >= DateTime.Today.AddMonths(-3)).ToList(),
-                    5 => DataGridRecords.Records.Where(x => x.Date >= DateTime.Today.AddMonths(-6)).ToList(),
-                    6 => DataGridRecords.Records.Where(x => x.Date >= DateTime.Today.AddYears(-1)).ToList(),
-                    _ => DataGridRecords.Records,
+                    1 => History.Records.Where(x => x.Date >= DateTime.Today.AddDays(-1)).ToList(),
+                    2 => History.Records.Where(x => x.Date >= DateTime.Today.AddDays(-7)).ToList(),
+                    3 => History.Records.Where(x => x.Date >= DateTime.Today.AddDays(-30)).ToList(),
+                    4 => History.Records.Where(x => x.Date >= DateTime.Today.AddMonths(-3)).ToList(),
+                    5 => History.Records.Where(x => x.Date >= DateTime.Today.AddMonths(-6)).ToList(),
+                    6 => History.Records.Where(x => x.Date >= DateTime.Today.AddYears(-1)).ToList(),
+                    _ => History.Records,
                 };
-                DataGridRecords.Items = new(list.OrderByDescending(d => d.Date));
+                History.List = new(list.OrderByDescending(d => d.Date));
                 if (list.Any())
                 {
                     History.Result = new DataResult()
                     {
-                        AvgBalance = Math.Round(Queryable.Average(DataGridRecords.Records.Select(x => x.Total).AsQueryable()), 2),
+                        AvgBalance = Math.Round(Queryable.Average(History.Records.Select(x => x.Total).AsQueryable()), 2),
                         StartBalance = list.FirstOrDefault().Total,
                         EndBalance = list.LastOrDefault().Total,
                     };
                 }
-            }, (obj) => DataGridRecords.Records.Any());
+            }, (obj) => History.Records.Any());
     }
 }

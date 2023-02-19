@@ -1,15 +1,44 @@
-﻿using ItemChecker.Properties;
-using ItemChecker.Support;
-using System;
+﻿using ItemChecker.Core;
+using ItemChecker.Properties;
 using System.Collections.Generic;
-using System.Linq;
-using System.Windows;
+using System.Collections.ObjectModel;
+using System.Threading;
 
 namespace ItemChecker.MVVM.Model
 {
-    public class DataGridOrders : BaseTable<DataOrder>
+    public class Home
     {
-        public static bool CanBeUpdated { get; set; }
+        public string CurrencySymbol { get; set; } = SteamAccount.Currency.Symbol;
+    }
+    public class HomeTable : ObservableObject
+    {
+        public ObservableCollection<DataOrder> OrderedGrid
+        {
+            get
+            {
+                return _orderedGrid;
+            }
+            set
+            {
+                _orderedGrid = value;
+                OnPropertyChanged();
+            }
+        }
+        ObservableCollection<DataOrder> _orderedGrid = new(SteamMarket.Orders);
+        public DataOrder SelectedOrderItem
+        {
+            get
+            {
+                return _selectedOrderItem;
+            }
+            set
+            {
+                _selectedOrderItem = value;
+                OnPropertyChanged();
+            }
+        }
+        DataOrder _selectedOrderItem;
+
         public bool IsBusy
         {
             get
@@ -23,111 +52,237 @@ namespace ItemChecker.MVVM.Model
             }
         }
         bool _isBusy = true;
+    }
+    //tools
+    public class HomePush : ObservableObject
+    {
+        public static System.Timers.Timer Timer { get; set; } = new(1000);
+        public static int TimerTick { get; set; }
+        public static CancellationTokenSource cts { get; set; } = new();
+        public static CancellationToken token { get; set; } = cts.Token;
 
-        public void ShowItemInService(int columnId)
+        public List<string> ServicesList
         {
-            var item = SelectedItem;
-            string itemName = item.ItemName.Replace("(Holo/Foil)", "(Holo-Foil)");
-            string market_hash_name = Uri.EscapeDataString(itemName);
-            switch (columnId)
+            get
             {
-                case 1:
-                    Edit.OpenUrl("https://steamcommunity.com/market/listings/730/" + market_hash_name);
-                    break;
-                case 2 or 3:
-                    switch (HomeProperties.Default.ServiceId)
-                    {
-                        case 0 or 1:
-                            Edit.OpenUrl("https://steamcommunity.com/market/listings/730/" + market_hash_name);
-                            break;
-                        case 2:
-                            Edit.OpenCsm(itemName);
-                            break;
-                        case 3:
-                            Edit.OpenUrl("https://loot.farm/");
-                            break;
-                        case 4:
-                            var id = ItemsBase.List.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id;
-                            if (id != 0)
-                                Edit.OpenUrl("https://buff.163.com/goods/" + id + "#tab=buying");
-                            else
-                                Edit.OpenUrl("https://buff.163.com/market/csgo#tab=buying&page_num=1&search=" + market_hash_name);
-                            break;
-                        case 5:
-                            id = ItemsBase.List.FirstOrDefault(x => x.ItemName == item.ItemName).Buff.Id;
-                            if (id != 0)
-                                Edit.OpenUrl("https://buff.163.com/goods/" + id);
-                            else
-                                Edit.OpenUrl("https://buff.163.com/market/csgo#tab=selling&page_num=1&search=" + market_hash_name);
-                            break;
-                    }
-                    break;
-                default:
-                    Clipboard.SetText(itemName);
-                    break;
+                return Main.Services;
             }
         }
-        public void CancelOrder(DataOrder item)
+        public int ServiceId
         {
-            try
+            get
             {
-                IsBusy = true;
-                MessageBoxResult result = MessageBox.Show(
-                    $"Are you sure you want to cancel order?\n{item.ItemName}",
-                    "Question", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if (result == MessageBoxResult.Yes)
+                return _serviceId;
+            }
+            set
+            {
+                _serviceId = value;
+                HomeProperties.Default.ServiceId = value;
+                HomeProperties.Default.Save();
+                OnPropertyChanged();
+            }
+        }
+        int _serviceId = HomeProperties.Default.ServiceId;
+        public int MinPrecent
+        {
+            get
+            {
+                return _minPrecent;
+            }
+            set
+            {
+                _minPrecent = value;
+                HomeProperties.Default.MinPrecent = value;
+                HomeProperties.Default.Save();
+                OnPropertyChanged();
+            }
+        }
+        int _minPrecent = HomeProperties.Default.MinPrecent;
+        public int Time { get; set; } = HomeProperties.Default.Time;
+
+        public bool IsService
+        {
+            get
+            {
+                return _isService;
+            }
+            set
+            {
+                _isService = value;
+                OnPropertyChanged();
+            }
+        }
+        bool _isService;
+        public int Check
+        {
+            get
+            {
+                return _check;
+            }
+            set
+            {
+                _check = value;
+                OnPropertyChanged();
+            }
+        }
+        int _check = 0;
+        public int Push
+        {
+            get
+            {
+                return _push;
+            }
+            set
+            {
+                _push = value;
+                OnPropertyChanged();
+            }
+        }
+        int _push = 0;
+        public int Progress
+        {
+            get { return _progress; }
+            set
+            {
+                _progress = value;
+                OnPropertyChanged();
+            }
+        }
+        int _progress = 0;
+        public int MaxProgress
+        {
+            get { return _maxProgress; }
+            set
+            {
+                _maxProgress = value;
+                OnPropertyChanged();
+            }
+        }
+        int _maxProgress = 0;
+        public string Status
+        {
+            get { return _status; }
+            set
+            {
+                _status = value;
+                OnPropertyChanged();
+            }
+        }
+        string _status = string.Empty;
+    }
+    //inventory
+    public class HomeInventoryConfig : ObservableObject
+    {
+        public bool AllAvailable { get; set; }
+        public bool SelectedOnly { get; set; } = true;
+        public List<string> SellingPrice { get; set; } = new()
+        {
+            "LowestSellOrder",
+            "HighestBuyOrder",
+            "Custom",
+        };
+        public int SellingPriceId { get; set; }
+        public decimal Price { get; set; }
+
+        public List<string> Tasks
+        {
+            get
+            {
+                return new()
                 {
-                    SteamAccount.Orders.Cancel(item);
-                    Items = new(SteamAccount.Orders);
-                    Main.Message.Enqueue($"{item.ItemName}\nOrder has been canceled.");
-                }
-            }
-            catch (Exception ex)
-            {
-                BaseModel.ErrorLog(ex, true);
-            }
-            finally
-            {
-                IsBusy = false;
+                    "TradeOffers",
+                    "QuickSell",
+                };
             }
         }
-        public void UpdateTable()
+        public int TaskId
         {
-            try
+            get
             {
-                IsBusy = true;
-                OrderCheckService.SteamOrders(true);
-                Items = new(SteamAccount.Orders);
-                Main.Message.Enqueue("MyOrders update is complete.");
+                return _taskId;
             }
-            catch (Exception ex)
+            set
             {
-                BaseModel.ErrorLog(ex, true);
-            }
-            finally
-            {
-                IsBusy = false;
+                _taskId = value;
+                OnPropertyChanged();
             }
         }
-        public void CancelOrders()
+        int _taskId;
+    }
+    public class HomeInventoryInfo : ObservableObject
+    {
+        public ObservableCollection<DataInventory> Items
         {
-            try
+            get { return _items; }
+            set
             {
-                IsBusy = true;
-                List<DataOrder> orders = new(SteamAccount.Orders);
-                foreach (DataOrder order in orders)
-                    SteamAccount.Orders.Cancel(order);
-                Items = new(SteamAccount.Orders);
-                Main.Message.Enqueue("All MyOrders have been cancelled.");
-            }
-            catch (Exception ex)
-            {
-                BaseModel.ErrorLog(ex, true);
-            }
-            finally
-            {
-                IsBusy = false;
+                _items = value;
+                OnPropertyChanged();
             }
         }
+        ObservableCollection<DataInventory> _items = new();
+
+        public decimal SumOfItems
+        {
+            get
+            {
+                return _sumOfItems;
+            }
+            set
+            {
+                _sumOfItems = value;
+                OnPropertyChanged();
+            }
+        }
+        decimal _sumOfItems;
+        public bool IsService
+        {
+            get
+            {
+                return _isService;
+            }
+            set
+            {
+                _isService = value;
+                OnPropertyChanged();
+            }
+        }
+        bool _isService;
+        public int Progress
+        {
+            get { return _progress; }
+            set
+            {
+                _progress = value;
+                OnPropertyChanged();
+            }
+        }
+        int _progress = 0;
+        public int MaxProgress
+        {
+            get { return _maxProgress; }
+            set
+            {
+                _maxProgress = value;
+                OnPropertyChanged();
+            }
+        }
+        int _maxProgress = 0;
+        public bool IsBusy
+        {
+            get
+            {
+                return _isBusy;
+            }
+            set
+            {
+                _isBusy = value;
+                OnPropertyChanged();
+            }
+        }
+        bool _isBusy;
+
+        public static CancellationTokenSource cts { get; set; } = new();
+        public static CancellationToken token { get; set; } = cts.Token;
     }
 }

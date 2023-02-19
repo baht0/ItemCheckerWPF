@@ -52,6 +52,17 @@ namespace ItemChecker.MVVM.ViewModel
         }
         SettingsAbout _about = new();
 
+        public ICommand GetCurrencyApiCommand
+        {
+            get
+            {
+                return new RelayCommand((obj) =>
+                {
+                    Edit.OpenUrl("https://free.currencyconverterapi.com/free-api-key");
+                    Edit.OpenUrl("https://openexchangerates.org/signup/free");
+                });
+            }
+        }
         //steam
         public ICommand LogoutCommand =>
             new RelayCommand((obj) =>
@@ -100,7 +111,6 @@ namespace ItemChecker.MVVM.ViewModel
                             item.Buff.Updated = DateTime.MinValue;
                         break;
                 }
-                Message.Enqueue("Reseted successfully.");
             });
         //about
         public ICommand CreateCurrentVersionCommand =>

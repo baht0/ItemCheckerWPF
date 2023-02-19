@@ -28,7 +28,7 @@
                 <RowDefinition Height="25"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <TextBlock Text="{Binding DataGridOrders.Items.Count, StringFormat='My Buy Orders: {0}'}" 
+            <TextBlock Text="{Binding HomeTable.OrderedGrid.Count, StringFormat='My Buy Orders: {0}'}" 
                        VerticalAlignment="Center" FontSize="18"/>
             <VirtualizingStackPanel Grid.Row="0" Background="Transparent" HorizontalAlignment="Right"
                                     Orientation="Horizontal" VirtualizationMode="Recycling">
@@ -43,25 +43,25 @@
             </VirtualizingStackPanel>
             <DataGrid x:Name="ordersGrid" Grid.Row="1" AlternationCount="2" AlternatingRowBackground="{DynamicResource ElementBackground}"
                       AutoGenerateColumns="False" ToolTip="Press 'Backspace' to cancel order"
-                      ItemsSource="{Binding DataGridOrders.Items, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding DataGridOrders.SelectedItem}"
+                      ItemsSource="{Binding HomeTable.OrderedGrid, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding HomeTable.SelectedOrderItem}"
                       KeyDown="DataGrid_KeyDown" SelectionMode="Single" MouseDoubleClick="DataGrid_MouseDoubleClick"
                       IsReadOnly="True" CanUserReorderColumns="False" CanUserResizeRows="False" CanUserResizeColumns="False">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Item" Binding="{Binding ItemName}" CanUserResize="False" Width="auto" MaxWidth="400" MinWidth="320"/>
                     <DataGridTextColumn Binding="{Binding OrderPrice}" CanUserResize="False" Width="auto" FontWeight="Bold">
                         <DataGridTextColumn.Header>
-                            <TextBlock Text="{Binding DataContext.Home.CurrencySteamSymbol, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat='BuyOrder ({0})'}"/>
+                            <TextBlock Text="{Binding DataContext.Home.CurrencySymbol, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat='BuyOrder ({0})'}"/>
                         </DataGridTextColumn.Header>
                     </DataGridTextColumn>
                     <DataGridTextColumn Header="Price" Binding="{Binding ServicePrice}" CanUserResize="False" Width="auto"/>
                     <DataGridTextColumn Header="Get" Binding="{Binding ServiceGive}" CanUserResize="False" Width="auto"/>
-                    <DataGridTextColumn Header="Precent" Binding="{Binding Precent, StringFormat='{}{0}%'}" CanUserResize="False" Width="auto" FontWeight="Bold"/>
+                    <DataGridTextColumn Header="Precent" Binding="{Binding Precent}" CanUserResize="False" Width="auto"/>
                     <DataGridTextColumn Header="Difference" Binding="{Binding Difference}" CanUserResize="False" Width="auto" MaxWidth="110"/>
                 </DataGrid.Columns>
             </DataGrid>
-            <Grid Grid.Row="1" Background="Transparent" Visibility="{Binding DataGridOrders.IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <ProgressBar VerticalAlignment="Center" HorizontalAlignment="Center" IsIndeterminate="True" Style="{StaticResource MaterialDesignCircularProgressBar}"/>
-            </Grid>
+            <ProgressBar Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" IsIndeterminate="True"
+                         Visibility="{Binding HomeTable.IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
+                         Style="{StaticResource MaterialDesignCircularProgressBar}"/>
         </Grid>
         <!--panel-->
         <Grid Grid.Column="1" HorizontalAlignment="Center">
@@ -87,18 +87,18 @@
                         <TextBlock VerticalAlignment="Center" FontWeight="Bold" Grid.ColumnSpan="2">
                             <TextBlock.Text>
                                 <MultiBinding StringFormat="Check: {0} | Pushed: {1}">
-                                    <Binding Path="PushTool.Check"/>
-                                    <Binding Path="PushTool.Count"/>
+                                    <Binding Path="HomePush.Check"/>
+                                    <Binding Path="HomePush.Push"/>
                                 </MultiBinding>
                             </TextBlock.Text>
                         </TextBlock>
                         <Button ToolTip="Reserve items" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignToolForegroundButton}"
-                                Click="ListShow_Click" IsEnabled="{Binding PushTool.IsService, Converter={StaticResource InvertBooleanConverter}}">
+                                Click="ListShow_Click" IsEnabled="{Binding HomePush.IsService, Converter={StaticResource InvertBooleanConverter}}">
                             <materialDesign:PackIcon Kind="FormatListBulleted"/>
                         </Button>
                         <Separator Grid.ColumnSpan="2" VerticalAlignment="Bottom" Height="3"/>
                         <!--body-->
-                        <Grid Grid.Row="1" Margin="2" IsEnabled="{Binding PushTool.IsService, Converter={StaticResource InvertBooleanConverter}}">
+                        <Grid Grid.Row="1" Margin="2" IsEnabled="{Binding HomePush.IsService, Converter={StaticResource InvertBooleanConverter}}">
                             <Grid.RowDefinitions>
                                 <RowDefinition/>
                                 <RowDefinition/>
@@ -111,12 +111,12 @@
                             </Grid.ColumnDefinitions>
 
                             <TextBlock Text="Service:" VerticalAlignment="Center"/>
-                            <ComboBox Grid.Column="1" Grid.ColumnSpan="2" VerticalAlignment="Center" x:Name="serviceCmb" SelectionChanged="serviceCmb_SelectionChanged"
-                                      ItemsSource="{Binding Home.Services}" SelectedIndex="{Binding PushTool.ServiceId}"/>
+                            <ComboBox Grid.Column="1" Grid.ColumnSpan="2" VerticalAlignment="Center" x:Name="serviceCmb"
+                                      ItemsSource="{Binding HomePush.ServicesList}" SelectedIndex="{Binding HomePush.ServiceId}"/>
 
                             <TextBlock Grid.Row="1" Text="Min. Precent:" VerticalAlignment="Center"/>
                             <TextBox Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" ToolTip="Cancel order less than" x:Name="minPrecentTxt"
-                                     Text="{Binding PushTool.MinPrecent}" TextInput="InputInt" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
+                                     Text="{Binding HomePush.MinPrecent}" PreviewTextInput="InputInt" Validation.ErrorTemplate="{StaticResource ResourceKey=ValidError}"/>
                             <TextBlock Grid.Row="1" Grid.Column="2" Text="%" Height="15" VerticalAlignment="Center"/>
 
                             <TextBlock Grid.Row="2" Grid.ColumnSpan="3" Text="Every 5th check the program will place an order from the Reserve list."
@@ -131,21 +131,21 @@
 
                             <VirtualizingStackPanel Orientation="Horizontal">
                                 <TextBlock VerticalAlignment="Center" Text="Timer: "/>
-                                <TextBlock VerticalAlignment="Center" Text="{Binding PushTool.StatusStr}" Cursor="Hand"
-                                           PreviewMouseDown="TimerPush_PreviewMouseDown" Visibility="{Binding PushTool.IsService, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                                <StackPanel Orientation="Horizontal" Margin="5 0 0 0" Visibility="{Binding PushTool.IsService, Converter={StaticResource InverseBoolToVisConverter}}">
-                                    <TextBox Width="50" Text="{Binding PushTool.TimeMin}" PreviewTextInput="InputInt"
+                                <TextBlock VerticalAlignment="Center" Text="{Binding HomePush.Status}" Cursor="Hand"
+                                           PreviewMouseDown="TimerPush_PreviewMouseDown" Visibility="{Binding HomePush.IsService, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                <StackPanel Orientation="Horizontal" Margin="5 0 0 0" Visibility="{Binding HomePush.IsService, Converter={StaticResource InverseBoolToVisConverter}}">
+                                    <TextBox Width="50" Text="{Binding HomePush.Time}" PreviewTextInput="InputInt"
                                              VerticalAlignment="Center" HorizontalAlignment="Right"/>
                                     <TextBlock Text="min." VerticalAlignment="Center"/>
                                 </StackPanel>
                             </VirtualizingStackPanel>
 
                             <Button Grid.Row="1" Grid.Column="2" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignFlatButton}"
-                                    Command="{Binding PushCommand}" CommandParameter="{Binding PushTool}">
-                                <materialDesign:PackIcon Kind="{Binding PushTool.IsService, Converter={StaticResource BooleanToPlayButtonConverter}}"/>
+                                    Command="{Binding PushCommand}" CommandParameter="{Binding HomePush}">
+                                <materialDesign:PackIcon Kind="{Binding HomePush.IsService, Converter={StaticResource BooleanToPlayButtonConverter}}"/>
                             </Button>
                             <ProgressBar Grid.Row="1" Grid.ColumnSpan="3" VerticalAlignment="Bottom" Height="3" Style="{StaticResource MaterialDesignLinearProgressBar}"
-                                         Maximum="{Binding PushTool.MaxProgress}" Value="{Binding PushTool.Progress}"/>
+                                         Maximum="{Binding HomePush.MaxProgress}" Value="{Binding HomePush.Progress}"/>
                         </Grid>
                     </Grid>
                     <!--Inventory-->
@@ -158,14 +158,14 @@
                         <TextBlock VerticalAlignment="Center" FontWeight="Bold">
                             <TextBlock.Text>
                                 <MultiBinding StringFormat="Items: {0} | {1}$">
-                                    <Binding Path="InventoryTool.Items.Count"/>
-                                    <Binding Path="InventoryTool.SumOfItems"/>
+                                    <Binding Path="HomeInventoryInfo.Items.Count"/>
+                                    <Binding Path="HomeInventoryInfo.SumOfItems"/>
                                 </MultiBinding>
                             </TextBlock.Text>
                         </TextBlock>
                         <Button ToolTip="Refresh Inventory" HorizontalAlignment="Right"
                                 Style="{StaticResource MaterialDesignToolForegroundButton}"
-                                Command="{Binding UpdateInventoryCommand}">
+                                Command="{Binding UpdateInformationsCommand}">
                             <materialDesign:PackIcon Kind="Reload"/>
                         </Button>
                         <Separator VerticalAlignment="Bottom"/>
@@ -174,7 +174,7 @@
                             <TextBlock Text="Click the 'Refresh Inventory' button to load the items." TextWrapping="Wrap" TextAlignment="Center"
                                        VerticalAlignment="Center" HorizontalAlignment="Center" FontStyle="Italic"/>
                         </Grid>
-                        <Grid Grid.Row="1" Visibility="{Binding InventoryTool.Items.Count, Converter={StaticResource IntToVisibilityConverter}}"
+                        <Grid Grid.Row="1" Visibility="{Binding HomeInventoryInfo.Items.Count, Converter={StaticResource IntToVisibilityConverter}}"
                               x:Name="inventoryGrid" Height="510" VerticalAlignment="Top">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="105"/>
@@ -183,20 +183,20 @@
                             <!--info-->
                             <GroupBox Grid.Row="0" Style="{x:Null}" BorderThickness="0.5" Margin="5">
                                 <GroupBox.Header>
-                                    <TextBlock Text="{Binding InventoryTool.SelectedItem.Data.Count, StringFormat='Count: {0}'}"/>
+                                    <TextBlock Text="{Binding SelectedInventory.Data.Count, StringFormat='Count: {0}'}"/>
                                 </GroupBox.Header>
                                 <Grid Margin="1">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="45"/>
                                         <RowDefinition Height="25"/>
                                     </Grid.RowDefinitions>
-                                    <TextBlock Grid.Row="0" VerticalAlignment="Center" TextWrapping="Wrap" Text="{Binding InventoryTool.SelectedItem.ItemName}"/>
+                                    <TextBlock Grid.Row="0" VerticalAlignment="Center" TextWrapping="Wrap" Text="{Binding SelectedInventory.ItemName}"/>
                                     <TextBlock Grid.Row="1" VerticalAlignment="Center" FontWeight="Bold"
-                                               Text="{Binding InventoryTool.SelectedItem.Data[0].TradeLock, StringFormat='TradeLock: {0}', Converter={StaticResource TradeLockConverter}}"/>
+                                               Text="{Binding SelectedInventory.Data[0].TradeLock, StringFormat='TradeLock: {0}', Converter={StaticResource TradeLockConverter}}"/>
                                 </Grid>
                             </GroupBox>
                             <ListBox Grid.Row="1" KeyDown="inventoryListBox_KeyDown" Background="{DynamicResource ElementBackground}"
-                                     ItemsSource="{Binding InventoryTool.Items}" SelectedItem="{Binding InventoryTool.SelectedItem}"
+                                     ItemsSource="{Binding HomeInventoryInfo.Items}" SelectedItem="{Binding SelectedInventory}"
                                      x:Name="inventoryListBox" MouseDoubleClick="inventoryListBox_MouseDoubleClick" ToolTip="'Double Click' to show item in inventory">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
@@ -218,14 +218,14 @@
                                     <ColumnDefinition/>
                                 </Grid.ColumnDefinitions>
                                 <RadioButton Grid.Row="0" Grid.Column="0" Content="All available" x:Name="allAvailable" Checked="allAvailable_Checked"
-                                             IsChecked="{Binding InventoryTool.AllAvailable}"/>
+                                             IsChecked="{Binding HomeInventoryConfig.AllAvailable}"/>
                                 <RadioButton Grid.Row="0" Grid.Column="1" Content="Selected only" x:Name="selectedOnly" Checked="selectedOnly_Checked"
-                                             IsChecked="{Binding InventoryTool.SelectedOnly}"/>
+                                             IsChecked="{Binding HomeInventoryConfig.SelectedOnly}"/>
                                 <TextBlock Grid.Row="1" Text="Selling price:" VerticalAlignment="Center"/>
-                                <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding InventoryTool.SellingPrice}" x:Name="priceCombox"
-                                          SelectedIndex="{Binding InventoryTool.SellingPriceId}" SelectionChanged="priceCombox_SelectionChanged"/>
-                                <TextBlock Grid.Row="2" Text="{Binding Home.CurrencySteamSymbol, StringFormat='Price ({0}):'}" VerticalAlignment="Center"/>
-                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding InventoryTool.Price}" VerticalAlignment="Center" x:Name="sellPrice"
+                                <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding HomeInventoryConfig.SellingPrice}" x:Name="priceCombox"
+                                          SelectedIndex="{Binding HomeInventoryConfig.SellingPriceId}" SelectionChanged="priceCombox_SelectionChanged"/>
+                                <TextBlock Grid.Row="2" Text="{Binding Home.CurrencySymbol, StringFormat='Price ({0}):'}" VerticalAlignment="Center"/>
+                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding HomeInventoryConfig.Price}" VerticalAlignment="Center" x:Name="sellPrice"
                                          Validation.ErrorTemplate="{StaticResource ValidError}"/>
                             </Grid>
                         </GroupBox>
@@ -236,14 +236,14 @@
                                 <ColumnDefinition/>
                                 <ColumnDefinition Width="50"/>
                             </Grid.ColumnDefinitions>
-                            <ComboBox VerticalAlignment="Center" ItemsSource="{Binding InventoryTool.Tasks}" SelectedIndex="{Binding InventoryTool.TaskId}"
+                            <ComboBox VerticalAlignment="Center" ItemsSource="{Binding HomeInventoryConfig.Tasks}" SelectedIndex="{Binding HomeInventoryConfig.TaskId}"
                                       SelectionChanged="inventComboBox_SelectionChanged" x:Name="invenTasks"/>
                             <Button Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignFlatButton}"
-                                    Command="{Binding InventoryTaskCommand}">
-                                <materialDesign:PackIcon Kind="{Binding InventoryTool.IsService, Converter={StaticResource BooleanToPlayButtonConverter}}"/>
+                                    Command="{Binding InventoryTaskCommand}" CommandParameter="{Binding HomeInventoryConfig}">
+                                <materialDesign:PackIcon Kind="{Binding HomeInventoryInfo.IsService, Converter={StaticResource BooleanToPlayButtonConverter}}"/>
                             </Button>
                             <ProgressBar Grid.ColumnSpan="3" VerticalAlignment="Bottom" Height="3" Style="{StaticResource MaterialDesignLinearProgressBar}"
-                                         Maximum="{Binding InventoryTool.MaxProgress}" Value="{Binding InventoryTool.Progress}"/>
+                                         Maximum="{Binding HomeInventoryInfo.MaxProgress}" Value="{Binding HomeInventoryInfo.Progress}"/>
                         </Grid>
                     </Grid>
                 </Grid>

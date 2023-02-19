@@ -7,7 +7,7 @@
         xmlns:viewmodel="clr-namespace:ItemChecker.MVVM.ViewModel"
         xmlns:customConverter="clr-namespace:ItemChecker.Converter"
         mc:Ignorable="d"
-        Title="Import" Height="370" Width="850"
+        Title="Import" Height="430" Width="850"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         d:DataContext="{d:DesignInstance Type=viewmodel:ImportParserViewModel}"
         Background="{DynamicResource Background}"
@@ -54,7 +54,7 @@
                     </Grid.RowDefinitions>
                     <TextBlock Grid.Column="1" VerticalAlignment="Center"
                                FontWeight="Bold" FontSize="14" TextWrapping="Wrap"
-                               Text="{Binding ImportParser.Items.Count, StringFormat='Count: {0}'}"/>
+                               Text="{Binding ImportParser.List.Count, StringFormat='Count: {0}'}"/>
                     <Button HorizontalAlignment="Right" Height="25"
                             Style="{StaticResource MaterialDesignToolForegroundButton}" 
                             Command="{Binding ClearCommand}">
@@ -65,8 +65,8 @@
                               AutoGenerateColumns="False" IsReadOnly="True" x:Name="filesGrid" SelectionMode="Single" CanUserSortColumns="False"
                               ToolTip="'Double Click' to load&#x0a;Press 'Backspace' to delete"
                               KeyDown="filesGrid_KeyDown" MouseDoubleClick="filesGrid_MouseDoubleClick"
-                              ItemsSource="{Binding ImportParser.Items, UpdateSourceTrigger=PropertyChanged}"
-                              SelectedItem="{Binding ImportParser.SelectedItem}">
+                              ItemsSource="{Binding ImportParser.List, UpdateSourceTrigger=PropertyChanged}"
+                              SelectedItem="{Binding ImportParser.Selected}">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Date" Binding="{Binding CheckedTime, StringFormat='{}{0:dd MMM hh:mm tt}'}" CanUserResize="False" Width="140"/>
                             <DataGridTextColumn Header="From" Binding="{Binding ServiceOne, Converter={StaticResource ServiceIdToServiceNameConverter}}" CanUserResize="False" Width="130"/>
@@ -88,14 +88,15 @@
                     <Separator VerticalAlignment="Bottom"/>
                     <Grid Grid.Row="1" Background="{DynamicResource Background}">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="115"/>
+                            <RowDefinition Height="160"/>
                             <RowDefinition Height="60"/>
                             <RowDefinition Height="100"/>
                         </Grid.RowDefinitions>
                         <GroupBox Grid.Row="0" Style="{DynamicResource none}" BorderThickness="0">
                             <Grid>
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="32"/>
+                                    <RowDefinition Height="40"/>
+                                    <RowDefinition/>
                                     <RowDefinition/>
                                     <RowDefinition/>
                                     <RowDefinition/>
@@ -106,29 +107,55 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Price:" VerticalAlignment="Center" ToolTip="For Service 1"/>
                                 <VirtualizingStackPanel Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                    <TextBox Width="60" Height="23" Text="{Binding ImportParser.SelectedItem.MinPrice}"/>
+                                    <TextBox Width="60" Height="23" Text="{Binding ImportParser.Selected.MinPrice}"/>
                                     <TextBlock Margin="8 0 8 0" Text="-" VerticalAlignment="Center"/>
-                                    <TextBox Width="60" Height="23" Text="{Binding ImportParser.SelectedItem.MaxPrice}"/>
+                                    <TextBox Width="60" Height="23" Text="{Binding ImportParser.Selected.MaxPrice}"/>
                                     <TextBlock Grid.Column="4" Text="$" VerticalAlignment="Center"/>
                                 </VirtualizingStackPanel>
                                 <CheckBox Grid.Row="1" Grid.Column="0" x:Name="Normal"
-                                              IsChecked="{Binding ImportParser.SelectedItem.Normal}"
+                                              IsChecked="{Binding ImportParser.Selected.Normal}"
                                               Content="Normal"/>
                                 <CheckBox Grid.Row="1" Grid.Column="1" x:Name="NotWeapon"
-                                              IsChecked="{Binding ImportParser.SelectedItem.NotWeapon}"
+                                              IsChecked="{Binding ImportParser.Selected.NotWeapon}"
                                               Content="Not Weapon" ToolTip="Stickers, graffiti, agents, music kit, etc."/>
                                 <CheckBox Grid.Row="2" Grid.Column="0" x:Name="Souvenir"
-                                              IsChecked="{Binding ImportParser.SelectedItem.Souvenir}"
+                                              IsChecked="{Binding ImportParser.Selected.Souvenir}"
                                               Content="Souvenir"/>
                                 <CheckBox Grid.Row="2" Grid.Column="1" x:Name="Stattrak"
-                                              IsChecked="{Binding ImportParser.SelectedItem.Stattrak}"
+                                              IsChecked="{Binding ImportParser.Selected.Stattrak}"
                                               Content="StatTrak™"/>
                                 <CheckBox Grid.Row="3" Grid.Column="0" x:Name="KnifeGlove"
-                                              IsChecked="{Binding ImportParser.SelectedItem.KnifeGlove}"
+                                              IsChecked="{Binding ImportParser.Selected.KnifeGlove}"
                                               Content="★"/>
                                 <CheckBox Grid.Row="3" Grid.Column="1" x:Name="KnifeGloveStattrak"
-                                              IsChecked="{Binding ImportParser.SelectedItem.KnifeGloveStattrak}"
+                                              IsChecked="{Binding ImportParser.Selected.KnifeGloveStattrak}"
                                               Content="★ StatTrak™"/>
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="Items Only:" VerticalAlignment="Center"/>
+                                <ComboBox Grid.Row="4" Grid.Column="1" ItemsSource="{Binding ImportParser.Selected.OnlyList}" SelectedIndex="{Binding ImportParser.Selected.SelectedOnly}"/>
+                            </Grid>
+                        </GroupBox>
+                        <GroupBox Grid.Row="1" Style="{DynamicResource none}" BorderThickness="0" x:Name="csmGroup">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <CheckBox Grid.Row="0" Grid.Column="0"
+                                              IsChecked="{Binding ImportParser.Selected.WithoutLock}"
+                                              Content="WithoutLock"
+                                              ToolTip="Show only without trade lock items"/>
+                                <CheckBox Grid.Row="0" Grid.Column="1"
+                                              IsChecked="{Binding ImportParser.Selected.UserItems}"
+                                              Content="UserItems"
+                                              ToolTip="Allow users items"/>
+                                <CheckBox Grid.Row="1" Grid.Column="0"
+                                              IsChecked="{Binding ImportParser.Selected.RareItems}"
+                                              Content="RareItems"
+                                              ToolTip="Allow rare items"/>
                             </Grid>
                         </GroupBox>
                         <GroupBox Grid.Row="2" Style="{DynamicResource none}" Header="Information:" BorderThickness="0.5">
@@ -143,15 +170,15 @@
                                     <RowDefinition/>
                                 </Grid.RowDefinitions>
                                 <TextBlock Text="From:" Grid.Row="0" VerticalAlignment="Center"/>
-                                <TextBlock Text="{Binding ImportParser.SelectedItem.ServiceOne, Converter={StaticResource ServiceIdToServiceNameConverter}}" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding ImportParser.Selected.ServiceOne, Converter={StaticResource ServiceIdToServiceNameConverter}}" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center"/>
                                 <TextBlock Text="To:" Grid.Row="1" VerticalAlignment="Center"/>
-                                <TextBlock Text="{Binding ImportParser.SelectedItem.ServiceTwo, Converter={StaticResource ServiceIdToServiceNameConverter}}" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding ImportParser.Selected.ServiceTwo, Converter={StaticResource ServiceIdToServiceNameConverter}}" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center"/>
                                 <TextBlock Text="Checked:" Grid.Row="2" VerticalAlignment="Center"/>
-                                <TextBlock Text="{Binding ImportParser.SelectedItem.CheckedTime, StringFormat='{}{0:dd MMM hh:mm tt}'}" Grid.Row="3" Grid.Column="2" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding ImportParser.Selected.CheckedTime, StringFormat='{}{0:dd MMM hh:mm tt}'}" Grid.Row="3" Grid.Column="2" VerticalAlignment="Center"/>
                             </Grid>
                         </GroupBox>
                     </Grid>
-                    <Grid Grid.Row="1" Background="Transparent" Cursor="No"/>
+                    <Grid Grid.Row="1" Background="Transparent"/>
                     <Grid Grid.Row="1" Background="{DynamicResource Background}" Visibility="{Binding ImportParser.IsInfoShow, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                         <TextBlock Text="Select an export file from the table to see the configuration." TextWrapping="Wrap" TextAlignment="Center"
                                    VerticalAlignment="Center" HorizontalAlignment="Center" FontStyle="Italic"/>

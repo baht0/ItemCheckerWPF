@@ -1,12 +1,10 @@
-﻿using HtmlAgilityPack;
-using ItemChecker.Net;
+﻿using ItemChecker.Net;
 using ItemChecker.Properties;
 using ItemChecker.Support;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 
 namespace ItemChecker.MVVM.Model
 {
@@ -27,166 +25,14 @@ namespace ItemChecker.MVVM.Model
                 }
             }
         }
-    }
-    public class OrderCheckService
-    {
-        public static void SteamOrders(bool isUpdateService)
+        public static decimal MaxAmount
         {
-            SteamAccount.Orders.Clear();
-            int canceled = 0;
-
-            HtmlDocument htmlDoc = new();
-            Thread.Sleep(500);
-            htmlDoc.LoadHtml(SteamRequest.Get.Request("https://steamcommunity.com/market/"));
-            int index = htmlDoc.DocumentNode.SelectSingleNode("//div[@class='my_listing_section market_content_block market_home_listing_table']/h3/span[1]").InnerText.Trim() != "My listings awaiting confirmation" ? 1 : 2;
-            HtmlNodeCollection items = htmlDoc.DocumentNode.SelectNodes("//div[@class='my_listing_section market_content_block market_home_listing_table'][" + index + "]/div[@class='market_listing_row market_recent_listing_row']");
-
-            if (items != null)
+            get
             {
-                foreach (HtmlNode item in items)
-                {
-                    DataOrder data = CheckOrder(item);
-                    data = SetService(data, isUpdateService);
-
-                    canceled += SteamAccount.Orders.Add(data) ? 0 : 1;
-                }
-                canceled += SteamAccount.Orders.CancelMinPrecent() ? 1 : 0;
-                if (canceled > 0)
-                    Main.Notifications.Add(new()
-                    {
-                        Title = "Orders",
-                        Message = $"{canceled} orders were canceled."
-                    });
+                return SteamAccount.Balance * 10;
             }
         }
-
-        static DataOrder CheckOrder(HtmlNode item)
-        {
-            string itemName = item.SelectSingleNode(".//div[4]/span/a").InnerText.Trim();
-            string order_id = item.Attributes["id"].Value;
-            string order_price = item.SelectSingleNode(".//div[2]/span/span[@class='market_listing_price']").InnerText.Trim();
-            decimal orderPrice = Edit.GetDecimal(order_price[3..].Trim());
-
-            DataOrder data = new()
-            {
-                ItemName = itemName,
-                Id = order_id.Replace("mybuyorder_", string.Empty),
-                OrderPrice = orderPrice
-            };
-            return data;
-        }
-        static DataOrder SetService(DataOrder data, bool isUpdateService)
-        {
-            int serviceId = HomeProperties.Default.ServiceId;
-            switch (serviceId)
-            {
-                case 0:
-                    {
-                        data.ServicePrice = 0;
-                        data.ServiceGive = 0;
-                        data.Precent = -100;
-                        data.Difference = 0;
-                        break;
-                    }
-                case 1:
-                    {
-                        if (isUpdateService)
-                            ItemBaseService.UpdateSteamItem(data.ItemName);
-                        var Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == data.ItemName).Steam;
-                        data.ServicePrice = Item.LowestSellOrder;
-                        data.ServiceGive = Math.Round(Item.LowestSellOrder * Calculator.CommissionSteam, 2);
-                        break;
-                    }
-                case 2:
-                    {
-                        if (isUpdateService)
-                            ItemBaseService.UpdateCsmItem(data.ItemName, false);
-                        var Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == data.ItemName).Csm;
-                        data.ServicePrice = Item.Price;
-                        data.ServiceGive = Math.Round(Item.Price * Calculator.CommissionCsm, 2);
-                        break;
-                    }
-                case 3:
-                    {
-                        if (isUpdateService)
-                            ItemBaseService.UpdateLfm();
-                        var Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == data.ItemName).Lfm;
-                        data.ServicePrice = Item.Price;
-                        data.ServiceGive = Math.Round(Item.Price * Calculator.CommissionLf, 2);
-                        break;
-                    }
-                case 4:
-                    {
-                        if (isUpdateService)
-                            ItemBaseService.UpdateBuffItem(data.ItemName);
-                        var Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == data.ItemName).Buff;
-                        data.ServicePrice = Item.BuyOrder;
-                        data.ServiceGive = Math.Round(Item.BuyOrder * Calculator.CommissionBuff, 2);
-                        break;
-                    }
-                case 5:
-                    {
-                        if (isUpdateService)
-                            ItemBaseService.UpdateBuffItem(data.ItemName);
-                        var Item = ItemsBase.List.FirstOrDefault(x => x.ItemName == data.ItemName).Buff;
-                        data.ServicePrice = Item.Price;
-                        data.ServiceGive = Math.Round(Item.Price * Calculator.CommissionBuff, 2);
-                        break;
-                    }
-            }
-            if (serviceId != 0)
-            {
-                if (SteamAccount.Currency.Id != 1)
-                {
-                    var id = SteamAccount.Currency.Id;
-                    data.ServicePrice = Currency.ConverterFromUsd(data.ServicePrice, id);
-                    data.ServiceGive = Currency.ConverterFromUsd(data.ServiceGive, id);
-                    data.Difference = Currency.ConverterFromUsd(data.Difference, id);
-                }
-                data.Precent = Edit.Precent(data.OrderPrice, data.ServiceGive);
-                data.Difference = Edit.Difference(data.ServiceGive, data.OrderPrice);
-            }
-            return data;
-        }
-
-        public static void PlaceOrderFromReserve()
-        {
-            if (SteamAccount.Orders.GetAvailableAmount() < SteamAccount.MaxOrderAmount * 0.15m || !SavedItems.Reserve.Any())
-                return;
-
-            int count = 0;
-            decimal sum = 0m;
-            foreach (var item in SavedItems.Reserve.Where(x => x.ServiceId == HomeProperties.Default.ServiceId))
-            {
-                try
-                {
-                    decimal orderPrice = ToolPlaceOrder.PlaceOrder(item.ItemName, HomeProperties.Default.ServiceId);
-                    sum += orderPrice;
-                    count += orderPrice > 0 ? 1 : 0;
-                    if (sum >= SteamAccount.Orders.GetAvailableAmount())
-                        break;
-                }
-                catch (Exception exp)
-                {
-                    BaseModel.ErrorLog(exp, false);
-                    continue;
-                }
-            }
-            if (count > 0)
-                Main.Notifications.Add(new()
-                {
-                    Title = "Orders",
-                    Message = $"{count} orders placed from Reserve.",
-                });
-        }
-    }
-
-    public class DataListingItem
-    {
-        public string ListingId { get; set; } = "0";
-        public decimal Fee { get; set; }
-        public decimal Subtotal { get; set; }
-        public decimal Total { get; set; }
+        public static Order<DataOrder> Orders { get; set; } = new();
     }
     public class DataOrder
     {
@@ -198,14 +44,14 @@ namespace ItemChecker.MVVM.Model
         public decimal Precent { get; set; }
         public decimal Difference { get; set; }
     }
-    public class Orders<T> : List<T>
+    public class Order<T> : List<T>
     {
         public bool CancelMinPrecent()
         {
-            var currentList = this as Orders<DataOrder>;
+            var currentList = this as Order<DataOrder>;
             decimal availableAmount = GetAvailableAmount();
 
-            if (availableAmount < (SteamAccount.MaxOrderAmount * 0.01m))
+            if (availableAmount < (SteamMarket.MaxAmount * 0.01m))
             {
                 currentList.Cancel(currentList.FirstOrDefault(x => x.Precent == currentList.Min(x => x.Precent)));
                 return true;
@@ -214,11 +60,11 @@ namespace ItemChecker.MVVM.Model
         }
         public decimal GetAvailableAmount()
         {
-            var currentList = this as Orders<DataOrder>;
+            var currentList = this as Order<DataOrder>;
 
             if (currentList.Any())
-                return Math.Round(SteamAccount.MaxOrderAmount - currentList.Sum(s => s.OrderPrice), 2);
-            return SteamAccount.MaxOrderAmount;
+                return Math.Round(SteamMarket.MaxAmount - currentList.Sum(s => s.OrderPrice), 2);
+            return SteamMarket.MaxAmount;
         }
         public void Cancel(T order)
         {
@@ -256,13 +102,73 @@ namespace ItemChecker.MVVM.Model
                 switch (HomeProperties.Default.ServiceId)
                 {
                     case 2:
-                        isAllow = item.Csm.Status != ItemStatus.Overstock && item.Csm.Status != ItemStatus.Unavailable;
+                        isAllow = !item.Csm.Overstock && !item.Csm.Unavailable;
                         break;
                     case 3:
-                        isAllow = item.Lfm.Status != ItemStatus.Overstock && item.Lfm.Status != ItemStatus.Unavailable;
+                        isAllow = !item.Lfm.Overstock && !item.Lfm.Unavailable;
                         break;
                 }
             }
+
+            return isAllow;
+        }
+    }
+
+    public class DataQueue
+    {
+        public string ItemName { get; set; }
+        public decimal OrderPrice
+        {
+            get
+            {
+                return _orderPrice;
+            }
+            set
+            {
+                var currency = SteamAccount.Currency.Id;
+                if (ParserTable.CurectCurrency.Id != 1)
+                    value = Currency.ConverterToUsd(value, ParserTable.CurectCurrency.Id);
+                value = Currency.ConverterFromUsd(value, currency);
+                _orderPrice = value;
+            }
+        }
+        decimal _orderPrice;
+        public decimal Precent { get; set; }
+
+        public DataQueue(string itemName, decimal orderPrice, decimal precent)
+        {
+            ItemName = itemName;
+            OrderPrice = orderPrice;
+            Precent = precent;
+        }
+    }
+    public class Queue<T> : List<T>
+    {
+        public new bool Add(T item)
+        {
+            if (IsAllow(item))
+            {
+                base.Add(item);
+                return true;
+            }
+            return false;
+        }
+        bool IsAllow(T item)
+        {
+            var currentItem = item as DataQueue;
+            var currentList = this as Queue<DataQueue>;
+
+            decimal sum = currentList.Select(x => x.OrderPrice).Sum();
+
+            bool isAllow = !currentList.Any(x => x.ItemName == currentItem.ItemName);
+            if (isAllow)
+                isAllow = !SteamMarket.Orders.Any(n => n.ItemName == currentItem.ItemName);
+            if (isAllow)
+                isAllow = (sum + currentItem.OrderPrice) < SteamMarket.Orders.GetAvailableAmount();
+            if (isAllow)
+                isAllow = currentItem.OrderPrice < SteamAccount.Balance;
+            if (isAllow)
+                isAllow = currentItem.Precent > HomeProperties.Default.MinPrecent;
 
             return isAllow;
         }

@@ -27,6 +27,7 @@ namespace ItemChecker.MVVM.Model
     }
     public class SettingsAbout : ObservableObject
     {
+
         public string CurrentVersion
         {
             get
@@ -53,6 +54,18 @@ namespace ItemChecker.MVVM.Model
             }
         }
         string _latestVersion = DataProjectInfo.LatestVersion;
-        public bool Admin { get; set; } = SteamAccount.AccountName == "bahtiarov116";
+        public bool Admin
+        {
+            get
+            {
+                return _admin;
+            }
+            set
+            {
+                _admin = value;
+                OnPropertyChanged();
+            }
+        }
+        bool _admin = SteamAccount.AccountName == "bahtiarov116";
     }
 }

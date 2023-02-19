@@ -17,9 +17,10 @@ namespace ItemChecker.MVVM.View
         {
             e.Handled = !int.TryParse(e.Text, out int result);
         }
-        void InputDecimal(object sender, TextCompositionEventArgs e)
+        void Decimal_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            e.Handled = !decimal.TryParse(e.Text, out decimal result);
+            decimal result;
+            e.Handled = !decimal.TryParse(e.Text, out result);
         }
 
         void DataGrid_KeyDown(object sender, KeyEventArgs e)
@@ -27,10 +28,10 @@ namespace ItemChecker.MVVM.View
             if (!ordersGrid.Items.IsEmpty)
             {
                 HomeViewModel vm = (HomeViewModel)DataContext;
-                if (e.Key == Key.Back && vm.CancelOrderCommand.CanExecute(vm.DataGridOrders.SelectedItem))
-                    vm.CancelOrderCommand.Execute(vm.DataGridOrders.SelectedItem);
+                if (e.Key == Key.Back && vm.CancelOrderCommand.CanExecute(vm.HomeTable.SelectedOrderItem))
+                    vm.CancelOrderCommand.Execute(vm.HomeTable.SelectedOrderItem);
                 if (e.Key == Key.F1)
-                    MainWindow.OpenDetailsItem(vm.DataGridOrders.SelectedItem.ItemName);
+                    MainWindow.OpenDetailsItem(vm.HomeTable.SelectedOrderItem.ItemName);
             }
         }
         void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -44,10 +45,10 @@ namespace ItemChecker.MVVM.View
             }
         }
 
-        #region push
-        private void serviceCmb_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        void TimerPush_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            minPrecentTxt.IsEnabled = serviceCmb.SelectedIndex != 0;
+            if (DataContext is HomeViewModel vm && vm.ResetTimerCommand.CanExecute(null))
+                vm.ResetTimerCommand.Execute(0);
         }
         void ListShow_Click(object sender, RoutedEventArgs e)
         {
@@ -63,19 +64,13 @@ namespace ItemChecker.MVVM.View
                 wnd.Activate();
             }
         }
-        void TimerPush_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (DataContext is HomeViewModel vm && vm.ResetTimerCommand.CanExecute(null))
-                vm.ResetTimerCommand.Execute(null);
-        }
-        #endregion
 
         #region inventory
         void inventoryListBox_KeyDown(object sender, KeyEventArgs e)
         {
             HomeViewModel vm = (HomeViewModel)DataContext;
             if (e.Key == Key.F1)
-                MainWindow.OpenDetailsItem(vm.InventoryTool.SelectedItem.ItemName);
+                MainWindow.OpenDetailsItem(vm.SelectedInventory.ItemName);
         }
         void inventoryListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
@@ -105,6 +100,5 @@ namespace ItemChecker.MVVM.View
             sellPrice.IsEnabled = (bool)selectedOnly.IsChecked && priceCombox.SelectedIndex == 2;
         }
         #endregion
-
     }
 }

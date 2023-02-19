@@ -134,7 +134,7 @@
                             </Grid.RowDefinitions>
                             <TextBlock Text="Account Name:" VerticalAlignment="Bottom"/>
                             <TextBox Grid.Row="1" FontSize="13" VerticalAlignment="Center" IsEnabled="{Binding StartUp.IsSubmitEnabled}"
-                                     Text="{Binding StartUp.AccountName, UpdateSourceTrigger=PropertyChanged}"/>
+                                     Text="{Binding SignInData.AccountName, UpdateSourceTrigger=PropertyChanged}"/>
                             <TextBlock Text="Password:" Grid.Row="2" VerticalAlignment="Bottom"/>
                             <PasswordBox x:Name="passTextbox" Grid.Row="3" FontSize="13" VerticalAlignment="Center" KeyDown="passTextbox_KeyDown"
                                          IsEnabled="{Binding StartUp.IsSubmitEnabled}"/>
@@ -156,7 +156,7 @@
                             <TextBlock Text="Or enter the code instead:" Grid.Row="1" VerticalAlignment="Bottom"/>
                             <TextBox Grid.Row="2" VerticalAlignment="Center" MaxLength="5" FontSize="20" x:Name="code2FA"
                                      TextAlignment="Center" CharacterCasing="Upper" FontWeight="Bold" FontFamily="Consolas"
-                                     TextChanged="code2FA_TextChanged" Text="{Binding StartUp.Code2AF, UpdateSourceTrigger=PropertyChanged}"
+                                     TextChanged="code2FA_TextChanged" Text="{Binding SignInData.Code2AF, UpdateSourceTrigger=PropertyChanged}"
                                      IsEnabled="{Binding StartUp.IsCodeEnabled}"/>
                             <TextBlock Text="Invalid Code2FA." Grid.Row="3" VerticalAlignment="Bottom" Foreground="Red" FontStyle="Italic"
                                        Visibility="{Binding StartUp.IsErrorShow, Converter={StaticResource BooleanToVisibilityConverter}}"/>

@@ -4,6 +4,7 @@ using ItemChecker.Properties;
 using ItemChecker.Support;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ItemChecker.MVVM.Model
@@ -17,7 +18,7 @@ namespace ItemChecker.MVVM.Model
                 Main.Notifications.Add(new()
                 {
                     Title = title,
-                    Message = $"Your balance has decreased.\n-{_balance - value}$\nThe balance is: {value}"
+                    Message = $"Your balance has decreased.\n-{_balance - value}$\nThe balance is: {_balance}"
                 });
             }
             else if (_balance < value && _balance != -1)
@@ -25,7 +26,7 @@ namespace ItemChecker.MVVM.Model
                 Main.Notifications.Add(new()
                 {
                     Title = title,
-                    Message = $"Your balance has increased.\n+{value - _balance}$\nThe balance is: {value}"
+                    Message = $"Your balance has increased.\n+{value - _balance}$\nThe balance is: {_balance}"
                 });
             }
         }
@@ -47,7 +48,6 @@ namespace ItemChecker.MVVM.Model
                 _balance = value;
             }
         }
-        public static decimal MaxOrderAmount => Balance * 10;
         public static DataCurrency Currency
         {
             get
@@ -64,7 +64,6 @@ namespace ItemChecker.MVVM.Model
                 }
             }
         }
-        public static Orders<DataOrder> Orders { get; set; } = new();
 
         public static void GetAccount()
         {
@@ -96,9 +95,9 @@ namespace ItemChecker.MVVM.Model
     {
         public static void SignInToServices()
         {
-            CsMoney.Post.SignIn();
-            LootFarm.Post.SignIn();
-            Buff163.Post.SignIn();
+            ServicesRequest.CsMoney.Post.SignIn();
+            ServicesRequest.LootFarm.Post.SignIn();
+            ServicesRequest.Buff163.Post.SignIn();
         }
         public static void UpdateBalances()
         {

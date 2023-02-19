@@ -8,14 +8,17 @@ using ItemChecker.Core;
 using ItemChecker.MVVM.Model;
 using ItemChecker.MVVM.View;
 using ItemChecker.Properties;
+using ItemChecker.Services;
 using ItemChecker.Support;
 
 namespace ItemChecker.MVVM.ViewModel
 {
     public class MainViewModel : ObservableObject
     {
+        #region prop
         readonly Timer TimerInfo = new(TimeSpan.FromMinutes(15).TotalMilliseconds);
         readonly Timer TimerWindow = new(250);
+
         public MainInfo MainInfo
         {
             get { return _mainInfo; }
@@ -26,6 +29,8 @@ namespace ItemChecker.MVVM.ViewModel
             }
         }
         MainInfo _mainInfo = new();
+        #endregion
+
         public MainViewModel()
         {
             TimerInfo.Elapsed += UpdateInformation;
@@ -33,12 +38,6 @@ namespace ItemChecker.MVVM.ViewModel
             TimerInfo.Enabled = true;
             TimerWindow.Enabled = true;
 
-            Task.Run(() =>
-            {
-                Main.CreateHistoryRecords();
-                MainInfo.Balance = Main.Balances.FirstOrDefault();
-                MainInfo.IsUpdateBalance = false;
-            });
             if (MainProperties.Default.CompletionUpdate)
             {
                 Window window = new WhatsNewWindow();
@@ -47,38 +46,13 @@ namespace ItemChecker.MVVM.ViewModel
                 MainProperties.Default.CompletionUpdate = false;
                 MainProperties.Default.Save();
             }
-        }
-        void UpdateInformation(Object sender, ElapsedEventArgs e)
-        {
-            try
+            Task.Run(() =>
             {
-                MainInfo.IsUpdateBalance = true;
                 Main.CreateHistoryRecords();
                 MainInfo.Balance = Main.Balances.FirstOrDefault();
                 MainInfo.IsUpdateBalance = false;
-
-                if (SteamMarket.StatusCommunity != "normal")
-                {
-                    Main.Notifications.Add(new()
-                    {
-                        Title = "Steam Status",
-                        Message = "There are problems with Steam servers. The program may not work correctly!"
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                BaseModel.ErrorLog(ex, false);
-            }
+            });
         }
-        void UpdateWindow(Object sender, ElapsedEventArgs e)
-        {
-            MainInfo.Balances = Main.Balances;
-            MainInfo.Message = Main.Message;
-            MainInfo.IsNotification = Main.Notifications.Any(x => !x.IsRead);
-            MainInfo.Notifications = new(Main.Notifications.OrderByDescending(x => x.Date));
-        }
-
         public ICommand MenuCommand =>
             new RelayCommand((obj) =>
             {
@@ -175,5 +149,35 @@ namespace ItemChecker.MVVM.ViewModel
                     item.IsRead = true;
             });
 
+        void UpdateInformation(Object sender, ElapsedEventArgs e)
+        {
+            try
+            {
+                MainInfo.IsUpdateBalance = true;
+                Main.CreateHistoryRecords();
+                MainInfo.Balance = Main.Balances.FirstOrDefault();
+                MainInfo.IsUpdateBalance = false;
+
+                if (SteamMarket.StatusCommunity != "normal")
+                {
+                    Main.Notifications.Add(new()
+                    {
+                        Title = "Steam Status",
+                        Message = "There are problems with Steam servers. The program may not work correctly!"
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                BaseService.errorLog(ex, false);
+            }
+        }
+        void UpdateWindow(Object sender, ElapsedEventArgs e)
+        {
+            MainInfo.Balances = Main.Balances;
+            MainInfo.Message = Main.Message;
+            MainInfo.IsNotification = Main.Notifications.Any(x => !x.IsRead);
+            MainInfo.Notifications = new(Main.Notifications.OrderByDescending(x => x.Date));
+        }
     }
 }

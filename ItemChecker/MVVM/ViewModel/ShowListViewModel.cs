@@ -11,7 +11,7 @@ namespace ItemChecker.MVVM.ViewModel
 {
     public class ShowListViewModel : ObservableObject
     {
-        readonly Timer Timer = new(100);
+        readonly Timer Timer = new(250);
         public SnackbarMessageQueue Message
         {
             get { return _message; }
@@ -46,12 +46,12 @@ namespace ItemChecker.MVVM.ViewModel
                 switch (SavedItems.ListName)
                 {
                     case "Reserve":
-                        SavedItems.Items = new(SavedItems.Reserve);
-                        SavedItems.Services = BaseModel.Services;
+                        SavedItems.List = new(SavedItems.Reserve);
+                        SavedItems.Services = Main.Services;
                         break;
                     case "Rare":
-                        SavedItems.Items = new(SavedItems.Rare);
-                        SavedItems.Services = BaseModel.Parameters;
+                        SavedItems.List = new(SavedItems.Rare);
+                        SavedItems.Services = Rare.Services;
                         break;
                 }
                 SavedItems.ServiceId = 0;
@@ -72,11 +72,11 @@ namespace ItemChecker.MVVM.ViewModel
                     {
                         case "Reserve":
                             SavedItems.Reserve.Remove(item);
-                            SavedItems.Items = new(SavedItems.Reserve);
+                            SavedItems.List = new(SavedItems.Reserve);
                             break;
                         case "Rare":
                             SavedItems.Rare.Remove(item);
-                            SavedItems.Items = new(SavedItems.Rare);
+                            SavedItems.List = new(SavedItems.Rare);
                             break;
                     }
                     Message.Enqueue($"{item.ItemName}\nItem has been removed.");
@@ -92,14 +92,14 @@ namespace ItemChecker.MVVM.ViewModel
                     case "Reserve":
                         bool isAdded = SavedItems.Reserve.Add(item);
                         message = isAdded ? $"{item.ItemName}\nItem has been added." : "Not successful. Conditions not met.";
-                        SavedItems.Items = new(SavedItems.Reserve);
+                        SavedItems.List = new(SavedItems.Reserve);
                         SavedItems.ItemName = isAdded ? string.Empty : SavedItems.ItemName;
                         break;
                     case "Rare":
                         isAdded = SavedItems.Rare.Add(item);
                         message = isAdded ? $"{item.ItemName}\nItem has been added." : "Not successful. Conditions not met.";
                         SavedItems.ItemName = isAdded ? string.Empty : SavedItems.ItemName;
-                        SavedItems.Items = new(SavedItems.Rare);
+                        SavedItems.List = new(SavedItems.Rare);
                         break;
                 }
                 Message.Enqueue(message);
@@ -117,14 +117,14 @@ namespace ItemChecker.MVVM.ViewModel
                 {
                     case "Reserve":
                         SavedItems.Reserve.Clear();
-                        SavedItems.Items = new(SavedItems.Reserve);
+                        SavedItems.List = new(SavedItems.Reserve);
                         break;
                     case "Rare":
                         SavedItems.Rare.Clear();
-                        SavedItems.Items = new(SavedItems.Rare);
+                        SavedItems.List = new(SavedItems.Rare);
                         break;
                 }
                 Message.Enqueue("The list has been cleared.");
-            }, (obj) => SavedItems.Items.Any());
+            }, (obj) => SavedItems.List.Any());
     }
 }

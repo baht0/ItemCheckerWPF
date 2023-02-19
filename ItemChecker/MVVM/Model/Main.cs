@@ -1,4 +1,5 @@
 ﻿using ItemChecker.Core;
+using ItemChecker.Services;
 using ItemChecker.Support;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Win32;
@@ -10,8 +11,36 @@ using System.Media;
 
 namespace ItemChecker.MVVM.Model
 {
-    public class Main : BaseModel
+    public class Main
     {
+        public static List<string> ServicesShort
+        {
+            get
+            {
+                return new List<string>()
+                    {
+                        "SteamMarket",
+                        "Cs.Money",
+                        "Loot.Farm",
+                        "Buff163"
+                    };
+            }
+        }
+        public static List<string> Services
+        {
+            get
+            {
+                return new List<string>()
+                    {
+                        "SteamMarket(A)",
+                        "SteamMarket",
+                        "Cs.Money",
+                        "Loot.Farm",
+                        "Buff163(A)",
+                        "Buff163"
+                    };
+            }
+        }
         public static SnackbarMessageQueue Message { get; set; } = new();
         public static Notification<DataNotification> Notifications { get; set; } = new()
         {
@@ -27,22 +56,14 @@ namespace ItemChecker.MVVM.Model
         public static void CreateHistoryRecords()
         {
             SteamAccount.GetBalance();
-            var steamBalance = Currency.ConverterToUsd(SteamAccount.Balance, SteamAccount.Currency.Id);
-
-            Balances = new()
-            {
-                { ServicesShort[0], steamBalance },
-                { ServicesShort[1], ServiceAccount.Csm.Balance },
-                { ServicesShort[2], ServiceAccount.Lfm.Balance },
-                { ServicesShort[3], ServiceAccount.Buff.Balance }
-            };
-
             ServiceAccount.UpdateBalances();
+
+            var steamBalance = Currency.ConverterToUsd(SteamAccount.Balance, SteamAccount.Currency.Id);
             var steam = steamBalance + InventoryService.GetSumOfItems();
             var csm = ServiceAccount.Csm.Balance + ServiceAccount.Csm.GetSumOfItems();
             var lfm = ServiceAccount.Lfm.Balance + ServiceAccount.Lfm.GetSumOfItems();
 
-            DataGridRecords.Records.Add(new()
+            History.Records.Add(new()
             {
                 Total = steam + csm + lfm + ServiceAccount.Buff.Balance,
                 Steam = steam,
@@ -50,6 +71,13 @@ namespace ItemChecker.MVVM.Model
                 LootFarm = lfm,
                 Buff163 = ServiceAccount.Buff.Balance,
             });
+            Balances = new()
+            {
+                { ServicesShort[0], steamBalance },
+                { ServicesShort[1], ServiceAccount.Csm.Balance },
+                { ServicesShort[2], ServiceAccount.Lfm.Balance },
+                { ServicesShort[3], ServiceAccount.Buff.Balance }
+            };
         }
     }
     public class MainInfo : ObservableObject
