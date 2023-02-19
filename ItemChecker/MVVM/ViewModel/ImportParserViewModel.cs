@@ -12,7 +12,6 @@ namespace ItemChecker.MVVM.ViewModel
 {
     public class ImportParserViewModel : ObservableObject
     {
-        ImportParser _importParser = new();
         public ImportParser ImportParser
         {
             get
@@ -25,6 +24,7 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+        ImportParser _importParser = new();
         public ImportParserViewModel()
         {
             Task.Run(() =>
