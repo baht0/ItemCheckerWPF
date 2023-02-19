@@ -1,25 +1,18 @@
 ﻿using System;
-using System.Linq;
-using System.Timers;
 using System.Windows;
 using System.Windows.Input;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Globalization;
 using ItemChecker.Core;
 using ItemChecker.Net;
 using ItemChecker.MVVM.Model;
-using ItemChecker.Services;
 using ItemChecker.Properties;
 using ItemChecker.Support;
 
 namespace ItemChecker.MVVM.ViewModel
 {
-    public class StartUpViewModel : StartUp
+    public class StartUpViewModel : ObservableObject
     {
-        public bool LaunchSuccessful { get; set; }
-        IView _view;
-
         public StartUp StartUp
         {
             get { return _startUp; }
@@ -30,159 +23,46 @@ namespace ItemChecker.MVVM.ViewModel
             }
         }
         StartUp _startUp = new();
-        public SignInData SignInData
-        {
-            get { return _signInData; }
-            set
-            {
-                _signInData = value;
-                OnPropertyChanged();
-            }
-        }
-        SignInData _signInData = new();
 
         public StartUpViewModel(IView view)
         {
-            _view = view;
-            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.CreateSpecificCulture("en-Us");
-            CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.CreateSpecificCulture("en-Us");
-
-            Task.Run(StartTask);
-        }
-        void Close()
-        {
-            _view.Close();
-        }
-        void StartTask()
-        {
-            try
+            Task.Run(() =>
             {
-                StartUp.Progress = Tuple.Create(1, "Checking Update...");
-                bool isUpdate = ProjectInfoService.AppCheck();
-                if (isUpdate)
+                try
                 {
-                    StartUp.Progress = Tuple.Create(1, "Updating...");
-                    ProjectInfoService.Update();
+                    CultureInfo.DefaultThreadCurrentCulture = CultureInfo.CreateSpecificCulture("en-Us");
+                    CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.CreateSpecificCulture("en-Us");
+
+                    StartUp.StartTask();
+                    Application.Current.Dispatcher.Invoke(() => { view.Close(); });
                 }
-                StartUp.Progress = Tuple.Create(2, "Preparation...");
-                Currencies.GetSteamCurrencies();
-
-                StartUp.Progress = Tuple.Create(3, "Signing In...");
-                if (!SteamRequest.Session.IsAuthorized())
+                catch (Exception exp)
                 {
-                    StartUp.IsSignInShow = true;
-                    SignIn();
-                }
-                else if (MainProperties.Default.SteamCurrencyId == 0)
-                {
-                    StartUp.IsSignInShow = true;
-                    SelectCurrency();
-                }
-                ServiceAccount.SignInToServices();
-
-                StartUp.Progress = Tuple.Create(4, "Get Account...");
-                SteamAccount.GetAccount();
-
-                StartUp.Progress = Tuple.Create(5, "Creation ItemsBase...");
-                ItemBaseService.CreateItemsBase();
-
-                LaunchSuccessful = true;
-                Application.Current.Dispatcher.Invoke(Close);
-            }
-            catch (Exception exp)
-            {
-                StartUp.IsReset = true;
-                BaseService.errorLog(exp, true);
-                Application.Current.Dispatcher.Invoke(Application.Current.Shutdown);
-            }
-        }
-        void SignIn()
-        {
-            StartUp.Progress = Tuple.Create(3, "Please, Signing In...");
-            SignInData = new();
-            StartUp.IsSubmitShow = true;
-
-            while (!SignInData.IsCorrect) Thread.Sleep(100);
-
-            bool isSetToken = false;
-            Task.Run(() => {
-                while (!isSetToken)
-                {
-                    isSetToken = SteamRequest.Session.CheckAuthStatus();
-                    if (!StartUp.IsCodeEnabled && !isSetToken)
-                    {
-                        StartUp.IsCodeEnabled = true;
-                        StartUp.IsErrorShow = true;
-                    }
-                    Thread.Sleep(5000);
+                    StartUp.IsReset = true;
+                    BaseModel.ErrorLog(exp, true);
+                    Application.Current.Dispatcher.Invoke(Application.Current.Shutdown);
                 }
             });
-            while (!isSetToken) Thread.Sleep(100);
-            StartUp.IsConfirmationShow = false;
-
-            SelectCurrency();
         }
-        void SelectCurrency()
-        {
-            StartUp.Progress = Tuple.Create(3, "Please, Signing In...");
-            StartUp.CurrencyList = new(Currencies.Steam);
-            StartUp.SelectedCurrency = Currencies.Steam.FirstOrDefault();
-            StartUp.IsCurrencyShow = true;
-            while (StartUp.IsCurrencyShow) Thread.Sleep(100);
-            StartUp.Progress = Tuple.Create(3, "Signing In...");
-        }
-        void SessionTimerTick(Object sender, ElapsedEventArgs e)
-        {
-            SignInData.TimerTick--;
-            if (SignInData.TimerTick <= 0)
-            {
-                StartUp.Progress = Tuple.Create(5, "Failed to login...");
-                StartUp.IsConfirmationShow = false;
-                StartUp.IsExpiredShow = true;
-                SignInData.Timer.Enabled = false;
-                SignInData.Timer.Elapsed -= SessionTimerTick;
-            }
-        }
+            
         public ICommand SignInCommand =>
             new RelayCommand((obj) =>
             {
                 Task.Run(() =>
                 {
-                    StartUp.IsSubmitEnabled = false;
-                    StartUp.IsErrorShow = false;
                     var propertyInfo = obj.GetType().GetProperty("Password");
-                    SignInData.Password = (string)propertyInfo.GetValue(obj, null);
-                    if (!String.IsNullOrEmpty(SignInData.Password))
-                    {
-                        if (SignInData.AllowUser(SignInData.AccountName))
-                        {
-                            SignInData.IsCorrect = SteamRequest.Session.SubmitSignIn(SignInData.AccountName, SignInData.Password);
-                            if (SignInData.IsCorrect)
-                            {
-                                SignInData.Timer.Elapsed += SessionTimerTick;
-                                SignInData.Timer.Enabled = true;
-                                StartUp.IsErrorShow = false;
-                                StartUp.IsSubmitShow = false;
-                                StartUp.IsConfirmationShow = true;
-                            }
-                            else
-                                StartUp.IsErrorShow = true;
-                        }
-                        else
-                            StartUp.IsErrorShow = true;
-                    }
-                    else
-                        StartUp.IsErrorShow = true;
-                    StartUp.IsSubmitEnabled = true;
+                    var pass = (string)propertyInfo.GetValue(obj, null);
+
+                    StartUp.SignInSubmit(pass);
                 });
-            }, (obj) => !String.IsNullOrEmpty(SignInData.AccountName));
+            }, (obj) => !string.IsNullOrEmpty(StartUp.AccountName));
         public ICommand SubmitCodeCommand =>
             new RelayCommand((obj) =>
             {
                 StartUp.IsErrorShow = false;
-                Task.Run(() => SteamRequest.Session.SubmitCode(SignInData.Code2AF));
+                Task.Run(() => SteamRequest.Session.SubmitCode(StartUp.Code2AF));
                 StartUp.IsCodeEnabled = false;
-            }, (obj) => !String.IsNullOrEmpty(SignInData.Code2AF) && SignInData.IsCorrect);
+            }, (obj) => !string.IsNullOrEmpty(StartUp.Code2AF) && StartUp.IsCorrect);
         public ICommand SelectCurrencyCommand =>
             new RelayCommand((obj) =>
             {

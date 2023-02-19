@@ -7,7 +7,7 @@
         xmlns:viewmodel="clr-namespace:ItemChecker.MVVM.ViewModel"
         xmlns:customConverter="clr-namespace:ItemChecker.Converter"
         mc:Ignorable="d" x:Name="calculatorWindow"
-        Title="Calculator" Height="330" Width="295"
+        Title="Calculator" Height="320" Width="295"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         d:DataContext="{d:DesignInstance Type=viewmodel:CalculatorViewModel}"
         Background="{DynamicResource Background}"
@@ -45,7 +45,7 @@
             <Grid Grid.Row="1">
                 <Grid.RowDefinitions>
                     <RowDefinition/>
-                    <RowDefinition Height="92"/>
+                    <RowDefinition Height="90"/>
                 </Grid.RowDefinitions>
                 <!--compare-->
                 <Grid Grid.Row="0" VerticalAlignment="Top">
@@ -54,7 +54,7 @@
                         <RowDefinition Height="25"/>
                         <RowDefinition Height="25"/>
                         <RowDefinition Height="25"/>
-                        <RowDefinition Height="90"/>
+                        <RowDefinition Height="88"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="85"/>
@@ -81,8 +81,8 @@
                              ToolTip="Press 'Enter' to apply" Text="{Binding Calculator.Commission}"
                              TextChanged="compare_TextChanged" TextInput="InputDecimal" KeyDown="commissionTxt_KeyDown"/>
                     <TextBlock Text="%" Grid.Row="3" Grid.Column="5" VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                    
-                    <GroupBox Header="Result:" Grid.Row="4" Style="{DynamicResource none}" BorderThickness="0.5" Grid.ColumnSpan="5">
+
+                    <GroupBox Header="Result:" Grid.Row="4" Style="{DynamicResource none}" BorderThickness="0.5" Grid.ColumnSpan="5" ToolTip="Click to copy">
                         <Grid Margin="5">
                             <Grid.RowDefinitions>
                                 <RowDefinition/>
@@ -98,11 +98,11 @@
                             <TextBlock Grid.Row="2" Text="Difference:" VerticalAlignment="Center"/>
 
                             <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Calculator.Get}" VerticalAlignment="Center"
-                                       PreviewMouseDown="copy_PreviewMouseDown" Cursor="Hand" ToolTip="Click to copy"/>
+                                       PreviewMouseDown="copy_PreviewMouseDown" Cursor="Hand"/>
                             <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Calculator.Precent, StringFormat='{}{0}%'}" VerticalAlignment="Center"
-                                       PreviewMouseDown="copy_PreviewMouseDown" Cursor="Hand" ToolTip="Click to copy"/>
+                                       PreviewMouseDown="copy_PreviewMouseDown" Cursor="Hand"/>
                             <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Calculator.Difference}" VerticalAlignment="Center"
-                                       PreviewMouseDown="copy_PreviewMouseDown" Cursor="Hand" ToolTip="Click to copy"/>
+                                       PreviewMouseDown="copy_PreviewMouseDown" Cursor="Hand"/>
                         </Grid>
                     </GroupBox>
                 </Grid>

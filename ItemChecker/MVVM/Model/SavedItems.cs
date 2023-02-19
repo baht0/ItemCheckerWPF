@@ -1,36 +1,15 @@
-﻿using ItemChecker.Core;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Windows.Forms;
+using System.Windows;
 
 namespace ItemChecker.MVVM.Model
 {
-    public class SavedItems : ObservableObject
+    public class SavedItems : BaseTable<DataItem>
     {
         public static string ShowListName { get; set; }
-        public ObservableCollection<DataItem> List
-        {
-            get { return _list; }
-            set
-            {
-                _list = value;
-                OnPropertyChanged();
-            }
-        }
-        ObservableCollection<DataItem> _list = new();
-        public DataItem SelectedItem
-        {
-            get { return _selectedItem; }
-            set
-            {
-                _selectedItem = value;
-                OnPropertyChanged();
-            }
-        }
-        DataItem _selectedItem;
-
         public string ListName
         {
             get { return _listName; }
@@ -153,11 +132,11 @@ namespace ItemChecker.MVVM.Model
             var steamBase = ItemsBase.List.FirstOrDefault(x => x.ItemName == currentItem.ItemName);
             bool isAllow = steamBase != null;
             if (isAllow)
-                isAllow = steamBase.Type == "Weapon" || steamBase.Type == "Knife" || steamBase.Type == "Gloves";
+                isAllow = steamBase.Type == Type.Weapon || steamBase.Type == Type.Knife || steamBase.Type == Type.Gloves;
             if (isAllow)
                 isAllow = !currentList.Any(x => x.ItemName == currentItem.ItemName && x.ServiceId == currentItem.ServiceId);
             if (isAllow && currentItem.ServiceId == 1)
-                isAllow = steamBase.Type == "Weapon";
+                isAllow = steamBase.Type == Type.Weapon;
             if (isAllow && currentItem.ServiceId == 2)
                 isAllow = currentItem.ItemName.Contains("Doppler");
 

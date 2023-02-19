@@ -32,45 +32,39 @@ namespace ItemChecker.Support
             OpenUrl(url);
         }
 
-        //remove
-        public static Decimal GetDecimal(string str)
+        public static decimal GetDecimal(string str)
         {
             var mat = Regex.Match(str, @"(\d+(\.\d+)?)|(\.\d+)").Value;
             return Convert.ToDecimal(mat, CultureInfo.InvariantCulture);
         }
-        public static Decimal SteamAvgPrice(string itemName, JObject items)
+        public static decimal SteamAvgPrice(string itemName, JObject items)
         {
-            try
+            itemName = itemName.Replace("'", "&#39");
+            var item = items[itemName] as JObject;
+            if (item != null && item["price"] != null)
             {
-                itemName = itemName.Replace("'", "&#39");
-                var item = items[itemName] as JObject;
-                if (item != null && item["price"] != null)
-                {
-                    if (item["price"]["24_hours"] != null)
-                        return Convert.ToDecimal(item["price"]["24_hours"]["average"]);
-                    else if (item["price"]["7_days"] != null)
-                        return Convert.ToDecimal(item["price"]["7_days"]["average"]);
-                    else if (item["price"]["30_days"] != null)
-                        return Convert.ToDecimal(item["price"]["30_days"]["average"]);
-                    else if (item["price"]["all_time"] != null)
-                        return Convert.ToDecimal(item["price"]["all_time"]["average"]);
-                }
-                return 0;
+                var price = item["price"];
+                decimal value;
+                if (price["24_hours"] != null && decimal.TryParse((string)price["24_hours"]["average"], out value) && value != 0)
+                    return value;
+                else if (price["7_days"] != null && decimal.TryParse((string)price["7_days"]["average"], out value) && value != 0)
+                    return value;
+                else if (price["30_days"] != null && decimal.TryParse((string)price["30_days"]["average"], out value) && value != 0)
+                    return value;
+                else if (price["all_time"] != null && decimal.TryParse((string)price["all_time"]["average"], out value) && value != 0)
+                    return value;
             }
-            catch
-            {
-                return 0;
-            }
+            return 0;
         }
 
-        public static Decimal Precent(decimal a, decimal b) //from A to B
+        public static decimal Precent(decimal a, decimal b) //from A to B
         {
             if (a != 0)
                 return Math.Round((b - a) / a * 100, 2);
             else
                 return 0;
         }
-        public static Decimal Difference(decimal a, decimal b)
+        public static decimal Difference(decimal a, decimal b)
         {
             return Math.Round(a - b, 2);
         }
@@ -86,7 +80,7 @@ namespace ItemChecker.Support
             DateTime origin = new(1970, 1, 1, 0, 0, 0, 0);
             return origin.AddMilliseconds(timestamp).ToLocalTime();
         }
-        public static String calcTimeLeft(DateTime start, int count, int i)
+        public static string calcTimeLeft(DateTime start, int count, int i)
         {
             double min = (count - ++i) / calcTimeLeftSpeed(start, i);
             TimeSpan time = TimeSpan.FromMinutes(min);
@@ -97,7 +91,7 @@ namespace ItemChecker.Support
 
             return time.ToString("ss'sec.'");
         }
-        static Double calcTimeLeftSpeed(DateTime start, int i)
+        static double calcTimeLeftSpeed(DateTime start, int i)
         {
             var time_passed = DateTime.Now.Subtract(start).TotalMinutes;
             return Math.Round(++i / time_passed, 2);

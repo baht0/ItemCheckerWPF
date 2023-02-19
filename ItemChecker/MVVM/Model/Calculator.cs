@@ -18,7 +18,7 @@ namespace ItemChecker.MVVM.Model
         {
             get
             {
-                var services = Main.ServicesShort;
+                var services = BaseModel.ServicesShort;
                 services.Add("Custom");
                 return services;
             }
@@ -91,8 +91,26 @@ namespace ItemChecker.MVVM.Model
 
         //currency
         public List<string> CurrencyList { get; set; } = Currencies.Allow.Select(x => x.Name).ToList();
-        public int Currency1 { get; set; } = 0;
-        public int Currency2 { get; set; } = 1;
+        public int Currency1
+        {
+            get { return _currency1; }
+            set
+            {
+                _currency1 = value;
+                OnPropertyChanged();
+            }
+        }
+        int _currency1;
+        public int Currency2
+        {
+            get { return _currency2; }
+            set
+            {
+                _currency2 = value;
+                OnPropertyChanged();
+            }
+        }
+        int _currency2 = 1;
 
         public decimal Converted
         {
@@ -114,5 +132,72 @@ namespace ItemChecker.MVVM.Model
             }
         }
         decimal _value = 1;
+
+        public void Compare(string[] values)
+        {
+            bool isDecimal = !decimal.TryParse(values[0], out decimal value);
+            decimal purchase = value;
+            isDecimal = !decimal.TryParse(values[1], out value);
+            decimal price = value;
+            isDecimal = !decimal.TryParse(values[2], out value);
+            decimal commission = value;
+
+            Get = Math.Round(price * commission, 2);
+            Precent = Edit.Precent(purchase, Get);
+            Difference = Edit.Difference(Get, purchase);
+        }
+        public void GetCommission()
+        {
+            switch (Service)
+            {
+                case 0:
+                    Commission = CommissionSteam;
+                    break;
+                case 1:
+                    Commission = CommissionCsm;
+                    break;
+                case 2:
+                    Commission = CommissionLf;
+                    break;
+                case 3:
+                    Commission = CommissionBuff;
+                    break;
+            }
+        }
+        public void Switch()
+        {
+            var config = (Calculator)this.MemberwiseClone();
+
+            Currency1 = config.Currency2;
+            Currency2 = config.Currency1;
+            Value = config.Converted;
+            Converted = config.Value;
+        }
+        public void CurrencyConvert(string str)
+        {
+            bool isDecimal = !decimal.TryParse(str, out decimal value);
+            decimal dol = value;
+            switch (Currency1) //any -> dol
+            {
+                case 1:
+                    dol = Currency.ConverterToUsd(value, 5);
+                    break;
+                case 2:
+                    dol = Currency.ConverterToUsd(value, 23);
+                    break;
+            }
+            switch (Currency2)//dol -> any
+            {
+                case 0:
+                    Converted = dol;
+                    break;
+                case 1:
+                    Converted = Currency.ConverterFromUsd(dol, 5);
+                    break;
+                case 2:
+                    Converted = Currency.ConverterFromUsd(dol, 23);
+                    break;
+            }
+        }
     }
 }

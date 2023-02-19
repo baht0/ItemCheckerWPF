@@ -10,6 +10,7 @@ using Microsoft.Win32;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using ItemChecker.MVVM.Model;
 
 namespace ItemChecker
 {
@@ -27,11 +28,8 @@ namespace ItemChecker
             switch (e.Category)
             {
                 case UserPreferenceCategory.General:
-                    {
-                        string theme = ThemeIsLight() ? "Light" : "Dark";
-                        ChangeTheme(theme);
-                        break;
-                    }
+                    ChangeTheme();
+                    break;
             }
         }
         static bool ThemeIsLight()
@@ -40,8 +38,9 @@ namespace ItemChecker
                     @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
             return (int)registry.GetValue("SystemUsesLightTheme") == 1;
         }
-        public void ChangeTheme(string theme)
+        public void ChangeTheme()
         {
+            string theme = ThemeIsLight() ? "Light" : "Dark";
             Uri uri = new($"/Themes/{theme}.xaml", UriKind.RelativeOrAbsolute);
             ThemeDictionary.MergedDictionaries.Clear();
             ThemeDictionary.MergedDictionaries.Add(new ResourceDictionary() { Source = uri });
@@ -70,16 +69,14 @@ namespace ItemChecker
                 Process.GetCurrentProcess().Kill();
             }
 
-            string theme = ThemeIsLight() ? "Light" : "Dark";
-            ChangeTheme(theme);
-
+            ChangeTheme();
             Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
             Window start = new StartWindow();
             start.ShowDialog();
 
             if (start.DataContext is StartUpViewModel startVM)
             {
-                if (startVM.LaunchSuccessful)
+                if (StartUp.LaunchSuccessful)
                 {
                     Window main = new MainWindow();
                     Current.ShutdownMode = ShutdownMode.OnMainWindowClose;

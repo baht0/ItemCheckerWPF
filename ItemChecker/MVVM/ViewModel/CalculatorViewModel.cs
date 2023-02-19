@@ -1,8 +1,5 @@
 ﻿using ItemChecker.Core;
 using ItemChecker.MVVM.Model;
-using ItemChecker.Support;
-using System;
-using System.Linq;
 using System.Windows.Input;
 
 namespace ItemChecker.MVVM.ViewModel
@@ -24,82 +21,23 @@ namespace ItemChecker.MVVM.ViewModel
             new RelayCommand((obj) =>
             {
                 string[] values = (string[])obj;
-                bool isDecimal = !decimal.TryParse(values[0], out decimal value);
-                decimal purchase = value;
-                isDecimal = !decimal.TryParse(values[1], out value);
-                decimal price = value;
-                isDecimal = !decimal.TryParse(values[2], out value);
-                decimal commission = value;
-
-                Calculator.Get = Math.Round(price * commission, 2);
-                Calculator.Precent = Edit.Precent(purchase, Calculator.Get);
-                Calculator.Difference = Edit.Difference(Calculator.Get, purchase);
+                Calculator.Compare(values);
             });
         public ICommand CommissionCommand =>
             new RelayCommand((obj) =>
             {
-                switch (Calculator.Service)
-                {
-                    case 0:
-                        Calculator.Commission = Calculator.CommissionSteam;
-                        break;
-                    case 1:
-                        Calculator.Commission = Calculator.CommissionCsm;
-                        break;
-                    case 2:
-                        Calculator.Commission = Calculator.CommissionLf;
-                        break;
-                    case 3:
-                        Calculator.Commission = Calculator.CommissionBuff;
-                        break;
-                }
+                Calculator.GetCommission();
             });
 
         public ICommand ChangeCommand =>
             new RelayCommand((obj) =>
             {
-                Calculator config = (Calculator)obj;
-                Calculator calculator = new();
-                calculator.Service = config.Service;
-                calculator.Commission = config.Commission;
-                calculator.Purchase = config.Purchase;
-                calculator.Price = config.Price;
-                calculator.Precent = config.Precent;
-                calculator.Difference = config.Difference;
-                calculator.Get = config.Get;
-
-                calculator.Currency1 = config.Currency2;
-                calculator.Currency2 = config.Currency1;
-                calculator.Value = config.Converted;
-                calculator.Converted = config.Value;
-                Calculator = calculator;
+                Calculator.Switch();
             });
         public ICommand CurrencyConvertCommand =>
             new RelayCommand((obj) =>
             {
-                bool isDecimal = !decimal.TryParse((string)obj, out decimal value);
-                decimal dol = value;
-                switch (Calculator.Currency1) //any -> dol
-                {
-                    case 1:
-                        dol = Currency.ConverterToUsd(value, 5);
-                        break;
-                    case 2:
-                        dol = Currency.ConverterToUsd(value, 23);
-                        break;
-                }
-                switch (Calculator.Currency2)//dol -> any
-                {
-                    case 0:
-                        Calculator.Converted = dol;
-                        break;
-                    case 1:
-                        Calculator.Converted = Currency.ConverterFromUsd(dol, 5);
-                        break;
-                    case 2:
-                        Calculator.Converted = Currency.ConverterFromUsd(dol, 23);
-                        break;
-                }
+                Calculator.CurrencyConvert((string)obj);
             });
     }
 }

@@ -25,7 +25,6 @@ namespace ItemChecker.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
-
         public ImportParserViewModel()
         {
             Task.Run(() =>
@@ -42,7 +41,7 @@ namespace ItemChecker.MVVM.ViewModel
                         file.Path = path;
                         files.Add(file);
                     }
-                    ImportParser.List = new(files.OrderByDescending(d => d.CheckedTime));
+                    ImportParser.Items = new(files.OrderByDescending(d => d.CheckedTime));
                 }
                 ImportParser.IsBusy = false;
             });
@@ -60,7 +59,7 @@ namespace ItemChecker.MVVM.ViewModel
                 Directory.Delete(folder, true);
                 ImportParser = new();
 
-            }, (obj) => ImportParser.List.Any());
+            }, (obj) => ImportParser.Items.Any());
         public ICommand DeleteCommand =>
             new RelayCommand((obj) =>
             {
@@ -72,8 +71,8 @@ namespace ItemChecker.MVVM.ViewModel
 
                 var file = obj as ImportFile;
                 File.Delete(file.Path);
-                ImportParser.List.Remove(file);
+                ImportParser.Items.Remove(file);
 
-            }, (obj) => ImportParser.List.Any());
+            }, (obj) => ImportParser.Items.Any());
     }
 }
