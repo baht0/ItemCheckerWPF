@@ -63,16 +63,11 @@ namespace ItemChecker.Net
                     string json = RequestGetAsync("https://cs.money/check_skin_status?appId=730&name=" + market_hash_name).Result;
                     return JObject.Parse(json);
                 }
-                public static JArray LoadBotsInventory(int offset, int minPrice, int maxPrice, bool userItems, bool withoutLock, bool rareItems, int selectedOnly)
+                public static JArray LoadBotsInventory(int offset, int minPrice, int maxPrice)
                 {
                     string price = $"maxPrice={maxPrice}&minPrice={minPrice}&";
-                    string user = userItems ? string.Empty : "isMarket=false&";
 
-                    string tradeLock = withoutLock ? "hasTradeLock=false&" : "hasTradeLock=false&hasTradeLock=true&tradeLockDays=1&tradeLockDays=2&tradeLockDays=3&tradeLockDays=4&tradeLockDays=5&tradeLockDays=6&tradeLockDays=7&tradeLockDays=0&";
-                    string rare = rareItems ? "hasRareFloat=true&hasRarePattern=true&hasRareStickers=true&" : "hasRareFloat=false&hasRarePattern=false&hasRareStickers=false&";
-                    string onlyDopp = selectedOnly == 3 ? "phase=Phase%201&phase=Phase%202&phase=Phase%203&phase=Phase%204&phase=Emerald&phase=Sapphire&phase=Ruby&phase=Black%20Pearl&" : string.Empty;
-
-                    string json = RequestGetAsync($"https://inventories.cs.money/5.0/load_bots_inventory/730?limit=60&offset={offset}&" + price + user + tradeLock + onlyDopp + rare + "&order=desc&priceWithBonus=40&sort=price&withStack=true").Result;
+                    string json = RequestGetAsync($"https://inventories.cs.money/5.0/load_bots_inventory/730?limit=60&offset={offset}&" + price + "&order=desc&priceWithBonus=40&sort=price&withStack=true").Result;
                     return JObject.Parse(json)["items"] as JArray;
                 }
                 public static JArray LoadBotsInventoryItem(string itemName)
