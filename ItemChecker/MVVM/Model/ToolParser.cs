@@ -30,7 +30,19 @@ namespace ItemChecker.MVVM.Model
         }
         int _maxPrice;
 
-        public bool All { get; set; }
+        public bool All
+        {
+            get
+            {
+                return _all;
+            }
+            set
+            {
+                _all = value;
+                OnPropertyChanged();
+            }
+        }
+        bool _all;
         public bool NotWeapon { get; set; }
         public bool Normal { get; set; }
         public bool Souvenir { get; set; }
@@ -43,6 +55,7 @@ namespace ItemChecker.MVVM.Model
 
         public void SetMaxPrice(int serviceId)
         {
+            All = false;
             switch (serviceId)
             {
                 case 0 or 1:

@@ -197,7 +197,7 @@ namespace ItemChecker.MVVM.ViewModel
         public ICommand ContinueCheckCommand =>
             new RelayCommand((obj) =>
             {
-                Task.Run(() => ToolParser.Start(DataGridParse.Items.ToList()));
+                Task.Run(() => ToolParser.Start(DataGridParse.Items));
             }, (obj) => !ToolParser.IsParser && ToolParser.IsStoped);
         public ICommand ImportCommand =>
             new RelayCommand((obj) =>

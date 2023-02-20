@@ -66,9 +66,6 @@ namespace ItemChecker.MVVM.View
         {
             int id = service1.SelectedIndex;
 
-            if (DataContext is ParserViewModel viewModel && viewModel.MaxPriceCommand.CanExecute(id))
-                viewModel.MaxPriceCommand.Execute(id);
-
             configGrid.Children.Clear();
             string[] binding = new string[] { "Normal", "Souvenir", "KnifeGlove", string.Empty, "Stattrak", "KnifeGloveStattrak" };
             string[] name = new string[] { "Normal", "Souvenir", "★", string.Empty, "StatTrak™", "★ StatTrak™" };
@@ -79,7 +76,7 @@ namespace ItemChecker.MVVM.View
                 button.Content = name[i];
                 button.ToolTip = name[i] == "NotWeapon" ? "Stickers, graffiti, agents, music kit, etc." : null;
 
-                button.SetBinding(RadioButton.IsCheckedProperty, new Binding($"ParserConfig.{binding[i]}"));
+                button.SetBinding(RadioButton.IsCheckedProperty, new Binding($"ToolParser.{binding[i]}"));
                 configGrid.Children.Add(button);
 
                 switch (i)
@@ -110,6 +107,9 @@ namespace ItemChecker.MVVM.View
                         break;
                 }
             }
+
+            if (DataContext is ParserViewModel viewModel && viewModel.MaxPriceCommand.CanExecute(id))
+                viewModel.MaxPriceCommand.Execute(id);
         }
 
         void queueListBox_KeyDown(object sender, KeyEventArgs e)
