@@ -51,10 +51,9 @@
             </Path>
             <!--Title-->
             <StackPanel Grid.Row="0" Height="25" HorizontalAlignment="Right" Orientation="Horizontal" Grid.Column="1">
-                <Button Height="25" Style="{DynamicResource MaterialDesignFlatButton}"
-                        Click="Reset_Click" ToolTip="Reset"
+                <Button Height="25" Style="{DynamicResource MaterialDesignFlatButton}" Click="Reset_Click" ToolTip="Reset user data"
                         Visibility="{Binding StartUp.IsReset, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <materialDesign:PackIcon Kind="FileRefreshOutline" Foreground="White"/>
+                    <materialDesign:PackIcon Kind="DatabaseRemove" Foreground="White"/>
                 </Button>
                 <Button Height="25" Style="{DynamicResource MaterialDesignFlatButton}"
                         Click="Close_Click">

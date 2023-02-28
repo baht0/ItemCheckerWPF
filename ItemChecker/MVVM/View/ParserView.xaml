@@ -409,23 +409,18 @@
                                            Visibility="{Binding ToolParser.TimerOn, Converter={StaticResource BooleanToVisibilityConverter}}" 
                                            Margin="5 0 0 0" VerticalAlignment="Center" FontSize="12"/>
                             </VirtualizingStackPanel>
-                            <VirtualizingStackPanel Orientation="Horizontal" HorizontalAlignment="Right"
-                                                    Grid.Column="2">
-                                <Button Style="{StaticResource MaterialDesignFlatButton}"
-                                        Command="{Binding ContinueCheckCommand}"
+                            <VirtualizingStackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Column="2">
+                                <Button Style="{StaticResource MaterialDesignFlatButton}" Command="{Binding ContinueCheckCommand}"
                                         ToolTip="Continue checking">
-                                    <materialDesign:PackIcon Kind="Replay"/>
+                                    <materialDesign:PackIcon Kind="PlaySpeed"/>
                                 </Button>
                                 <Button Style="{StaticResource MaterialDesignFlatButton}"
-                                        Command="{Binding CheckCommand}"
-                                        CommandParameter="{Binding ToolParser}">
+                                        Command="{Binding CheckCommand}" CommandParameter="{Binding ToolParser}">
                                     <materialDesign:PackIcon Kind="{Binding ToolParser.IsParser, Converter={StaticResource BooleanToPlayButtonConverter}}"/>
                                 </Button>
                             </VirtualizingStackPanel>
-                            <ProgressBar Grid.ColumnSpan="3" VerticalAlignment="Bottom"
-                                         Height="3" Style="{StaticResource MaterialDesignLinearProgressBar}"
-                                         Value="{Binding ToolParser.CurrentProgress}"
-                                         Maximum="{Binding ToolParser.MaxProgress}"/>
+                            <ProgressBar Grid.ColumnSpan="3" VerticalAlignment="Bottom" Height="3" Style="{StaticResource MaterialDesignLinearProgressBar}"
+                                         Value="{Binding ToolParser.CurrentProgress}" Maximum="{Binding ToolParser.MaxProgress}"/>
                         </Grid>
                     </Grid>
                     <!--queue-->
@@ -439,7 +434,7 @@
                             <TextBlock VerticalAlignment="Center" FontWeight="Bold" Text="{Binding ToolPlaceOrder.Items.Count, StringFormat='Place Order: {0}'}"/>
                             <Button VerticalAlignment="Center" Style="{StaticResource MaterialDesignToolForegroundButton}"
                                         Command="{Binding ClearQueueCommand}">
-                                <materialDesign:PackIcon Kind="Delete"/>
+                                <materialDesign:PackIcon Kind="DeleteForever"/>
                             </Button>
                         </VirtualizingStackPanel>
                         <Button HorizontalAlignment="Right" VerticalAlignment="Bottom" Style="{StaticResource MaterialDesignFlatButton}"

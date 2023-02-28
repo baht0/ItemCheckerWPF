@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Runtime.Intrinsics.X86;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -92,7 +91,11 @@ namespace ItemChecker.MVVM.Model
         public new void Add(string itemName)
         {
             if (IsAllow(itemName))
-                base.Add(new DetailItem(itemName));
+            {
+                var item = new DetailItem(itemName);
+                item.UpdateServices();
+                base.Add(item);
+            }
         }
         bool IsAllow(string itemName)
         {
@@ -184,24 +187,33 @@ namespace ItemChecker.MVVM.Model
         }
         int _currencyId = 0;
 
-        public DetailItem() { }
         public DetailItem(string itemName)
         {
-            ItemName = itemName;
-            IsBusy = true;
+            if (!string.IsNullOrEmpty(itemName))
+            {
+                ItemName = itemName;
+                IsBusy = true;
+            }
+        }
+        public void UpdateServices()
+        {
             Task.Run(() =>
             {
                 try
-                {        
-                    ItemBaseService.UpdateSteamItem(itemName);
-                    ItemBaseService.UpdateCsmItem(itemName, false);
+                {
+                    ItemBaseService.UpdateSteamItem(ItemName);
+                    ItemBaseService.UpdateCsmItem(ItemName, false);
                     ItemBaseService.UpdateLfm();
-                    ItemBaseService.UpdateBuffItem(itemName);
+                    ItemBaseService.UpdateBuffItem(ItemName);
 
-                    var prices = new List<DetailService>();
-                    for (int i = 0; i < BaseModel.Services.Count; i++)
-                        prices.Add(new(i, itemName));
-                    Services = new(prices);
+                    var services = new List<DetailService>();
+                    for (int id = 0; id < BaseModel.Services.Count; id++)
+                    {
+                        var service = new DetailService();
+                        service.Update(id, ItemName);
+                        services.Add(service);
+                    }
+                    Services = new(services);
                 }
                 catch (Exception ex)
                 {
@@ -224,53 +236,50 @@ namespace ItemChecker.MVVM.Model
         public bool Have { get; set; }
         public bool Available { get; set; } = true;
 
-        public DetailService()
-        {
-
-        }
-        public DetailService(int service, string itemName)
+        public DetailService Update(int service, string itemName)
         {
             dynamic item = null;
-            this.ServiceId = service;
-            this.Service = BaseModel.Services[service];
+            ServiceId = service;
+            Service = BaseModel.Services[service];
             switch (service)
             {
                 case 0:
-                    this.Price = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Steam.HighestBuyOrder;
-                    this.Get = Math.Round(this.Price * Calculator.CommissionSteam, 2);
-                    this.Have = Price > 0;
+                    Price = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Steam.HighestBuyOrder;
+                    Get = Math.Round(Price * Calculator.CommissionSteam, 2);
+                    Have = Price > 0;
                     break;
                 case 1:
-                    this.Price = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Steam.LowestSellOrder;
-                    this.Get = Math.Round(this.Price * Calculator.CommissionSteam, 2);
-                    this.Have = Price > 0;
+                    Price = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Steam.LowestSellOrder;
+                    Get = Math.Round(Price * Calculator.CommissionSteam, 2);
+                    Have = Price > 0;
                     break;
                 case 2:
                     item = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Csm;
-                    this.Price = item.Price;
-                    this.Get = Math.Round(this.Price * Calculator.CommissionCsm, 2);
-                    this.Have = item.IsHave;
-                    this.Available = item.Status == ItemStatus.Available;
+                    Price = item.Price;
+                    Get = Math.Round(Price * Calculator.CommissionCsm, 2);
+                    Have = item.IsHave;
+                    Available = item.Status == ItemStatus.Available;
                     break;
                 case 3:
                     item = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Lfm;
                     var price = item.Price;
-                    this.Price = Math.Round(price * 1.03m, 2);
-                    this.Get = Math.Round(price * Calculator.CommissionLf, 2);
-                    this.Have = item.IsHave;
-                    this.Available = item.Status == ItemStatus.Available;
+                    Price = Math.Round(price * 1.03m, 2);
+                    Get = Math.Round(price * Calculator.CommissionLf, 2);
+                    Have = item.IsHave;
+                    Available = item.Status == ItemStatus.Available;
                     break;
                 case 4:
-                    this.Price = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Buff.BuyOrder;
-                    this.Get = Math.Round(this.Price * Calculator.CommissionBuff, 2);
-                    this.Have = Price > 0;
+                    Price = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Buff.BuyOrder;
+                    Get = Math.Round(Price * Calculator.CommissionBuff, 2);
+                    Have = Price > 0;
                     break;
                 case 5:
-                    this.Price = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Buff.Price;
-                    this.Get = Math.Round(this.Price * Calculator.CommissionBuff, 2);
-                    this.Have = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Buff.IsHave;
+                    Price = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Buff.Price;
+                    Get = Math.Round(Price * Calculator.CommissionBuff, 2);
+                    Have = ItemsBase.List.FirstOrDefault(x => x.ItemName == itemName).Buff.IsHave;
                     break;
             }
+            return this;
         }
     }
     public class DetailServiceCompare : ObservableObject

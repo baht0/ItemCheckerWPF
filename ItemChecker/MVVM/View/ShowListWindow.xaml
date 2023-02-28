@@ -56,7 +56,7 @@
                 </TextBlock>
                 <Button VerticalAlignment="Center" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignToolForegroundButton}"
                             Command="{Binding ClearCommand}" ToolTip="Clear">
-                    <materialDesign:PackIcon Kind="Delete"/>
+                    <materialDesign:PackIcon Kind="DeleteForever"/>
                 </Button>
                 <Separator VerticalAlignment="Bottom"/>
                 <DataGrid Grid.Row="1" Grid.ColumnSpan="3" AlternationCount="2" AlternatingRowBackground="{DynamicResource ElementBackground}"

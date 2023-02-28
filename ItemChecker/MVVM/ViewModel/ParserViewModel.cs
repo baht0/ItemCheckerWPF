@@ -39,7 +39,8 @@ namespace ItemChecker.MVVM.ViewModel
             {
                 if (DataGridParse.CanBeUpdated)
                 {
-                    DataGridParse.Items = new(ToolParser.Items);
+                    DataGridParse.Items = ToolParser.Items.OrderByDescending(x => x.Precent).ToList();
+                    DataGridParse.Count = ToolParser.Items.Count;
                     DataGridParse.CanBeUpdated = false;
                 }
             }
@@ -213,7 +214,7 @@ namespace ItemChecker.MVVM.ViewModel
                         DataGridParse = new();
                         Parser.CurrencyId = 0;
                         DataGridParse.Count = items.Count;
-                        DataGridParse.Items = items;
+                        DataGridParse.Items = items.OrderByDescending(x => x.Precent).ToList();
 
                         Main.Message.Enqueue("The table was successfully imported.");
                     }

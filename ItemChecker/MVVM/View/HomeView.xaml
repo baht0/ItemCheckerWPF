@@ -38,7 +38,7 @@
                 </Button>
                 <Button ToolTip="Cancel all orders" Style="{StaticResource MaterialDesignToolForegroundButton}"
                         Command="{Binding OrdersCommand}" CommandParameter="1" VerticalAlignment="Center">
-                    <materialDesign:PackIcon Kind="Delete"/>
+                    <materialDesign:PackIcon Kind="DeleteForever"/>
                 </Button>
             </VirtualizingStackPanel>
             <DataGrid x:Name="ordersGrid" Grid.Row="1" AlternationCount="2" AlternatingRowBackground="{DynamicResource ElementBackground}"

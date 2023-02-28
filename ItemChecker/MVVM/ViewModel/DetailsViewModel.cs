@@ -75,6 +75,21 @@ namespace ItemChecker.MVVM.ViewModel
             }
         }
         DataGridDetails _dataGridDetails = new();
+        public ICommand DeleteCommand =>
+            new RelayCommand((obj) =>
+            {
+                var result = MessageBox.Show(
+                    "Are you sure you want to delete all items?", "Question",
+                    MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    Details.IsSearch = true;
+                    Details.Items.Clear();
+                    DataGridDetails.Items = new(Details.Items);
+                    DataGridDetails.SelectedItem = new(null);
+                }
+            }, (obj) => !DataGridDetails.Items.Any(x => x.IsBusy) && !DataGridDetails.Items.Any(x => x.Info.IsBusy));
         public ICommand ShowSearchCommand =>
             new RelayCommand((obj) =>
             {
@@ -92,27 +107,18 @@ namespace ItemChecker.MVVM.ViewModel
                 DataGridDetails.SelectedItem = Details.Items.LastOrDefault();
                 Details.IsSearch = false;
             });
+
+        public ICommand ReloadCommand =>
+            new RelayCommand((obj) =>
+            {
+                DataGridDetails.SelectedItem.UpdateServices();
+            }, (obj) => !DataGridDetails.Items.Any(x => x.IsBusy) && !DataGridDetails.Items.Any(x => x.Info.IsBusy));
         public ICommand CopyCommand =>
             new RelayCommand((obj) =>
             {
                 Clipboard.SetText(DataGridDetails.SelectedItem.ItemName);
                 Message.Enqueue("Item name copied.");
             });
-        public ICommand DeleteCommand =>
-            new RelayCommand((obj) =>
-            {
-                var result = MessageBox.Show(
-                    "Are you sure you want to delete all items?", "Question",
-                    MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-                if (result == MessageBoxResult.Yes)
-                {
-                    Details.IsSearch = true;
-                    Details.Items.Clear();
-                    DataGridDetails.Items = new(Details.Items);
-                    DataGridDetails.SelectedItem = new();
-                }
-            }, (obj) => !DataGridDetails.Items.Any(x => x.IsBusy) && !DataGridDetails.Items.Any(x => x.Info.IsBusy));
         public ICommand SwitchCurrencyCommand =>
             new RelayCommand((obj) =>
             {

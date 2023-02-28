@@ -14,18 +14,18 @@ namespace ItemChecker.MVVM.Model
 {
     public class BaseModel : ObservableObject
     {
-        public static List<string> ServicesShort => new List<string>()
+        public static List<string> ServicesShort => new()
                     {
                         "SteamMarket",
                         "Cs.Money",
                         "Loot.Farm",
                         "Buff163"
                     };
-        public static List<string> Services => new List<string>()
+        public static List<string> Services => new()
                     {
                         "SteamMarket(A)",
                         "SteamMarket",
-                        "Cs.Money",
+                        "Cs.Money(T)",
                         "Loot.Farm",
                         "Buff163(A)",
                         "Buff163"

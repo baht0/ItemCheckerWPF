@@ -58,7 +58,7 @@
                     <Button HorizontalAlignment="Right" Height="25"
                             Style="{StaticResource MaterialDesignToolForegroundButton}" 
                             Command="{Binding ClearCommand}">
-                        <materialDesign:PackIcon Kind="Delete"/>
+                        <materialDesign:PackIcon Kind="DeleteForever"/>
                     </Button>
                     <Separator Grid.ColumnSpan="3" VerticalAlignment="Bottom"/>
                     <DataGrid Grid.Row="1" Grid.ColumnSpan="3" AlternationCount="2" AlternatingRowBackground="{DynamicResource ElementBackground}"
